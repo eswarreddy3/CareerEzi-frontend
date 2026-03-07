@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
 import { ProgressRing } from "@/components/progress-ring"
 import { Button } from "@/components/ui/button"
@@ -144,10 +145,11 @@ const difficultyColors = {
 }
 
 export default function LearnPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("all")
 
-  const filteredCourses = activeTab === "all" 
-    ? courses 
+  const filteredCourses = activeTab === "all"
+    ? courses
     : courses.filter(c => c.category === activeTab)
 
   const handleStartCourse = (course: Course) => {
@@ -157,10 +159,7 @@ export default function LearnPage() {
       })
       return
     }
-    
-    toast.success(`Starting ${course.title}`, {
-      description: "Loading course content...",
-    })
+    router.push(`/learn/${course.id}`)
   }
 
   return (
