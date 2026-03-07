@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, type FormEvent } from "react"
+import { useState, useEffect, useCallback, useRef, type FormEvent } from "react"
 import { Plus, Upload, Eye } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
@@ -21,27 +21,21 @@ import { cn } from "@/lib/utils"
 import api from "@/lib/api"
 
 interface Student {
-  id: string
+  id: number
   name: string
   email: string
-  college: string
-  branch: string
-  rollNo: string
-  status: "active" | "inactive"
-  lastActive: string
+  college_name: string | null
+  branch: string | null
+  roll_number: string | null
+  is_active: boolean
+  streak: number
+  points: number
 }
 
-const mockStudents: Student[] = [
-  { id: "1", name: "Priya Sharma", email: "priya@vit.edu", college: "VIT Vellore", branch: "CSE", rollNo: "21CS001", status: "active", lastActive: "2 hrs ago" },
-  { id: "2", name: "Arjun Patel", email: "arjun@srm.edu", college: "SRM Institute", branch: "IT", rollNo: "21IT002", status: "active", lastActive: "1 hr ago" },
-  { id: "3", name: "Sneha Reddy", email: "sneha@bits.edu", college: "BITS Pilani", branch: "ECE", rollNo: "21ECE003", status: "active", lastActive: "Today" },
-  { id: "4", name: "Vikram Singh", email: "vikram@vit.edu", college: "VIT Vellore", branch: "CSE", rollNo: "21CS004", status: "inactive", lastActive: "6 days ago" },
-  { id: "5", name: "Ananya Gupta", email: "ananya@srm.edu", college: "SRM Institute", branch: "MECH", rollNo: "21MECH005", status: "active", lastActive: "3 hrs ago" },
-  { id: "6", name: "Karthik Nair", email: "karthik@bits.edu", college: "BITS Pilani", branch: "CSE", rollNo: "21CS006", status: "inactive", lastActive: "4 days ago" },
-  { id: "7", name: "Divya Menon", email: "divya@vit.edu", college: "VIT Vellore", branch: "IT", rollNo: "21IT007", status: "active", lastActive: "Yesterday" },
-]
-
-const colleges = ["All Colleges", "VIT Vellore", "SRM Institute", "BITS Pilani"]
+interface College {
+  id: number
+  name: string
+}
 
 const columns: Column<Student>[] = [
   {
@@ -54,52 +48,97 @@ const columns: Column<Student>[] = [
       </div>
     ),
   },
-  { key: "college", header: "College" },
-  { key: "branch", header: "Branch" },
-  { key: "rollNo", header: "Roll No" },
   {
-    key: "status",
+    key: "college_name",
+    header: "College",
+    render: (row) => <span className="text-sm text-muted-foreground">{row.college_name || "—"}</span>,
+  },
+  {
+    key: "branch",
+    header: "Branch",
+    render: (row) => <span className="text-sm text-muted-foreground">{row.branch || "—"}</span>,
+  },
+  {
+    key: "roll_number",
+    header: "Roll No",
+    render: (row) => <span className="text-sm text-muted-foreground">{row.roll_number || "—"}</span>,
+  },
+  {
+    key: "points",
+    header: "Points",
+    render: (row) => <span className="text-sm text-foreground">{row.points.toLocaleString()}</span>,
+  },
+  {
+    key: "is_active",
     header: "Status",
     render: (row) => (
       <Badge
         variant="outline"
         className={cn(
           "text-xs",
-          row.status === "active"
+          row.is_active
             ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
             : "bg-red-500/20 text-red-400 border-red-500/30"
         )}
       >
-        {row.status === "active" ? "Active" : "Inactive"}
+        {row.is_active ? "Active" : "Inactive"}
       </Badge>
     ),
   },
-  { key: "lastActive", header: "Last Active" },
 ]
 
 export default function SuperAdminStudentsPage() {
-  const [collegeFilter, setCollegeFilter] = useState("All Colleges")
+  const [students, setStudents] = useState<Student[]>([])
+  const [colleges, setColleges] = useState<College[]>([])
+  const [loading, setLoading] = useState(true)
+  const [collegeFilter, setCollegeFilter] = useState("all")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedCollegeId, setSelectedCollegeId] = useState("")
+  const [bulkCollegeId, setBulkCollegeId] = useState("")
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
+  const [isBulkUploading, setIsBulkUploading] = useState(false)
   const csvRef = useRef<HTMLInputElement>(null)
 
-  const filtered =
-    collegeFilter === "All Colleges"
-      ? mockStudents
-      : mockStudents.filter((s) => s.college === collegeFilter)
+  const fetchStudents = useCallback(async () => {
+    setLoading(true)
+    try {
+      const params: Record<string, string> = { per_page: "100" }
+      if (collegeFilter !== "all") params.college_id = collegeFilter
+      const res = await api.get("/super-admin/students", { params })
+      setStudents(res.data.students)
+    } catch {
+      toast.error("Failed to load students")
+    } finally {
+      setLoading(false)
+    }
+  }, [collegeFilter])
+
+  useEffect(() => {
+    fetchStudents()
+  }, [fetchStudents])
+
+  useEffect(() => {
+    api.get("/super-admin/colleges", { params: { per_page: 100 } })
+      .then((r) => setColleges(r.data.colleges))
+      .catch(() => {})
+  }, [])
 
   const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = e.currentTarget
-    const data = Object.fromEntries(new FormData(form))
+    const data: Record<string, string | number> = Object.fromEntries(new FormData(form)) as Record<string, string>
+    if (selectedCollegeId) data.college_id = Number(selectedCollegeId)
     setIsSubmitting(true)
     try {
       await api.post("/super-admin/students", data)
-      toast.success("Student created! Activation email sent.")
+      toast.success("Student created! Welcome email sent.")
       setIsCreateOpen(false)
+      setSelectedCollegeId("")
       form.reset()
-    } catch {
-      toast.error("Failed to create student")
+      fetchStudents()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Failed to create student")
     } finally {
       setIsSubmitting(false)
     }
@@ -108,17 +147,31 @@ export default function SuperAdminStudentsPage() {
   const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!bulkCollegeId) {
+      toast.error("Please select a college first")
+      if (csvRef.current) csvRef.current.value = ""
+      return
+    }
     const formData = new FormData()
     formData.append("file", file)
+    formData.append("college_id", bulkCollegeId)
+    setIsBulkUploading(true)
     try {
-      await api.post("/super-admin/students/bulk-upload", formData, {
+      const res = await api.post("/super-admin/students/bulk-upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      toast.success("CSV uploaded successfully", { description: "Students are being created" })
-    } catch {
-      toast.error("Failed to upload CSV")
+      toast.success(`${res.data.created} students created`, {
+        description: res.data.skipped?.length ? `${res.data.skipped.length} skipped (already exist)` : undefined,
+      })
+      setIsBulkModalOpen(false)
+      setBulkCollegeId("")
+      fetchStudents()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Failed to upload CSV")
+    } finally {
+      setIsBulkUploading(false)
+      if (csvRef.current) csvRef.current.value = ""
     }
-    if (csvRef.current) csvRef.current.value = ""
   }
 
   return (
@@ -132,14 +185,14 @@ export default function SuperAdminStudentsPage() {
           <input
             ref={csvRef}
             type="file"
-            accept=".csv"
+            accept=".csv,.xlsx"
             className="hidden"
             onChange={handleBulkUpload}
           />
           <Button
             variant="outline"
             className="border-primary/30 text-primary hover:bg-primary/10"
-            onClick={() => csvRef.current?.click()}
+            onClick={() => setIsBulkModalOpen(true)}
           >
             <Upload className="h-4 w-4 mr-2" />
             Bulk Upload CSV
@@ -154,15 +207,16 @@ export default function SuperAdminStudentsPage() {
         </div>
       </div>
 
-      {/* Filter */}
+      {/* College filter */}
       <GlassCard className="p-4">
         <Select value={collegeFilter} onValueChange={setCollegeFilter}>
           <SelectTrigger className="w-64 bg-secondary/50 border-border text-foreground">
-            <SelectValue />
+            <SelectValue placeholder="All Colleges" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="all">All Colleges</SelectItem>
             {colleges.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
+              <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -172,11 +226,12 @@ export default function SuperAdminStudentsPage() {
       <GlassCard>
         <DataTable
           columns={columns}
-          data={filtered}
+          data={students}
           keyField="id"
           searchPlaceholder="Search by name or email..."
-          searchKeys={["name", "email", "rollNo"]}
-          pageSize={8}
+          searchKeys={["name", "email", "roll_number"]}
+          pageSize={10}
+          isLoading={loading}
           emptyMessage="No students found"
           actions={(row) => (
             <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground hover:text-foreground">
@@ -189,9 +244,9 @@ export default function SuperAdminStudentsPage() {
       {/* Create Student Modal */}
       <ModalForm
         title="Create Student"
-        description="Student will receive an activation email to set their password."
+        description="Student will receive a welcome email with temporary credentials."
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => { setIsCreateOpen(false); setSelectedCollegeId("") }}
         onSubmit={handleCreate}
         isLoading={isSubmitting}
         submitLabel="Create Student"
@@ -209,13 +264,13 @@ export default function SuperAdminStudentsPage() {
           </div>
           <div className="space-y-1.5">
             <Label className="text-foreground">College</Label>
-            <Select name="college_id">
+            <Select value={selectedCollegeId} onValueChange={setSelectedCollegeId}>
               <SelectTrigger className="bg-secondary/50 border-border text-foreground">
                 <SelectValue placeholder="Select college" />
               </SelectTrigger>
               <SelectContent>
-                {colleges.slice(1).map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                {colleges.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -251,7 +306,7 @@ export default function SuperAdminStudentsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-foreground">Roll Number</Label>
-              <Input name="roll_number" placeholder="21CS001" className="bg-secondary/50 border-border text-foreground" required />
+              <Input name="roll_number" placeholder="21CS001" className="bg-secondary/50 border-border text-foreground" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-foreground">Pass-out Year</Label>
@@ -266,6 +321,37 @@ export default function SuperAdminStudentsPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </div>
+      </ModalForm>
+
+      {/* Bulk Upload Modal */}
+      <ModalForm
+        title="Bulk Upload Students"
+        description="Upload a CSV or XLSX file. Required columns: name, email, branch, section, roll_number, passout_year."
+        isOpen={isBulkModalOpen}
+        onClose={() => { setIsBulkModalOpen(false); setBulkCollegeId("") }}
+        onSubmit={(e) => { e.preventDefault(); csvRef.current?.click() }}
+        isLoading={isBulkUploading}
+        submitLabel="Choose File & Upload"
+      >
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-foreground">College</Label>
+            <Select value={bulkCollegeId} onValueChange={setBulkCollegeId}>
+              <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+                <SelectValue placeholder="Select college for import" />
+              </SelectTrigger>
+              <SelectContent>
+                {colleges.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+            <Upload className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p>CSV / XLSX file will be selected after clicking "Choose File & Upload"</p>
           </div>
         </div>
       </ModalForm>

@@ -1,100 +1,87 @@
 "use client"
 
-import { useState } from "react"
-import { Check, Pencil } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Check, Pencil, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import api from "@/lib/api"
 
-interface PackagePlan {
-  id: string
+interface Package {
+  id: number
   name: string
-  price: string
-  duration: string
-  colleges: number
-  color: string
-  borderColor: string
-  features: { label: string; included: boolean }[]
+  price: number
+  features: string[]
+  is_active: boolean
 }
 
-const packages: PackagePlan[] = [
-  {
-    id: "free",
-    name: "Free",
-    price: "₹0",
-    duration: "/forever",
-    colleges: 3,
-    color: "text-muted-foreground",
-    borderColor: "border-border",
-    features: [
-      { label: "Up to 100 students", included: true },
-      { label: "Basic MCQ practice", included: true },
-      { label: "5 coding problems/month", included: true },
-      { label: "Company prep resources", included: false },
-      { label: "Domain programs", included: false },
-      { label: "Analytics dashboard", included: false },
-      { label: "Priority support", included: false },
-    ],
-  },
-  {
-    id: "basic",
-    name: "Basic",
-    price: "₹49,999",
-    duration: "/year",
-    colleges: 8,
-    color: "text-blue-400",
-    borderColor: "border-blue-500/30",
-    features: [
-      { label: "Up to 500 students", included: true },
-      { label: "Full MCQ bank", included: true },
-      { label: "Unlimited coding problems", included: true },
-      { label: "Company prep resources", included: true },
-      { label: "Domain programs", included: false },
-      { label: "Analytics dashboard", included: false },
-      { label: "Priority support", included: false },
-    ],
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "₹99,999",
-    duration: "/year",
-    colleges: 22,
-    color: "text-primary",
-    borderColor: "border-primary/30",
-    features: [
-      { label: "Up to 2,000 students", included: true },
-      { label: "Full MCQ bank", included: true },
-      { label: "Unlimited coding problems", included: true },
-      { label: "Company prep resources", included: true },
-      { label: "Domain programs", included: true },
-      { label: "Analytics dashboard", included: true },
-      { label: "Priority support", included: false },
-    ],
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Custom",
-    duration: "",
-    colleges: 15,
-    color: "text-purple-400",
-    borderColor: "border-purple-500/30",
-    features: [
-      { label: "Unlimited students", included: true },
-      { label: "Full MCQ bank", included: true },
-      { label: "Unlimited coding problems", included: true },
-      { label: "Company prep resources", included: true },
-      { label: "Domain programs", included: true },
-      { label: "Analytics dashboard", included: true },
-      { label: "Priority support", included: true },
-    ],
-  },
-]
+const packageStyle: Record<string, { color: string; borderColor: string }> = {
+  Free:       { color: "text-muted-foreground", borderColor: "border-border" },
+  Basic:      { color: "text-blue-400",         borderColor: "border-blue-500/30" },
+  Pro:        { color: "text-primary",          borderColor: "border-primary/30" },
+  Enterprise: { color: "text-purple-400",       borderColor: "border-purple-500/30" },
+}
+
+function formatPrice(price: number): string {
+  if (price === 0) return "₹0"
+  return `₹${price.toLocaleString("en-IN")}`
+}
 
 export default function PackagesPage() {
-  const [editing, setEditing] = useState<string | null>(null)
+  const [packages, setPackages] = useState<Package[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState<number | null>(null)
+  const [editPrice, setEditPrice] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    api.get("/super-admin/packages")
+      .then((r) => setPackages(r.data))
+      .catch(() => toast.error("Failed to load packages"))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const startEdit = (pkg: Package) => {
+    setEditing(pkg.id)
+    setEditPrice(String(pkg.price))
+  }
+
+  const handleSave = async (pkg: Package) => {
+    const price = parseFloat(editPrice)
+    if (isNaN(price) || price < 0) {
+      toast.error("Enter a valid price")
+      return
+    }
+    setSaving(true)
+    try {
+      await api.patch(`/super-admin/packages/${pkg.id}`, { price })
+      setPackages((prev) => prev.map((p) => p.id === pkg.id ? { ...p, price } : p))
+      toast.success(`${pkg.name} price updated`)
+      setEditing(null)
+    } catch {
+      toast.error("Failed to update package")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold font-serif text-foreground">Packages</h1>
+          <p className="text-muted-foreground mt-1">Manage pricing plans for colleges</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <GlassCard key={i} className="h-80 animate-pulse bg-secondary/20" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -104,85 +91,82 @@ export default function PackagesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {packages.map((pkg) => (
-          <GlassCard
-            key={pkg.id}
-            className={cn(
-              "relative border",
-              pkg.id === "pro" ? `${pkg.borderColor} shadow-[0_0_20px_rgba(0,212,200,0.15)]` : pkg.borderColor
-            )}
-          >
-            {pkg.id === "pro" && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-primary text-primary-foreground text-xs px-3">
-                  Most Popular
-                </Badge>
-              </div>
-            )}
+        {packages.map((pkg) => {
+          const style = packageStyle[pkg.name] ?? { color: "text-foreground", borderColor: "border-border" }
+          const isPro = pkg.name === "Pro"
+          const isEditing = editing === pkg.id
 
-            <div className="flex items-center justify-between mb-4">
-              <h2 className={cn("text-xl font-bold font-serif", pkg.color)}>
-                {pkg.name}
-              </h2>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                onClick={() => setEditing(editing === pkg.id ? null : pkg.id)}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            <div className="mb-4">
-              <span className="text-2xl font-bold text-foreground">{pkg.price}</span>
-              <span className="text-sm text-muted-foreground">{pkg.duration}</span>
-            </div>
-
-            <p className="text-xs text-muted-foreground mb-4">
-              <span className={cn("font-semibold", pkg.color)}>{pkg.colleges}</span> colleges using this package
-            </p>
-
-            <div className="space-y-2">
-              {pkg.features.map(({ label, included }) => (
-                <div key={label} className="flex items-center gap-2 text-sm">
-                  <div
-                    className={cn(
-                      "w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
-                      included
-                        ? "bg-primary/20 text-primary"
-                        : "bg-secondary text-muted-foreground"
-                    )}
-                  >
-                    <Check className="h-2.5 w-2.5" />
-                  </div>
-                  <span className={included ? "text-foreground" : "text-muted-foreground line-through"}>
-                    {label}
-                  </span>
+          return (
+            <GlassCard
+              key={pkg.id}
+              className={cn(
+                "relative border",
+                style.borderColor,
+                isPro && "shadow-[0_0_20px_rgba(0,212,200,0.15)]"
+              )}
+            >
+              {isPro && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground text-xs px-3">
+                    Most Popular
+                  </Badge>
                 </div>
-              ))}
-            </div>
+              )}
 
-            {editing === pkg.id && (
-              <div className="mt-4 pt-4 border-t border-border space-y-2">
-                <p className="text-xs text-muted-foreground mb-2">Edit price:</p>
-                <input
-                  defaultValue={pkg.price}
-                  className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
-                />
+              <div className="flex items-center justify-between mb-4">
+                <h2 className={cn("text-xl font-bold font-serif", style.color)}>
+                  {pkg.name}
+                </h2>
                 <Button
-                  size="sm"
-                  className="w-full bg-primary hover:brightness-110 text-primary-foreground"
-                  onClick={() => {
-                    setEditing(null)
-                  }}
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                  onClick={() => isEditing ? setEditing(null) : startEdit(pkg)}
                 >
-                  Save Changes
+                  <Pencil className="h-3.5 w-3.5" />
                 </Button>
               </div>
-            )}
-          </GlassCard>
-        ))}
+
+              <div className="mb-4">
+                <span className="text-2xl font-bold text-foreground">{formatPrice(pkg.price)}</span>
+                {pkg.price > 0 && <span className="text-sm text-muted-foreground">/year</span>}
+              </div>
+
+              <div className="space-y-2 mb-4">
+                {pkg.features.map((feature) => (
+                  <div key={feature} className="flex items-center gap-2 text-sm">
+                    <div className="w-4 h-4 rounded-full bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
+                      <Check className="h-2.5 w-2.5" />
+                    </div>
+                    <span className="text-foreground">{feature}</span>
+                  </div>
+                ))}
+              </div>
+
+              {isEditing && (
+                <div className="pt-4 border-t border-border space-y-2">
+                  <p className="text-xs text-muted-foreground">Edit price (₹/year):</p>
+                  <input
+                    type="number"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-primary"
+                    placeholder="0"
+                  />
+                  <Button
+                    size="sm"
+                    disabled={saving}
+                    className="w-full bg-primary hover:brightness-110 text-primary-foreground"
+                    onClick={() => handleSave(pkg)}
+                  >
+                    {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : null}
+                    Save Changes
+                  </Button>
+                </div>
+              )}
+            </GlassCard>
+          )
+        })}
       </div>
     </div>
   )

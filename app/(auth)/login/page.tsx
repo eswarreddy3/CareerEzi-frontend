@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Eye, EyeOff, Loader2, FlaskConical } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,77 +19,6 @@ const loginSchema = z.object({
 })
 
 type LoginForm = z.infer<typeof loginSchema>
-
-// ── Mock users for dev testing ────────────────────────────────────────────────
-const DEV_USERS: { label: string; color: string; user: User; token: string }[] = [
-  {
-    label: "Student",
-    color: "border-primary/40 text-primary hover:bg-primary/10",
-    token: "dev-student-token",
-    user: {
-      id: "u1",
-      name: "Rahul Kumar",
-      email: "rahul@college.edu",
-      role: "student",
-      college_id: "c1",
-      college_name: "VIT Vellore",
-      first_login: false,
-      branch: "CSE",
-      section: "A",
-      roll_number: "21CS006",
-      passout_year: "2025",
-      phone: "9876543210",
-      points: 4200,
-      streak: 12,
-    },
-  },
-  {
-    label: "College Admin",
-    color: "border-amber-500/40 text-amber-400 hover:bg-amber-500/10",
-    token: "dev-admin-token",
-    user: {
-      id: "u2",
-      name: "Dr. Priya Menon",
-      email: "priya@vit.edu",
-      role: "college_admin",
-      college_id: "c1",
-      college_name: "VIT Vellore",
-      first_login: false,
-      points: 0,
-      streak: 0,
-    },
-  },
-  {
-    label: "Super Admin",
-    color: "border-purple-500/40 text-purple-400 hover:bg-purple-500/10",
-    token: "dev-super-token",
-    user: {
-      id: "u3",
-      name: "Eswar Reddy",
-      email: "eswar@fynity.in",
-      role: "super_admin",
-      first_login: false,
-      points: 0,
-      streak: 0,
-    },
-  },
-  {
-    label: "First-Login Student",
-    color: "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10",
-    token: "dev-firstlogin-token",
-    user: {
-      id: "u4",
-      name: "Ananya Gupta",
-      email: "ananya@college.edu",
-      role: "student",
-      college_id: "c1",
-      college_name: "SRM Institute",
-      first_login: true,
-      points: 0,
-      streak: 0,
-    },
-  },
-]
 
 export default function LoginPage() {
   const router = useRouter()
@@ -110,7 +39,7 @@ export default function LoginPage() {
       redirectByUser(user)
     } catch (err: any) {
       const message =
-        err?.response?.data?.message || "Invalid email or password"
+        err?.response?.data?.error || err?.response?.data?.message || "Invalid email or password"
       toast.error("Sign in failed", { description: message })
     }
   }
@@ -120,12 +49,6 @@ export default function LoginPage() {
     if (user.role === "super_admin") return router.replace("/super-admin")
     if (user.role === "college_admin") return router.replace("/admin")
     router.replace("/dashboard")
-  }
-
-  const handleDevLogin = (entry: (typeof DEV_USERS)[number]) => {
-    setAuth(entry.token, `${entry.token}-refresh`, entry.user)
-    toast.success(`Logged in as ${entry.label}`)
-    redirectByUser(entry.user)
   }
 
   return (
@@ -218,27 +141,6 @@ export default function LoginPage() {
             Sign In
           </Button>
         </form>
-
-        {/* ── Dev mock login ──────────────────────────────────────────────── */}
-        <div className="mt-6 pt-5 border-t border-border/50">
-          <div className="flex items-center gap-2 mb-3">
-            <FlaskConical className="h-3.5 w-3.5 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground">
-              Dev shortcuts — no backend needed
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {DEV_USERS.map((entry) => (
-              <button
-                key={entry.label}
-                onClick={() => handleDevLogin(entry)}
-                className={`text-xs py-2 px-3 rounded-lg border transition-all font-medium ${entry.color}`}
-              >
-                {entry.label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )

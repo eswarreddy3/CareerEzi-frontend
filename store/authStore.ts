@@ -4,17 +4,17 @@ import { persist } from "zustand/middleware"
 export type UserRole = "student" | "college_admin" | "super_admin"
 
 export interface User {
-  id: string
+  id: string | number
   name: string
   email: string
   role: UserRole
-  college_id?: string
+  college_id?: string | number
   college_name?: string
   first_login: boolean
   branch?: string
   section?: string
   roll_number?: string
-  passout_year?: string
+  passout_year?: string | number
   phone?: string
   linkedin_url?: string
   points: number
@@ -29,6 +29,8 @@ interface AuthState {
   clearAuth: () => void
   updateUser: (partial: Partial<User>) => void
 }
+
+const TOKEN_KEY = "fynity_access_token"
 
 function setCookie(name: string, value: string, days = 7) {
   if (typeof document === "undefined") return
@@ -49,11 +51,18 @@ export const useAuthStore = create<AuthState>()(
       user: null,
 
       setAuth: (token, refreshToken, user) => {
+        // Store token as plain string for reliable cross-navigation access
+        if (typeof window !== "undefined") {
+          localStorage.setItem(TOKEN_KEY, token)
+        }
         setCookie("fynity_token", token)
         set({ token, refreshToken, user })
       },
 
       clearAuth: () => {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(TOKEN_KEY)
+        }
         deleteCookie("fynity_token")
         set({ token: null, refreshToken: null, user: null })
       },
