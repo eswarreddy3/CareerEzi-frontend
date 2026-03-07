@@ -1,0 +1,24 @@
+import { cn } from "@/lib/utils"
+import type { ReactNode } from "react"
+
+interface GlassCardProps {
+  children: ReactNode
+  className?: string
+  hover?: boolean
+  glow?: boolean
+}
+
+export function GlassCard({ children, className, hover = false, glow = false }: GlassCardProps) {
+  return (
+    <div
+      className={cn(
+        "glass-card rounded-xl p-6",
+        hover && "transition-all duration-300 hover:border-primary/30 teal-glow-hover cursor-pointer",
+        glow && "teal-glow",
+        className
+      )}
+    >
+      {children}
+    </div>
+  )
+}
