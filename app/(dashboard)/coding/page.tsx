@@ -24,6 +24,11 @@ import {
   List,
   RotateCcw,
   Loader2,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+  Star,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -41,6 +46,7 @@ interface Problem {
   examples: { input: string; output: string; explanation?: string }[]
   constraints: string | null
   starter_code: Record<string, string>
+  points: number
 }
 
 interface ProblemListItem {
@@ -49,6 +55,7 @@ interface ProblemListItem {
   slug: string
   difficulty: "Easy" | "Medium" | "Hard"
   tags: string[]
+  points: number
 }
 
 interface Submission {
@@ -113,6 +120,10 @@ export default function CodingPage() {
   const [showProblemList, setShowProblemList] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
   const [testResults, setTestResults] = useState<TestResult[]>([])
+  const [customInput, setCustomInput] = useState("")
+  const [customOutput, setCustomOutput] = useState("")
+  const [showConsole, setShowConsole] = useState(false)
+  const [consoleTab, setConsoleTab] = useState<"testcases" | "custom">("testcases")
 
   // Load problems list
   useEffect(() => {
@@ -168,45 +179,86 @@ export default function CodingPage() {
   async function handleRunCode() {
     if (!currentProblem) return
     setIsRunning(true)
-    toast.info("Running test cases...")
-    try {
-      const res = await api.post("/coding/run", {
-        problem_slug: currentProblem.slug,
-        language,
-        code,
-      })
-      const results = res.data.test_results ?? []
-      setTestResults(results.map((r: any, i: number) => ({
-        id: i + 1,
-        input: r.input,
-        expectedOutput: r.expected,
-        actualOutput: r.got,
-        status: r.passed ? "passed" : "failed",
-      })))
-      const allPassed = results.every((r: any) => r.passed)
-      if (allPassed) toast.success("All test cases passed!")
-      else toast.error("Some test cases failed")
-    } catch {
-      toast.error("Failed to run code")
-    } finally {
-      setIsRunning(false)
+    setShowConsole(true)
+
+    if (customInput.trim()) {
+      // Custom input mode
+      setConsoleTab("custom")
+      setCustomOutput("Running...")
+      try {
+        const res = await api.post("/coding/run", {
+          problem_slug: currentProblem.slug,
+          language,
+          code,
+          custom_input: customInput,
+        })
+        setCustomOutput(res.data.output || res.data.error || "(no output)")
+      } catch {
+        setCustomOutput("Error: Failed to run code")
+      } finally {
+        setIsRunning(false)
+      }
+    } else {
+      // Test cases mode
+      setConsoleTab("testcases")
+      try {
+        const res = await api.post("/coding/run", {
+          problem_slug: currentProblem.slug,
+          language,
+          code,
+        })
+        const results = res.data.test_results ?? []
+        setTestResults(results.map((r: any, i: number) => ({
+          id: i + 1,
+          input: r.input,
+          expectedOutput: r.expected,
+          actualOutput: r.got,
+          status: r.passed ? "passed" : "failed",
+        })))
+        const allPassed = results.every((r: any) => r.passed)
+        if (allPassed) toast.success("All test cases passed!")
+        else toast.error("Some test cases failed")
+      } catch {
+        toast.error("Failed to run code")
+      } finally {
+        setIsRunning(false)
+      }
     }
   }
 
   async function handleSubmit() {
     if (!currentProblem) return
     setIsRunning(true)
+    setShowConsole(true)
+    setConsoleTab("testcases")
     try {
       const res = await api.post("/coding/submit", {
         problem_slug: currentProblem.slug,
         language,
         code,
       })
-      const { status, message } = res.data
+      const { status, message, test_results, points_awarded } = res.data
       if (status === "accepted") {
-        toast.success("Solution Accepted!", { description: message })
+        toast.success("Solution Accepted!", {
+          description: points_awarded > 0 ? `+${points_awarded} points earned!` : message,
+        })
       } else {
-        toast.error("Submission Failed", { description: message })
+        toast.error(
+          status === "runtime_error" ? "Runtime Error"
+          : status === "time_limit" ? "Time Limit Exceeded"
+          : "Wrong Answer",
+          { description: message }
+        )
+      }
+      // Show all test results
+      if (test_results) {
+        setTestResults(test_results.map((r: any, i: number) => ({
+          id: i + 1,
+          input: r.input,
+          expectedOutput: r.expected,
+          actualOutput: r.got,
+          status: r.passed ? "passed" : "failed",
+        })))
       }
       // Refresh submissions tab
       const subsRes = await api.get(`/coding/problems/${currentProblem.slug}/submissions`)
@@ -252,13 +304,19 @@ export default function CodingPage() {
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <span className={cn("text-sm truncate", idx === currentIndex ? "text-primary" : "text-foreground")}>
+                  <span className={cn("text-sm truncate flex-1", idx === currentIndex ? "text-primary" : "text-foreground")}>
                     {idx + 1}. {problem.title}
                   </span>
                 </div>
-                <Badge variant="outline" className={cn("text-xs mt-1", difficultyColors[problem.difficulty])}>
-                  {problem.difficulty}
-                </Badge>
+                <div className="flex items-center justify-between mt-1">
+                  <Badge variant="outline" className={cn("text-xs", difficultyColors[problem.difficulty])}>
+                    {problem.difficulty}
+                  </Badge>
+                  <span className="flex items-center gap-0.5 text-xs text-amber-400">
+                    <Star className="h-3 w-3 fill-amber-400" />
+                    {problem.points}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -304,9 +362,15 @@ export default function CodingPage() {
                       </div>
                     )}
                   </div>
-                  <Badge variant="outline" className={cn("text-sm flex-shrink-0", difficultyColors[currentProblem.difficulty])}>
-                    {currentProblem.difficulty}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <Badge variant="outline" className={cn("text-sm", difficultyColors[currentProblem.difficulty])}>
+                      {currentProblem.difficulty}
+                    </Badge>
+                    <span className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                      <Star className="h-3.5 w-3.5 fill-amber-400" />
+                      {currentProblem.points} pts
+                    </span>
+                  </div>
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -458,46 +522,107 @@ export default function CodingPage() {
             />
           </GlassCard>
 
-          {/* Test Results */}
-          {testResults.length > 0 && (
-            <GlassCard className="mt-4 max-h-52 overflow-y-auto">
-              <h4 className="text-sm font-medium text-foreground mb-3">Test Results</h4>
-              <div className="space-y-3">
-                {testResults.map((tc) => (
-                  <div key={tc.id} className={cn(
-                    "p-3 rounded-lg border text-sm",
-                    tc.status === "passed" && "bg-emerald-500/5 border-emerald-500/30",
-                    tc.status === "failed" && "bg-red-500/5 border-red-500/30",
-                    tc.status === "pending" && "bg-secondary/50 border-border",
-                  )}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-foreground">Test Case {tc.id}</span>
-                      {tc.status === "passed" && <CheckCircle className="h-4 w-4 text-emerald-400" />}
-                      {tc.status === "failed" && <XCircle className="h-4 w-4 text-red-400" />}
-                      {tc.status === "pending" && <Clock className="h-4 w-4 text-muted-foreground" />}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">Input: </span>
-                        <code className="font-mono text-foreground">{tc.input}</code>
+          {/* Console Panel */}
+          <GlassCard className={cn("mt-4 transition-all", showConsole ? "block" : "hidden")}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <Terminal className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Console</span>
+                <div className="flex gap-1">
+                  {(["testcases", "custom"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setConsoleTab(tab)}
+                      className={cn(
+                        "px-3 py-0.5 rounded text-xs font-medium transition-all",
+                        consoleTab === tab
+                          ? "bg-primary/20 text-primary border border-primary/30"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tab === "testcases" ? "Test Cases" : "Custom Input"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={() => setShowConsole(false)} className="text-muted-foreground hover:text-foreground">
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </div>
+
+            {consoleTab === "testcases" && (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {testResults.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">
+                    Click Run to see test results
+                  </p>
+                ) : (
+                  testResults.map((tc) => (
+                    <div key={tc.id} className={cn(
+                      "p-3 rounded-lg border text-sm",
+                      tc.status === "passed" ? "bg-emerald-500/5 border-emerald-500/30" : "bg-red-500/5 border-red-500/30"
+                    )}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-medium text-foreground">Test {tc.id}</span>
+                        {tc.status === "passed"
+                          ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                          : <XCircle className="h-3.5 w-3.5 text-red-400" />}
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Expected: </span>
-                        <code className="font-mono text-primary">{tc.expectedOutput}</code>
-                      </div>
-                      {tc.actualOutput && (
-                        <div>
-                          <span className="text-muted-foreground">Got: </span>
-                          <code className={cn("font-mono", tc.status === "passed" ? "text-emerald-400" : "text-red-400")}>
+                      <div className="grid grid-cols-1 gap-1 text-xs font-mono">
+                        <div className="flex gap-2">
+                          <span className="text-muted-foreground w-16 shrink-0">Input:</span>
+                          <code className="text-foreground">{tc.input.replace(/\n/g, " | ")}</code>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-muted-foreground w-16 shrink-0">Expected:</span>
+                          <code className="text-primary">{tc.expectedOutput}</code>
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="text-muted-foreground w-16 shrink-0">Got:</span>
+                          <code className={tc.status === "passed" ? "text-emerald-400" : "text-red-400"}>
                             {tc.actualOutput}
                           </code>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
-            </GlassCard>
+            )}
+
+            {consoleTab === "custom" && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Standard Input (stdin)</label>
+                  <textarea
+                    value={customInput}
+                    onChange={(e) => setCustomInput(e.target.value)}
+                    placeholder={"Enter your input here...\n(Leave empty to run against test cases)"}
+                    className="w-full h-20 bg-secondary/40 border border-white/10 rounded-lg p-2 text-sm font-mono text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:border-primary/40"
+                  />
+                </div>
+                {customOutput && (
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-1 block">Output</label>
+                    <pre className="w-full min-h-12 max-h-32 overflow-auto bg-secondary/40 border border-white/10 rounded-lg p-2 text-sm font-mono text-foreground">
+                      {customOutput}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </GlassCard>
+
+          {/* Console toggle when hidden */}
+          {!showConsole && (
+            <button
+              onClick={() => setShowConsole(true)}
+              className="mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Terminal className="h-3.5 w-3.5" />
+              Show Console
+              <ChevronUp className="h-3.5 w-3.5" />
+            </button>
           )}
         </div>
       </div>
