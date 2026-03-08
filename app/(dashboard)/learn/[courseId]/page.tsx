@@ -1,761 +1,548 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
-  BookOpen,
   CheckCircle,
-  Lock,
   PlayCircle,
-  Star,
-  FileQuestion,
-  ClipboardList,
   Clock,
   ArrowRight,
-  AlertCircle,
+  Loader2,
+  BookOpen,
 } from "lucide-react"
 import { GlassCard } from "@/components/glass-card"
 import { ProgressRing } from "@/components/progress-ring"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import api from "@/lib/api"
+import { useAuthStore } from "@/store/authStore"
+import { getLessonContent } from "@/content"
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface Lesson {
-  id: string
+  id: number
   title: string
-  duration: string
-  isCompleted: boolean
-  isLocked: boolean
-}
-
-interface MCQTopic {
-  id: string
-  title: string
-  questions: number
-  attempted: number
-  bestScore?: number
-}
-
-interface Assignment {
-  id: string
-  title: string
-  dueDate: string
-  totalQuestions: number
-  completedQuestions: number
-  status: "pending" | "in-progress" | "completed" | "overdue"
+  duration_mins: number
+  order: number
   points: number
+  is_completed: boolean
 }
 
-interface CourseData {
+interface Course {
   id: string
   title: string
   description: string
-  iconColor: string
   difficulty: "Beginner" | "Intermediate" | "Advanced"
-  lessonsCompleted: number
-  totalLessons: number
-  stars: number
+  icon_color: string
+  total_lessons: number
+  lessons_completed: number
   lessons: Lesson[]
-  mcqTopics: MCQTopic[]
-  assignments: Assignment[]
 }
 
-// ── Mock data per course ──────────────────────────────────────────────────────
-const courseData: Record<string, CourseData> = {
-  python: {
-    id: "python",
-    title: "Python",
-    description: "Learn Python from scratch — variables, loops, functions, OOP and more.",
-    iconColor: "text-blue-400",
-    difficulty: "Beginner",
-    lessonsCompleted: 17,
-    totalLessons: 25,
-    stars: 150,
-    lessons: [
-      { id: "l1", title: "Introduction to Python", duration: "12 min", isCompleted: true, isLocked: false },
-      { id: "l2", title: "Variables & Data Types", duration: "18 min", isCompleted: true, isLocked: false },
-      { id: "l3", title: "String Operations", duration: "15 min", isCompleted: true, isLocked: false },
-      { id: "l4", title: "Lists & Tuples", duration: "20 min", isCompleted: true, isLocked: false },
-      { id: "l5", title: "Dictionaries & Sets", duration: "22 min", isCompleted: true, isLocked: false },
-      { id: "l6", title: "Conditional Statements", duration: "14 min", isCompleted: true, isLocked: false },
-      { id: "l7", title: "Loops — for & while", duration: "25 min", isCompleted: true, isLocked: false },
-      { id: "l8", title: "Functions & Arguments", duration: "28 min", isCompleted: true, isLocked: false },
-      { id: "l9", title: "Lambda & Map/Filter", duration: "20 min", isCompleted: true, isLocked: false },
-      { id: "l10", title: "File Handling", duration: "18 min", isCompleted: true, isLocked: false },
-      { id: "l11", title: "Exception Handling", duration: "22 min", isCompleted: true, isLocked: false },
-      { id: "l12", title: "Modules & Packages", duration: "16 min", isCompleted: true, isLocked: false },
-      { id: "l13", title: "OOP — Classes & Objects", duration: "30 min", isCompleted: true, isLocked: false },
-      { id: "l14", title: "Inheritance & Polymorphism", duration: "28 min", isCompleted: true, isLocked: false },
-      { id: "l15", title: "Decorators", duration: "20 min", isCompleted: true, isLocked: false },
-      { id: "l16", title: "Generators & Iterators", duration: "22 min", isCompleted: true, isLocked: false },
-      { id: "l17", title: "List Comprehensions", duration: "15 min", isCompleted: true, isLocked: false },
-      { id: "l18", title: "Regular Expressions", duration: "25 min", isCompleted: false, isLocked: false },
-      { id: "l19", title: "Working with JSON", duration: "14 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "API Requests with requests lib", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l21", title: "NumPy Basics", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l22", title: "Pandas Introduction", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l23", title: "Data Visualization", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l24", title: "Testing with pytest", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l25", title: "Capstone Project", duration: "60 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "Python Basics", questions: 40, attempted: 40, bestScore: 92 },
-      { id: "m2", title: "Data Types & Operators", questions: 35, attempted: 35, bestScore: 88 },
-      { id: "m3", title: "Control Flow", questions: 30, attempted: 28, bestScore: 76 },
-      { id: "m4", title: "Functions", questions: 45, attempted: 20, bestScore: 80 },
-      { id: "m5", title: "OOP Concepts", questions: 50, attempted: 0 },
-      { id: "m6", title: "File & Exception Handling", questions: 35, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "Python Basics Assessment", dueDate: "Mar 10, 2026", totalQuestions: 20, completedQuestions: 20, status: "completed", points: 100 },
-      { id: "a2", title: "OOP Design Challenge", dueDate: "Mar 18, 2026", totalQuestions: 15, completedQuestions: 6, status: "in-progress", points: 150 },
-      { id: "a3", title: "Python Advanced — Functions", dueDate: "Mar 25, 2026", totalQuestions: 25, completedQuestions: 0, status: "pending", points: 200 },
-    ],
-  },
-
-  sql: {
-    id: "sql",
-    title: "SQL",
-    description: "Master SQL queries, joins, aggregation and database design.",
-    iconColor: "text-cyan-400",
-    difficulty: "Intermediate",
-    lessonsCompleted: 8,
-    totalLessons: 20,
-    stars: 100,
-    lessons: [
-      { id: "l1", title: "Introduction to Databases", duration: "10 min", isCompleted: true, isLocked: false },
-      { id: "l2", title: "SELECT Queries", duration: "15 min", isCompleted: true, isLocked: false },
-      { id: "l3", title: "WHERE & Filtering", duration: "18 min", isCompleted: true, isLocked: false },
-      { id: "l4", title: "ORDER BY & LIMIT", duration: "12 min", isCompleted: true, isLocked: false },
-      { id: "l5", title: "Aggregate Functions", duration: "20 min", isCompleted: true, isLocked: false },
-      { id: "l6", title: "GROUP BY & HAVING", duration: "22 min", isCompleted: true, isLocked: false },
-      { id: "l7", title: "INNER JOIN", duration: "25 min", isCompleted: true, isLocked: false },
-      { id: "l8", title: "LEFT, RIGHT & FULL JOINs", duration: "28 min", isCompleted: true, isLocked: false },
-      { id: "l9", title: "Subqueries", duration: "30 min", isCompleted: false, isLocked: false },
-      { id: "l10", title: "UNION & INTERSECT", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "String Functions", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "Date & Time Functions", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Window Functions", duration: "35 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Indexes & Performance", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Views", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "Stored Procedures", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Transactions & ACID", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "Normalization", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "ER Diagrams", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Capstone — DB Design Project", duration: "60 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "SELECT & Filtering", questions: 50, attempted: 50, bestScore: 90 },
-      { id: "m2", title: "Joins", questions: 40, attempted: 32, bestScore: 82 },
-      { id: "m3", title: "Aggregation & GROUP BY", questions: 35, attempted: 10, bestScore: 70 },
-      { id: "m4", title: "Subqueries", questions: 30, attempted: 0 },
-      { id: "m5", title: "Window Functions", questions: 25, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "SQL Joins Practice", dueDate: "Mar 12, 2026", totalQuestions: 15, completedQuestions: 8, status: "in-progress", points: 75 },
-      { id: "a2", title: "Aggregation Challenge", dueDate: "Mar 20, 2026", totalQuestions: 20, completedQuestions: 0, status: "pending", points: 100 },
-      { id: "a3", title: "Complex Query Assessment", dueDate: "Apr 1, 2026", totalQuestions: 25, completedQuestions: 0, status: "pending", points: 150 },
-    ],
-  },
-
-  javascript: {
-    id: "javascript",
-    title: "JavaScript",
-    description: "Build dynamic web applications with modern JavaScript (ES6+).",
-    iconColor: "text-yellow-400",
-    difficulty: "Beginner",
-    lessonsCompleted: 0,
-    totalLessons: 25,
-    stars: 150,
-    lessons: [
-      { id: "l1", title: "Introduction to JavaScript", duration: "10 min", isCompleted: false, isLocked: false },
-      { id: "l2", title: "Variables — var, let, const", duration: "12 min", isCompleted: false, isLocked: true },
-      { id: "l3", title: "Data Types & Operators", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l4", title: "Functions & Arrow Functions", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l5", title: "Arrays & Array Methods", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l6", title: "Objects & Destructuring", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l7", title: "DOM Manipulation", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l8", title: "Events & Event Listeners", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l9", title: "Promises & Async/Await", duration: "35 min", isCompleted: false, isLocked: true },
-      { id: "l10", title: "Fetch API", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "ES6+ Features", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "Classes & OOP", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Modules (import/export)", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Error Handling", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Local Storage & Sessions", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "Regular Expressions", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Closures & Scope", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "Prototypes & Inheritance", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "Event Loop & Callbacks", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Web APIs overview", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l21", title: "Testing with Jest basics", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l22", title: "Webpack & Bundlers intro", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l23", title: "TypeScript Introduction", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l24", title: "React intro (coming soon)", duration: "—", isCompleted: false, isLocked: true },
-      { id: "l25", title: "Capstone: Build a Todo App", duration: "60 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "JS Fundamentals", questions: 45, attempted: 0 },
-      { id: "m2", title: "Functions & Scope", questions: 35, attempted: 0 },
-      { id: "m3", title: "DOM & Events", questions: 30, attempted: 0 },
-      { id: "m4", title: "Async JS", questions: 25, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "JavaScript Fundamentals Quiz", dueDate: "Mar 18, 2026", totalQuestions: 20, completedQuestions: 0, status: "pending", points: 100 },
-      { id: "a2", title: "DOM Manipulation Project", dueDate: "Apr 2, 2026", totalQuestions: 10, completedQuestions: 0, status: "pending", points: 150 },
-    ],
-  },
-
-  "html-css": {
-    id: "html-css",
-    title: "HTML/CSS",
-    description: "Build beautiful, responsive web pages from scratch.",
-    iconColor: "text-pink-400",
-    difficulty: "Beginner",
-    lessonsCompleted: 0,
-    totalLessons: 20,
-    stars: 100,
-    lessons: [
-      { id: "l1", title: "HTML Document Structure", duration: "10 min", isCompleted: false, isLocked: false },
-      { id: "l2", title: "Headings, Paragraphs & Text", duration: "12 min", isCompleted: false, isLocked: true },
-      { id: "l3", title: "Links & Images", duration: "14 min", isCompleted: false, isLocked: true },
-      { id: "l4", title: "Lists & Tables", duration: "16 min", isCompleted: false, isLocked: true },
-      { id: "l5", title: "Forms & Input Elements", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l6", title: "Semantic HTML5 Elements", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l7", title: "CSS Selectors & Specificity", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l8", title: "Box Model", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l9", title: "Flexbox", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l10", title: "CSS Grid", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "Responsive Design & Media Queries", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "CSS Variables & Custom Properties", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Animations & Transitions", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Typography & Google Fonts", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Color Theory & Gradients", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "Positioning & Z-index", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Pseudo-classes & Elements", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "CSS Preprocessors (SCSS)", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "Accessibility (a11y)", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Capstone: Build a Portfolio Page", duration: "60 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "HTML Fundamentals", questions: 40, attempted: 0 },
-      { id: "m2", title: "CSS Selectors & Box Model", questions: 35, attempted: 0 },
-      { id: "m3", title: "Flexbox & Grid", questions: 30, attempted: 0 },
-      { id: "m4", title: "Responsive Design", questions: 25, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "HTML Structure Assessment", dueDate: "Mar 22, 2026", totalQuestions: 15, completedQuestions: 0, status: "pending", points: 75 },
-      { id: "a2", title: "CSS Layout Challenge", dueDate: "Apr 5, 2026", totalQuestions: 10, completedQuestions: 0, status: "pending", points: 100 },
-    ],
-  },
-
-  java: {
-    id: "java",
-    title: "Java",
-    description: "Learn Java — the industry-standard OOP language for backend and Android.",
-    iconColor: "text-orange-400",
-    difficulty: "Intermediate",
-    lessonsCompleted: 0,
-    totalLessons: 30,
-    stars: 200,
-    lessons: [
-      { id: "l1", title: "Java Environment Setup & Hello World", duration: "12 min", isCompleted: false, isLocked: false },
-      { id: "l2", title: "Data Types & Variables", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l3", title: "Operators & Expressions", duration: "14 min", isCompleted: false, isLocked: true },
-      { id: "l4", title: "Control Statements", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l5", title: "Arrays", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l6", title: "Methods & Recursion", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l7", title: "Classes & Objects", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l8", title: "Constructors", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l9", title: "Inheritance", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l10", title: "Polymorphism", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "Abstraction & Interfaces", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "Encapsulation", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Exception Handling", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Collections Framework", duration: "35 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Generics", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "File I/O", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Multithreading Basics", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "Lambda & Streams (Java 8)", duration: "35 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "String & StringBuilder", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Wrapper Classes & Autoboxing", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l21", title: "JDBC — Database Connectivity", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l22", title: "Design Patterns — Singleton, Factory", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l23", title: "Maven & Build Tools", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l24", title: "Unit Testing with JUnit", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l25", title: "Spring Boot Introduction", duration: "40 min", isCompleted: false, isLocked: true },
-      { id: "l26", title: "REST API with Spring Boot", duration: "45 min", isCompleted: false, isLocked: true },
-      { id: "l27", title: "JPA & Hibernate", duration: "40 min", isCompleted: false, isLocked: true },
-      { id: "l28", title: "Security Basics", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l29", title: "Deployment & Docker intro", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l30", title: "Capstone: REST API Project", duration: "90 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "Java Basics", questions: 50, attempted: 0 },
-      { id: "m2", title: "OOP Concepts", questions: 45, attempted: 0 },
-      { id: "m3", title: "Collections & Generics", questions: 35, attempted: 0 },
-      { id: "m4", title: "Multithreading", questions: 30, attempted: 0 },
-      { id: "m5", title: "Java 8 Features", questions: 30, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "Java OOP Assessment", dueDate: "Mar 28, 2026", totalQuestions: 20, completedQuestions: 0, status: "pending", points: 150 },
-      { id: "a2", title: "Collections Challenge", dueDate: "Apr 10, 2026", totalQuestions: 15, completedQuestions: 0, status: "pending", points: 120 },
-    ],
-  },
-
-  quantitative: {
-    id: "quantitative",
-    title: "Quantitative Aptitude",
-    description: "Master quantitative reasoning for placements and competitive exams.",
-    iconColor: "text-purple-400",
-    difficulty: "Intermediate",
-    lessonsCompleted: 5,
-    totalLessons: 30,
-    stars: 180,
-    lessons: [
-      { id: "l1", title: "Number Systems", duration: "20 min", isCompleted: true, isLocked: false },
-      { id: "l2", title: "HCF & LCM", duration: "18 min", isCompleted: true, isLocked: false },
-      { id: "l3", title: "Percentages", duration: "22 min", isCompleted: true, isLocked: false },
-      { id: "l4", title: "Profit & Loss", duration: "25 min", isCompleted: true, isLocked: false },
-      { id: "l5", title: "Simple & Compound Interest", duration: "28 min", isCompleted: true, isLocked: false },
-      { id: "l6", title: "Ratio & Proportion", duration: "20 min", isCompleted: false, isLocked: false },
-      { id: "l7", title: "Averages", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l8", title: "Time & Work", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l9", title: "Time, Speed & Distance", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l10", title: "Trains & Boats", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "Mixtures & Alligation", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "Pipes & Cisterns", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Permutations", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Combinations", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Probability", duration: "32 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "Series & Sequences", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Algebra Basics", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "Linear Equations", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "Quadratic Equations", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Geometry — Lines & Angles", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l21", title: "Triangles & Properties", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l22", title: "Circles", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l23", title: "Mensuration — 2D", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l24", title: "Mensuration — 3D", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l25", title: "Data Interpretation — Bar & Line", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l26", title: "Data Interpretation — Pie Charts", duration: "28 min", isCompleted: false, isLocked: true },
-      { id: "l27", title: "Logical Reasoning Basics", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l28", title: "Syllogisms", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l29", title: "Blood Relations & Puzzles", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l30", title: "Full Mock Test", duration: "90 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "Percentages", questions: 50, attempted: 45, bestScore: 84 },
-      { id: "m2", title: "Profit & Loss", questions: 45, attempted: 40, bestScore: 80 },
-      { id: "m3", title: "Time & Work", questions: 40, attempted: 0 },
-      { id: "m4", title: "Probability", questions: 35, attempted: 0 },
-      { id: "m5", title: "Data Interpretation", questions: 30, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "Aptitude Test — Week 5", dueDate: "Mar 5, 2026", totalQuestions: 30, completedQuestions: 15, status: "overdue", points: 120 },
-      { id: "a2", title: "Number Systems Test", dueDate: "Mar 30, 2026", totalQuestions: 25, completedQuestions: 0, status: "pending", points: 100 },
-    ],
-  },
-
-  verbal: {
-    id: "verbal",
-    title: "Verbal Ability",
-    description: "Strengthen your English language skills for placements.",
-    iconColor: "text-teal-400",
-    difficulty: "Beginner",
-    lessonsCompleted: 0,
-    totalLessons: 25,
-    stars: 120,
-    lessons: [
-      { id: "l1", title: "Parts of Speech", duration: "15 min", isCompleted: false, isLocked: false },
-      { id: "l2", title: "Tenses — Overview", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l3", title: "Subject-Verb Agreement", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l4", title: "Active & Passive Voice", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l5", title: "Direct & Indirect Speech", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l6", title: "Articles & Prepositions", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l7", title: "Synonyms & Antonyms", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l8", title: "One-Word Substitution", duration: "15 min", isCompleted: false, isLocked: true },
-      { id: "l9", title: "Idioms & Phrases", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l10", title: "Sentence Completion", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l11", title: "Reading Comprehension — Strategy", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l12", title: "RC Practice — Set 1", duration: "35 min", isCompleted: false, isLocked: true },
-      { id: "l13", title: "Para Jumbles", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l14", title: "Error Spotting", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l15", title: "Fill in the Blanks", duration: "18 min", isCompleted: false, isLocked: true },
-      { id: "l16", title: "Cloze Tests", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l17", title: "Vocabulary Building", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l18", title: "Sentence Improvement", duration: "22 min", isCompleted: false, isLocked: true },
-      { id: "l19", title: "Analytical Paragraph Writing", duration: "30 min", isCompleted: false, isLocked: true },
-      { id: "l20", title: "Email & Formal Writing", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l21", title: "Group Discussion Tips", duration: "20 min", isCompleted: false, isLocked: true },
-      { id: "l22", title: "Interview Communication", duration: "25 min", isCompleted: false, isLocked: true },
-      { id: "l23", title: "RC Practice — Set 2", duration: "40 min", isCompleted: false, isLocked: true },
-      { id: "l24", title: "Full Grammar Mock", duration: "45 min", isCompleted: false, isLocked: true },
-      { id: "l25", title: "Final Verbal Mock Test", duration: "60 min", isCompleted: false, isLocked: true },
-    ],
-    mcqTopics: [
-      { id: "m1", title: "Grammar Basics", questions: 55, attempted: 0 },
-      { id: "m2", title: "Vocabulary", questions: 80, attempted: 0 },
-      { id: "m3", title: "Reading Comprehension", questions: 60, attempted: 0 },
-      { id: "m4", title: "Para Jumbles & Error Spotting", questions: 40, attempted: 0 },
-    ],
-    assignments: [
-      { id: "a1", title: "Grammar Basics Test", dueDate: "Mar 25, 2026", totalQuestions: 25, completedQuestions: 0, status: "pending", points: 80 },
-    ],
-  },
-}
-
-// Fallback for courses without explicit data (nodejs, data-science)
-const defaultCourse = (id: string): CourseData => ({
-  id,
-  title: id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-  description: "Course content coming soon.",
-  iconColor: "text-primary",
-  difficulty: "Intermediate",
-  lessonsCompleted: 0,
-  totalLessons: 10,
-  stars: 100,
-  lessons: Array.from({ length: 10 }, (_, i) => ({
-    id: `l${i + 1}`,
-    title: `Lesson ${i + 1}`,
-    duration: "20 min",
-    isCompleted: false,
-    isLocked: i > 0,
-  })),
-  mcqTopics: [
-    { id: "m1", title: "Topic 1", questions: 30, attempted: 0 },
-    { id: "m2", title: "Topic 2", questions: 30, attempted: 0 },
-  ],
-  assignments: [
-    { id: "a1", title: "Assessment 1", dueDate: "Apr 1, 2026", totalQuestions: 15, completedQuestions: 0, status: "pending", points: 100 },
-  ],
-})
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const difficultyColors = {
   Beginner: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
   Intermediate: "bg-amber-500/20 text-amber-400 border-amber-500/30",
   Advanced: "bg-red-500/20 text-red-400 border-red-500/30",
 }
 
-const assignmentStatusConfig = {
-  pending: { label: "Pending", className: "bg-secondary text-muted-foreground", icon: Clock },
-  "in-progress": { label: "In Progress", className: "bg-amber-500/20 text-amber-400", icon: AlertCircle },
-  completed: { label: "Completed", className: "bg-emerald-500/20 text-emerald-400", icon: CheckCircle },
-  overdue: { label: "Overdue", className: "bg-red-500/20 text-red-400", icon: AlertCircle },
+// ─── Inline renderer: bold + inline-code ─────────────────────────────────────
+function renderInline(text: string): React.ReactNode[] {
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**'))
+      return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
+    if (part.startsWith('`') && part.endsWith('`') && part.length > 2)
+      return (
+        <code key={i} className="bg-secondary/80 px-1.5 py-0.5 rounded text-[11px] font-mono text-primary border border-white/10">
+          {part.slice(1, -1)}
+        </code>
+      )
+    return <span key={i}>{part}</span>
+  })
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-export default function CourseDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const courseId = params.courseId as string
+// ─── Custom block config ──────────────────────────────────────────────────────
+const BLOCK_CFG = {
+  scenario: {
+    bg: 'bg-[rgba(0,212,200,0.05)]',
+    border: 'border-l-[3px] border-[#00D4C8]',
+    icon: '📍',
+    label: 'Real Scenario',
+    labelClass: 'text-[#00D4C8]',
+  },
+  insight: {
+    bg: 'bg-[rgba(245,158,11,0.05)]',
+    border: 'border-l-[3px] border-amber-500',
+    icon: '💡',
+    label: 'Real World Insight',
+    labelClass: 'text-amber-400',
+  },
+  challenge: {
+    bg: 'bg-[rgba(139,92,246,0.05)]',
+    border: 'border-l-[3px] border-violet-500',
+    icon: '🚀',
+    label: 'Challenge',
+    labelClass: 'text-violet-400',
+  },
+  mistake: {
+    bg: 'bg-[rgba(239,68,68,0.05)]',
+    border: 'border-l-[3px] border-red-500',
+    icon: '⚠️',
+    label: 'Common Mistake',
+    labelClass: 'text-red-400',
+  },
+  tip: {
+    bg: 'bg-[rgba(16,185,129,0.05)]',
+    border: 'border-l-[3px] border-emerald-500',
+    icon: '✨',
+    label: 'Pro Tip',
+    labelClass: 'text-emerald-400',
+  },
+} as const
 
-  const course = courseData[courseId] ?? defaultCourse(courseId)
-  const progress = Math.round((course.lessonsCompleted / course.totalLessons) * 100)
+const LANG_LABEL: Record<string, string> = {
+  python: 'Python', bash: 'Terminal', shell: 'Terminal',
+  javascript: 'JavaScript', js: 'JavaScript', ts: 'TypeScript',
+  typescript: 'TypeScript', sql: 'SQL', json: 'JSON',
+  html: 'HTML', css: 'CSS', output: 'Output',
+}
 
-  const [completedLessons, setCompletedLessons] = useState<Set<string>>(
-    new Set(course.lessons.filter(l => l.isCompleted).map(l => l.id))
-  )
-
-  const handleLessonClick = (lesson: Lesson) => {
-    if (lesson.isLocked) {
-      toast.error("Lesson locked", { description: "Complete the previous lesson first." })
-      return
-    }
-    if (!completedLessons.has(lesson.id)) {
-      setCompletedLessons(prev => new Set([...prev, lesson.id]))
-      toast.success(`"${lesson.title}" completed!`, { description: "+10 points earned" })
+// ─── Block content renderer (supports code fences + inline formatting) ────────
+function renderBlockLines(lines: string[], baseKey: number): React.ReactNode[] {
+  const result: React.ReactNode[] = []
+  let k = baseKey * 10000
+  let j = 0
+  while (j < lines.length) {
+    const line = lines[j]
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim().toLowerCase()
+      const codeLines: string[] = []
+      j++
+      while (j < lines.length && !lines[j].startsWith('```')) { codeLines.push(lines[j]); j++ }
+      const isOutput = lang === 'output'
+      result.push(
+        <pre key={k++} className={cn(
+          'rounded-lg p-3 overflow-x-auto text-xs font-mono mt-2 leading-relaxed',
+          isOutput
+            ? 'bg-[#050A10] text-emerald-400 border border-emerald-900/40'
+            : 'bg-[#0D1224] text-foreground border border-white/5'
+        )}>
+          <code>{codeLines.join('\n')}</code>
+        </pre>
+      )
+    } else if (line.trim() === '') {
+      result.push(<div key={k++} className="h-1" />)
+    } else if (line.startsWith('- ') || line.startsWith('* ')) {
+      result.push(
+        <div key={k++} className="flex items-start gap-2 text-sm my-0.5">
+          <span className="text-primary mt-1.5 text-[8px]">▸</span>
+          <span className="text-foreground/90 leading-relaxed">{renderInline(line.slice(2))}</span>
+        </div>
+      )
+    } else if (/^\d+\.\s/.test(line)) {
+      const m = line.match(/^(\d+)\.\s(.+)/)
+      if (m) result.push(
+        <div key={k++} className="flex items-start gap-2 text-sm my-0.5">
+          <span className="text-primary font-mono font-bold text-xs mt-0.5 min-w-[14px]">{m[1]}.</span>
+          <span className="text-foreground/90 leading-relaxed">{renderInline(m[2])}</span>
+        </div>
+      )
     } else {
-      toast.info(`Reviewing "${lesson.title}"`)
+      result.push(
+        <p key={k++} className="text-sm text-foreground/90 leading-relaxed">{renderInline(line)}</p>
+      )
+    }
+    j++
+  }
+  return result
+}
+
+// ─── Main content renderer ────────────────────────────────────────────────────
+function renderContent(content: string): React.ReactNode[] {
+  const lines = content.split('\n')
+  const elements: React.ReactNode[] = []
+  let i = 0
+  let key = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+
+    // Custom blocks: :::type … :::
+    const blockMatch = line.match(/^:::(\w+)$/)
+    if (blockMatch) {
+      const type = blockMatch[1] as keyof typeof BLOCK_CFG
+      const blockLines: string[] = []
+      i++
+      while (i < lines.length && lines[i].trim() !== ':::') { blockLines.push(lines[i]); i++ }
+      const cfg = BLOCK_CFG[type]
+      if (cfg) {
+        elements.push(
+          <div key={key++} className={cn('rounded-xl p-4 my-4', cfg.bg, cfg.border)}>
+            <div className={cn('flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest mb-3', cfg.labelClass)}>
+              <span>{cfg.icon}</span><span>{cfg.label}</span>
+            </div>
+            <div className="space-y-1.5">{renderBlockLines(blockLines, key)}</div>
+          </div>
+        )
+      }
+      i++; continue
+    }
+
+    // Fenced code blocks
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim().toLowerCase()
+      const codeLines: string[] = []
+      i++
+      while (i < lines.length && !lines[i].startsWith('```')) { codeLines.push(lines[i]); i++ }
+      const label = LANG_LABEL[lang] ?? (lang || null)
+      const isOutput = lang === 'output'
+      elements.push(
+        <div key={key++} className="relative my-4 group">
+          {label && (
+            <div className={cn(
+              'absolute top-0 right-0 px-2.5 py-1 text-[10px] font-mono font-semibold rounded-bl-lg rounded-tr-xl border-b border-l z-10 uppercase tracking-wider',
+              isOutput
+                ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/50'
+                : 'bg-secondary/80 text-muted-foreground border-white/5'
+            )}>{label}</div>
+          )}
+          <pre className={cn(
+            'rounded-xl p-4 pt-7 overflow-x-auto text-sm font-mono leading-relaxed',
+            isOutput
+              ? 'bg-[#040810] text-emerald-400 border border-emerald-900/40'
+              : 'bg-[#0D1224] text-foreground border border-white/5'
+          )}>
+            <code>{codeLines.join('\n')}</code>
+          </pre>
+        </div>
+      )
+      i++; continue
+    }
+
+    // Headings
+    if (line.startsWith('### ')) {
+      elements.push(<h3 key={key++} className="text-sm font-bold text-foreground mt-5 mb-1.5">{renderInline(line.slice(4))}</h3>)
+    } else if (line.startsWith('## ')) {
+      elements.push(
+        <h2 key={key++} className="text-base font-bold text-foreground mt-7 mb-2 font-serif pb-1.5 border-b border-white/5">
+          {renderInline(line.slice(3))}
+        </h2>
+      )
+    } else if (line.startsWith('# ')) {
+      elements.push(
+        <h1 key={key++} className="text-xl font-bold mt-4 mb-3 font-serif gradient-text">{line.slice(2)}</h1>
+      )
+    }
+    // Blockquote
+    else if (line.startsWith('> ')) {
+      elements.push(
+        <blockquote key={key++} className="border-l-2 border-primary/40 pl-3 text-sm text-muted-foreground italic my-2">
+          {renderInline(line.slice(2))}
+        </blockquote>
+      )
+    }
+    // Unordered list
+    else if (line.startsWith('- ') || line.startsWith('* ')) {
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 text-sm my-0.5 ml-1">
+          <span className="text-primary mt-1.5 text-[8px] flex-shrink-0">▸</span>
+          <span className="text-foreground/90 leading-relaxed">{renderInline(line.slice(2))}</span>
+        </div>
+      )
+    }
+    // Ordered list
+    else if (/^\d+\.\s/.test(line)) {
+      const m = line.match(/^(\d+)\.\s(.+)/)
+      if (m) elements.push(
+        <div key={key++} className="flex items-start gap-2 text-sm my-0.5 ml-1">
+          <span className="text-primary font-mono font-bold text-xs mt-0.5 min-w-[16px]">{m[1]}.</span>
+          <span className="text-foreground/90 leading-relaxed">{renderInline(m[2])}</span>
+        </div>
+      )
+    }
+    // Table
+    else if (line.startsWith('| ')) {
+      const tableLines: string[] = [line]
+      i++
+      while (i < lines.length && lines[i].startsWith('|')) { tableLines.push(lines[i]); i++ }
+      const headers = tableLines[0].split('|').filter(Boolean).map(h => h.trim())
+      const rows = tableLines.slice(2).map(r => r.split('|').filter(Boolean).map(c => c.trim()))
+      elements.push(
+        <div key={key++} className="overflow-x-auto my-5 rounded-xl border border-white/5">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-secondary/60">
+                {headers.map((h, j) => (
+                  <th key={j} className="text-left py-2.5 px-4 text-muted-foreground font-semibold text-xs uppercase tracking-wide border-b border-white/5">
+                    {renderInline(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, j) => (
+                <tr key={j} className="border-b border-white/5 hover:bg-secondary/20 transition-colors last:border-0">
+                  {row.map((cell, k) => (
+                    <td key={k} className="py-2.5 px-4 text-foreground/90 text-sm">{renderInline(cell)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+      continue
+    }
+    // Empty line
+    else if (line.trim() === '') {
+      elements.push(<div key={key++} className="h-2" />)
+    }
+    // Paragraph
+    else {
+      elements.push(
+        <p key={key++} className="text-sm text-foreground/85 leading-7">
+          {renderInline(line)}
+        </p>
+      )
+    }
+
+    i++
+  }
+  return elements
+}
+
+export default function CourseDetailPage() {
+  const { courseId } = useParams<{ courseId: string }>()
+  const router = useRouter()
+  const { updateUser } = useAuthStore()
+
+  const [course, setCourse] = useState<Course | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
+  const [completing, setCompleting] = useState(false)
+
+  useEffect(() => {
+    api.get(`/learn/courses/${courseId}`)
+      .then((res) => {
+        const data: Course = res.data
+        setCourse(data)
+        // Auto-select first incomplete lesson, or first lesson
+        const first = data.lessons.find(l => !l.is_completed) ?? data.lessons[0]
+        setActiveLesson(first ?? null)
+      })
+      .catch(() => {
+        toast.error("Failed to load course")
+        router.push("/learn")
+      })
+      .finally(() => setLoading(false))
+  }, [courseId])
+
+  async function markComplete() {
+    if (!activeLesson || activeLesson.is_completed) return
+    setCompleting(true)
+    try {
+      const res = await api.post(`/learn/lessons/${activeLesson.id}/complete`)
+      const { points_earned, total_points } = res.data
+
+      // Update local state
+      setCourse(prev => {
+        if (!prev) return prev
+        const updated = prev.lessons.map(l =>
+          l.id === activeLesson.id ? { ...l, is_completed: true } : l
+        )
+        return { ...prev, lessons: updated, lessons_completed: prev.lessons_completed + 1 }
+      })
+      setActiveLesson(prev => prev ? { ...prev, is_completed: true } : prev)
+
+      updateUser({ points: total_points })
+
+      if (points_earned > 0) {
+        toast.success(`Lesson complete! +${points_earned} pts`)
+      } else {
+        toast.success("Lesson marked complete")
+      }
+
+      // Auto-advance to next lesson
+      const currentIdx = course!.lessons.findIndex(l => l.id === activeLesson.id)
+      const next = course!.lessons[currentIdx + 1]
+      if (next) {
+        setTimeout(() => setActiveLesson(next), 800)
+      }
+    } catch {
+      toast.error("Failed to mark lesson complete")
+    } finally {
+      setCompleting(false)
     }
   }
 
-  const handleMCQAttempt = (topic: MCQTopic) => {
-    toast.success(`Opening ${topic.title} practice`, { description: `${topic.questions} questions` })
-    router.push(`/practice-mcq`)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+      </div>
+    )
   }
 
-  const handleAssignment = (assignment: Assignment) => {
-    if (assignment.status === "completed") {
-      toast.info("Already completed!", { description: `You earned ${assignment.points} points` })
-      return
-    }
-    router.push(`/assignments`)
-  }
+  if (!course) return null
 
-  const liveProgress = Math.round((completedLessons.size / course.totalLessons) * 100)
+  const progress = course.total_lessons > 0
+    ? Math.round((course.lessons_completed / course.total_lessons) * 100)
+    : 0
+
+  const activeIdx = course.lessons.findIndex(l => l.id === activeLesson?.id)
 
   return (
     <div className="space-y-6">
-      {/* ── Back + Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-start gap-4">
-        <button
-          onClick={() => router.push("/learn")}
-          className="mt-1 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
-        >
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => router.push("/learn")}>
           <ArrowLeft className="h-5 w-5" />
-        </button>
+        </Button>
         <div className="flex-1">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold font-serif text-foreground">{course.title}</h1>
-            <Badge variant="outline" className={cn("text-xs self-start sm:self-auto", difficultyColors[course.difficulty])}>
-              {course.difficulty}
-            </Badge>
-          </div>
-          <p className="text-muted-foreground text-sm">{course.description}</p>
+          <h1 className="text-2xl font-bold font-serif text-foreground">{course.title}</h1>
+          <p className="text-sm text-muted-foreground">{course.description}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className={cn("text-xs border", difficultyColors[course.difficulty])}>
+            {course.difficulty}
+          </Badge>
+          <ProgressRing progress={progress} size={52} strokeWidth={4} />
         </div>
       </div>
 
-      {/* ── Progress overview card ────────────────────────────────────────── */}
-      <GlassCard>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="flex items-center gap-4">
-            <ProgressRing progress={liveProgress} size={72} strokeWidth={6} />
-            <div>
-              <p className="text-2xl font-bold font-serif text-foreground">{liveProgress}%</p>
-              <p className="text-sm text-muted-foreground">
-                {completedLessons.size} / {course.totalLessons} lessons
-              </p>
-            </div>
-          </div>
-          <div className="flex-1">
-            <Progress value={liveProgress} className="h-2 mb-2" />
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{completedLessons.size} completed</span>
-              <span>{course.totalLessons - completedLessons.size} remaining</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-            <span className="text-lg font-semibold text-foreground">{course.stars}</span>
-            <span className="text-sm text-muted-foreground ml-1">stars</span>
-          </div>
+      {/* Progress bar */}
+      <div className="space-y-1">
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>{course.lessons_completed} of {course.total_lessons} lessons completed</span>
+          <span>{progress}%</span>
         </div>
-      </GlassCard>
+        <Progress value={progress} className="h-2" />
+      </div>
 
-      {/* ── 3 Module Tabs ─────────────────────────────────────────────────── */}
-      <Tabs defaultValue="lessons">
-        <TabsList className="bg-secondary/50 w-full sm:w-auto">
-          <TabsTrigger
-            value="lessons"
-            className="flex-1 sm:flex-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
-          >
-            <BookOpen className="h-4 w-4" />
-            Lessons
-            <Badge variant="outline" className="text-xs border-current ml-1 hidden sm:inline-flex">
-              {course.totalLessons}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="mcq"
-            className="flex-1 sm:flex-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
-          >
-            <FileQuestion className="h-4 w-4" />
-            Practice MCQ
-            <Badge variant="outline" className="text-xs border-current ml-1 hidden sm:inline-flex">
-              {course.mcqTopics.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="assignments"
-            className="flex-1 sm:flex-none data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2"
-          >
-            <ClipboardList className="h-4 w-4" />
-            Assignments
-            <Badge variant="outline" className="text-xs border-current ml-1 hidden sm:inline-flex">
-              {course.assignments.length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* ── MODULE 1: Lessons ──────────────────────────────────────────── */}
-        <TabsContent value="lessons" className="mt-6">
-          <div className="space-y-2">
-            {course.lessons.map((lesson, index) => {
-              const isDone = completedLessons.has(lesson.id)
-              return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Lesson list */}
+        <div className="lg:col-span-1">
+          <GlassCard className="p-0 overflow-hidden">
+            <div className="p-4 border-b border-border">
+              <h2 className="font-semibold font-serif text-foreground">Lessons</h2>
+            </div>
+            <div className="max-h-[600px] overflow-y-auto">
+              {course.lessons.map((lesson, idx) => (
                 <button
                   key={lesson.id}
-                  onClick={() => handleLessonClick(lesson)}
+                  onClick={() => setActiveLesson(lesson)}
                   className={cn(
-                    "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left",
-                    lesson.isLocked
-                      ? "border-border/30 opacity-50 cursor-not-allowed"
-                      : isDone
-                      ? "border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10"
-                      : "border-border hover:border-primary/40 hover:bg-primary/5 cursor-pointer"
+                    "w-full flex items-start gap-3 p-4 text-left border-b border-border/50 last:border-0 transition-colors hover:bg-secondary/30",
+                    activeLesson?.id === lesson.id && "bg-primary/10 border-l-2 border-l-primary"
                   )}
-                  disabled={lesson.isLocked}
                 >
-                  {/* Status icon */}
-                  <div
-                    className={cn(
-                      "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold",
-                      isDone
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : lesson.isLocked
-                        ? "bg-secondary text-muted-foreground"
-                        : "bg-primary/20 text-primary"
-                    )}
-                  >
-                    {isDone ? (
-                      <CheckCircle className="h-5 w-5" />
-                    ) : lesson.isLocked ? (
-                      <Lock className="h-4 w-4" />
+                  <div className="mt-0.5 flex-shrink-0">
+                    {lesson.is_completed ? (
+                      <CheckCircle className="h-5 w-5 text-emerald-400" />
                     ) : (
-                      <PlayCircle className="h-5 w-5" />
+                      <PlayCircle className={cn(
+                        "h-5 w-5",
+                        activeLesson?.id === lesson.id ? "text-primary" : "text-muted-foreground"
+                      )} />
                     )}
                   </div>
-
-                  {/* Lesson info */}
                   <div className="flex-1 min-w-0">
                     <p className={cn(
                       "text-sm font-medium truncate",
-                      isDone ? "text-emerald-300" : lesson.isLocked ? "text-muted-foreground" : "text-foreground"
+                      lesson.is_completed ? "text-muted-foreground line-through" : "text-foreground"
                     )}>
-                      <span className="text-muted-foreground mr-2">{String(index + 1).padStart(2, "0")}.</span>
-                      {lesson.title}
+                      {idx + 1}. {lesson.title}
                     </p>
-                  </div>
-
-                  {/* Duration + status */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {lesson.duration}
-                    </span>
-                    {isDone && (
-                      <Badge className="text-xs bg-emerald-500/20 text-emerald-400 border-0">
-                        Done
-                      </Badge>
-                    )}
-                    {!isDone && !lesson.isLocked && (
-                      <ArrowRight className="h-4 w-4 text-primary" />
-                    )}
+                    <div className="flex items-center gap-2 mt-1">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{lesson.duration_mins} min</span>
+                      <span className="text-xs text-amber-500">+{lesson.points} pts</span>
+                    </div>
                   </div>
                 </button>
-              )
-            })}
-          </div>
-        </TabsContent>
-
-        {/* ── MODULE 2: Practice MCQ ─────────────────────────────────────── */}
-        <TabsContent value="mcq" className="mt-6">
-          <div className="space-y-3">
-            {course.mcqTopics.map((topic) => {
-              const topicProgress = topic.questions > 0
-                ? Math.round((topic.attempted / topic.questions) * 100)
-                : 0
-              return (
-                <GlassCard key={topic.id} hover className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileQuestion className="h-4 w-4 text-primary flex-shrink-0" />
-                      <p className="text-sm font-medium text-foreground">{topic.title}</p>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                      <span>{topic.questions} questions</span>
-                      {topic.bestScore !== undefined && (
-                        <span className="text-emerald-400">Best: {topic.bestScore}%</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Progress value={topicProgress} className="h-1.5 flex-1" />
-                      <span className="text-xs text-muted-foreground w-10 text-right">
-                        {topic.attempted}/{topic.questions}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleMCQAttempt(topic)}
-                    className={cn(
-                      "flex-shrink-0",
-                      topic.attempted === 0
-                        ? "bg-primary hover:brightness-110 text-primary-foreground"
-                        : "bg-secondary hover:bg-secondary/80 text-foreground"
-                    )}
-                  >
-                    {topic.attempted === 0 ? "Start" : topic.attempted === topic.questions ? "Retry" : "Continue"}
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </GlassCard>
-              )
-            })}
-          </div>
-        </TabsContent>
-
-        {/* ── MODULE 3: Assignments ──────────────────────────────────────── */}
-        <TabsContent value="assignments" className="mt-6">
-          {course.assignments.length === 0 ? (
-            <div className="flex flex-col items-center py-16 text-center">
-              <ClipboardList className="h-12 w-12 text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">No assignments yet for this course.</p>
+              ))}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {course.assignments.map((assignment) => {
-                const config = assignmentStatusConfig[assignment.status]
-                const StatusIcon = config.icon
-                const pct = assignment.totalQuestions > 0
-                  ? Math.round((assignment.completedQuestions / assignment.totalQuestions) * 100)
-                  : 0
-                return (
-                  <GlassCard key={assignment.id} hover className="flex flex-col lg:flex-row lg:items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <ClipboardList className="h-4 w-4 text-primary flex-shrink-0" />
-                        <p className="text-sm font-medium text-foreground">{assignment.title}</p>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-2">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          Due {assignment.dueDate}
-                        </span>
-                        <span className="text-primary font-medium">{assignment.points} pts</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Progress value={pct} className="h-1.5 flex-1 max-w-xs" />
-                        <span className="text-xs text-muted-foreground">
-                          {assignment.completedQuestions}/{assignment.totalQuestions}
-                        </span>
-                      </div>
+          </GlassCard>
+        </div>
+
+        {/* Lesson content */}
+        <div className="lg:col-span-2">
+          {activeLesson ? (
+            <GlassCard>
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold font-serif text-foreground">{activeLesson.title}</h2>
+                  <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {activeLesson.duration_mins} min
                     </div>
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <Badge className={cn("flex items-center gap-1 text-xs border-0", config.className)}>
-                        <StatusIcon className="h-3 w-3" />
-                        {config.label}
+                    <span className="text-xs text-amber-500 font-medium">+{activeLesson.points} pts</span>
+                    {activeLesson.is_completed && (
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                        Completed
                       </Badge>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAssignment(assignment)}
-                        className={cn(
-                          assignment.status === "completed"
-                            ? "bg-secondary hover:bg-secondary/80 text-foreground"
-                            : "bg-primary hover:brightness-110 text-primary-foreground"
-                        )}
-                      >
-                        {assignment.status === "completed"
-                          ? "Review"
-                          : assignment.status === "in-progress"
-                          ? "Continue"
-                          : "Start"}
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </GlassCard>
-                )
-              })}
-            </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Content — loaded from local content files, not from DB */}
+              <div className="prose-sm max-w-none mb-8">
+                {(() => {
+                  const content = getLessonContent(courseId, activeLesson.order)
+                  return content
+                    ? renderContent(content)
+                    : <p className="text-muted-foreground text-sm italic">Content coming soon for this lesson.</p>
+                })()}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={activeIdx <= 0}
+                  onClick={() => setActiveLesson(course.lessons[activeIdx - 1])}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1" /> Previous
+                </Button>
+
+                <div className="flex gap-2">
+                  {!activeLesson.is_completed && (
+                    <Button
+                      onClick={markComplete}
+                      disabled={completing}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    >
+                      {completing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Mark Complete
+                    </Button>
+                  )}
+                  {activeIdx < course.lessons.length - 1 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setActiveLesson(course.lessons[activeIdx + 1])}
+                    >
+                      Next <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </GlassCard>
+          ) : (
+            <GlassCard className="flex flex-col items-center justify-center h-64">
+              <BookOpen className="h-10 w-10 text-muted-foreground/30 mb-3" />
+              <p className="text-muted-foreground">Select a lesson to start learning</p>
+            </GlassCard>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }
