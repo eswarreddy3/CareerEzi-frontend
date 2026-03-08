@@ -28,7 +28,6 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { getAssignment } from "@/lib/assignment-data"
 
 interface ApiQuestion {
   id: number
@@ -106,34 +105,8 @@ export default function AssignmentExamPage() {
         setTimeLeft(res.data.assignment.duration_mins * 60)
       })
       .catch(() => {
-        // Fallback to mock data
-        const mock = getAssignment(moduleId)
-        if (mock) {
-          setAssignmentMeta({
-            id: mock.id,
-            module_id: mock.id,
-            title: mock.title,
-            course: mock.course,
-            icon: mock.icon,
-            duration_mins: mock.durationMins,
-            total_questions: mock.totalQuestions,
-            points: mock.points,
-          })
-          setQuestions(
-            mock.questions.map((q) => ({
-              id: q.id,
-              module_id: mock.id,
-              topic: mock.course,
-              subtopic: mock.course,
-              question: q.question,
-              options: q.options,
-              difficulty: "Medium",
-              points: 5,
-              explanation: q.explanation,
-            }))
-          )
-          setTimeLeft(mock.durationMins * 60)
-        }
+        toast.error("Failed to load assignment")
+        router.push("/assignments")
       })
       .finally(() => setLoading(false))
   }, [moduleId])

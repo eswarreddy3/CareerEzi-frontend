@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
-import { buildMockTopics, getMockQuestions } from "@/lib/mcq-data"
 
 interface Subtopic {
   name: string
@@ -64,7 +63,6 @@ export default function PracticeMCQPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loadingTopics, setLoadingTopics] = useState(true)
   const [loadingQuestions, setLoadingQuestions] = useState(false)
-  const [usingMockData, setUsingMockData] = useState(false)
 
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
@@ -75,7 +73,6 @@ export default function PracticeMCQPage() {
   const tryingAgainRef = useRef(false)
   const { updateUser } = useAuthStore()
 
-  // Load topics — try API first, fall back to mock data
   useEffect(() => {
     api.get("/mcq/topics")
       .then((res) => {
@@ -83,43 +80,17 @@ export default function PracticeMCQPage() {
         const firstTopic = res.data[0]?.topic
         if (firstTopic) setExpandedTopics([firstTopic])
       })
-      .catch(() => {
-        // API unavailable — use local mock data
-        const mockTopics = buildMockTopics()
-        setTopics(mockTopics)
-        setUsingMockData(true)
-        if (mockTopics.length > 0) setExpandedTopics([mockTopics[0].topic])
-      })
+      .catch(() => toast.error("Failed to load topics"))
       .finally(() => setLoadingTopics(false))
   }, [])
 
-  const loadSubtopic = useCallback((topic: string, subtopic: string, isMock = false) => {
+  const loadSubtopic = useCallback((topic: string, subtopic: string) => {
     setSelectedSubtopic({ topic, subtopic })
     setLoadingQuestions(true)
     setCurrentIndex(0)
     setSelectedAnswer(null)
     setIsSubmitted(false)
     setServerResult(null)
-
-    if (isMock || usingMockData) {
-      // Use local mock data
-      const mockQs = getMockQuestions(topic, subtopic)
-      const qs: Question[] = mockQs.map(q => ({
-        id: q.id,
-        topic: q.topic,
-        subtopic: q.subtopic,
-        question: q.question,
-        options: q.options,
-        difficulty: q.difficulty,
-        points: q.points,
-        explanation: q.explanation,
-        attempted: false,
-      }))
-      setQuestions(qs)
-      setQuestionStatuses(qs.map(() => "unattempted"))
-      setLoadingQuestions(false)
-      return
-    }
 
     api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
       .then((res) => {
@@ -131,20 +102,9 @@ export default function PracticeMCQPage() {
           setIsSubmitted(true)
         }
       })
-      .catch(() => {
-        // Fallback to mock on API failure
-        const mockQs = getMockQuestions(topic, subtopic)
-        const qs: Question[] = mockQs.map(q => ({
-          id: q.id, topic: q.topic, subtopic: q.subtopic,
-          question: q.question, options: q.options, difficulty: q.difficulty,
-          points: q.points, explanation: q.explanation, attempted: false,
-        }))
-        setQuestions(qs)
-        setQuestionStatuses(qs.map(() => "unattempted"))
-        setUsingMockData(true)
-      })
+      .catch(() => toast.error("Failed to load questions"))
       .finally(() => setLoadingQuestions(false))
-  }, [usingMockData])
+  }, [])
 
   // Auto-select topic/subtopic from URL params (e.g. from lesson page links)
   useEffect(() => {
@@ -153,7 +113,7 @@ export default function PracticeMCQPage() {
     const subtopicParam = searchParams.get("subtopic")
     if (topicParam && subtopicParam) {
       setExpandedTopics(prev => prev.includes(topicParam) ? prev : [...prev, topicParam])
-      loadSubtopic(topicParam, subtopicParam, usingMockData)
+      loadSubtopic(topicParam, subtopicParam)
     }
   }, [loadingTopics, topics, searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -181,33 +141,6 @@ export default function PracticeMCQPage() {
     const q = questions[currentIndex]
     setSubmitting(true)
     tryingAgainRef.current = false
-
-    // Mock mode: evaluate locally
-    if (usingMockData) {
-      const mockQs = getMockQuestions(q.topic, q.subtopic)
-      const mockQ = mockQs.find(mq => mq.id === q.id)
-      const correctIndex = mockQ?.correctIndex ?? 0
-      const isCorrect = selectedAnswer === correctIndex
-      const result = {
-        correct: isCorrect,
-        correct_answer: correctIndex,
-        explanation: q.explanation ?? null,
-        points_earned: isCorrect ? q.points : 0,
-        total_points: 0,
-      }
-      setServerResult(result)
-      setIsSubmitted(true)
-      const newStatuses = [...questionStatuses]
-      newStatuses[currentIndex] = "answered"
-      setQuestionStatuses(newStatuses)
-      const updatedQuestions = [...questions]
-      updatedQuestions[currentIndex] = { ...q, attempted: true, selected_answer: selectedAnswer, is_correct: isCorrect, correct_answer: correctIndex }
-      setQuestions(updatedQuestions)
-      if (isCorrect) toast.success(`Correct! +${q.points} pts`)
-      else toast.error("Incorrect — check the explanation below")
-      setSubmitting(false)
-      return
-    }
 
     try {
       const res = await api.post("/mcq/answer", {

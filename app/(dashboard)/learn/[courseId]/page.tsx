@@ -33,8 +33,36 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { getLessonContent } from "@/content"
 import { PYTHON_TOPIC_META } from "@/lib/python-topics"
-import { getMockQuestions, type MockQuestion } from "@/lib/mcq-data"
-import { pythonModuleAssignments } from "@/lib/assignment-data"
+
+interface ApiMcqQuestion {
+  id: number
+  topic: string
+  subtopic: string
+  question: string
+  options: string[]
+  difficulty: "Easy" | "Medium" | "Hard"
+  points: number
+  explanation: string | null
+  attempted: boolean
+  selected_answer?: number
+  is_correct?: boolean
+  correct_answer?: number
+}
+
+interface ModuleAssignment {
+  id: string
+  module_id: string
+  title: string
+  course: string
+  icon: string
+  due_date: string
+  duration_mins: number
+  total_questions: number
+  completed_questions: number
+  status: "pending" | "in-progress" | "completed" | "overdue"
+  points: number
+  score: number
+}
 
 interface Lesson {
   id: number
@@ -344,33 +372,53 @@ export default function CourseDetailPage() {
 
   // Inline MCQ state
   const [mcqTopic, setMcqTopic] = useState<{ topic: string; subtopic: string; lessonOrder: number } | null>(null)
-  const [mcqQuestions, setMcqQuestions] = useState<MockQuestion[]>([])
+  const [mcqQuestions, setMcqQuestions] = useState<ApiMcqQuestion[]>([])
+  const [mcqLoading, setMcqLoading] = useState(false)
   const [mcqIndex, setMcqIndex] = useState(0)
   const [mcqSelected, setMcqSelected] = useState<number | null>(null)
   const [mcqSubmitted, setMcqSubmitted] = useState(false)
+  const [mcqResult, setMcqResult] = useState<{ correct: boolean; correct_answer: number; explanation: string | null; points_earned: number } | null>(null)
   const [mcqScores, setMcqScores] = useState<Record<string, { correct: number; total: number }>>({})
+  const [moduleAssignments, setModuleAssignments] = useState<ModuleAssignment[]>([])
 
-  function openMcqTopic(topic: string, subtopic: string, lessonOrder: number) {
-    const qs = getMockQuestions(topic, subtopic)
+  async function openMcqTopic(topic: string, subtopic: string, lessonOrder: number) {
     setMcqTopic({ topic, subtopic, lessonOrder })
-    setMcqQuestions(qs)
+    setMcqQuestions([])
     setMcqIndex(0)
     setMcqSelected(null)
     setMcqSubmitted(false)
+    setMcqResult(null)
+    setMcqLoading(true)
+    try {
+      const res = await api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
+      setMcqQuestions(res.data)
+    } catch {
+      toast.error("Failed to load questions")
+      setMcqTopic(null)
+    } finally {
+      setMcqLoading(false)
+    }
   }
 
-  function mcqSubmit() {
+  async function mcqSubmit() {
     if (mcqSelected === null) return
-    setMcqSubmitted(true)
     const q = mcqQuestions[mcqIndex]
-    const correct = mcqSelected === q.correctIndex
-    const key = `${mcqTopic?.topic}|${mcqTopic?.subtopic}`
-    setMcqScores(prev => {
-      const cur = prev[key] ?? { correct: 0, total: 0 }
-      return { ...prev, [key]: { correct: cur.correct + (correct ? 1 : 0), total: cur.total + 1 } }
-    })
-    if (correct) toast.success(`Correct! +${q.points} pts`)
-    else toast.error("Incorrect — see the explanation")
+    try {
+      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: mcqSelected })
+      const result = res.data
+      setMcqResult(result)
+      setMcqSubmitted(true)
+      const key = `${mcqTopic?.topic}|${mcqTopic?.subtopic}`
+      setMcqScores(prev => {
+        const cur = prev[key] ?? { correct: 0, total: 0 }
+        return { ...prev, [key]: { correct: cur.correct + (result.correct ? 1 : 0), total: cur.total + 1 } }
+      })
+      updateUser({ points: result.total_points })
+      if (result.correct) toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
+      else toast.error("Incorrect — see the explanation")
+    } catch {
+      toast.error("Failed to submit answer")
+    }
   }
 
   function mcqNext() {
@@ -378,6 +426,7 @@ export default function CourseDetailPage() {
       setMcqIndex(i => i + 1)
       setMcqSelected(null)
       setMcqSubmitted(false)
+      setMcqResult(null)
     }
   }
 
@@ -395,6 +444,18 @@ export default function CourseDetailPage() {
         router.push("/learn")
       })
       .finally(() => setLoading(false))
+  }, [courseId])
+
+  useEffect(() => {
+    if (courseId !== "python") return
+    api.get("/assignments/list")
+      .then((res) => {
+        const pythonModules = (res.data as ModuleAssignment[]).filter((a) =>
+          ["python-basics", "python-intermediate", "python-advanced"].includes(a.module_id)
+        )
+        setModuleAssignments(pythonModules)
+      })
+      .catch(() => {/* silently fail — assignment tab will be empty */})
   }, [courseId])
 
   async function markComplete() {
@@ -746,14 +807,18 @@ export default function CourseDetailPage() {
                 <h3 className="font-semibold font-serif text-foreground">Select a Topic</h3>
                 <p className="text-sm text-muted-foreground">Pick a topic from the left to start practicing</p>
               </GlassCard>
+            ) : mcqLoading ? (
+              <GlassCard className="flex flex-col items-center justify-center h-64">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </GlassCard>
             ) : mcqQuestions.length === 0 ? (
               <GlassCard className="flex flex-col items-center justify-center h-64">
                 <p className="text-muted-foreground text-sm">No questions for this topic yet.</p>
               </GlassCard>
             ) : (() => {
               const q = mcqQuestions[mcqIndex]
-              const isCorrect = mcqSubmitted && mcqSelected === q.correctIndex
-              const isWrong = mcqSubmitted && mcqSelected !== q.correctIndex
+              const isCorrect = mcqSubmitted && mcqResult?.correct === true
+              const isWrong = mcqSubmitted && mcqResult?.correct === false
               return (
                 <GlassCard className="space-y-5">
                   {/* Header */}
@@ -780,8 +845,8 @@ export default function CourseDetailPage() {
                   <div className="space-y-2.5">
                     {q.options.map((opt, idx) => {
                       const isSelected = mcqSelected === idx
-                      const showCorrect = mcqSubmitted && idx === q.correctIndex
-                      const showWrong = mcqSubmitted && isSelected && idx !== q.correctIndex
+                      const showCorrect = mcqSubmitted && idx === mcqResult?.correct_answer
+                      const showWrong = mcqSubmitted && isSelected && idx !== mcqResult?.correct_answer
                       return (
                         <button
                           key={idx}
@@ -814,19 +879,19 @@ export default function CourseDetailPage() {
                   </div>
 
                   {/* Explanation */}
-                  {mcqSubmitted && (
+                  {mcqSubmitted && mcqResult && (
                     <div className={cn("p-3 rounded-xl border text-sm", isCorrect ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20")}>
                       <p className={cn("font-semibold text-xs mb-1", isCorrect ? "text-emerald-400" : "text-red-400")}>
                         {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
                       </p>
-                      <p className="text-muted-foreground leading-relaxed">{q.explanation}</p>
+                      <p className="text-muted-foreground leading-relaxed">{mcqResult.explanation ?? q.explanation}</p>
                     </div>
                   )}
 
                   {/* Actions */}
                   <div className="flex items-center justify-between pt-3 border-t border-white/5">
                     <button
-                      onClick={() => { setMcqIndex(i => Math.max(0, i - 1)); setMcqSelected(null); setMcqSubmitted(false) }}
+                      onClick={() => { setMcqIndex(i => Math.max(0, i - 1)); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}
                       disabled={mcqIndex === 0}
                       className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
                     >
@@ -848,7 +913,7 @@ export default function CourseDetailPage() {
                           Next <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       ) : (
-                        <Button size="sm" variant="outline" className="gap-2 border-white/10" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false) }}>
+                        <Button size="sm" variant="outline" className="gap-2 border-white/10" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}>
                           <RotateCcw className="h-3.5 w-3.5" /> Restart
                         </Button>
                       )}
@@ -887,9 +952,9 @@ export default function CourseDetailPage() {
             Complete the timed assessment for each module to earn points and test your understanding.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {pythonModuleAssignments.map((a, i) => {
+            {moduleAssignments.map((a, i) => {
               const mod = PYTHON_MODULES[i]
-              const pct = a.totalQuestions > 0 ? Math.round((a.completedQuestions / a.totalQuestions) * 100) : 0
+              const pct = a.total_questions > 0 ? Math.round((a.completed_questions / a.total_questions) * 100) : 0
               return (
                 <GlassCard key={a.id} hover className="flex flex-col gap-4">
                   {/* Module identity */}
@@ -916,10 +981,10 @@ export default function CourseDetailPage() {
                   {/* Stats */}
                   <div className="flex items-center gap-4 text-sm">
                     <span className="flex items-center gap-1 text-muted-foreground">
-                      <Timer className="h-3.5 w-3.5" />{a.durationMins} min
+                      <Timer className="h-3.5 w-3.5" />{a.duration_mins} min
                     </span>
                     <span className="flex items-center gap-1 text-muted-foreground">
-                      <FileText className="h-3.5 w-3.5" />{a.totalQuestions} questions
+                      <FileText className="h-3.5 w-3.5" />{a.total_questions} questions
                     </span>
                     <span className="flex items-center gap-1 text-amber-500">
                       <Star className="h-3.5 w-3.5 fill-amber-500" />{a.points} pts
@@ -938,10 +1003,10 @@ export default function CourseDetailPage() {
 
                   <Button
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 mt-auto"
-                    onClick={() => router.push(`/assignments/${a.id}`)}
+                    onClick={() => router.push(`/assignments/${a.module_id}`)}
                   >
                     <ClipboardList className="h-4 w-4" />
-                    {a.status === "completed" ? "Review" : a.completedQuestions > 0 ? "Continue" : "Start Assessment"}
+                    {a.status === "completed" ? "Review" : a.completed_questions > 0 ? "Continue" : "Start Assessment"}
                   </Button>
                 </GlassCard>
               )

@@ -22,8 +22,8 @@ import {
   ChevronUp,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import api from "@/lib/api"
-import { assignments as mockAssignments, pythonModuleAssignments as mockModuleAssignments } from "@/lib/assignment-data"
 
 interface ApiAssignment {
   id: string
@@ -82,24 +82,6 @@ function getDueDateUrgency(dueDate: string, status: string) {
 
 type TabFilter = "all" | "pending" | "in-progress" | "completed" | "overdue"
 
-// Convert mock data to ApiAssignment shape for fallback
-function toApiShape(a: (typeof mockAssignments)[0] | (typeof mockModuleAssignments)[0]): ApiAssignment {
-  return {
-    id: a.id,
-    module_id: a.id,
-    title: a.title,
-    course: a.course,
-    icon: a.icon,
-    due_date: a.dueDate,
-    duration_mins: a.durationMins,
-    total_questions: a.totalQuestions,
-    completed_questions: a.completedQuestions,
-    status: a.status,
-    points: a.points,
-    score: a.status === "completed" ? a.points : 0,
-  }
-}
-
 export default function AssignmentsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabFilter>("all")
@@ -110,13 +92,7 @@ export default function AssignmentsPage() {
   useEffect(() => {
     api.get("/assignments/list")
       .then((res) => setAllAssignments(res.data))
-      .catch(() => {
-        // Fallback to mock data
-        setAllAssignments([
-          ...mockAssignments.map(toApiShape),
-          ...mockModuleAssignments.map(toApiShape),
-        ])
-      })
+      .catch(() => toast.error("Failed to load assignments"))
       .finally(() => setLoading(false))
   }, [])
 
