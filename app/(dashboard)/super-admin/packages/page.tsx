@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Check, Pencil, Loader2 } from "lucide-react"
+import { Check, Pencil, Loader2, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -12,20 +12,22 @@ import api from "@/lib/api"
 interface Package {
   id: number
   name: string
+  plan_type: string
   price: number
   features: string[]
   is_active: boolean
 }
 
-const packageStyle: Record<string, { color: string; borderColor: string }> = {
-  Free:       { color: "text-muted-foreground", borderColor: "border-border" },
-  Basic:      { color: "text-blue-400",         borderColor: "border-blue-500/30" },
-  Pro:        { color: "text-primary",          borderColor: "border-primary/30" },
-  Enterprise: { color: "text-purple-400",       borderColor: "border-purple-500/30" },
+const planStyle: Record<string, { label: string; color: string; borderColor: string; badge?: string }> = {
+  free:       { label: "Free",        color: "text-muted-foreground", borderColor: "border-border" },
+  base:       { label: "Base Plan",   color: "text-blue-400",         borderColor: "border-blue-500/30" },
+  pro:        { label: "Pro Plan",    color: "text-primary",          borderColor: "border-primary/30", badge: "Most Popular" },
+  enterprise: { label: "Enterprise",  color: "text-purple-400",       borderColor: "border-purple-500/30" },
 }
 
-function formatPrice(price: number): string {
-  if (price === 0) return "₹0"
+function formatPrice(price: number, planType: string): string {
+  if (planType === "enterprise") return "Custom"
+  if (price === 0) return "Free"
   return `₹${price.toLocaleString("en-IN")}`
 }
 
@@ -76,7 +78,7 @@ export default function PackagesPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <GlassCard key={i} className="h-80 animate-pulse bg-secondary/20" />
+            <GlassCard key={i} className="h-96 animate-pulse bg-secondary/20" />
           ))}
         </div>
       </div>
@@ -92,23 +94,23 @@ export default function PackagesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {packages.map((pkg) => {
-          const style = packageStyle[pkg.name] ?? { color: "text-foreground", borderColor: "border-border" }
-          const isPro = pkg.name === "Pro"
+          const style = planStyle[pkg.plan_type] ?? { label: pkg.name, color: "text-foreground", borderColor: "border-border" }
           const isEditing = editing === pkg.id
+          const isEnterprise = pkg.plan_type === "enterprise"
 
           return (
             <GlassCard
               key={pkg.id}
               className={cn(
-                "relative border",
+                "relative border flex flex-col",
                 style.borderColor,
-                isPro && "shadow-[0_0_20px_rgba(0,212,200,0.15)]"
+                pkg.plan_type === "pro" && "shadow-[0_0_20px_rgba(0,212,200,0.15)]"
               )}
             >
-              {isPro && (
+              {style.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground text-xs px-3">
-                    Most Popular
+                    {style.badge}
                   </Badge>
                 </div>
               )}
@@ -117,26 +119,42 @@ export default function PackagesPage() {
                 <h2 className={cn("text-xl font-bold font-serif", style.color)}>
                   {pkg.name}
                 </h2>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                  onClick={() => isEditing ? setEditing(null) : startEdit(pkg)}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
+                {!isEnterprise && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={() => isEditing ? setEditing(null) : startEdit(pkg)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
               </div>
 
-              <div className="mb-4">
-                <span className="text-2xl font-bold text-foreground">{formatPrice(pkg.price)}</span>
-                {pkg.price > 0 && <span className="text-sm text-muted-foreground">/year</span>}
+              <div className="mb-1">
+                <span className={cn("text-3xl font-bold", isEnterprise ? "text-purple-400" : "text-foreground")}>
+                  {formatPrice(pkg.price, pkg.plan_type)}
+                </span>
+                {pkg.price > 0 && (
+                  <span className="text-xs text-muted-foreground ml-1">/student/year</span>
+                )}
               </div>
 
-              <div className="space-y-2 mb-4">
+              {isEnterprise && (
+                <p className="text-xs text-muted-foreground mb-3">Contact us for pricing</p>
+              )}
+
+              <div className="space-y-2 mt-3 flex-1">
                 {pkg.features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-2 text-sm">
-                    <div className="w-4 h-4 rounded-full bg-primary/20 text-primary flex items-center justify-center flex-shrink-0">
-                      <Check className="h-2.5 w-2.5" />
+                  <div key={feature} className="flex items-start gap-2 text-sm">
+                    <div className={cn(
+                      "mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0",
+                      isEnterprise ? "bg-purple-500/20 text-purple-400" : "bg-primary/20 text-primary"
+                    )}>
+                      {isEnterprise
+                        ? <Sparkles className="h-2.5 w-2.5" />
+                        : <Check className="h-2.5 w-2.5" />
+                      }
                     </div>
                     <span className="text-foreground">{feature}</span>
                   </div>
@@ -144,8 +162,8 @@ export default function PackagesPage() {
               </div>
 
               {isEditing && (
-                <div className="pt-4 border-t border-border space-y-2">
-                  <p className="text-xs text-muted-foreground">Edit price (₹/year):</p>
+                <div className="pt-4 border-t border-border space-y-2 mt-4">
+                  <p className="text-xs text-muted-foreground">Edit price (₹/student/year):</p>
                   <input
                     type="number"
                     value={editPrice}
