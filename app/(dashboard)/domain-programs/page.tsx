@@ -37,6 +37,7 @@ interface Domain {
   skills: string[]
   total_points: number
   total_courses: number
+  is_locked: boolean
 }
 
 interface Course {
@@ -269,6 +270,30 @@ export default function DomainProgramsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {domains.map((domain) => {
             const Icon = iconMap[domain.icon] ?? Database
+
+            if (domain.is_locked) {
+              return (
+                <GlassCard key={domain.id} className="relative opacity-50 select-none">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl z-10 bg-background/40 backdrop-blur-[2px]">
+                    <Lock className="h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-xs text-muted-foreground font-medium">Not available in your plan</p>
+                  </div>
+                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-4", domain.bg_color)}>
+                    <Icon className={cn("h-7 w-7", domain.icon_color)} />
+                  </div>
+                  <h3 className="font-semibold text-lg font-serif text-foreground mb-2">{domain.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{domain.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <span>{domain.total_courses} courses</span>
+                    </div>
+                    <Button size="sm" disabled className="bg-secondary text-muted-foreground cursor-not-allowed">
+                      <Lock className="h-3.5 w-3.5 mr-1" /> Locked
+                    </Button>
+                  </div>
+                </GlassCard>
+              )
+            }
 
             return (
               <GlassCard

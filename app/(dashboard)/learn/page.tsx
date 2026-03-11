@@ -26,6 +26,7 @@ interface Course {
   points_per_lesson: number
   prerequisite_id: string | null
   is_locked: boolean
+  lock_reason: "plan" | "prerequisite" | null
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -99,13 +100,19 @@ export default function LearnPage() {
               {course.is_locked && (
                 <div className="absolute inset-0 locked-overlay z-10 flex flex-col items-center justify-center gap-3 rounded-xl">
                   <Lock className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground text-center px-4">
-                    Complete{" "}
-                    <span className="text-primary font-medium">
-                      {courses.find(c => c.id === course.prerequisite_id)?.title ?? course.prerequisite_id}
-                    </span>{" "}
-                    first to unlock
-                  </p>
+                  {course.lock_reason === "plan" ? (
+                    <p className="text-sm text-muted-foreground text-center px-4">
+                      Not available in your college plan
+                    </p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center px-4">
+                      Complete{" "}
+                      <span className="text-primary font-medium">
+                        {courses.find(c => c.id === course.prerequisite_id)?.title ?? course.prerequisite_id}
+                      </span>{" "}
+                      first to unlock
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -144,9 +151,13 @@ export default function LearnPage() {
                 disabled={course.is_locked}
                 onClick={() => {
                   if (course.is_locked) {
-                    toast.error("Course Locked", {
-                      description: `Complete ${courses.find(c => c.id === course.prerequisite_id)?.title ?? course.prerequisite_id} first.`,
-                    })
+                    if (course.lock_reason === "plan") {
+                      toast.error("Course Locked", { description: "This course is not available in your college plan." })
+                    } else {
+                      toast.error("Course Locked", {
+                        description: `Complete ${courses.find(c => c.id === course.prerequisite_id)?.title ?? course.prerequisite_id} first.`,
+                      })
+                    }
                     return
                   }
                   router.push(`/learn/${course.id}`)

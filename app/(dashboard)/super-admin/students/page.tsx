@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef, type FormEvent } from "react"
-import { Plus, Upload, Eye } from "lucide-react"
+import { Plus, Upload, UserCheck, UserX, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -17,6 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import api from "@/lib/api"
 
@@ -37,55 +47,7 @@ interface College {
   name: string
 }
 
-const columns: Column<Student>[] = [
-  {
-    key: "name",
-    header: "Name",
-    render: (row) => (
-      <div>
-        <p className="text-sm font-medium text-foreground">{row.name}</p>
-        <p className="text-xs text-muted-foreground">{row.email}</p>
-      </div>
-    ),
-  },
-  {
-    key: "college_name",
-    header: "College",
-    render: (row) => <span className="text-sm text-muted-foreground">{row.college_name || "—"}</span>,
-  },
-  {
-    key: "branch",
-    header: "Branch",
-    render: (row) => <span className="text-sm text-muted-foreground">{row.branch || "—"}</span>,
-  },
-  {
-    key: "roll_number",
-    header: "Roll No",
-    render: (row) => <span className="text-sm text-muted-foreground">{row.roll_number || "—"}</span>,
-  },
-  {
-    key: "points",
-    header: "Points",
-    render: (row) => <span className="text-sm text-foreground">{row.points.toLocaleString()}</span>,
-  },
-  {
-    key: "is_active",
-    header: "Status",
-    render: (row) => (
-      <Badge
-        variant="outline"
-        className={cn(
-          "text-xs",
-          row.is_active
-            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-            : "bg-red-500/20 text-red-400 border-red-500/30"
-        )}
-      >
-        {row.is_active ? "Active" : "Inactive"}
-      </Badge>
-    ),
-  },
-]
+type StudentAction = { type: "activate" | "deactivate" | "delete"; student: Student }
 
 export default function SuperAdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
@@ -98,6 +60,8 @@ export default function SuperAdminStudentsPage() {
   const [bulkCollegeId, setBulkCollegeId] = useState("")
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
   const [isBulkUploading, setIsBulkUploading] = useState(false)
+  const [actionLoading, setActionLoading] = useState<number | null>(null)
+  const [confirm, setConfirm] = useState<StudentAction | null>(null)
   const csvRef = useRef<HTMLInputElement>(null)
 
   const fetchStudents = useCallback(async () => {
@@ -114,9 +78,7 @@ export default function SuperAdminStudentsPage() {
     }
   }, [collegeFilter])
 
-  useEffect(() => {
-    fetchStudents()
-  }, [fetchStudents])
+  useEffect(() => { fetchStudents() }, [fetchStudents])
 
   useEffect(() => {
     api.get("/super-admin/colleges", { params: { per_page: 100 } })
@@ -173,6 +135,103 @@ export default function SuperAdminStudentsPage() {
       if (csvRef.current) csvRef.current.value = ""
     }
   }
+
+  const handleConfirmedAction = async () => {
+    if (!confirm) return
+    const { type, student } = confirm
+    setConfirm(null)
+    setActionLoading(student.id)
+    try {
+      if (type === "activate") {
+        await api.patch(`/super-admin/students/${student.id}`, { is_active: true })
+        toast.success(`${student.name} activated`)
+        setStudents((prev) => prev.map((s) => s.id === student.id ? { ...s, is_active: true } : s))
+      } else if (type === "deactivate") {
+        await api.patch(`/super-admin/students/${student.id}`, { is_active: false })
+        toast.success(`${student.name} deactivated`)
+        setStudents((prev) => prev.map((s) => s.id === student.id ? { ...s, is_active: false } : s))
+      } else if (type === "delete") {
+        await api.delete(`/super-admin/students/${student.id}`)
+        toast.success(`${student.name} deleted`)
+        setStudents((prev) => prev.filter((s) => s.id !== student.id))
+      }
+    } catch {
+      toast.error(`Failed to ${type} student`)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const confirmConfig = confirm ? {
+    activate: {
+      title: "Activate Student?",
+      description: `"${confirm.student.name}" will regain access to the platform.`,
+      actionLabel: "Activate",
+      actionClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    },
+    deactivate: {
+      title: "Deactivate Student?",
+      description: `"${confirm.student.name}" will be blocked from logging in until reactivated.`,
+      actionLabel: "Deactivate",
+      actionClass: "bg-amber-600 hover:bg-amber-700 text-white",
+    },
+    delete: {
+      title: "Delete Student?",
+      description: `This will permanently delete "${confirm.student.name}" (${confirm.student.email}) and all their data. This cannot be undone.`,
+      actionLabel: "Delete",
+      actionClass: "bg-red-600 hover:bg-red-700 text-white",
+    },
+  }[confirm.type] : null
+
+  const columns: Column<Student>[] = [
+    {
+      key: "name",
+      header: "Name",
+      render: (row) => (
+        <div>
+          <p className="text-sm font-medium text-foreground">{row.name}</p>
+          <p className="text-xs text-muted-foreground">{row.email}</p>
+        </div>
+      ),
+    },
+    {
+      key: "college_name",
+      header: "College",
+      render: (row) => <span className="text-sm text-muted-foreground">{row.college_name || "—"}</span>,
+    },
+    {
+      key: "branch",
+      header: "Branch",
+      render: (row) => <span className="text-sm text-muted-foreground">{row.branch || "—"}</span>,
+    },
+    {
+      key: "roll_number",
+      header: "Roll No",
+      render: (row) => <span className="text-sm text-muted-foreground">{row.roll_number || "—"}</span>,
+    },
+    {
+      key: "points",
+      header: "Points",
+      render: (row) => <span className="text-sm text-foreground">{row.points.toLocaleString()}</span>,
+    },
+    {
+      key: "is_active",
+      header: "Status",
+      render: (row) => (
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs",
+            row.is_active
+              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+              : "bg-red-500/20 text-red-400 border-red-500/30"
+          )}
+        >
+          {row.is_active ? "Active" : "Inactive"}
+        </Badge>
+      ),
+    },
+  ]
 
   return (
     <div className="space-y-6">
@@ -234,12 +293,67 @@ export default function SuperAdminStudentsPage() {
           isLoading={loading}
           emptyMessage="No students found"
           actions={(row) => (
-            <Button size="sm" variant="ghost" className="h-7 px-2 text-muted-foreground hover:text-foreground">
-              <Eye className="h-3.5 w-3.5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {row.is_active ? (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={actionLoading === row.id}
+                  className="h-7 px-2 text-muted-foreground hover:text-amber-400"
+                  onClick={() => setConfirm({ type: "deactivate", student: row })}
+                  title="Deactivate student"
+                >
+                  <UserX className="h-3.5 w-3.5" />
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={actionLoading === row.id}
+                  className="h-7 px-2 text-muted-foreground hover:text-emerald-400"
+                  onClick={() => setConfirm({ type: "activate", student: row })}
+                  title="Activate student"
+                >
+                  <UserCheck className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={actionLoading === row.id}
+                className="h-7 px-2 text-muted-foreground hover:text-red-400"
+                onClick={() => setConfirm({ type: "delete", student: row })}
+                title="Delete student"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           )}
         />
       </GlassCard>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!confirm} onOpenChange={(open) => { if (!open) setConfirm(null) }}>
+        <AlertDialogContent className="bg-secondary border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">{confirmConfig?.title}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {confirmConfig?.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-secondary/80">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmConfig?.actionClass}
+              onClick={handleConfirmedAction}
+            >
+              {confirmConfig?.actionLabel}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Create Student Modal */}
       <ModalForm
