@@ -98,7 +98,7 @@ function renderInline(text: string): React.ReactNode[] {
       return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>
     if (part.startsWith('`') && part.endsWith('`') && part.length > 2)
       return (
-        <code key={i} className="bg-secondary/80 px-1.5 py-0.5 rounded text-[11px] font-mono text-primary border border-white/10">
+        <code key={i} className="bg-secondary/80 px-1.5 py-0.5 rounded text-[11px] font-mono text-primary border border-border">
           {part.slice(1, -1)}
         </code>
       )
@@ -248,7 +248,7 @@ function renderContent(content: string): React.ReactNode[] {
               'absolute top-0 right-0 px-2.5 py-1 text-[10px] font-mono font-semibold rounded-bl-lg rounded-tr-xl border-b border-l z-10 uppercase tracking-wider',
               isOutput
                 ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/50'
-                : 'bg-secondary/80 text-muted-foreground border-white/5'
+                : 'bg-secondary/80 text-muted-foreground border-border'
             )}>{label}</div>
           )}
           <pre className={cn(
@@ -269,7 +269,7 @@ function renderContent(content: string): React.ReactNode[] {
       elements.push(<h3 key={key++} className="text-sm font-bold text-foreground mt-5 mb-1.5">{renderInline(line.slice(4))}</h3>)
     } else if (line.startsWith('## ')) {
       elements.push(
-        <h2 key={key++} className="text-base font-bold text-foreground mt-7 mb-2 font-serif pb-1.5 border-b border-white/5">
+        <h2 key={key++} className="text-base font-bold text-foreground mt-7 mb-2 font-serif pb-1.5 border-b border-border">
           {renderInline(line.slice(3))}
         </h2>
       )
@@ -313,12 +313,12 @@ function renderContent(content: string): React.ReactNode[] {
       const headers = tableLines[0].split('|').filter(Boolean).map(h => h.trim())
       const rows = tableLines.slice(2).map(r => r.split('|').filter(Boolean).map(c => c.trim()))
       elements.push(
-        <div key={key++} className="overflow-x-auto my-5 rounded-xl border border-white/5">
+        <div key={key++} className="overflow-x-auto my-5 rounded-xl border border-border">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-secondary/60">
                 {headers.map((h, j) => (
-                  <th key={j} className="text-left py-2.5 px-4 text-muted-foreground font-semibold text-xs uppercase tracking-wide border-b border-white/5">
+                  <th key={j} className="text-left py-2.5 px-4 text-muted-foreground font-semibold text-xs uppercase tracking-wide border-b border-border">
                     {renderInline(h)}
                   </th>
                 ))}
@@ -326,7 +326,7 @@ function renderContent(content: string): React.ReactNode[] {
             </thead>
             <tbody>
               {rows.map((row, j) => (
-                <tr key={j} className="border-b border-white/5 hover:bg-secondary/20 transition-colors last:border-0">
+                <tr key={j} className="border-b border-border hover:bg-secondary/20 transition-colors last:border-0">
                   {row.map((cell, k) => (
                     <td key={k} className="py-2.5 px-4 text-foreground/90 text-sm">{renderInline(cell)}</td>
                   ))}
@@ -554,7 +554,7 @@ export default function CourseDetailPage() {
 
       {/* ── Python: 3-tab nav bar ────────────────────────────────────────────── */}
       {isPython && (
-        <div className="flex gap-1 p-1 rounded-xl bg-secondary/40 border border-white/5 w-fit">
+        <div className="flex gap-1 p-1 rounded-xl bg-secondary/40 border border-border w-fit">
           {(["lessons", "practice", "assignment"] as const).map((tab) => {
             const labels = { lessons: "📖 Lessons", practice: "🧠 MCQ Practice", assignment: "📋 Assignment" }
             return (
@@ -577,16 +577,16 @@ export default function CourseDetailPage() {
 
       {/* ── TAB: Lessons (+ non-Python courses) ────────────────────────────── */}
       {(!isPython || activeTab === "lessons") && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Module / lesson nav */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Module / lesson nav — sticky on desktop */}
+          <div className="lg:col-span-1 lg:sticky lg:top-4">
             <GlassCard className="p-0 overflow-hidden">
-              <div className="p-4 border-b border-white/5">
+              <div className="p-4 border-b border-border">
                 <h2 className="font-semibold font-serif text-foreground">
                   {isPython ? "Modules" : "Lessons"}
                 </h2>
               </div>
-              <div className="max-h-[640px] overflow-y-auto">
+              <div className="overflow-y-auto max-h-[60vh]">
                 {isPython ? (
                   PYTHON_MODULES.map((mod) => {
                     const modLessons = course.lessons.filter(l => mod.lessonOrders.includes(l.order))
@@ -597,7 +597,7 @@ export default function CourseDetailPage() {
                     const hasActive = modLessons.some(l => l.id === activeLesson?.id)
 
                     return (
-                      <div key={mod.id} className="border-b border-white/5 last:border-0">
+                      <div key={mod.id} className="border-b border-border last:border-0">
                         <button
                           onClick={() => toggleModule(mod.id)}
                           className={cn(
@@ -611,7 +611,7 @@ export default function CourseDetailPage() {
                               {mod.title}
                             </p>
                             <div className="flex items-center gap-2 mt-1.5">
-                              <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden">
+                              <div className="flex-1 h-1 bg-secondary/30 rounded-full overflow-hidden">
                                 <div className={cn("h-full rounded-full transition-all", mod.bar)} style={{ width: `${modProgress}%` }} />
                               </div>
                               <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{completed}/{total}</span>
@@ -630,7 +630,7 @@ export default function CourseDetailPage() {
                                   key={lesson.id}
                                   onClick={() => setActiveLesson(lesson)}
                                   className={cn(
-                                    "w-full flex items-start gap-3 pl-6 pr-4 py-3 text-left border-t border-white/3 transition-colors hover:bg-secondary/30",
+                                    "w-full flex items-start gap-3 pl-6 pr-4 py-3 text-left border-t border-border transition-colors hover:bg-secondary/30",
                                     isActive && "bg-primary/10 border-l-2 border-l-primary pl-[22px]"
                                   )}
                                 >
@@ -666,7 +666,7 @@ export default function CourseDetailPage() {
                       key={lesson.id}
                       onClick={() => setActiveLesson(lesson)}
                       className={cn(
-                        "w-full flex items-start gap-3 p-4 text-left border-b border-white/5 last:border-0 transition-colors hover:bg-secondary/30",
+                        "w-full flex items-start gap-3 p-4 text-left border-b border-border last:border-0 transition-colors hover:bg-secondary/30",
                         activeLesson?.id === lesson.id && "bg-primary/10 border-l-2 border-l-primary"
                       )}
                     >
@@ -751,16 +751,16 @@ export default function CourseDetailPage() {
 
       {/* ── TAB: MCQ Practice ───────────────────────────────────────────────── */}
       {isPython && activeTab === "practice" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Topic list by module */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Topic list by module — sticky on desktop */}
+          <div className="lg:col-span-1 lg:sticky lg:top-4">
             <GlassCard className="p-0 overflow-hidden">
-              <div className="p-4 border-b border-white/5">
+              <div className="p-4 border-b border-border">
                 <h2 className="font-semibold font-serif text-foreground">Topics</h2>
               </div>
-              <div className="max-h-[640px] overflow-y-auto">
+              <div className="overflow-y-auto max-h-[60vh]">
                 {PYTHON_MODULES.map((mod) => (
-                  <div key={mod.id} className="border-b border-white/5 last:border-0">
+                  <div key={mod.id} className="border-b border-border last:border-0">
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-secondary/20">
                       <span className="text-base">{mod.emoji}</span>
                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{mod.title}</span>
@@ -776,7 +776,7 @@ export default function CourseDetailPage() {
                           key={order}
                           onClick={() => openMcqTopic(meta.topic, meta.subtopic, order)}
                           className={cn(
-                            "w-full flex items-center justify-between pl-6 pr-4 py-3 text-left border-t border-white/3 transition-colors hover:bg-secondary/30",
+                            "w-full flex items-center justify-between pl-6 pr-4 py-3 text-left border-t border-border transition-colors hover:bg-secondary/30",
                             isSelected && "bg-primary/10 border-l-2 border-l-primary pl-[22px]"
                           )}
                         >
@@ -858,7 +858,7 @@ export default function CourseDetailPage() {
                             !mcqSubmitted && !isSelected && "border-white/8 bg-secondary/30 text-muted-foreground hover:border-white/20 hover:text-foreground",
                             showCorrect && "border-emerald-500/60 bg-emerald-500/10 text-emerald-300",
                             showWrong && "border-red-500/60 bg-red-500/10 text-red-300",
-                            mcqSubmitted && !showCorrect && !showWrong && "border-white/5 bg-secondary/20 text-muted-foreground opacity-50"
+                            mcqSubmitted && !showCorrect && !showWrong && "border-border bg-secondary/20 text-muted-foreground opacity-50"
                           )}
                         >
                           <span className={cn("flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold mt-0.5",
@@ -866,7 +866,7 @@ export default function CourseDetailPage() {
                             showCorrect ? "border-emerald-500 bg-emerald-500 text-white" : "",
                             showWrong ? "border-red-500 bg-red-500 text-white" : "",
                             !mcqSubmitted && !isSelected ? "border-white/20 text-muted-foreground" : "",
-                            mcqSubmitted && !showCorrect && !showWrong ? "border-white/10" : ""
+                            mcqSubmitted && !showCorrect && !showWrong ? "border-border" : ""
                           )}>
                             {String.fromCharCode(65 + idx)}
                           </span>
@@ -889,7 +889,7 @@ export default function CourseDetailPage() {
                   )}
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
                     <button
                       onClick={() => { setMcqIndex(i => Math.max(0, i - 1)); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}
                       disabled={mcqIndex === 0}
@@ -913,7 +913,7 @@ export default function CourseDetailPage() {
                           Next <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                       ) : (
-                        <Button size="sm" variant="outline" className="gap-2 border-white/10" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}>
+                        <Button size="sm" variant="outline" className="gap-2 border-border" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}>
                           <RotateCcw className="h-3.5 w-3.5" /> Restart
                         </Button>
                       )}
@@ -971,7 +971,7 @@ export default function CourseDetailPage() {
                     <p className="text-xs text-muted-foreground font-medium">Covers:</p>
                     <div className="flex flex-wrap gap-1.5">
                       {PYTHON_MODULES[i]?.lessonOrders.map((order) => (
-                        <span key={order} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-white/5">
+                        <span key={order} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border">
                           {PYTHON_TOPIC_META[order]?.subtopic}
                         </span>
                       ))}

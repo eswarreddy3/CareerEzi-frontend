@@ -30,6 +30,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
+import { useUIStore } from "@/store/uiStore"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { toast } from "sonner"
 
@@ -69,9 +70,10 @@ const roleBadgeConfig = {
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const { user, clearAuth } = useAuthStore()
+  const { sidebarCollapsed: isCollapsed, setSidebarCollapsed } = useUIStore()
+  const setIsCollapsed = setSidebarCollapsed
 
   const role = user?.role ?? "student"
   const navItems =
@@ -194,64 +196,67 @@ export function Sidebar() {
         </nav>
 
         {/* User section */}
-        <div
-          className={cn(
-            "p-4 border-t border-sidebar-border space-y-3",
-            isCollapsed && "px-2"
-          )}
-        >
-          {/* Avatar + name */}
-          <div
-            className={cn(
-              "flex items-center gap-3",
-              isCollapsed && "flex-col gap-2"
-            )}
-          >
-            <Avatar className="h-10 w-10 border-2 border-primary/30 flex-shrink-0">
-              <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+        <div className={cn(
+          "border-t border-sidebar-border",
+          isCollapsed ? "p-2 flex flex-col items-center gap-2" : "p-4 space-y-3"
+        )}>
+
+          {/* Avatar + name/badge */}
+          {isCollapsed ? (
+            <Avatar className="h-9 w-9 border-2 border-primary/30">
+              <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            {!isCollapsed && (
+          ) : (
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10 border-2 border-primary/30 flex-shrink-0">
+                <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate text-foreground">
                   {user?.name || "User"}
                 </p>
-                <Badge
-                  variant="outline"
-                  className={cn("text-xs mt-0.5", roleBadge.className)}
-                >
+                <Badge variant="outline" className={cn("text-xs mt-0.5", roleBadge.className)}>
                   {roleBadge.label}
                 </Badge>
-              </div>
-            )}
-          </div>
-
-          {/* Streak + Points (students only) */}
-          {role === "student" && (
-            <div
-              className={cn(
-                "flex items-center gap-4",
-                isCollapsed ? "flex-col gap-2" : "justify-center"
-              )}
-            >
-              <div className="flex items-center gap-1">
-                <Flame className="h-4 w-4 text-orange-500 flame-pulse" />
-                <span className="text-sm font-semibold text-foreground">
-                  {user?.streak ?? 0}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 text-amber-500" />
-                <span className="text-sm font-semibold text-foreground">
-                  {(user?.points ?? 0).toLocaleString()}
-                </span>
               </div>
             </div>
           )}
 
+          {/* Streak + Points (students only) */}
+          {role === "student" && (
+            isCollapsed ? (
+              <div className="flex flex-col items-center gap-1.5 w-full">
+                <div className="flex items-center gap-1">
+                  <Flame className="h-3.5 w-3.5 text-orange-500 flame-pulse" />
+                  <span className="text-xs font-bold text-foreground">{user?.streak ?? 0}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 text-amber-500" />
+                  <span className="text-xs font-bold text-foreground">{(user?.points ?? 0).toLocaleString()}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-5 py-0.5">
+                <div className="flex items-center gap-1.5">
+                  <Flame className="h-4 w-4 text-orange-500 flame-pulse" />
+                  <span className="text-sm font-semibold text-foreground">{user?.streak ?? 0}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-semibold text-foreground">{(user?.points ?? 0).toLocaleString()}</span>
+                </div>
+              </div>
+            )
+          )}
+
           {/* Theme toggle */}
-          <ThemeToggle collapsed={isCollapsed} />
+          <div className={cn(isCollapsed ? "w-full flex justify-center" : "w-full")}>
+            <ThemeToggle collapsed={isCollapsed} />
+          </div>
 
           {/* Logout */}
           <Button
@@ -259,26 +264,28 @@ export function Sidebar() {
             size="sm"
             onClick={handleLogout}
             className={cn(
-              "w-full text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors",
-              isCollapsed ? "px-2 justify-center" : "justify-start gap-2"
+              "text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors",
+              isCollapsed
+                ? "w-9 h-9 p-0 justify-center"
+                : "w-full justify-start gap-2"
             )}
           >
             <LogOut className="h-4 w-4 flex-shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Button>
-        </div>
 
-        {/* Collapse button for desktop */}
-        {isCollapsed && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mx-auto mb-4 text-muted-foreground hover:text-foreground"
-            onClick={() => setIsCollapsed(false)}
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-        )}
+          {/* Expand button (collapsed mode only) */}
+          {isCollapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-9 h-9 text-muted-foreground hover:text-foreground"
+              onClick={() => setIsCollapsed(false)}
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </aside>
     </>
   )
