@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Loader2, Eye, EyeOff } from "lucide-react"
+import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -51,6 +51,71 @@ function timeAgo(iso: string): string {
   const diffDays = Math.floor(diffHrs / 24)
   if (diffDays === 1) return "Yesterday"
   return `${diffDays} days ago`
+}
+
+const linksSchema = z.object({
+  linkedin: z.string().url("Enter a valid URL").optional().or(z.literal("")),
+  github: z.string().url("Enter a valid URL").optional().or(z.literal("")),
+})
+type LinksForm = z.infer<typeof linksSchema>
+
+function LinksSection({ user, updateUser }: { user: any; updateUser: (u: Partial<any>) => void }) {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LinksForm>({
+    resolver: zodResolver(linksSchema),
+    defaultValues: { linkedin: user?.linkedin || "", github: user?.github || "" },
+  })
+
+  const onSave = async (data: LinksForm) => {
+    try {
+      await api.patch("/student/profile", { linkedin: data.linkedin, github: data.github })
+      updateUser({ linkedin: data.linkedin, github: data.github } as any)
+      toast.success("Links updated")
+    } catch {
+      toast.error("Failed to update links")
+    }
+  }
+
+  return (
+    <div>
+      <h3 className="font-semibold font-serif text-foreground mb-4 flex items-center gap-2">
+        Social Links
+      </h3>
+      <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label className="text-foreground flex items-center gap-1.5">
+            <Linkedin className="h-3.5 w-3.5 text-blue-400" />
+            LinkedIn URL
+          </Label>
+          <Input
+            placeholder="https://linkedin.com/in/yourname"
+            className="bg-secondary/50 border-border text-foreground"
+            {...register("linkedin")}
+          />
+          {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-foreground flex items-center gap-1.5">
+            <Github className="h-3.5 w-3.5" />
+            GitHub URL
+          </Label>
+          <Input
+            placeholder="https://github.com/yourusername"
+            className="bg-secondary/50 border-border text-foreground"
+            {...register("github")}
+          />
+          {errors.github && <p className="text-xs text-destructive">{errors.github.message}</p>}
+        </div>
+        <Button
+          type="submit"
+          className="bg-primary hover:brightness-110 text-primary-foreground"
+          disabled={isSubmitting}
+        >
+          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Save Links
+        </Button>
+      </form>
+    </div>
+  )
 }
 
 export default function ProfilePage() {
@@ -160,6 +225,36 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
+
+            {/* Social links */}
+            {((user as any)?.linkedin || (user as any)?.github) && (
+              <div className="mt-4 space-y-2">
+                {(user as any)?.linkedin && (
+                  <a
+                    href={(user as any).linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    <Linkedin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">LinkedIn</span>
+                    <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
+                  </a>
+                )}
+                {(user as any)?.github && (
+                  <a
+                    href={(user as any).github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors"
+                  >
+                    <Github className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="truncate">GitHub</span>
+                    <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
+                  </a>
+                )}
+              </div>
+            )}
           </GlassCard>
         </div>
 
@@ -188,9 +283,13 @@ export default function ProfilePage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Account tab — change password */}
+              {/* Account tab — links + change password */}
               <TabsContent value="account">
-                <div className="max-w-sm">
+                <div className="max-w-sm space-y-8">
+                  {/* Social Links */}
+                  <LinksSection user={user} updateUser={updateUser} />
+
+                  <div>
                   <h3 className="font-semibold font-serif text-foreground mb-4">
                     Change Password
                   </h3>
@@ -273,6 +372,7 @@ export default function ProfilePage() {
                       Save Password
                     </Button>
                   </form>
+                  </div>
                 </div>
               </TabsContent>
 

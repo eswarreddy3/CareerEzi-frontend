@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Loader2, Eye, EyeOff, Check } from "lucide-react"
+import { Loader2, Eye, EyeOff, Check, Github, Linkedin } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +30,11 @@ const step1Schema = z.object({
   linkedin_url: z
     .string()
     .url("Enter a valid LinkedIn URL")
+    .optional()
+    .or(z.literal("")),
+  github_url: z
+    .string()
+    .url("Enter a valid GitHub URL")
     .optional()
     .or(z.literal("")),
 })
@@ -132,17 +137,17 @@ export default function OnboardingPage() {
   // ── Step 1 ──────────────────────────────────────────────────────────────────
   const form1 = useForm<Step1>({
     resolver: zodResolver(step1Schema),
-    defaultValues: { full_name: user?.name || "", phone: "", linkedin_url: "" },
+    defaultValues: { full_name: user?.name || "", phone: "", linkedin_url: "", github_url: "" },
   })
 
   // ── Step 2 ──────────────────────────────────────────────────────────────────
   const form2 = useForm<Step2>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
-      branch: user?.branch || "",
-      section: user?.section || "",
-      roll_number: user?.roll_number || "",
-      passout_year: user?.passout_year || "",
+      branch: (user as any)?.branch || "",
+      section: (user as any)?.section || "",
+      roll_number: (user as any)?.roll_number || "",
+      passout_year: (user as any)?.passout_year ? String((user as any).passout_year) : "",
     },
   })
 
@@ -244,7 +249,8 @@ export default function OnboardingPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-foreground">
+              <Label className="text-foreground flex items-center gap-1.5">
+                <Linkedin className="h-3.5 w-3.5 text-blue-400" />
                 LinkedIn URL{" "}
                 <span className="text-muted-foreground text-xs">(optional)</span>
               </Label>
@@ -256,6 +262,24 @@ export default function OnboardingPage() {
               {form1.formState.errors.linkedin_url && (
                 <p className="text-xs text-destructive">
                   {form1.formState.errors.linkedin_url.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-foreground flex items-center gap-1.5">
+                <Github className="h-3.5 w-3.5" />
+                GitHub URL{" "}
+                <span className="text-muted-foreground text-xs">(optional)</span>
+              </Label>
+              <Input
+                placeholder="https://github.com/yourusername"
+                className="bg-secondary/50 border-border text-foreground"
+                {...form1.register("github_url")}
+              />
+              {form1.formState.errors.github_url && (
+                <p className="text-xs text-destructive">
+                  {form1.formState.errors.github_url.message}
                 </p>
               )}
             </div>
@@ -283,7 +307,7 @@ export default function OnboardingPage() {
                     <SelectValue placeholder="Select branch" />
                   </SelectTrigger>
                   <SelectContent>
-                    {["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL"].map((b) => (
+                    {["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML", "CSD"].map((b) => (
                       <SelectItem key={b} value={b}>
                         {b}
                       </SelectItem>

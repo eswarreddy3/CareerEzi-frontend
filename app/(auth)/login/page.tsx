@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -90,12 +91,12 @@ export default function LoginPage() {
               <Label htmlFor="password" className="text-foreground">
                 Password
               </Label>
-              <button
-                type="button"
+              <Link
+                href="/forgot-password"
                 className="text-xs text-muted-foreground hover:text-primary transition-colors"
               >
                 Forgot Password?
-              </button>
+              </Link>
             </div>
             <div className="relative">
               <Input

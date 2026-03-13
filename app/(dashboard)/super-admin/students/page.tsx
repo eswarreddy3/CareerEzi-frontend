@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef, type FormEvent } from "react"
-import { Plus, Upload, UserCheck, UserX, Trash2 } from "lucide-react"
+import { Plus, Upload, UserCheck, UserX, Trash2, FileText, X } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -57,7 +57,8 @@ export default function SuperAdminStudentsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedCollegeId, setSelectedCollegeId] = useState("")
-  const [bulkCollegeId, setBulkCollegeId] = useState("")
+  const [selectedBranch, setSelectedBranch] = useState("")
+  const [bulkFile, setBulkFile] = useState<File | null>(null)
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false)
   const [isBulkUploading, setIsBulkUploading] = useState(false)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
@@ -91,12 +92,16 @@ export default function SuperAdminStudentsPage() {
     const form = e.currentTarget
     const data: Record<string, string | number> = Object.fromEntries(new FormData(form)) as Record<string, string>
     if (selectedCollegeId) data.college_id = Number(selectedCollegeId)
+    if (selectedBranch) data.branch = selectedBranch
+    if (!selectedCollegeId) { toast.error("Please select a college"); return }
+    if (!selectedBranch) { toast.error("Please select a branch"); return }
     setIsSubmitting(true)
     try {
       await api.post("/super-admin/students", data)
       toast.success("Student created! Welcome email sent.")
       setIsCreateOpen(false)
       setSelectedCollegeId("")
+      setSelectedBranch("")
       form.reset()
       fetchStudents()
     } catch (err: any) {
@@ -106,33 +111,31 @@ export default function SuperAdminStudentsPage() {
     }
   }
 
-  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!bulkCollegeId) {
-      toast.error("Please select a college first")
-      if (csvRef.current) csvRef.current.value = ""
-      return
-    }
+  const handleBulkUpload = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!bulkFile) { toast.error("Please select a CSV or XLSX file"); return }
     const formData = new FormData()
-    formData.append("file", file)
-    formData.append("college_id", bulkCollegeId)
+    formData.append("file", bulkFile)
     setIsBulkUploading(true)
     try {
       const res = await api.post("/super-admin/students/bulk-upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      toast.success(`${res.data.created} students created`, {
-        description: res.data.skipped?.length ? `${res.data.skipped.length} skipped (already exist)` : undefined,
+      const skippedCount = res.data.skipped?.length ?? 0
+      toast.success(`${res.data.created} student${res.data.created !== 1 ? "s" : ""} created`, {
+        description: skippedCount ? `${skippedCount} skipped (already exist)` : undefined,
       })
       setIsBulkModalOpen(false)
-      setBulkCollegeId("")
+      setBulkFile(null)
+      if (csvRef.current) csvRef.current.value = ""
       fetchStudents()
     } catch (err: any) {
-      toast.error(err?.response?.data?.error || "Failed to upload CSV")
+      const detail = err?.response?.data?.details
+      toast.error(err?.response?.data?.error || "Failed to upload file", {
+        description: detail ? (Array.isArray(detail) ? detail[0] : detail) : undefined,
+      })
     } finally {
       setIsBulkUploading(false)
-      if (csvRef.current) csvRef.current.value = ""
     }
   }
 
@@ -241,13 +244,6 @@ export default function SuperAdminStudentsPage() {
           <p className="text-muted-foreground mt-1">Manage students across all colleges</p>
         </div>
         <div className="flex gap-2">
-          <input
-            ref={csvRef}
-            type="file"
-            accept=".csv,.xlsx"
-            className="hidden"
-            onChange={handleBulkUpload}
-          />
           <Button
             variant="outline"
             className="border-primary/30 text-primary hover:bg-primary/10"
@@ -358,26 +354,50 @@ export default function SuperAdminStudentsPage() {
       {/* Create Student Modal */}
       <ModalForm
         title="Create Student"
-        description="Student will receive a welcome email with temporary credentials."
+        description="Enter the basics — the student will complete their profile during onboarding."
         isOpen={isCreateOpen}
-        onClose={() => { setIsCreateOpen(false); setSelectedCollegeId("") }}
+        onClose={() => { setIsCreateOpen(false); setSelectedCollegeId(""); setSelectedBranch("") }}
         onSubmit={handleCreate}
         isLoading={isSubmitting}
-        submitLabel="Create Student"
+        submitLabel="Create & Send Welcome Email"
       >
         <div className="space-y-4">
+          {/* Name + Email */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-foreground">Full Name</Label>
+              <Label className="text-foreground">Full Name <span className="text-destructive">*</span></Label>
               <Input name="name" placeholder="Rahul Kumar" className="bg-secondary/50 border-border text-foreground" required />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-foreground">Email</Label>
+              <Label className="text-foreground">Email <span className="text-destructive">*</span></Label>
               <Input name="email" type="email" placeholder="student@college.edu" className="bg-secondary/50 border-border text-foreground" required />
             </div>
           </div>
+
+          {/* Roll Number + Branch */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-foreground">Roll Number <span className="text-destructive">*</span></Label>
+              <Input name="roll_number" placeholder="21CS001" className="bg-secondary/50 border-border text-foreground" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-foreground">Branch <span className="text-destructive">*</span></Label>
+              <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+                  <SelectValue placeholder="Select branch" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML", "CSD"].map((b) => (
+                    <SelectItem key={b} value={b}>{b}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* College */}
           <div className="space-y-1.5">
-            <Label className="text-foreground">College</Label>
+            <Label className="text-foreground">College <span className="text-destructive">*</span></Label>
             <Select value={selectedCollegeId} onValueChange={setSelectedCollegeId}>
               <SelectTrigger className="bg-secondary/50 border-border text-foreground">
                 <SelectValue placeholder="Select college" />
@@ -389,52 +409,11 @@ export default function SuperAdminStudentsPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-foreground">Branch</Label>
-              <Select name="branch">
-                <SelectTrigger className="bg-secondary/50 border-border text-foreground">
-                  <SelectValue placeholder="Branch" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL"].map((b) => (
-                    <SelectItem key={b} value={b}>{b}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-foreground">Section</Label>
-              <Select name="section">
-                <SelectTrigger className="bg-secondary/50 border-border text-foreground">
-                  <SelectValue placeholder="Section" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["A", "B", "C", "D"].map((s) => (
-                    <SelectItem key={s} value={s}>Section {s}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-foreground">Roll Number</Label>
-              <Input name="roll_number" placeholder="21CS001" className="bg-secondary/50 border-border text-foreground" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-foreground">Pass-out Year</Label>
-              <Select name="passout_year">
-                <SelectTrigger className="bg-secondary/50 border-border text-foreground">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["2025", "2026", "2027", "2028"].map((y) => (
-                    <SelectItem key={y} value={y}>{y}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+          {/* Info note */}
+          <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-primary/8 border border-primary/20 text-xs text-muted-foreground">
+            <span className="text-primary mt-0.5">ℹ️</span>
+            <span>Section, passout year, phone, LinkedIn, GitHub and password will be set by the student during onboarding.</span>
           </div>
         </div>
       </ModalForm>
@@ -442,30 +421,54 @@ export default function SuperAdminStudentsPage() {
       {/* Bulk Upload Modal */}
       <ModalForm
         title="Bulk Upload Students"
-        description="Upload a CSV or XLSX file. Required columns: name, email, branch, section, roll_number, passout_year."
+        description="Upload a CSV or XLSX file with student data."
         isOpen={isBulkModalOpen}
-        onClose={() => { setIsBulkModalOpen(false); setBulkCollegeId("") }}
-        onSubmit={(e) => { e.preventDefault(); csvRef.current?.click() }}
+        onClose={() => { setIsBulkModalOpen(false); setBulkFile(null); if (csvRef.current) csvRef.current.value = "" }}
+        onSubmit={handleBulkUpload}
         isLoading={isBulkUploading}
-        submitLabel="Choose File & Upload"
+        submitLabel="Upload"
       >
         <div className="space-y-4">
+          {/* File picker */}
           <div className="space-y-1.5">
-            <Label className="text-foreground">College</Label>
-            <Select value={bulkCollegeId} onValueChange={setBulkCollegeId}>
-              <SelectTrigger className="bg-secondary/50 border-border text-foreground">
-                <SelectValue placeholder="Select college for import" />
-              </SelectTrigger>
-              <SelectContent>
-                {colleges.map((c) => (
-                  <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-foreground">File <span className="text-destructive">*</span></Label>
+            <div
+              className="rounded-lg border border-dashed border-border p-5 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+              onClick={() => csvRef.current?.click()}
+            >
+              <input
+                ref={csvRef}
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                onChange={(e) => setBulkFile(e.target.files?.[0] ?? null)}
+              />
+              {bulkFile ? (
+                <div className="flex items-center justify-center gap-2">
+                  <FileText className="h-5 w-5 text-primary flex-shrink-0" />
+                  <span className="text-sm text-foreground font-medium truncate max-w-[220px]">{bulkFile.name}</span>
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    onClick={(e) => { e.stopPropagation(); setBulkFile(null); if (csvRef.current) csvRef.current.value = "" }}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-7 w-7 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Click to select a <span className="text-foreground font-medium">CSV</span> or <span className="text-foreground font-medium">XLSX</span> file</p>
+                </>
+              )}
+            </div>
           </div>
-          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-            <Upload className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>CSV / XLSX file will be selected after clicking "Choose File & Upload"</p>
+
+          {/* Required columns info */}
+          <div className="rounded-lg bg-secondary/40 border border-border px-3 py-2.5 text-xs text-muted-foreground space-y-1">
+            <p className="font-medium text-foreground">Required columns:</p>
+            <p><code className="text-primary">name</code>, <code className="text-primary">email</code>, <code className="text-primary">roll_number</code>, <code className="text-primary">branch</code>, <code className="text-primary">college</code></p>
+            <p className="mt-1">College must match the exact name in the system. Section, passout year and password are filled by the student during onboarding. Existing emails are skipped.</p>
           </div>
         </div>
       </ModalForm>

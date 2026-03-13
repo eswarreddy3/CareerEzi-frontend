@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Newspaper,
   FlaskConical,
+  FileText,
 } from "lucide-react"
 import { useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -46,6 +47,7 @@ const studentNavItems = [
   { href: "/domain-programs", label: "Domain Programs", icon: Layers },
   { href: "/feed", label: "College Feed", icon: Newspaper },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/resume", label: "Resume Builder", icon: FileText },
   { href: "/profile", label: "Profile", icon: User },
 ]
 
