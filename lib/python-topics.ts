@@ -41,7 +41,26 @@ export const SQL_TOPIC_META: Record<number, TopicMeta> = {
   12: { lesson: 12, topic: "SQL", subtopic: "Indexes & Performance", moduleId: "sql-advanced",      moduleTitle: "SQL Advanced Assessment"      },
 }
 
+export const HTML_CSS_TOPIC_META: Record<number, TopicMeta> = {
+  1:  { lesson: 1,  topic: "HTML", subtopic: "Structure",           moduleId: "html-basics",        moduleTitle: "HTML Basics Assessment"        },
+  2:  { lesson: 2,  topic: "HTML", subtopic: "Text & Headings",     moduleId: "html-basics",        moduleTitle: "HTML Basics Assessment"        },
+  3:  { lesson: 3,  topic: "HTML", subtopic: "Links & Images",      moduleId: "html-basics",        moduleTitle: "HTML Basics Assessment"        },
+  4:  { lesson: 4,  topic: "HTML", subtopic: "Lists & Forms",       moduleId: "html-basics",        moduleTitle: "HTML Basics Assessment"        },
+  5:  { lesson: 5,  topic: "HTML", subtopic: "Semantic HTML",       moduleId: "html-intermediate",  moduleTitle: "HTML Intermediate Assessment"  },
+  6:  { lesson: 6,  topic: "CSS",  subtopic: "Selectors",           moduleId: "css-basics",         moduleTitle: "CSS Basics Assessment"         },
+  7:  { lesson: 7,  topic: "CSS",  subtopic: "Box Model",           moduleId: "css-basics",         moduleTitle: "CSS Basics Assessment"         },
+  8:  { lesson: 8,  topic: "CSS",  subtopic: "Colors & Typography", moduleId: "css-basics",         moduleTitle: "CSS Basics Assessment"         },
+  9:  { lesson: 9,  topic: "CSS",  subtopic: "Flexbox",             moduleId: "css-intermediate",   moduleTitle: "CSS Intermediate Assessment"   },
+  10: { lesson: 10, topic: "CSS",  subtopic: "Grid",                moduleId: "css-intermediate",   moduleTitle: "CSS Intermediate Assessment"   },
+  11: { lesson: 11, topic: "CSS",  subtopic: "Positioning",         moduleId: "css-intermediate",   moduleTitle: "CSS Intermediate Assessment"   },
+  12: { lesson: 12, topic: "CSS",  subtopic: "Responsive Design",   moduleId: "css-intermediate",   moduleTitle: "CSS Intermediate Assessment"   },
+  13: { lesson: 13, topic: "CSS",  subtopic: "Animations",          moduleId: "css-advanced",       moduleTitle: "CSS Advanced Assessment"       },
+  14: { lesson: 14, topic: "CSS",  subtopic: "Custom Properties",   moduleId: "css-advanced",       moduleTitle: "CSS Advanced Assessment"       },
+  15: { lesson: 15, topic: "CSS",  subtopic: "Modern CSS",          moduleId: "css-advanced",       moduleTitle: "CSS Advanced Assessment"       },
+}
+
 export const COURSE_TOPIC_META: Record<string, Record<number, TopicMeta>> = {
   python: PYTHON_TOPIC_META,
   sql: SQL_TOPIC_META,
+  "html-css": HTML_CSS_TOPIC_META,
 }

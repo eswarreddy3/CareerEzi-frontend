@@ -82,10 +82,92 @@ function getDueDateUrgency(dueDate: string, status: string) {
 
 type TabFilter = "all" | "pending" | "in-progress" | "completed" | "overdue"
 
+function ModuleSection({
+  emoji, title, expanded, onToggle, assignments, loading, onStart,
+}: {
+  emoji: string
+  title: string
+  expanded: boolean
+  onToggle: () => void
+  assignments: ApiAssignment[]
+  loading: boolean
+  onStart: (id: string) => void
+}) {
+  return (
+    <div className="space-y-3">
+      <button className="flex items-center gap-2 w-full text-left" onClick={onToggle}>
+        <span className="text-lg">{emoji}</span>
+        <h2 className="text-lg font-bold font-serif text-foreground">{title}</h2>
+        <span className="text-xs text-muted-foreground ml-1">topic-wise</span>
+        <div className="ml-auto text-muted-foreground">
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <GlassCard key={i} className="flex flex-col gap-3">
+                  <Skeleton className="h-8 w-8 rounded" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-8 w-full rounded-lg" />
+                </GlassCard>
+              ))
+            : assignments.map((a) => {
+                const config = statusConfig[a.status]
+                const StatusIcon = config.icon
+                return (
+                  <GlassCard key={a.id} hover className="relative overflow-hidden group flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl">{a.icon}</span>
+                      <span className={cn("flex items-center gap-1 text-xs px-2 py-1 rounded-full border", config.color)}>
+                        <StatusIcon className="h-3 w-3" />
+                        {config.label}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-sm">{a.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                        <Timer className="h-3 w-3" /> {a.duration_mins} min &nbsp;·&nbsp;
+                        <FileText className="h-3 w-3" /> {a.total_questions} questions
+                      </p>
+                    </div>
+                    {a.status === "completed" && (
+                      <div className="text-xs text-emerald-400 font-medium">
+                        Score: {a.score} / {a.points} pts
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                        <span className="text-sm font-semibold text-foreground">{a.points} pts</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1"
+                        onClick={() => onStart(a.id)}
+                      >
+                        {a.status === "completed" ? "Review" : "Start"} <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </GlassCard>
+                )
+              })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AssignmentsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabFilter>("all")
   const [pythonExpanded, setPythonExpanded] = useState(true)
+  const [sqlExpanded, setSqlExpanded] = useState(true)
+  const [htmlExpanded, setHtmlExpanded] = useState(true)
+  const [cssExpanded, setCssExpanded] = useState(true)
   const [allAssignments, setAllAssignments] = useState<ApiAssignment[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -96,12 +178,17 @@ export default function AssignmentsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const moduleAssignments = allAssignments.filter((a) =>
-    ["python-basics", "python-intermediate", "python-advanced"].includes(a.module_id)
-  )
-  const generalAssignments = allAssignments.filter(
-    (a) => !["python-basics", "python-intermediate", "python-advanced"].includes(a.module_id)
-  )
+  const PYTHON_MODULES = ["python-basics", "python-intermediate", "python-advanced"]
+  const SQL_MODULES = ["sql-basics", "sql-intermediate", "sql-advanced"]
+  const HTML_MODULES = ["html-basics", "html-intermediate", "html-advanced"]
+  const CSS_MODULES = ["css-basics", "css-intermediate", "css-advanced"]
+  const MODULE_IDS = [...PYTHON_MODULES, ...SQL_MODULES, ...HTML_MODULES, ...CSS_MODULES]
+
+  const pythonModuleAssignments = allAssignments.filter((a) => PYTHON_MODULES.includes(a.module_id))
+  const sqlModuleAssignments = allAssignments.filter((a) => SQL_MODULES.includes(a.module_id))
+  const htmlModuleAssignments = allAssignments.filter((a) => HTML_MODULES.includes(a.module_id))
+  const cssModuleAssignments = allAssignments.filter((a) => CSS_MODULES.includes(a.module_id))
+  const generalAssignments = allAssignments.filter((a) => !MODULE_IDS.includes(a.module_id))
 
   const filtered =
     activeTab === "all"
@@ -166,74 +253,49 @@ export default function AssignmentsPage() {
         </GlassCard>
       </div>
 
-      {/* Python Module Assignments (topic-wise) */}
-      <div className="space-y-3">
-        <button
-          className="flex items-center gap-2 w-full text-left"
-          onClick={() => setPythonExpanded((p) => !p)}
-        >
-          <span className="text-lg">🐍</span>
-          <h2 className="text-lg font-bold font-serif text-foreground">Python — Module Assessments</h2>
-          <span className="text-xs text-muted-foreground ml-1">topic-wise</span>
-          <div className="ml-auto text-muted-foreground">
-            {pythonExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </div>
-        </button>
+      {/* Python Module Assignments */}
+      <ModuleSection
+        emoji="🐍"
+        title="Python — Module Assessments"
+        expanded={pythonExpanded}
+        onToggle={() => setPythonExpanded((p) => !p)}
+        assignments={pythonModuleAssignments}
+        loading={loading}
+        onStart={(id) => router.push(`/assignments/${id}`)}
+      />
 
-        {pythonExpanded && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <GlassCard key={i} className="flex flex-col gap-3">
-                    <Skeleton className="h-8 w-8 rounded" />
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                    <Skeleton className="h-8 w-full rounded-lg" />
-                  </GlassCard>
-                ))
-              : moduleAssignments.map((a) => {
-                  const config = statusConfig[a.status]
-                  const StatusIcon = config.icon
-                  return (
-                    <GlassCard key={a.id} hover className="relative overflow-hidden group flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl">{a.icon}</span>
-                        <span className={cn("flex items-center gap-1 text-xs px-2 py-1 rounded-full border", config.color)}>
-                          <StatusIcon className="h-3 w-3" />
-                          {config.label}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground text-sm">{a.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                          <Timer className="h-3 w-3" /> {a.duration_mins} min &nbsp;·&nbsp;
-                          <FileText className="h-3 w-3" /> {a.total_questions} questions
-                        </p>
-                      </div>
-                      {a.status === "completed" && (
-                        <div className="text-xs text-emerald-400 font-medium">
-                          Score: {a.score} / {a.points} pts
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                          <span className="text-sm font-semibold text-foreground">{a.points} pts</span>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1"
-                          onClick={() => router.push(`/assignments/${a.id}`)}
-                        >
-                          {a.status === "completed" ? "Review" : "Start"} <ArrowRight className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </GlassCard>
-                  )
-                })}
-          </div>
-        )}
-      </div>
+      {/* SQL Module Assignments */}
+      <ModuleSection
+        emoji="🗄️"
+        title="SQL — Module Assessments"
+        expanded={sqlExpanded}
+        onToggle={() => setSqlExpanded((p) => !p)}
+        assignments={sqlModuleAssignments}
+        loading={loading}
+        onStart={(id) => router.push(`/assignments/${id}`)}
+      />
+
+      {/* HTML Module Assignments */}
+      <ModuleSection
+        emoji="🌐"
+        title="HTML — Module Assessments"
+        expanded={htmlExpanded}
+        onToggle={() => setHtmlExpanded((p) => !p)}
+        assignments={htmlModuleAssignments}
+        loading={loading}
+        onStart={(id) => router.push(`/assignments/${id}`)}
+      />
+
+      {/* CSS Module Assignments */}
+      <ModuleSection
+        emoji="🎨"
+        title="CSS — Module Assessments"
+        expanded={cssExpanded}
+        onToggle={() => setCssExpanded((p) => !p)}
+        assignments={cssModuleAssignments}
+        loading={loading}
+        onStart={(id) => router.push(`/assignments/${id}`)}
+      />
 
       <div className="border-t border-white/5" />
 

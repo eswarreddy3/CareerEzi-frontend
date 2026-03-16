@@ -448,10 +448,13 @@ export default function CourseDetailPage() {
   }, [courseId])
 
   useEffect(() => {
-    if (courseId !== "python" && courseId !== "sql") return
-    const moduleIds = courseId === "sql"
-      ? ["sql-basics", "sql-intermediate", "sql-advanced"]
-      : ["python-basics", "python-intermediate", "python-advanced"]
+    if (courseId !== "python" && courseId !== "sql" && courseId !== "html-css") return
+    const moduleIds =
+      courseId === "sql"
+        ? ["sql-basics", "sql-intermediate", "sql-advanced"]
+        : courseId === "html-css"
+        ? ["html-basics", "css-basics", "css-advanced"]
+        : ["python-basics", "python-intermediate", "python-advanced"]
     api.get("/assignments/list")
       .then((res) => {
         const filtered = (res.data as ModuleAssignment[]).filter((a) =>
@@ -527,13 +530,21 @@ export default function CourseDetailPage() {
     { id: 2, title: "SQL Intermediate",  emoji: "⚙️",  lessonOrders: [5, 6, 7, 8],   bar: "bg-amber-500"   },
     { id: 3, title: "SQL Advanced",      emoji: "🚀", lessonOrders: [9, 10, 11, 12], bar: "bg-violet-500"  },
   ]
+  const HTML_CSS_MODULES = [
+    { id: 1, title: "HTML Basics",        emoji: "🌐", lessonOrders: [1, 2, 3, 4, 5],      bar: "bg-emerald-500" },
+    { id: 2, title: "CSS Basics & Intermediate", emoji: "🎨", lessonOrders: [6, 7, 8, 9, 10, 11, 12], bar: "bg-amber-500" },
+    { id: 3, title: "CSS Advanced",       emoji: "✨", lessonOrders: [13, 14, 15],           bar: "bg-violet-500"  },
+  ]
   function toggleModule(mid: number) {
     setExpandedModules(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])
   }
 
   const isPython = courseId === "python"
-  const isModular = isPython || courseId === "sql"
-  const ACTIVE_MODULES = courseId === "sql" ? SQL_MODULES : PYTHON_MODULES
+  const isModular = isPython || courseId === "sql" || courseId === "html-css"
+  const ACTIVE_MODULES =
+    courseId === "sql" ? SQL_MODULES :
+    courseId === "html-css" ? HTML_CSS_MODULES :
+    PYTHON_MODULES
 
   return (
     <div className="space-y-6">

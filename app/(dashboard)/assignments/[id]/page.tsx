@@ -96,10 +96,14 @@ export default function AssignmentExamPage() {
   const [submitted, setSubmitted] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // Load questions from API, fall back to mock
+  // Load questions from API; redirect to results if already completed
   useEffect(() => {
     api.get(`/assignments/${moduleId}/questions`)
       .then((res) => {
+        if (res.data.already_completed) {
+          router.replace(`/assignments/${moduleId}/results`)
+          return
+        }
         setAssignmentMeta(res.data.assignment)
         setQuestions(res.data.questions)
         setTimeLeft(res.data.assignment.duration_mins * 60)

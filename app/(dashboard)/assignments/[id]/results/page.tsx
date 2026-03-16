@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import api from "@/lib/api"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +15,6 @@ import {
   Trophy,
   ChevronDown,
   ChevronUp,
-  RotateCcw,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -87,8 +87,12 @@ export default function AssignmentResultsPage() {
   useEffect(() => {
     const raw = sessionStorage.getItem(`assignment-result-${params.id}`)
     if (raw) {
-      try { setResult(JSON.parse(raw)) } catch { /* ignore */ }
+      try { setResult(JSON.parse(raw)); return } catch { /* fall through */ }
     }
+    // sessionStorage miss (e.g. user navigated back) — load from API
+    api.get(`/assignments/${params.id}/result`)
+      .then((res) => setResult(res.data))
+      .catch(() => { /* result stays null, shows empty state */ })
   }, [params.id])
 
   if (!result) {
@@ -361,14 +365,6 @@ export default function AssignmentResultsPage() {
 
       {/* Bottom actions */}
       <div className="flex gap-3 justify-center pb-8">
-        <Button
-          variant="outline"
-          className="gap-2 border-white/10 hover:border-white/20"
-          onClick={() => router.push(`/assignments/${params.id}`)}
-        >
-          <RotateCcw className="h-4 w-4" />
-          Retake
-        </Button>
         <Button
           className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
           onClick={() => router.push("/assignments")}

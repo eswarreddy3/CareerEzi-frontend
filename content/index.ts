@@ -4,10 +4,12 @@
 
 import pythonContent from "./courses/python"
 import sqlContent from "./courses/sql"
+import htmlCssContent from "./courses/html-css"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
   sql: sqlContent,
+  "html-css": htmlCssContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
