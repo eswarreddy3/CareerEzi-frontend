@@ -57,7 +57,8 @@ export default function LearnPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = activeTab === "all" ? courses : courses.filter(c => c.category === activeTab)
+  const filtered = (activeTab === "all" ? courses : courses.filter(c => c.category === activeTab))
+    .sort((a, b) => Number(a.is_locked) - Number(b.is_locked))
 
   if (loading) {
     return (

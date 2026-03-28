@@ -9,7 +9,7 @@ const ROLE_HOME: Record<string, string> = {
   super_admin: "/super-admin",
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get("careerezi_token")?.value
 

@@ -268,7 +268,7 @@ export default function DomainProgramsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {domains.map((domain) => {
+          {[...domains].sort((a, b) => Number(a.is_locked) - Number(b.is_locked)).map((domain) => {
             const Icon = iconMap[domain.icon] ?? Database
 
             if (domain.is_locked) {
