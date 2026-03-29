@@ -88,6 +88,8 @@ export default function AssignmentExamPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
 
+  const [started, setStarted] = useState(false)
+
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [statuses, setStatuses] = useState<Record<number, QStatus>>({})
@@ -169,9 +171,9 @@ export default function AssignmentExamPage() {
       .finally(() => setSubmitting(false))
   }, [assignmentMeta, answers, moduleId, questions, router, submitting])
 
-  // Timer
+  // Timer — only starts after user confirms the pre-start dialog
   useEffect(() => {
-    if (submitted || timeLeft === 0 || loading) return
+    if (!started || submitted || timeLeft === 0 || loading) return
     timerRef.current = setInterval(() => {
       setTimeLeft((t) => {
         if (t <= 1) {
@@ -183,7 +185,7 @@ export default function AssignmentExamPage() {
       })
     }, 1000)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [submitted, timeLeft, loading, submit])
+  }, [started, submitted, timeLeft, loading, submit])
 
   if (loading) {
     return (
@@ -212,6 +214,83 @@ export default function AssignmentExamPage() {
         <AlertTriangle className="h-10 w-10 text-muted-foreground" />
         <p className="text-muted-foreground">Assignment not found.</p>
         <Button variant="outline" onClick={() => router.push("/assignments")}>Back to Assignments</Button>
+      </div>
+    )
+  }
+
+  // Pre-start confirmation screen
+  if (!started) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <GlassCard className="p-8 space-y-6 text-center">
+            {/* Icon */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center">
+                <span className="text-3xl">📋</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold font-serif text-foreground">{assignmentMeta.title}</h1>
+              <p className="text-sm text-muted-foreground">{assignmentMeta.course}</p>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-secondary/50 rounded-xl p-3 border border-border space-y-1">
+                <p className="text-xs text-muted-foreground">Questions</p>
+                <p className="text-lg font-bold text-foreground">{assignmentMeta.total_questions}</p>
+              </div>
+              <div className="bg-secondary/50 rounded-xl p-3 border border-border space-y-1">
+                <p className="text-xs text-muted-foreground">Time Limit</p>
+                <p className="text-lg font-bold text-primary">{assignmentMeta.duration_mins} min</p>
+              </div>
+              <div className="bg-secondary/50 rounded-xl p-3 border border-border space-y-1">
+                <p className="text-xs text-muted-foreground">Max Score</p>
+                <p className="text-lg font-bold text-amber-400">{assignmentMeta.points} pts</p>
+              </div>
+            </div>
+
+            {/* Warning */}
+            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-left">
+              <AlertTriangle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-red-400">One attempt only</p>
+                <p className="text-xs text-muted-foreground">
+                  Once you start, the timer begins immediately and cannot be paused.
+                  You cannot retake this assignment after submission.
+                </p>
+              </div>
+            </div>
+
+            {/* Rules */}
+            <div className="text-left space-y-2">
+              {[
+                `Timer starts immediately — ${assignmentMeta.duration_mins} minutes`,
+                "Auto-submits when time runs out",
+                "You can mark questions for review and return to them",
+                "Results are shown immediately after submission",
+              ].map((rule, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span>{rule}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => router.push("/assignments")}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setStarted(true)}>
+                Start Now
+              </Button>
+            </div>
+          </GlassCard>
+        </div>
       </div>
     )
   }

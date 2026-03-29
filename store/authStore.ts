@@ -10,6 +10,7 @@ export interface User {
   role: UserRole
   college_id?: string | number
   college_name?: string
+  college_logo_url?: string | null
   first_login: boolean
   branch?: string
   section?: string

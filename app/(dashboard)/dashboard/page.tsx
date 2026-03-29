@@ -53,8 +53,13 @@ export default function DashboardPage() {
     api.get("/student/dashboard")
       .then((res) => {
         setData(res.data)
-        // Sync points + streak from DB into authStore so sidebar reflects real values
-        updateUser({ points: res.data.points, streak: res.data.streak })
+        // Sync points, streak, and college info from DB into authStore
+        updateUser({
+          points: res.data.points,
+          streak: res.data.streak,
+          college_name: res.data.college_name ?? undefined,
+          college_logo_url: res.data.college_logo_url ?? undefined,
+        })
       })
       .catch(() => toast.error("Failed to load dashboard"))
       .finally(() => setLoading(false))

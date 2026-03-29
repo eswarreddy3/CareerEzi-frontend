@@ -5,11 +5,13 @@
 import pythonContent from "./courses/python"
 import sqlContent from "./courses/sql"
 import htmlCssContent from "./courses/html-css"
+import excelContent from "./courses/excel"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
   sql: sqlContent,
   "html-css": htmlCssContent,
+  excel: excelContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {

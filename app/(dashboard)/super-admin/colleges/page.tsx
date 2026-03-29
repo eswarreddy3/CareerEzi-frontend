@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, type FormEvent } from "react"
-import { Plus, Search, RefreshCw, Ban, CheckCircle2, Trash2, Loader2, Lock, LayoutGrid, Link2 } from "lucide-react"
+import { Plus, Search, RefreshCw, Ban, CheckCircle2, Trash2, Loader2, Lock, LayoutGrid, Link2, Pencil, Upload, X } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -30,6 +30,14 @@ import {
 import { cn } from "@/lib/utils"
 import api from "@/lib/api"
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ?? "http://localhost:5000"
+
+function resolveLogoUrl(url: string | null): string | null {
+  if (!url) return null
+  if (url.startsWith("blob:") || url.startsWith("http")) return url
+  return `${BACKEND}${url}`
+}
+
 interface College {
   id: number
   name: string
@@ -47,6 +55,7 @@ interface College {
   linkedin_post_embeds: string[]
   instagram_url: string | null
   instagram_post_embeds: string[]
+  logo_url: string | null
 }
 
 interface Package {
@@ -159,6 +168,17 @@ export default function CollegesPage() {
   const [socialInstagram, setSocialInstagram] = useState("")
   const [socialInstagramEmbeds, setSocialInstagramEmbeds] = useState<string[]>(["", "", ""])
   const [isSavingSocial, setIsSavingSocial] = useState(false)
+
+  // Edit college modal
+  const [editCollege, setEditCollege] = useState<College | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editLocation, setEditLocation] = useState("")
+  const [editPackageId, setEditPackageId] = useState("")
+  const [editAdminEmail, setEditAdminEmail] = useState("")
+  const [editAdminName, setEditAdminName] = useState("")
+  const [editLogoFile, setEditLogoFile] = useState<File | null>(null)
+  const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null)
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   // Confirm dialog
   const [actionLoading, setActionLoading] = useState<number | null>(null)
@@ -289,6 +309,58 @@ export default function CollegesPage() {
       toast.error("Failed to update social links")
     } finally {
       setIsSavingSocial(false)
+    }
+  }
+
+  // ── Edit college ─────────────────────────────────────────────────────────────
+
+  const openEditCollege = (college: College) => {
+    setEditCollege(college)
+    setEditName(college.name)
+    setEditLocation(college.location || "")
+    setEditPackageId(college.package_id ? String(college.package_id) : "none")
+    setEditAdminEmail("")
+    setEditAdminName("")
+    setEditLogoFile(null)
+    setEditLogoPreview(college.logo_url || null)
+  }
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEditLogoFile(file)
+    setEditLogoPreview(URL.createObjectURL(file))
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editCollege) return
+    setIsSavingEdit(true)
+    try {
+      // Upload logo first if changed
+      if (editLogoFile) {
+        const form = new FormData()
+        form.append("logo", editLogoFile)
+        const res = await api.post(`/super-admin/colleges/${editCollege.id}/logo`, form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        })
+        setEditLogoPreview(res.data.logo_url)
+      }
+      // Patch other fields
+      const payload: Record<string, unknown> = {
+        name: editName.trim(),
+        location: editLocation.trim(),
+        package_id: editPackageId && editPackageId !== "none" ? Number(editPackageId) : null,
+      }
+      if (editAdminEmail.trim()) payload.admin_email = editAdminEmail.trim()
+      if (editAdminName.trim()) payload.admin_name = editAdminName.trim()
+      await api.patch(`/super-admin/colleges/${editCollege.id}`, payload)
+      toast.success("College updated successfully")
+      setEditCollege(null)
+      fetchColleges()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Failed to update college")
+    } finally {
+      setIsSavingEdit(false)
     }
   }
 
@@ -466,6 +538,18 @@ export default function CollegesPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1">
+                          {/* Edit college details */}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={isActioning}
+                            className="h-7 px-2 text-muted-foreground hover:text-violet-400"
+                            onClick={() => openEditCollege(college)}
+                            title="Edit college"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+
                           {/* Edit social links */}
                           <Button
                             size="sm"
@@ -713,6 +797,124 @@ export default function CollegesPage() {
                 className="bg-secondary/50 border-border text-foreground text-xs font-mono"
               />
             ))}
+          </div>
+        </div>
+      </ModalForm>
+
+      {/* Edit College Modal */}
+      <ModalForm
+        title={`Edit College — ${editCollege?.name}`}
+        description="Update college details or change the admin account."
+        isOpen={!!editCollege}
+        onClose={() => setEditCollege(null)}
+        onSubmit={(e) => { e.preventDefault(); handleSaveEdit() }}
+        isLoading={isSavingEdit}
+        submitLabel="Save Changes"
+      >
+        <div className="space-y-4">
+          {/* Logo upload */}
+          <div className="space-y-2">
+            <Label className="text-foreground">College Logo</Label>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl border border-border bg-secondary/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {editLogoPreview ? (
+                  <img src={resolveLogoUrl(editLogoPreview)!} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-bold text-muted-foreground">
+                    {editCollege?.name?.[0]?.toUpperCase() ?? "?"}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 space-y-1">
+                <label
+                  htmlFor="edit-logo-input"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border bg-secondary/30 hover:border-primary/50 cursor-pointer transition-colors text-sm text-muted-foreground hover:text-foreground"
+                >
+                  <Upload className="h-4 w-4" />
+                  {editLogoFile ? editLogoFile.name : "Upload logo (JPG, PNG, WEBP)"}
+                </label>
+                <input
+                  id="edit-logo-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={handleLogoFileChange}
+                />
+                {editLogoPreview && (
+                  <button
+                    type="button"
+                    onClick={() => { setEditLogoFile(null); setEditLogoPreview(null) }}
+                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"
+                  >
+                    <X className="h-3 w-3" /> Remove logo
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-foreground">College Name</Label>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Sri Venkateswara Engineering College"
+              className="bg-secondary/50 border-border text-foreground"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-foreground">Location</Label>
+            <Input
+              value={editLocation}
+              onChange={(e) => setEditLocation(e.target.value)}
+              placeholder="Chennai, Tamil Nadu"
+              className="bg-secondary/50 border-border text-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-foreground">Package</Label>
+            <Select value={editPackageId} onValueChange={setEditPackageId}>
+              <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+                <SelectValue placeholder="Select package" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {packages.map((p) => (
+                  <SelectItem key={p.id} value={String(p.id)}>
+                    {p.name} {p.price > 0 ? `— ₹${p.price.toLocaleString()}` : "— Free"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="border-t border-border pt-4 space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Update Admin Account (optional)</p>
+            <p className="text-xs text-muted-foreground">Leave blank to keep the current admin email / name.</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-foreground">Admin Email</Label>
+            <Input
+              type="email"
+              value={editAdminEmail}
+              onChange={(e) => setEditAdminEmail(e.target.value)}
+              placeholder="new-admin@college.edu"
+              className="bg-secondary/50 border-border text-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-foreground">Admin Name</Label>
+            <Input
+              value={editAdminName}
+              onChange={(e) => setEditAdminName(e.target.value)}
+              placeholder="Dr. Rajesh Kumar"
+              className="bg-secondary/50 border-border text-foreground"
+            />
           </div>
         </div>
       </ModalForm>

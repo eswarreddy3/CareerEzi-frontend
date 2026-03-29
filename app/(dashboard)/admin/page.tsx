@@ -11,12 +11,20 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import {
   Users, TrendingUp, Flame, Star, Mail, AlertTriangle, Loader2,
-  Crown, ArrowRight, Share2, Trophy, Zap, CheckCircle,
+  Crown, ArrowRight, Share2, Trophy, Zap, CheckCircle, Upload, X,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import Link from "next/link"
+
+const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ?? "http://localhost:5000"
+
+function resolveLogoUrl(url: string | null): string | null {
+  if (!url) return null
+  if (url.startsWith("blob:") || url.startsWith("http")) return url
+  return `${BACKEND}${url}`
+}
 
 interface InactiveStudent {
   id: number
@@ -69,6 +77,10 @@ export default function AdminDashboardPage() {
   const [instagramEmbeds, setInstagramEmbeds] = useState(["", "", ""])
   const [savingSocial, setSavingSocial] = useState(false)
 
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [savingLogo, setSavingLogo] = useState(false)
+
   useEffect(() => {
     api.get("/admin/analytics")
       .then((res) => setAnalytics(res.data))
@@ -81,6 +93,7 @@ export default function AdminDashboardPage() {
       setInstagram(res.data.instagram_url ?? "")
       const ig = res.data.instagram_post_embeds ?? []
       setInstagramEmbeds([ig[0] ?? "", ig[1] ?? "", ig[2] ?? ""])
+      if (res.data.logo_url) setLogoPreview(res.data.logo_url)
     }).catch(() => {})
   }, [])
 
@@ -98,6 +111,25 @@ export default function AdminDashboardPage() {
       toast.error("Failed to save social links")
     } finally {
       setSavingSocial(false)
+    }
+  }
+
+  async function handleLogoUpload() {
+    if (!logoFile) return
+    setSavingLogo(true)
+    try {
+      const form = new FormData()
+      form.append("logo", logoFile)
+      const res = await api.post("/admin/college-logo", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      setLogoPreview(res.data.logo_url)
+      setLogoFile(null)
+      toast.success("College logo updated")
+    } catch {
+      toast.error("Failed to upload logo")
+    } finally {
+      setSavingLogo(false)
     }
   }
 
@@ -370,6 +402,69 @@ export default function AdminDashboardPage() {
           </GlassCard>
         </motion.div>
       </div>
+
+      {/* College Logo */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+        <GlassCard>
+          <div className="flex items-center gap-3 mb-5">
+            <Upload className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold font-serif text-foreground">College Logo</h3>
+            <span className="text-xs text-muted-foreground">Shown as your college profile picture</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-2xl border border-border bg-secondary/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {logoPreview ? (
+                <img src={resolveLogoUrl(logoPreview)!} alt="College logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl font-bold text-muted-foreground">
+                  {user?.college_name?.[0]?.toUpperCase() ?? "?"}
+                </span>
+              )}
+            </div>
+            <div className="flex-1 space-y-2">
+              <label
+                htmlFor="admin-logo-input"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-border bg-secondary/30 hover:border-primary/50 cursor-pointer transition-colors text-sm text-muted-foreground hover:text-foreground"
+              >
+                <Upload className="h-4 w-4" />
+                {logoFile ? logoFile.name : "Choose logo (JPG, PNG, WEBP — max 2 MB)"}
+              </label>
+              <input
+                id="admin-logo-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setLogoFile(file)
+                  setLogoPreview(URL.createObjectURL(file))
+                }}
+              />
+              {logoFile && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleLogoUpload}
+                    disabled={savingLogo}
+                    className="bg-primary text-primary-foreground h-8"
+                  >
+                    {savingLogo ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : null}
+                    Upload Logo
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => { setLogoFile(null); setLogoPreview(null) }}
+                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"
+                  >
+                    <X className="h-3 w-3" /> Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+      </motion.div>
 
       {/* Social Links */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>

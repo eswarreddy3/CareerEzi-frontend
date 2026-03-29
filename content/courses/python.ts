@@ -15,6 +15,11 @@ She walks away. You stare at the blank file. Time to write your first Python pro
 
 # What is Python?
 
+:::funfact
+Python was named after **"Monty Python's Flying Circus"** — a British TV comedy show — not the snake! Creator **Guido van Rossum** wanted a name that was short, unique, and slightly mysterious.
+Python turns 35 in 2026. It's the **#1 most-used language** worldwide and powers everything from Instagram to NASA satellites.
+:::
+
 Python is a **high-level programming language** designed to be readable — almost like English. No semicolons, no complex boilerplate. Just clean, expressive code.
 
 Here's what you're about to build:
@@ -97,6 +102,15 @@ max_retries = 3
 
 Good comments explain the *reason*, not the *action*. Your teammates (and future you) will thank you.
 
+:::compare
+✓ print("Hello, World!")
+✓ name = "Arjun"    # snake_case
+✓ MAX_RETRIES = 3   # UPPER for constants
+✗ print "Hello, World!"    # Python 2 — doesn't work!
+✗ Name = "Arjun"   # misleading capitalization
+✗ maxretries = 3   # hard to read
+:::
+
 :::tip
 **PEP 8** is Python's official style guide. Key rules:
 - File names: \`snake_case.py\` (e.g. \`welcome_message.py\`)
@@ -104,6 +118,14 @@ Good comments explain the *reason*, not the *action*. Your teammates (and future
 - One statement per line
 
 Most editors (VS Code, PyCharm) auto-format this for you. Turn it on.
+:::
+
+:::quiz
+What will \`print("Hello" + " " + "World")\` output?
+- Hello World✓
+- Hello+World
+- Error: cannot add strings
+- "Hello World"
 :::
 
 :::mistake
@@ -192,6 +214,16 @@ CGPA   : 8.75
 Placed : False
 \`\`\`
 
+**How Python stores these in memory:**
+
+:::memorymodel
+student_id | 1001 | int
+name | "Arjun Sharma" | str
+cgpa | 8.75 | float
+is_placed | False | bool
+backlogs | 0 | int
+:::
+
 ## Checking and Converting Types
 
 \`\`\`python
@@ -242,6 +274,14 @@ _is_eligible = True
 
 :::tip
 Use **descriptive names**. \`cgpa\` is better than \`c\`. \`is_placed\` is better than \`flag\`. Code is communication — make it readable at a glance.
+:::
+
+:::quiz
+What is the type of the value \`8.75\` in Python?
+- int
+- double
+- float✓
+- decimal
 :::
 
 :::mistake
@@ -403,6 +443,23 @@ print(formatted)
 \`split()\` and \`join()\` are the backbone of text processing. When you parse CSV files, query parameters, or user-submitted comma-separated data — these are your tools. Learn them well.
 :::
 
+:::quiz
+What does \`"arjun@vit.ac.in"[6:]\` return?
+- arjun
+- @vit.ac.in
+- vit.ac.in✓
+- arjun@vit
+:::
+
+:::compare
+✓ f"Hello {name}!"
+✓ f"CGPA: {cgpa:.2f}"
+✓ email.strip().lower()
+✗ "Hello " + name + "!"   # error if name is not str
+✗ "CGPA: " + cgpa          # TypeError — can't add float!
+✗ email.lower().strip()    # strip first, then lower (more correct)
+:::
+
 ## Validating User Input
 
 \`\`\`python
@@ -545,6 +602,23 @@ print(clean)     # ['Google', 'Microsoft', 'Amazon']
 List comprehensions replace 3-4 lines of loop code with one readable line. They're idiomatic Python — you'll see them everywhere in real codebases. Master them and your code immediately looks more professional.
 :::
 
+:::quiz
+What does \`companies[-1]\` return when \`companies = ["Google", "TCS", "Amazon"]\`?
+- Google
+- TCS
+- Amazon✓
+- IndexError
+:::
+
+:::compare
+✓ companies = ["Google", "TCS"]   # mutable — use list
+✓ slot = ("9:00 AM", "Hall A")    # fixed — use tuple
+✓ [p for p in pkgs if p > 20]     # list comprehension
+✗ companies = ("Google", "TCS")   # tuple breaks if you need .append()
+✗ slot = ["9:00 AM", "Hall A"]    # list when data is truly fixed
+✗ result = []                     # 3 lines instead of 1 comprehension
+:::
+
 ## Nested Lists — 2D Data
 
 \`\`\`python
@@ -633,6 +707,14 @@ Profile data = dictionary. Unique company tracking = sets. Let's build it.
 # Dictionaries — Named Data Storage
 
 A dictionary stores **key-value pairs**. Think of it as a student's ID card — each field has a name and a value.
+
+:::memorymodel
+student["id"] | 1001 | int
+student["name"] | "Arjun Sharma" | str
+student["cgpa"] | 8.75 | float
+student["is_placed"] | False | bool
+student["skills"] | ["Python","SQL","React"] | list
+:::
 
 \`\`\`python
 student = {
@@ -767,6 +849,23 @@ print(f"Unique skills: {unique_skills}")
 
 :::tip
 Use \`set\` when you need: (1) uniqueness guaranteed, (2) fast membership check — \`x in my_set\` is O(1) regardless of size, (3) set operations like intersection and union.
+:::
+
+:::quiz
+What does \`student.get("phone", "N/A")\` return when "phone" key does not exist?
+- None
+- KeyError
+- N/A✓
+- False
+:::
+
+:::compare
+✓ student.get("phone", "N/A")     # safe — returns default
+✓ "name" in student               # check before access
+✓ for k, v in student.items()     # iterate key-value pairs
+✗ student["phone"]                 # KeyError if key missing!
+✗ student.keys()[0]               # dict_keys is not subscriptable
+✗ for i in range(len(student))    # wrong — use .items() instead
 :::
 
 :::challenge
@@ -942,6 +1041,14 @@ for company, package in companies:
 
 :::insight
 Real production code is mostly control flow — eligibility checks, feature flags, error conditions, role-based access. Learning to think in conditions is more valuable than memorizing any specific syntax.
+:::
+
+:::quiz
+What will this print? \`score = 75\` then \`print("B" if score >= 75 else "C")\`
+- C
+- B✓
+- BC
+- SyntaxError
 :::
 
 :::tip
@@ -1122,6 +1229,19 @@ for s in by_cgpa:
 
 :::insight
 Lambdas shine with \`sorted()\`, \`min()\`, \`max()\`, \`filter()\`, \`map()\`. When you use them, you're thinking functionally. This scales to pandas DataFrames, Django querysets, and everywhere else in real codebases.
+:::
+
+:::quiz
+What does \`lambda x: x ** 2\` return when called with \`5\`?
+- 10
+- 52
+- 25✓
+- lambda object
+:::
+
+:::funfact
+In Python, **functions are first-class objects** — you can pass them as arguments, store them in lists, and return them from other functions. This is how Flask/Django's \`@route\` decorator works under the hood.
+Over **450,000 packages** are available on PyPI (Python Package Index) — for virtually any task imaginable.
 :::
 
 :::tip
@@ -1310,6 +1430,19 @@ db_url = os.getenv("DATABASE_URL", "sqlite:///local.db")
 The standard library eliminates most third-party dependencies for common tasks. Before \`pip install something\`, check if Python's stdlib already has it. It usually does.
 :::
 
+:::funfact
+Python ships with **~300 built-in modules** in its standard library — batteries included! \`json\`, \`datetime\`, \`os\`, \`re\`, \`csv\`, \`http\`, \`hashlib\`, \`logging\` — all zero install required.
+The \`import antigravity\` module in Python's stdlib literally opens a comic strip in your browser. Try it!
+:::
+
+:::quiz
+How do you import only the \`sqrt\` function from the \`math\` module?
+- import math.sqrt
+- from math import sqrt✓
+- import sqrt from math
+- include math.sqrt
+:::
+
 :::tip
 The most useful stdlib modules for backend work: \`datetime\`, \`json\`, \`os\`, \`pathlib\`, \`re\`, \`collections\`, \`itertools\`, \`functools\`, \`logging\`, \`hashlib\`. Learn these and you'll be dangerous.
 :::
@@ -1459,6 +1592,23 @@ with open("placements.csv", "r") as f:
 
 :::tip
 Store configuration in JSON, logs in plain text with \`.log\` extension, tabular reports in CSV. For a real application you'd use a database — but understanding file I/O is the foundation for understanding ALL persistence.
+:::
+
+:::quiz
+Which mode opens a file for appending (adds to end without deleting existing content)?
+- "w"
+- "r+"
+- "x"
+- "a"✓
+:::
+
+:::compare
+✓ with open("data.txt", "r") as f:   # context manager — auto closes
+✓ data = json.load(f)                  # parse JSON safely
+✓ f.read()                             # read full content
+✗ f = open("data.txt")                # manual open — may not close on error!
+✗ f.close()                            # easy to forget or skip on exception
+✗ eval(f.read())                       # NEVER eval file content — security risk
 :::
 
 :::mistake
@@ -1633,6 +1783,21 @@ s.cgpa = 9.1    # uses setter — validates automatically
 
 :::insight
 \`__str__\` is called by \`print()\` — make it human-readable. \`__repr__\` is called in debug mode — make it unambiguous. This convention is followed by every library you'll ever use — Django models, SQLAlchemy entities, FastAPI schemas.
+:::
+
+:::quiz
+What is the purpose of \`__init__\` in a Python class?
+- It's called when the object is deleted
+- It initialises object attributes when an instance is created✓
+- It defines class-level (static) variables only
+- It converts the class to a string
+:::
+
+:::memorymodel
+self.name | "Arjun Sharma" | str
+self.cgpa | 8.75 | float
+self.skills | ["Python","SQL"] | list
+self.is_placed | False | bool
 :::
 
 :::tip
@@ -1812,6 +1977,23 @@ def can_apply_priority(user):
 This exact pattern is used in Django's user system: \`User\`, \`AbstractUser\`, \`AnonymousUser\`. In FastAPI's dependency injection. In SQLAlchemy's model inheritance. Understanding OOP inheritance means understanding every major Python framework.
 :::
 
+:::quiz
+What does \`super().__init__(name)\` do inside a child class?
+- Creates a new parent class object
+- Calls the parent class's \`__init__\` method passing \`name\`✓
+- Overrides the parent class completely
+- Raises an error if the parent has no \`__init__\`
+:::
+
+:::compare
+✓ class Car(Vehicle):                # inherit Vehicle
+✓ super().__init__(brand)            # reuse parent init
+✓ def drive(self): ...               # override just what changes
+✗ class Car:                          # copy-paste Vehicle code
+✗ Vehicle.__init__(self, brand)      # hard-coded — breaks with multiple inheritance
+✗ def __init__(self): pass           # skip super() — parent fields not set!
+:::
+
 :::tip
 Use \`super()\` to call the parent class method instead of hard-coding the parent class name. It handles multiple inheritance correctly and makes refactoring easier.
 :::
@@ -1986,6 +2168,23 @@ Data Error  — CGPA N/A is not in valid range [0.0 to 10.0]
 
 :::insight
 In production at Flipkart, Google, or any serious company, unhandled exceptions are caught by monitoring tools (Sentry, Datadog) and wake engineers up at 3 AM. Every exception you handle thoughtfully is a crisis prevented.
+:::
+
+:::quiz
+What does the \`finally\` block always do?
+- Runs only when an exception occurs
+- Runs only when no exception occurs
+- Runs whether or not an exception occurred✓
+- Catches all exceptions silently
+:::
+
+:::compare
+✓ except ValueError as e:            # specific — only catches what you expect
+✓ except (KeyError, TypeError) as e: # multiple specific types
+✓ finally: conn.close()              # cleanup always runs
+✗ except:                             # bare except — catches EVERYTHING incl. Ctrl+C!
+✗ except Exception: pass             # silently swallows all errors — hides bugs
+✗ try: ... except: pass              # worst pattern — app appears to work but is broken
 :::
 
 :::tip

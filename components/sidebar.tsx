@@ -72,6 +72,14 @@ const superAdminNavItems = [
   { href: "/super-admin/feedback", label: "Feedback", icon: MessageSquare },
 ]
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ?? "http://localhost:5000"
+
+function resolveLogoUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith("blob:") || url.startsWith("http")) return url
+  return `${BACKEND}${url}`
+}
+
 const roleBadgeConfig = {
   student: { label: "Student", className: "bg-primary/20 text-primary border-primary/30" },
   college_admin: { label: "Admin", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
@@ -200,101 +208,132 @@ export function Sidebar() {
         </nav>
 
         {/* User section */}
-        <div className={cn(
-          "border-t border-sidebar-border",
-          isCollapsed ? "p-2 flex flex-col items-center gap-2" : "p-4 space-y-3"
-        )}>
-
-          {/* Avatar + name/badge */}
+        <div className="border-t border-sidebar-border p-3">
           {isCollapsed ? (
-            <Avatar className="h-9 w-9 border-2 border-primary/30">
-              <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border-2 border-primary/30 flex-shrink-0">
-                <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+            /* ── Collapsed ── */
+            <div className="flex flex-col items-center gap-2">
+              {/* Avatar */}
+              <Avatar className="h-9 w-9 border-2 border-primary/30">
+                <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate text-foreground">
-                  {user?.name || "User"}
-                </p>
-                <Badge variant="outline" className={cn("text-xs mt-0.5", roleBadge.className)}>
-                  {roleBadge.label}
-                </Badge>
+
+              {/* College logo (students) */}
+              {role === "student" && user?.college_name && (
+                <div
+                  className="w-9 h-9 rounded-lg border border-border bg-secondary/50 flex items-center justify-center overflow-hidden"
+                  title={user.college_name}
+                >
+                  {resolveLogoUrl(user.college_logo_url) ? (
+                    <img src={resolveLogoUrl(user.college_logo_url)!} alt={user.college_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-bold text-muted-foreground">{user.college_name[0].toUpperCase()}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Streak + points (students) */}
+              {role === "student" && (
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex items-center gap-1">
+                    <Flame className="h-3.5 w-3.5 text-orange-500 flame-pulse" />
+                    <span className="text-xs font-bold text-foreground">{user?.streak ?? 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 text-amber-500" />
+                    <span className="text-xs font-bold text-foreground">
+                      {(user?.points ?? 0) >= 1000
+                        ? `${((user?.points ?? 0) / 1000).toFixed(1)}k`
+                        : (user?.points ?? 0)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Action icons */}
+              {role === "student" && <FeedbackModal compact />}
+              <ThemeToggle collapsed />
+              <button
+                onClick={handleLogout}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setIsCollapsed(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                title="Expand sidebar"
+              >
+                <Menu className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            /* ── Expanded ── */
+            <div className="space-y-2.5">
+              {/* Profile card */}
+              <div className="rounded-xl bg-secondary/40 border border-border p-2.5 space-y-2">
+                {/* Avatar + name row */}
+                <div className="flex items-center gap-2.5">
+                  <Avatar className="h-9 w-9 border-2 border-primary/30 flex-shrink-0">
+                    <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate text-foreground leading-tight">
+                      {user?.name || "User"}
+                    </p>
+                    <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 mt-0.5 h-4", roleBadge.className)}>
+                      {roleBadge.label}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* College row (students) */}
+                {role === "student" && user?.college_name && (
+                  <div className="flex items-center gap-2 pt-0.5 border-t border-border/50">
+                    <div className="w-5 h-5 rounded-md border border-border bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {resolveLogoUrl(user.college_logo_url) ? (
+                        <img src={resolveLogoUrl(user.college_logo_url)!} alt={user.college_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[9px] font-bold text-muted-foreground">{user.college_name[0].toUpperCase()}</span>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground truncate">{user.college_name}</span>
+                  </div>
+                )}
+
+                {/* Streak + points (students) */}
+                {role === "student" && (
+                  <div className="flex items-center gap-2 pt-0.5 border-t border-border/50">
+                    <div className="flex-1 flex items-center justify-center gap-1.5 py-0.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                      <Flame className="h-3.5 w-3.5 text-orange-500 flame-pulse" />
+                      <span className="text-xs font-bold text-orange-400">{user?.streak ?? 0} days</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center gap-1.5 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                      <Star className="h-3.5 w-3.5 text-amber-500" />
+                      <span className="text-xs font-bold text-amber-400">{(user?.points ?? 0).toLocaleString()} pts</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action row */}
+              <div className="flex items-center gap-1">
+                {role === "student" && <FeedbackModal compact />}
+                <div className="flex-1" />
+                <ThemeToggle collapsed />
+                <button
+                  onClick={handleLogout}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
               </div>
             </div>
-          )}
-
-          {/* Streak + Points (students only) */}
-          {role === "student" && (
-            isCollapsed ? (
-              <div className="flex flex-col items-center gap-1.5 w-full">
-                <div className="flex items-center gap-1">
-                  <Flame className="h-3.5 w-3.5 text-orange-500 flame-pulse" />
-                  <span className="text-xs font-bold text-foreground">{user?.streak ?? 0}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 text-amber-500" />
-                  <span className="text-xs font-bold text-foreground">{(user?.points ?? 0).toLocaleString()}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center gap-5 py-0.5">
-                <div className="flex items-center gap-1.5">
-                  <Flame className="h-4 w-4 text-orange-500 flame-pulse" />
-                  <span className="text-sm font-semibold text-foreground">{user?.streak ?? 0}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Star className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm font-semibold text-foreground">{(user?.points ?? 0).toLocaleString()}</span>
-                </div>
-              </div>
-            )
-          )}
-
-          {/* Feedback (students only) */}
-          {role === "student" && (
-            <div className={cn(isCollapsed ? "w-full flex justify-center" : "w-full")}>
-              <FeedbackModal compact={isCollapsed} />
-            </div>
-          )}
-
-          {/* Theme toggle */}
-          <div className={cn(isCollapsed ? "w-full flex justify-center" : "w-full")}>
-            <ThemeToggle collapsed={isCollapsed} />
-          </div>
-
-          {/* Logout */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className={cn(
-              "text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors",
-              isCollapsed
-                ? "w-9 h-9 p-0 justify-center"
-                : "w-full justify-start gap-2"
-            )}
-          >
-            <LogOut className="h-4 w-4 flex-shrink-0" />
-            {!isCollapsed && <span>Logout</span>}
-          </Button>
-
-          {/* Expand button (collapsed mode only) */}
-          {isCollapsed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-9 h-9 text-muted-foreground hover:text-foreground"
-              onClick={() => setIsCollapsed(false)}
-            >
-              <Menu className="h-4 w-4" />
-            </Button>
           )}
         </div>
       </aside>
