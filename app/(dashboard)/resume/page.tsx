@@ -54,6 +54,99 @@ const EMPTY: ResumeData = {
   certifications: [], achievements: [],
 }
 
+function buildDemo(name: string, email: string, phone: string, linkedin: string, github: string): ResumeData {
+  return {
+    personal: {
+      name:     name     || "Arjun Sharma",
+      email:    email    || "arjun.sharma@email.com",
+      phone:    phone    || "+91 98765 43210",
+      location: "Chennai, Tamil Nadu",
+      linkedin: linkedin || "linkedin.com/in/arjun-sharma",
+      github:   github   || "github.com/arjun-sharma",
+      website:  "",
+    },
+    objective: "To secure a challenging position as a Software Engineer where I can apply my technical skills and contribute to innovative projects while growing professionally.",
+    summary: "Motivated Computer Science graduate with hands-on experience in full-stack web development. Passionate about building scalable applications and solving real-world problems through technology.",
+    experience: [
+      {
+        id: uid(),
+        company: "TechSoft Solutions Pvt. Ltd.",
+        role: "Software Engineer Intern",
+        start: "Jan 2025",
+        end: "Jun 2025",
+        current: false,
+        description: "• Developed RESTful APIs using Python Flask, improving response time by 30%\n• Built responsive UI components with React and Tailwind CSS\n• Collaborated with a team of 5 engineers in an Agile environment\n• Wrote unit tests achieving 85% code coverage",
+      },
+      {
+        id: uid(),
+        company: "Freelance Projects",
+        role: "Full Stack Developer",
+        start: "Jun 2024",
+        end: "",
+        current: true,
+        description: "• Built 3 end-to-end web applications for local businesses\n• Integrated payment gateways and third-party APIs\n• Deployed apps on AWS EC2 with Nginx and SSL configuration",
+      },
+    ],
+    education: [
+      {
+        id: uid(),
+        school: "Sri Venkateswara Engineering College",
+        degree: "B.E.",
+        field: "Computer Science and Engineering",
+        start: "2021",
+        end: "2025",
+        gpa: "8.4",
+      },
+      {
+        id: uid(),
+        school: "Bright Future Higher Secondary School",
+        degree: "HSC (Class XII)",
+        field: "Computer Science",
+        start: "2019",
+        end: "2021",
+        gpa: "92%",
+      },
+    ],
+    projects: [
+      {
+        id: uid(),
+        name: "CareerEzi — Placement Prep Platform",
+        tech: "Next.js, Flask, MySQL, Tailwind CSS",
+        description: "A full-stack college placement preparation platform featuring MCQ practice, coding challenges, assignments, leaderboard, and resume builder with PDF export.",
+        link: "github.com/arjun-sharma/careerezi",
+      },
+      {
+        id: uid(),
+        name: "Smart Inventory Management System",
+        tech: "React, Node.js, MongoDB, Express",
+        description: "Real-time inventory tracking system with role-based access control, automated low-stock alerts, and analytics dashboard for small businesses.",
+        link: "github.com/arjun-sharma/inventory-mgmt",
+      },
+      {
+        id: uid(),
+        name: "AI-Powered Resume Analyser",
+        tech: "Python, FastAPI, OpenAI API, React",
+        description: "Tool that analyses resumes against job descriptions, gives ATS score, and suggests improvements using GPT-4.",
+        link: "",
+      },
+    ],
+    skills: "Python, JavaScript, TypeScript, Java, C++, React, Next.js, Flask, Node.js, MySQL, MongoDB, Redis, Docker, AWS, Git, REST APIs, Tailwind CSS",
+    strengths: "Problem Solving, Team Collaboration, Quick Learner, Attention to Detail, Communication",
+    languages: "English, Tamil, Hindi",
+    hobbies: "Competitive Programming, Open Source Contributions, Tech Blogging, Chess",
+    certifications: [
+      { id: uid(), name: "AWS Certified Cloud Practitioner", issuer: "Amazon Web Services", year: "2024" },
+      { id: uid(), name: "Full Stack Web Development", issuer: "Coursera (Meta)", year: "2024" },
+      { id: uid(), name: "Data Structures & Algorithms", issuer: "GeeksforGeeks", year: "2023" },
+    ],
+    achievements: [
+      { id: uid(), title: "Smart India Hackathon 2024 — Finalist", description: "Led a team of 6 to build an AI-based crop disease detection app, reaching national finals among 5,000+ teams.", year: "2024" },
+      { id: uid(), title: "LeetCode — 500+ Problems Solved", description: "Ranked in top 10% globally with consistent problem-solving across data structures and algorithms topics.", year: "2024" },
+      { id: uid(), title: "College Coding Championship — 1st Place", description: "Won inter-college coding contest competing against 200+ participants across 15 colleges.", year: "2023" },
+    ],
+  }
+}
+
 const TEMPLATES: { id: TemplateId; label: string; accent: string }[] = [
   { id: "modern",  label: "Modern",  accent: "#00D4C8" },
   { id: "classic", label: "Classic", accent: "#1a1a1a" },
@@ -903,18 +996,15 @@ export default function ResumePage() {
         const remote = res.data.resume_data
         if (remote && Object.keys(remote).length > 0) {
           setData({ ...EMPTY, ...remote, achievements: remote.achievements ?? [] })
-        } else if (user) {
-          setData(prev => ({
-            ...prev,
-            personal: {
-              ...prev.personal,
-              name: user.name || "",
-              email: user.email || "",
-              phone: (user as any).phone || "",
-              linkedin: (user as any).linkedin || "",
-              github: (user as any).github || "",
-            },
-          }))
+        } else {
+          // No saved resume — load full demo data pre-filled with real profile info
+          setData(buildDemo(
+            user?.name || "",
+            user?.email || "",
+            (user as any)?.phone || "",
+            (user as any)?.linkedin || "",
+            (user as any)?.github || "",
+          ))
         }
       })
       .catch(() => {
@@ -922,18 +1012,14 @@ export default function ResumePage() {
         const saved = localStorage.getItem("careerezi-resume")
         if (saved) {
           try { const parsed = JSON.parse(saved); setData({ ...EMPTY, ...parsed, achievements: parsed.achievements ?? [] }) } catch {}
-        } else if (user) {
-          setData(prev => ({
-            ...prev,
-            personal: {
-              ...prev.personal,
-              name: user.name || "",
-              email: user.email || "",
-              phone: (user as any).phone || "",
-              linkedin: (user as any).linkedin || "",
-              github: (user as any).github || "",
-            },
-          }))
+        } else {
+          setData(buildDemo(
+            user?.name || "",
+            user?.email || "",
+            (user as any)?.phone || "",
+            (user as any)?.linkedin || "",
+            (user as any)?.github || "",
+          ))
         }
       })
   }, []) // eslint-disable-line
