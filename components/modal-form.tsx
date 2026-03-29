@@ -19,6 +19,7 @@ interface ModalFormProps {
   onSubmit: (e: FormEvent<HTMLFormElement>) => void
   isLoading?: boolean
   submitLabel?: string
+  submitClassName?: string
   children: ReactNode
 }
 
@@ -30,6 +31,7 @@ export function ModalForm({
   onSubmit,
   isLoading = false,
   submitLabel = "Submit",
+  submitClassName,
   children,
 }: ModalFormProps) {
   return (
@@ -59,7 +61,7 @@ export function ModalForm({
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-primary hover:brightness-110 text-primary-foreground"
+              className={submitClassName ?? "flex-1 bg-primary hover:brightness-110 text-primary-foreground"}
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}

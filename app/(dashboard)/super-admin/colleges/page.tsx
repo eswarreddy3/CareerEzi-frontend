@@ -180,9 +180,14 @@ export default function CollegesPage() {
   const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null)
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
-  // Confirm dialog
+  // Confirm dialog (activate / deactivate)
   const [actionLoading, setActionLoading] = useState<number | null>(null)
   const [confirm, setConfirm] = useState<CollegeAction | null>(null)
+
+  // Delete with password confirmation
+  const [deleteCollege, setDeleteCollege] = useState<College | null>(null)
+  const [deletePassword, setDeletePassword] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchColleges = useCallback(async () => {
     setLoading(true)
@@ -404,6 +409,29 @@ export default function CollegesPage() {
     }
   }
 
+  const openDeleteConfirm = (college: College) => {
+    setDeleteCollege(college)
+    setDeletePassword("")
+  }
+
+  const handleDelete = async () => {
+    if (!deleteCollege || !deletePassword.trim()) return
+    setIsDeleting(true)
+    try {
+      await api.delete(`/super-admin/colleges/${deleteCollege.id}`, {
+        data: { password: deletePassword },
+      })
+      toast.success(`${deleteCollege.name} deleted`)
+      setColleges((prev) => prev.filter((c) => c.id !== deleteCollege.id))
+      setDeleteCollege(null)
+      setDeletePassword("")
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Failed to delete college")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const confirmConfig = confirm ? {
     deactivate: {
       title: "Deactivate College?",
@@ -619,16 +647,16 @@ export default function CollegesPage() {
                           )}
 
                           {/* Delete */}
-                          {/* <Button
+                          <Button
                             size="sm"
                             variant="ghost"
                             disabled={isActioning}
                             className="h-7 px-2 text-muted-foreground hover:text-red-400"
-                            onClick={() => setConfirm({ type: "delete", college })}
+                            onClick={() => openDeleteConfirm(college)}
                             title="Delete college"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
-                          </Button> */}
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -659,6 +687,43 @@ export default function CollegesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Delete College Modal (password required) */}
+      <ModalForm
+        title="Delete College"
+        description={`Permanently delete "${deleteCollege?.name}" and all its students. This cannot be undone.`}
+        isOpen={!!deleteCollege}
+        onClose={() => { setDeleteCollege(null); setDeletePassword("") }}
+        onSubmit={(e) => { e.preventDefault(); handleDelete() }}
+        isLoading={isDeleting}
+        submitLabel="Delete Permanently"
+        submitClassName="flex-1 bg-red-600 hover:bg-red-700 text-white"
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+            <Trash2 className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-red-400 space-y-1">
+              <p className="font-semibold">This will permanently delete:</p>
+              <ul className="list-disc list-inside space-y-0.5 text-red-400/80">
+                <li>The college and all its settings</li>
+                <li>All {deleteCollege?.student_count ?? 0} student account(s)</li>
+                <li>All student progress, points and streaks</li>
+              </ul>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-foreground">Enter your password to confirm</Label>
+            <Input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder="Your super admin password"
+              className="bg-secondary/50 border-border text-foreground"
+              autoComplete="current-password"
+            />
+          </div>
+        </div>
+      </ModalForm>
 
       {/* Edit Access Modal */}
       <ModalForm

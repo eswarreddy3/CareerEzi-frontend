@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef, type FormEvent } from "react"
-import { Plus, Upload, UserCheck, UserX, Trash2, FileText, X } from "lucide-react"
+import { Plus, Upload, UserCheck, UserX, Trash2, FileText, X, Download } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -236,6 +236,23 @@ export default function SuperAdminStudentsPage() {
     },
   ]
 
+  const downloadSampleCsv = () => {
+    const rows = [
+      ["name", "email", "roll_number", "branch", "college"],
+      ["Arjun Sharma", "arjun@example.com", "21CS001", "CSE", "Sri Venkateswara Engineering College"],
+      ["Priya Menon", "priya@example.com", "21EC042", "ECE", "Sri Venkateswara Engineering College"],
+      ["Rahul Kumar", "rahul@example.com", "21ME015", "ME", "Sri Venkateswara Engineering College"],
+    ]
+    const csv = rows.map((r) => r.map((v) => `"${v}"`).join(",")).join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "students_sample.csv"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -244,6 +261,15 @@ export default function SuperAdminStudentsPage() {
           <p className="text-muted-foreground mt-1">Manage students across all colleges</p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="border-border text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+            onClick={downloadSampleCsv}
+            title="Download sample CSV template"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Sample CSV
+          </Button>
           <Button
             variant="outline"
             className="border-primary/30 text-primary hover:bg-primary/10"
