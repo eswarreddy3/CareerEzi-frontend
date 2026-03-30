@@ -12,7 +12,7 @@ interface TopNavProps {
   onScrollTo?: (id: string) => void
 }
 
-const navLinks = ["features", "about", "pricing", "contact"]
+const navLinks = ["features", "about", "contact"]
 
 export function TopNav({ onScrollTo }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false)

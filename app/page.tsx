@@ -166,47 +166,50 @@ function Orb({ className }: { className: string }) {
 // ─── Dashboard mockup ──────────────────────────────────────────────────────────
 function DashboardPreview() {
   return (
-    <TiltCard className="relative w-full max-w-sm mx-auto lg:mx-0">
-      {/* Main card */}
+    <TiltCard className="w-full max-w-sm mx-auto lg:mx-0">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-        className="glass-card rounded-2xl border border-border p-4 shadow-2xl"
+        className="glass-card rounded-2xl border border-border p-5 shadow-2xl"
       >
-        <div className="flex items-center justify-between mb-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-xs text-muted-foreground">Good morning,</p>
             <p className="text-sm font-semibold">Rahul Kumar 👋</p>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <Flame className="w-3 h-3 text-amber-500 flame-pulse" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <Flame className="w-3.5 h-3.5 text-amber-500 flame-pulse" />
             <span className="text-xs font-bold text-amber-500">12 day streak</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 mb-3">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
           {[
-            { label: "Points", value: "2,340", color: "text-violet-400", bg: "bg-violet-500/10" },
-            { label: "Rank", value: "#5", color: "text-cyan-400", bg: "bg-cyan-500/10" },
-            { label: "Done", value: "3/8", color: "text-pink-400", bg: "bg-pink-500/10" },
+            { label: "Points", value: "2,340", color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20" },
+            { label: "Rank",   value: "#5",    color: "text-cyan-400",   bg: "bg-cyan-500/10",   border: "border-cyan-500/20" },
+            { label: "Done",   value: "3/8",   color: "text-pink-400",   bg: "bg-pink-500/10",   border: "border-pink-500/20" },
           ].map((s) => (
-            <div key={s.label} className={`${s.bg} rounded-xl p-2 text-center`}>
+            <div key={s.label} className={`${s.bg} border ${s.border} rounded-xl p-2.5 text-center`}>
               <div className={`text-sm font-bold ${s.color}`}>{s.value}</div>
-              <div className="text-[10px] text-muted-foreground">{s.label}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="glass-card rounded-xl p-3 border border-border mb-3">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-6 h-6 rounded-lg bg-violet-500/20 flex items-center justify-center">
-              <BookOpen className="w-3 h-3 text-violet-400" />
+        {/* Course progress */}
+        <div className="rounded-xl border border-border bg-white/[0.03] p-3 mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0">
+              <BookOpen className="w-3.5 h-3.5 text-violet-400" />
             </div>
-            <div>
-              <p className="text-xs font-medium">Python Fundamentals</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold">Python Fundamentals</p>
               <p className="text-[10px] text-muted-foreground">8 of 12 lessons done</p>
             </div>
+            <span className="text-[10px] text-violet-400 font-semibold">67%</span>
           </div>
           <div className="w-full bg-border rounded-full h-1.5">
             <motion.div
@@ -218,66 +221,23 @@ function DashboardPreview() {
           </div>
         </div>
 
+        {/* Leaderboard */}
         <div>
-          <p className="text-[10px] text-muted-foreground mb-2">Top Performers</p>
-          {[
-            { rank: 1, name: "Priya S.", pts: "3,210", color: "text-amber-400" },
-            { rank: 2, name: "Arjun R.", pts: "2,890", color: "text-slate-400" },
-            { rank: 3, name: "Kavya M.", pts: "2,650", color: "text-orange-400" },
-          ].map((r) => (
-            <div key={r.rank} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-colors">
-              <span className={`text-xs font-bold w-5 ${r.color}`}>#{r.rank}</span>
-              <span className="text-xs flex-1">{r.name}</span>
-              <span className="text-xs text-primary font-medium">{r.pts}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Floating MCQ badge */}
-      <motion.div
-        initial={{ opacity: 0, x: 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.1, duration: 0.5 }}
-        className="absolute -right-10 top-6 glass-card rounded-xl border border-pink-500/20 p-3 w-44 shadow-xl hidden sm:block"
-      >
-        <div className="flex items-center gap-1.5 mb-2">
-          <Brain className="w-3 h-3 text-pink-400" />
-          <span className="text-[10px] font-semibold text-pink-400">MCQ Practice</span>
-        </div>
-        <p className="text-[10px] text-muted-foreground mb-2 leading-relaxed">What is Big O notation used for?</p>
-        {[
-          { text: "Algorithm complexity", correct: true },
-          { text: "A sorting method", correct: false },
-        ].map((opt) => (
-          <div key={opt.text} className={`text-[10px] px-2 py-1 rounded-lg border mb-1 ${opt.correct ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground"}`}>
-            {opt.text}
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2.5">Top Performers</p>
+          <div className="space-y-1">
+            {[
+              { rank: 1, name: "Priya S.",  pts: "3,210", color: "text-amber-400",  bg: "bg-amber-500/10",  badge: "🥇" },
+              { rank: 2, name: "Arjun R.",  pts: "2,890", color: "text-slate-400",  bg: "bg-slate-500/10",  badge: "🥈" },
+              { rank: 3, name: "Kavya M.", pts: "2,650", color: "text-orange-400", bg: "bg-orange-500/10", badge: "🥉" },
+            ].map((r) => (
+              <div key={r.rank} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl ${r.bg}`}>
+                <span className="text-sm w-4">{r.badge}</span>
+                <span className="text-xs flex-1 font-medium">{r.name}</span>
+                <span className={`text-xs font-bold ${r.color}`}>{r.pts} pts</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </motion.div>
-
-      {/* Floating code badge */}
-      <motion.div
-        initial={{ opacity: 0, x: -24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.35, duration: 0.5 }}
-        className="absolute -left-8 bottom-24 glass-card rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-2.5 shadow-xl hidden sm:flex items-center gap-2"
-      >
-        <Terminal className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-        <div>
-          <p className="text-[10px] font-semibold text-cyan-400">Submitted ✓</p>
-          <p className="text-[10px] text-muted-foreground">All 5 tests passed</p>
         </div>
-      </motion.div>
-
-      {/* Points burst */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0, y: 8 }}
-        animate={{ opacity: [0, 1, 1, 0], scale: [0.6, 1.1, 1, 0.8], y: [8, 0, 0, -12] }}
-        transition={{ delay: 2.2, duration: 1.8, repeat: Infinity, repeatDelay: 5 }}
-        className="absolute -left-2 top-1/3 gradient-bg text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg pointer-events-none"
-      >
-        +10 pts 🎉
       </motion.div>
     </TiltCard>
   )
@@ -839,7 +799,12 @@ export default function LandingPage() {
     router.replace(user.role === "super_admin" ? "/super-admin" : user.role === "college_admin" ? "/admin" : "/dashboard")
   }, [token, user, router])
 
-  const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY - 64
+    window.scrollTo({ top, behavior: "smooth" })
+  }
 
   const handleContact = (e: React.FormEvent) => {
     e.preventDefault()
@@ -858,7 +823,7 @@ export default function LandingPage() {
       <MobileBottomCTA />
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section id="hero" ref={heroRef} className="relative min-h-[calc(100vh-64px)] flex items-center overflow-hidden pt-16 pb-20 px-4 sm:px-6">
+      <section id="hero" ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-20 px-4 sm:px-6">
         <Orb className="w-[500px] h-[500px] bg-violet-500/20 -top-32 -left-24 sm:-left-32" />
         <Orb className="w-[400px] h-[400px] bg-cyan-500/15 top-1/3 -right-16 sm:-right-24" />
         <Orb className="w-[280px] h-[280px] bg-pink-500/15 bottom-8 left-1/4" />
@@ -1006,7 +971,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ───────────────────────────────────────────────────────────── */}
-      <section id="features" className="py-16 sm:py-24 px-4 sm:px-6"
+      <section id="features" className="scroll-mt-20 py-16 sm:py-24 px-4 sm:px-6"
         onMouseEnter={() => setTabPaused(true)}
         onMouseLeave={() => setTabPaused(false)}
       >
@@ -1111,7 +1076,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── About ──────────────────────────────────────────────────────────────── */}
-      <section id="about" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+      <section id="about" className="scroll-mt-20 py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <Orb className="w-[400px] h-[400px] bg-purple-500/10 -left-32 top-0" />
         <Orb className="w-[300px] h-[300px] bg-cyan-500/10 right-0 bottom-0" />
         <div className="max-w-7xl mx-auto relative z-10">
@@ -1390,7 +1355,7 @@ export default function LandingPage() {
       </section> */}
 
       {/* ── Contact ────────────────────────────────────────────────────────────── */}
-      <section id="contact" className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
+      <section id="contact" className="scroll-mt-20 py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
         <Orb className="w-[350px] h-[350px] bg-violet-500/10 -right-24 top-0" />
         <Orb className="w-[280px] h-[280px] bg-cyan-500/10 -left-16 bottom-0" />
         <div className="max-w-6xl mx-auto relative z-10">
@@ -1501,7 +1466,7 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-bold mb-4">Platform</h4>
               <ul className="space-y-2.5">
-                {["features", "pricing", "about"].map((id) => (
+                {["features", "about", "contact"].map((id) => (
                   <li key={id}>
                     <button onClick={() => scrollTo(id)} className="text-sm text-muted-foreground hover:text-foreground capitalize transition-colors">
                       {id}
