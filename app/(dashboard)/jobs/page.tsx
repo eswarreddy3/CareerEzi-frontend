@@ -25,6 +25,7 @@ interface Job {
   apply_link: string
   deadline: string | null
   description: string | null
+  scope: "global" | "college"
   created_at: string
 }
 
@@ -153,9 +154,16 @@ export default function JobsPage() {
                       <div className="p-2.5 rounded-xl bg-primary/10 flex-shrink-0">
                         <Building2 className="h-5 w-5 text-primary" />
                       </div>
-                      <Badge variant="outline" className={cn("text-xs border ml-auto", tc.color)}>
-                        {tc.label}
-                      </Badge>
+                      <div className="flex items-center gap-2 ml-auto">
+                        {job.scope === "college" && (
+                          <Badge variant="outline" className="text-xs border border-primary/40 text-primary bg-primary/10">
+                            Your College
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className={cn("text-xs border", tc.color)}>
+                          {tc.label}
+                        </Badge>
+                      </div>
                     </div>
 
                     {/* Title & company */}

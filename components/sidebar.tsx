@@ -60,6 +60,7 @@ const collegeAdminNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/jobs", label: "Job Postings", icon: BriefcaseBusiness },
   { href: "/feed", label: "College Feed", icon: Newspaper },
 ]
 
