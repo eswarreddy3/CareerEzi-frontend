@@ -28,6 +28,7 @@ import {
   FileText,
   BriefcaseBusiness,
   MessageSquare,
+  BarChart2,
 } from "lucide-react"
 import { useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -53,6 +54,7 @@ const studentNavItems = [
   { href: "/feed", label: "College Feed", icon: Newspaper },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/resume", label: "Resume Builder", icon: FileText },
+  { href: "/report", label: "My Report", icon: BarChart2 },
   { href: "/profile", label: "Profile", icon: User },
 ]
 
