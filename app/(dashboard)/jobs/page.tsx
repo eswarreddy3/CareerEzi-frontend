@@ -192,12 +192,16 @@ export default function JobsPage() {
 
                     {/* Apply button */}
                     <div className="mt-auto pt-2">
-                      <a href={job.apply_link} target="_blank" rel="noopener noreferrer">
-                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-                          Apply Now
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </a>
+                      <Button
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+                        onClick={() => {
+                          api.post(`/jobs/${job.id}/apply`).catch(() => {})
+                          window.open(job.apply_link, "_blank", "noopener,noreferrer")
+                        }}
+                      >
+                        Apply Now
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
                     </div>
                   </GlassCard>
                 </motion.div>
