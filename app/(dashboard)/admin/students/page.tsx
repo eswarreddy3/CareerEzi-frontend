@@ -15,8 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import {
   Users, Search, Flame, Mail, Loader2, Download,
-  ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle, CheckCircle, ExternalLink, FileDown,
+  ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle, CheckCircle, ExternalLink, FileDown, Pencil,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -90,6 +98,42 @@ export default function AdminStudentsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("points")
   const [sortDir, setSortDir] = useState<SortDir>("desc")
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
+  const [editStudent, setEditStudent] = useState<Student | null>(null)
+  const [editForm, setEditForm] = useState({ name: "", branch: "", section: "", roll_number: "", passout_year: "" })
+  const [editSaving, setEditSaving] = useState(false)
+
+  function openEdit(student: Student) {
+    setEditStudent(student)
+    setEditForm({
+      name: student.name,
+      branch: student.branch || "",
+      section: student.section || "",
+      roll_number: student.roll_number || "",
+      passout_year: student.passout_year ? String(student.passout_year) : "",
+    })
+  }
+
+  async function saveEdit() {
+    if (!editStudent) return
+    setEditSaving(true)
+    try {
+      const res = await api.patch(`/admin/students/${editStudent.id}`, {
+        name: editForm.name.trim(),
+        branch: editForm.branch.trim(),
+        section: editForm.section.trim(),
+        roll_number: editForm.roll_number.trim(),
+        passout_year: editForm.passout_year ? parseInt(editForm.passout_year) : null,
+      })
+      setStudents(prev => prev.map(s => s.id === editStudent.id ? { ...s, ...res.data } : s))
+      toast.success("Student updated")
+      setEditStudent(null)
+    } catch {
+      toast.error("Failed to update student")
+    } finally {
+      setEditSaving(false)
+    }
+  }
 
   useEffect(() => {
     const params = new URLSearchParams()
@@ -394,13 +438,13 @@ export default function AdminStudentsPage() {
                       Name <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
                     </button>
                   </th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden md:table-cell">
+                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">
                     Roll No
                   </th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">
+                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden md:table-cell">
                     Branch / Sec
                   </th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">
+                  <th className="text-left py-3 px-3 text-sm font-medium text-muted-foreground hidden xl:table-cell">
                     Year
                   </th>
                   <th className="text-right py-3 px-3">
@@ -411,7 +455,7 @@ export default function AdminStudentsPage() {
                       Points <SortIcon col="points" sortKey={sortKey} sortDir={sortDir} />
                     </button>
                   </th>
-                  <th className="text-right py-3 px-3 hidden lg:table-cell">
+                  <th className="text-right py-3 px-3 hidden xl:table-cell">
                     <button
                       onClick={() => toggleSort("streak")}
                       className="flex items-center justify-end ml-auto text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -448,34 +492,37 @@ export default function AdminStudentsPage() {
                       />
                     </td>
                     <td className="py-3 px-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2.5">
                         <Avatar className="h-8 w-8 flex-shrink-0">
                           <AvatarFallback className={cn(
-                            "text-xs",
+                            "text-xs font-medium",
                             student.is_inactive ? "bg-red-500/20 text-red-400" : "bg-secondary text-foreground"
                           )}>
-                            {student.name.split(" ").map(n => n[0]).join("")}
+                            {student.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{student.name}</p>
-                          <p className="text-xs text-muted-foreground">{student.email}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                          <p className="text-xs text-muted-foreground/70 sm:hidden">
+                            {[student.roll_number, student.branch, student.section].filter(Boolean).join(" · ") || "—"}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-3 hidden md:table-cell text-sm text-muted-foreground">
+                    <td className="py-3 px-3 hidden sm:table-cell text-sm text-muted-foreground">
                       {student.roll_number || "—"}
                     </td>
-                    <td className="py-3 px-3 hidden sm:table-cell text-sm text-muted-foreground">
+                    <td className="py-3 px-3 hidden md:table-cell text-sm text-muted-foreground">
                       {student.branch || "—"}{student.section ? ` / ${student.section}` : ""}
                     </td>
-                    <td className="py-3 px-3 hidden lg:table-cell text-sm text-muted-foreground">
+                    <td className="py-3 px-3 hidden xl:table-cell text-sm text-muted-foreground">
                       {student.passout_year || "—"}
                     </td>
                     <td className="py-3 px-3 text-right text-sm font-medium text-foreground">
                       {student.points.toLocaleString()}
                     </td>
-                    <td className="py-3 px-3 text-right hidden lg:table-cell">
+                    <td className="py-3 px-3 text-right hidden xl:table-cell">
                       <div className="flex items-center justify-end gap-1">
                         <Flame className={cn("h-3 w-3", student.streak > 0 ? "text-orange-500" : "text-muted-foreground")} />
                         <span className="text-sm text-foreground">{student.streak}</span>
@@ -487,40 +534,46 @@ export default function AdminStudentsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         {student.is_inactive && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-red-500/30 text-red-400 hover:bg-red-500/10 hidden xl:flex"
+                          <button
+                            title="Send reminder"
                             onClick={() => handleRemind(student)}
                             disabled={remindingId === student.id}
+                            className="h-8 w-8 flex items-center justify-center rounded-md border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors"
                           >
                             {remindingId === student.id
-                              ? <Loader2 className="h-3 w-3 animate-spin" />
-                              : <><Mail className="h-3 w-3 mr-1" />Remind</>
+                              ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              : <Mail className="h-3.5 w-3.5" />
                             }
-                          </Button>
+                          </button>
                         )}
+                        <button
+                          title="Edit student"
+                          onClick={() => openEdit(student)}
+                          className="h-8 w-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
                         <Link href={`/admin/students/${student.id}`}>
-                          <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-1">
-                            <ExternalLink className="h-3 w-3" />
-                            <span className="hidden sm:inline">View</span>
-                          </Button>
+                          <button
+                            title="View profile"
+                            className="h-8 w-8 flex items-center justify-center rounded-md border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </button>
                         </Link>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-secondary text-muted-foreground hover:text-foreground gap-1"
+                        <button
+                          title="Download report"
                           onClick={() => handleDownloadReport(student)}
                           disabled={downloadingId === student.id}
+                          className="h-8 w-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/60 disabled:opacity-50 transition-colors"
                         >
                           {downloadingId === student.id
-                            ? <Loader2 className="h-3 w-3 animate-spin" />
-                            : <FileDown className="h-3 w-3" />
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            : <FileDown className="h-3.5 w-3.5" />
                           }
-                          <span className="hidden xl:inline">Report</span>
-                        </Button>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -543,6 +596,75 @@ export default function AdminStudentsPage() {
           </p>
         )}
       </GlassCard>
+
+      <Dialog open={!!editStudent} onOpenChange={(open) => { if (!open) setEditStudent(null) }}>
+        <DialogContent className="bg-[#0A0F1E] border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Edit Student</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-sm">Name</Label>
+              <Input
+                value={editForm.name}
+                onChange={(e) => setEditForm(f => ({ ...f, name: e.target.value }))}
+                className="bg-secondary/50 border-border text-foreground"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-sm">Roll Number</Label>
+              <Input
+                value={editForm.roll_number}
+                onChange={(e) => setEditForm(f => ({ ...f, roll_number: e.target.value }))}
+                className="bg-secondary/50 border-border text-foreground"
+                placeholder="e.g. 21CS001"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-muted-foreground text-sm">Branch</Label>
+                <Input
+                  value={editForm.branch}
+                  onChange={(e) => setEditForm(f => ({ ...f, branch: e.target.value }))}
+                  className="bg-secondary/50 border-border text-foreground"
+                  placeholder="e.g. CSE"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-muted-foreground text-sm">Section</Label>
+                <Input
+                  value={editForm.section}
+                  onChange={(e) => setEditForm(f => ({ ...f, section: e.target.value }))}
+                  className="bg-secondary/50 border-border text-foreground"
+                  placeholder="e.g. A"
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-sm">Passout Year</Label>
+              <Input
+                type="number"
+                value={editForm.passout_year}
+                onChange={(e) => setEditForm(f => ({ ...f, passout_year: e.target.value }))}
+                className="bg-secondary/50 border-border text-foreground"
+                placeholder="e.g. 2026"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="border-border text-muted-foreground" onClick={() => setEditStudent(null)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={saveEdit}
+              disabled={editSaving || !editForm.name.trim()}
+            >
+              {editSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
