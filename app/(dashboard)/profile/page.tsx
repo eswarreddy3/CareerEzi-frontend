@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Camera, Lock } from "lucide-react"
+import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock } from "lucide-react"
+import { AvatarPicker } from "@/components/avatar-picker"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -63,9 +64,7 @@ const personalSchema = z.object({
 type PersonalForm = z.infer<typeof personalSchema>
 
 function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: Partial<any>) => void }) {
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<PersonalForm>({
     resolver: zodResolver(personalSchema),
@@ -77,24 +76,13 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
     },
   })
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setAvatarPreview(URL.createObjectURL(file))
-    setUploadingAvatar(true)
+  const handleAvatarSelect = async (url: string) => {
     try {
-      const fd = new FormData()
-      fd.append("file", file)
-      const res = await api.post("/student/profile/avatar", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      updateUser({ photo_url: res.data.photo_url } as any)
-      toast.success("Profile photo updated")
+      await api.patch("/student/profile", { photo_url: url })
+      updateUser({ photo_url: url } as any)
+      toast.success("Avatar updated")
     } catch {
-      toast.error("Failed to upload photo")
-      setAvatarPreview(null)
-    } finally {
-      setUploadingAvatar(false)
+      toast.error("Failed to update avatar")
     }
   }
 
@@ -113,7 +101,7 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
     }
   }
 
-  const photoUrl = avatarPreview || user?.photo_url
+  const photoUrl = user?.photo_url
   const initials = user?.name ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) : "??"
 
   return (
@@ -122,29 +110,33 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
       <form onSubmit={handleSubmit(onSave)} className="space-y-4">
         {/* Avatar */}
         <div className="space-y-1.5">
-          <Label className="text-foreground">Profile Photo</Label>
+          <Label className="text-foreground">Avatar</Label>
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setAvatarPickerOpen(true)}
+              className="relative group"
+            >
+              <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary">
                 {photoUrl
-                  ? <img src={photoUrl.startsWith("/static") ? `${process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "")}${photoUrl}` : photoUrl} alt="avatar" className="w-full h-full object-cover" />
+                  ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
                   : <span className="text-xl font-bold text-primary font-serif">{initials}</span>
                 }
               </div>
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploadingAvatar}
-                className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center hover:brightness-110 transition-all disabled:opacity-50"
-              >
-                {uploadingAvatar ? <Loader2 className="h-2.5 w-2.5 text-primary-foreground animate-spin" /> : <Camera className="h-2.5 w-2.5 text-primary-foreground" />}
-              </button>
-            </div>
-            <button type="button" onClick={() => fileRef.current?.click()} className="text-sm text-primary hover:underline">
-              {uploadingAvatar ? "Uploading…" : "Change photo"}
+              <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                <Pencil className="h-2.5 w-2.5 text-primary-foreground" />
+              </div>
             </button>
-            <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleAvatarChange} />
+            <button type="button" onClick={() => setAvatarPickerOpen(true)} className="text-sm text-primary hover:underline">
+              Change avatar
+            </button>
           </div>
+          <AvatarPicker
+            open={avatarPickerOpen}
+            onClose={() => setAvatarPickerOpen(false)}
+            onSelect={handleAvatarSelect}
+            current={photoUrl}
+          />
         </div>
 
         {/* Phone */}
@@ -211,7 +203,6 @@ export default function ProfilePage() {
     : "??"
 
   const photoUrl: string | undefined = (user as any)?.photo_url
-  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ?? ""
 
   const {
     register,
@@ -260,7 +251,7 @@ export default function ProfilePage() {
               <div className="relative mb-4">
                 <div className="w-24 h-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center primary-glow overflow-hidden">
                   {photoUrl
-                    ? <img src={photoUrl.startsWith("/static") ? `${apiBase}${photoUrl}` : photoUrl} alt="avatar" className="w-full h-full object-cover" />
+                    ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
                     : <span className="text-3xl font-bold text-primary font-serif">{initials}</span>
                   }
                 </div>

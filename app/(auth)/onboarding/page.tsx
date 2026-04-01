@@ -6,9 +6,10 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import {
-  Loader2, Eye, EyeOff, Check, Github, Linkedin, Camera,
-  BookOpen, Trophy, Zap, Users, Code2, Target,
+  Loader2, Eye, EyeOff, Check, Github, Linkedin,
+  BookOpen, Trophy, Zap, Users, Code2, Target, Pencil,
 } from "lucide-react"
+import { AvatarPicker } from "@/components/avatar-picker"
 import { toast } from "sonner"
 import { Logo } from "@/components/logo"
 import { motion, AnimatePresence } from "framer-motion"
@@ -106,10 +107,8 @@ export default function OnboardingPage() {
   const [pwdValue, setPwdValue] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [done, setDone] = useState(false)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [selectedAvatar, setSelectedAvatar] = useState<string>("")
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
 
   useEffect(() => {
     if (!token || !user) { router.replace("/login"); return }
@@ -122,13 +121,6 @@ export default function OnboardingPage() {
   })
   const form2 = useForm<Step2>({ resolver: zodResolver(step2Schema) })
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setAvatarFile(file)
-    setAvatarPreview(URL.createObjectURL(file))
-  }
-
   const handleStep1 = (data: Step1) => {
     setFormData((prev) => ({ ...prev, ...data }))
     setStep(2)
@@ -137,24 +129,13 @@ export default function OnboardingPage() {
   const handleStep2 = async (data: Step2) => {
     setIsSubmitting(true)
     try {
-      let photo_url: string | undefined
-      if (avatarFile) {
-        setUploadingAvatar(true)
-        const fd = new FormData()
-        fd.append("file", avatarFile)
-        const uploadRes = await api.post("/student/profile/avatar", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-        photo_url = uploadRes.data.photo_url
-        setUploadingAvatar(false)
-      }
       await api.patch("/auth/complete-onboarding", {
         phone: formData.phone,
         linkedin_url: formData.linkedin_url,
         github_url: formData.github_url,
         dob: formData.dob,
         new_password: data.new_password,
-        photo_url,
+        photo_url: selectedAvatar || undefined,
       })
       updateUser({ first_login: false })
       toast.success("Setup complete! Welcome to CareerEzi 🎉")
@@ -167,7 +148,6 @@ export default function OnboardingPage() {
       })
     } finally {
       setIsSubmitting(false)
-      setUploadingAvatar(false)
     }
   }
 
@@ -337,36 +317,42 @@ export default function OnboardingPage() {
                       </div>
                     </div>
 
-                    {/* Avatar */}
+                    {/* Avatar picker */}
                     <div className="flex items-center gap-4">
-                      <div className="relative flex-shrink-0">
-                        <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden">
-                          {avatarPreview
-                            ? <img src={avatarPreview} alt="preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setAvatarPickerOpen(true)}
+                        className="relative flex-shrink-0 group"
+                      >
+                        <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary">
+                          {selectedAvatar
+                            ? <img src={selectedAvatar} alt="avatar" className="w-full h-full object-cover" />
                             : <span className="text-xl font-bold text-primary font-serif">{initials}</span>
                           }
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => fileRef.current?.click()}
-                          className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center hover:brightness-110 transition-all"
-                        >
-                          <Camera className="h-2.5 w-2.5 text-primary-foreground" />
-                        </button>
-                      </div>
+                        <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                          <Pencil className="h-2.5 w-2.5 text-primary-foreground" />
+                        </div>
+                      </button>
                       <div>
                         <p className="text-sm font-medium text-foreground">{user?.name}</p>
                         <button
                           type="button"
-                          onClick={() => fileRef.current?.click()}
+                          onClick={() => setAvatarPickerOpen(true)}
                           className="text-xs text-primary hover:underline mt-0.5"
                         >
-                          {avatarPreview ? "Change photo" : "Upload profile photo"}
+                          {selectedAvatar ? "Change avatar" : "Pick an avatar"}
                           <span className="text-muted-foreground ml-1">(optional)</span>
                         </button>
                       </div>
-                      <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleAvatarChange} />
                     </div>
+
+                    <AvatarPicker
+                      open={avatarPickerOpen}
+                      onClose={() => setAvatarPickerOpen(false)}
+                      onSelect={setSelectedAvatar}
+                      current={selectedAvatar}
+                    />
 
                     {/* Phone */}
                     <div className="space-y-1.5">
@@ -502,7 +488,7 @@ export default function OnboardingPage() {
                         disabled={isSubmitting}
                       >
                         {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                        {uploadingAvatar ? "Uploading…" : "Complete Setup"}
+                        Complete Setup
                       </Button>
                     </div>
                   </form>
