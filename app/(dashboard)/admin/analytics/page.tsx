@@ -12,12 +12,12 @@ import {
 } from "@/components/ui/chart"
 import {
   Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell,
-  Line, LineChart, ResponsiveContainer,
+  Line, LineChart, PieChart, Pie, Legend,
 } from "recharts"
 import {
   Users, TrendingUp, Flame, Loader2, Download,
   Trophy, AlertTriangle, BookOpen, Target, Activity,
-  UserX, Send,
+  UserX, Send, Code2, GitBranch, ClipboardCheck,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
@@ -26,8 +26,11 @@ interface ReadinessBucket { range: string; label: string; count: number }
 interface WeekPoint       { week: string; active: number }
 interface MCQTopicStat    { topic: string; total: number; correct: number; accuracy: number }
 interface CourseStat      { course_id: number; course_title: string; students_started: number; total_students: number; avg_completion_pct: number; total_lessons: number }
-interface AtRiskStudent   { id: number; name: string; email: string; branch: string | null; section: string | null; roll_number: string | null; points: number; last_active: string | null }
-interface TopStudent      { id: number; name: string; points: number; streak: number; branch: string | null }
+interface AtRiskStudent     { id: number; name: string; email: string; branch: string | null; section: string | null; roll_number: string | null; points: number; last_active: string | null }
+interface TopStudent        { id: number; name: string; points: number; streak: number; branch: string | null }
+interface BranchStat        { branch: string; avgPoints: number; count: number }
+interface AssignmentModStat { module: string; attempts: number; passed: number; pass_rate: number; avg_score: number }
+interface CodingDiff        { difficulty: string; solved: number; total: number }
 
 interface Analytics {
   total_students: number
@@ -42,6 +45,10 @@ interface Analytics {
   readiness_buckets: ReadinessBucket[]
   at_risk_students: AtRiskStudent[]
   at_risk_count: number
+  branch_stats: BranchStat[]
+  assignment_module_stats: AssignmentModStat[]
+  coding_summary: CodingDiff[]
+  total_coding_submissions: number
   top_students: TopStudent[]
 }
 
@@ -108,7 +115,13 @@ export default function AdminAnalyticsPage() {
     )
   }
 
-  const a = analytics!
+  const a = {
+    branch_stats: [],
+    assignment_module_stats: [],
+    coding_summary: [],
+    total_coding_submissions: 0,
+    ...analytics!,
+  }
   const avgCoursePct = a.course_completions.length
     ? Math.round(a.course_completions.reduce((s, c) => s + c.avg_completion_pct, 0) / a.course_completions.length)
     : 0
@@ -296,7 +309,119 @@ export default function AdminAnalyticsPage() {
         </GlassCard>
       </div>
 
-      {/* ── Row 4: At-risk students ── */}
+      {/* ── Row 4: Branch performance chart ── */}
+      {a.branch_stats.length > 0 && (
+        <GlassCard>
+          <div className="flex items-center gap-2 mb-1">
+            <GitBranch className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold font-serif text-foreground">Branch Performance</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">Average points per branch</p>
+          <ChartContainer
+            config={{ avgPoints: { label: "Avg Points", color: "#6366F1" } }}
+            className="h-[220px] w-full"
+          >
+            <BarChart data={a.branch_stats} layout="vertical" margin={{ left: 8, right: 24 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+              <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} />
+              <YAxis dataKey="branch" type="category" stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} width={72} />
+              <ChartTooltip
+                content={<ChartTooltipContent />}
+                formatter={(val: number, _: string, props: { payload?: BranchStat }) => [
+                  `${val} pts · ${props.payload?.count ?? 0} students`, "Avg Points"
+                ]}
+              />
+              <Bar dataKey="avgPoints" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                {a.branch_stats.map((_, i) => (
+                  <Cell key={i} fill={["#6366F1","#8B5CF6","#3B82F6","#06B6D4","#10B981","#F59E0B"][i % 6]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </GlassCard>
+      )}
+
+      {/* ── Row 5: Assignment pass rates + Coding breakdown ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        {/* Assignment module pass rates */}
+        <GlassCard className="lg:col-span-3">
+          <div className="flex items-center gap-2 mb-1">
+            <ClipboardCheck className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold font-serif text-foreground">Assignment Pass Rates</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">% of attempts scoring ≥50% per module</p>
+          {a.assignment_module_stats.length > 0 ? (
+            <ChartContainer
+              config={{ pass_rate: { label: "Pass Rate %", color: "#10B981" }, avg_score: { label: "Avg Score %", color: "#6366F1" } }}
+              className="h-[240px] w-full"
+            >
+              <BarChart data={[...a.assignment_module_stats].reverse()} layout="vertical" margin={{ left: 8, right: 24 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                <XAxis type="number" domain={[0, 100]} stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} tickFormatter={v => `${v}%`} />
+                <YAxis dataKey="module" type="category" stroke="var(--muted-foreground)" fontSize={10} tick={{ fill: "var(--muted-foreground)" }} width={110} />
+                <ChartTooltip content={<ChartTooltipContent />} formatter={(val: number) => [`${val}%`]} />
+                <Bar dataKey="pass_rate" name="Pass Rate %" radius={[0, 3, 3, 0]} maxBarSize={18}>
+                  {a.assignment_module_stats.map((s) => (
+                    <Cell key={s.module} fill={s.pass_rate >= 70 ? "#10B981" : s.pass_rate >= 40 ? "#F59E0B" : "#EF4444"} />
+                  ))}
+                </Bar>
+                <Bar dataKey="avg_score" name="Avg Score %" radius={[0, 3, 3, 0]} maxBarSize={18} fill="#6366F140" />
+              </BarChart>
+            </ChartContainer>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">No assignment attempts yet</p>
+          )}
+        </GlassCard>
+
+        {/* Coding difficulty breakdown */}
+        <GlassCard className="lg:col-span-2">
+          <div className="flex items-center gap-2 mb-1">
+            <Code2 className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold font-serif text-foreground">Coding Problems Solved</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">Unique problems solved across all students</p>
+          {a.coding_summary.some(d => d.solved > 0) ? (
+            <>
+              <ChartContainer
+                config={{
+                  Easy:   { label: "Easy",   color: "#10B981" },
+                  Medium: { label: "Medium", color: "#F59E0B" },
+                  Hard:   { label: "Hard",   color: "#EF4444" },
+                }}
+                className="h-[160px] w-full"
+              >
+                <PieChart>
+                  <Pie data={a.coding_summary} dataKey="solved" nameKey="difficulty" cx="50%" cy="50%" innerRadius={40} outerRadius={68} paddingAngle={3}>
+                    {a.coding_summary.map((d) => (
+                      <Cell key={d.difficulty} fill={d.difficulty === "Easy" ? "#10B981" : d.difficulty === "Medium" ? "#F59E0B" : "#EF4444"} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend iconType="circle" iconSize={8} />
+                </PieChart>
+              </ChartContainer>
+              <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-border/50">
+                {a.coding_summary.map(d => (
+                  <div key={d.difficulty} className="text-center">
+                    <p className="text-base font-bold font-serif" style={{ color: d.difficulty === "Easy" ? "#10B981" : d.difficulty === "Medium" ? "#F59E0B" : "#EF4444" }}>
+                      {d.solved}<span className="text-xs text-muted-foreground font-normal">/{d.total}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">{d.difficulty}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                {a.total_coding_submissions.toLocaleString()} total submissions
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-12">No coding submissions yet</p>
+          )}
+        </GlassCard>
+      </div>
+
+      {/* ── Row 6: At-risk students ── */}
       <GlassCard>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -364,7 +489,7 @@ export default function AdminAnalyticsPage() {
         )}
       </GlassCard>
 
-      {/* ── Row 5: Top 10 leaderboard ── */}
+      {/* ── Row 7: Top 10 leaderboard ── */}
       <GlassCard>
         <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-4 w-4 text-amber-400" />
