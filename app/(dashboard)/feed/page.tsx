@@ -14,6 +14,7 @@ import {
   PenLine, BookOpen, Clock, ChevronLeft, ChevronRight,
   Send, Loader2, Trash2, ImagePlus, Tag, Newspaper,
   Share2, X, Sparkles, Globe, MessageCircle, ExternalLink, Bell,
+  ShieldCheck, Megaphone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -21,7 +22,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface Author { id: number; name: string; branch: string | null; passout_year: number | null }
+interface Author { id: number; name: string; role: string; branch: string | null; passout_year: number | null }
 interface Post {
   id: number; type: "post" | "blog"; title: string | null; content: string
   cover_image_url: string | null; reading_time: number; tags: string[]
@@ -370,6 +371,14 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
 }
 
 // ── Post Card ─────────────────────────────────────────────────────────────────
+// ── Admin post helpers ────────────────────────────────────────────────────────
+function isAdminAuthor(role: string) {
+  return role === "college_admin" || role === "branch_admin"
+}
+function adminLabel(role: string) {
+  return role === "branch_admin" ? "Branch Admin" : "College Admin"
+}
+
 function PostCard({
   post, onLike, onDelete, currentUserId, reactions, onShare,
 }: {
@@ -381,7 +390,9 @@ function PostCard({
   onShare: (post: Post) => void
 }) {
   const router = useRouter()
-  const isBlog   = post.type === "blog"
+  const isBlog    = post.type === "blog"
+  const isOfficial = isAdminAuthor(post.author.role)
+
   const [expanded, setExpanded] = useState(false)
   const limit = 220
   const shouldTruncate = post.content.length > limit
@@ -394,155 +405,205 @@ function PostCard({
   return (
     <GlassCard
       hover
-      className="group relative overflow-hidden border-border/60 hover:border-primary/25 transition-all duration-300 cursor-pointer"
+      className={cn(
+        "group relative overflow-hidden transition-all duration-300 cursor-pointer",
+        isOfficial
+          ? "border-amber-500/40 hover:border-amber-400/60 shadow-[0_0_24px_rgba(245,158,11,0.08)]"
+          : "border-border/60 hover:border-primary/25"
+      )}
       onClick={() => router.push(`/feed/post/${post.id}`)}
     >
-      {/* Accent line */}
-      <div className={cn(
-        "absolute top-0 left-0 right-0 h-0.5",
-        isBlog
-          ? "bg-gradient-to-r from-purple-500 via-pink-400 to-purple-500"
-          : "bg-gradient-to-r from-primary via-accent to-primary"
-      )} />
-
-      {/* Cover image — full bleed */}
-      {isBlog && post.cover_image_url && (
-        <div className="relative -mx-5 -mt-1 mb-4 h-48 overflow-hidden" style={{ width: "calc(100% + 2.5rem)", marginLeft: "-1.25rem" }}>
-          <img src={post.cover_image_url} alt={post.title ?? ""} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+      {/* Top accent — announcement banner for admins, thin line for others */}
+      {isOfficial ? (
+        <div className="absolute top-0 left-0 right-0 flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 border-b border-amber-500/25">
+          <Megaphone className="h-3 w-3 text-amber-400 flex-shrink-0" />
+          <span className="text-[11px] font-semibold text-amber-400 tracking-wide uppercase">
+            Official Announcement
+          </span>
         </div>
+      ) : (
+        <div className={cn(
+          "absolute top-0 left-0 right-0 h-0.5",
+          isBlog
+            ? "bg-gradient-to-r from-purple-500 via-pink-400 to-purple-500"
+            : "bg-gradient-to-r from-primary via-accent to-primary"
+        )} />
       )}
 
-      {/* Author row */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 ring-2 ring-border ring-offset-1 ring-offset-card transition-all group-hover:ring-primary/40">
-            <AvatarFallback className="bg-primary/20 text-primary font-bold text-xs">
-              {initials(post.author.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-bold text-foreground leading-none">{post.author.name}</p>
-            <div className="flex items-center gap-1 mt-0.5 text-xs text-muted-foreground">
-              <span>{post.author.branch ?? "Student"}</span>
-              <span className="opacity-40">·</span>
-              <span>{timeAgo(post.created_at)}</span>
-              <span className="opacity-40">·</span>
-              <Globe className="h-2.5 w-2.5 opacity-60" />
+      {/* Offset content down when announcement banner is present */}
+      <div className={cn(isOfficial && "mt-6")}>
+
+        {/* Cover image — full bleed */}
+        {isBlog && post.cover_image_url && (
+          <div className="relative -mx-5 -mt-1 mb-4 h-48 overflow-hidden" style={{ width: "calc(100% + 2.5rem)", marginLeft: "-1.25rem" }}>
+            <img src={post.cover_image_url} alt={post.title ?? ""} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+          </div>
+        )}
+
+        {/* Author row */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            {/* Avatar with optional verified badge */}
+            <div className="relative flex-shrink-0">
+              <Avatar className={cn(
+                "h-10 w-10 ring-2 ring-offset-1 ring-offset-card transition-all",
+                isOfficial
+                  ? "ring-amber-500/50 group-hover:ring-amber-400/70"
+                  : "ring-border group-hover:ring-primary/40"
+              )}>
+                <AvatarFallback className={cn(
+                  "font-bold text-xs",
+                  isOfficial
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-primary/20 text-primary"
+                )}>
+                  {initials(post.author.name)}
+                </AvatarFallback>
+              </Avatar>
+              {isOfficial && (
+                <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 ring-2 ring-card">
+                  <ShieldCheck className="w-2.5 h-2.5 text-white" />
+                </span>
+              )}
+            </div>
+
+            <div>
+              <div className="flex items-center gap-1.5 leading-none mb-1">
+                <p className="text-sm font-bold text-foreground">{post.author.name}</p>
+                {isOfficial && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                    {adminLabel(post.author.role)}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {!isOfficial && <span>{post.author.branch ?? "Student"}</span>}
+                {!isOfficial && <span className="opacity-40">·</span>}
+                <span>{timeAgo(post.created_at)}</span>
+                <span className="opacity-40">·</span>
+                <Globe className="h-2.5 w-2.5 opacity-60" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-xs flex items-center gap-1 rounded-full",
-              isBlog
-                ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
-                : "bg-primary/10 border-primary/30 text-primary"
-            )}
-          >
-            {isBlog ? <BookOpen className="h-3 w-3" /> : <PenLine className="h-3 w-3" />}
-            {isBlog ? "Blog" : "Post"}
-          </Badge>
-          {post.author.id === currentUserId && (
-            <button
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
-              onClick={e => { e.stopPropagation(); onDelete(post.id) }}
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs flex items-center gap-1 rounded-full",
+                isBlog
+                  ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
+                  : "bg-primary/10 border-primary/30 text-primary"
+              )}
             >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Title */}
-      {post.title && (
-        <h3 className="font-bold font-serif text-foreground text-lg mb-2 leading-snug group-hover:text-primary transition-colors">
-          {post.title}
-        </h3>
-      )}
-
-      {/* Content */}
-      <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-        {displayContent}
-        {shouldTruncate && (
-          <button
-            className="text-primary font-semibold ml-1 hover:underline"
-            onClick={e => { e.stopPropagation(); setExpanded(!expanded) }}
-          >
-            {expanded ? " see less" : " see more"}
-          </button>
-        )}
-      </p>
-
-      {/* Tags */}
-      {post.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {post.tags.map(tag => (
-            <span key={tag} className="text-xs text-primary/80 bg-primary/10 border border-primary/15 px-2.5 py-0.5 rounded-full font-medium">
-              #{tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Reaction + comment stats row */}
-      {(post.like_count > 0 || post.comment_count > 0) && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground pb-3 mb-3 border-b border-border/40">
-          <div className="flex items-center gap-1.5">
-            {post.like_count > 0 && (
-              <>
-                <span className="flex -space-x-0.5">
-                  {REACTIONS.slice(0, 3).map(r => (
-                    <span key={r.id} className="text-sm leading-none">{r.emoji}</span>
-                  ))}
-                </span>
-                <span>{post.like_count}</span>
-              </>
+              {isBlog ? <BookOpen className="h-3 w-3" /> : <PenLine className="h-3 w-3" />}
+              {isBlog ? "Blog" : "Post"}
+            </Badge>
+            {post.author.id === currentUserId && (
+              <button
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100"
+                onClick={e => { e.stopPropagation(); onDelete(post.id) }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             )}
           </div>
-          {post.comment_count > 0 && (
-            <span>{post.comment_count} comment{post.comment_count !== 1 ? "s" : ""}</span>
+        </div>
+
+        {/* Title */}
+        {post.title && (
+          <h3 className={cn(
+            "font-bold font-serif text-foreground text-lg mb-2 leading-snug transition-colors",
+            isOfficial ? "group-hover:text-amber-400" : "group-hover:text-primary"
+          )}>
+            {post.title}
+          </h3>
+        )}
+
+        {/* Content */}
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
+          {displayContent}
+          {shouldTruncate && (
+            <button
+              className="text-primary font-semibold ml-1 hover:underline"
+              onClick={e => { e.stopPropagation(); setExpanded(!expanded) }}
+            >
+              {expanded ? " see less" : " see more"}
+            </button>
+          )}
+        </p>
+
+        {/* Tags */}
+        {post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {post.tags.map(tag => (
+              <span key={tag} className={cn(
+                "text-xs px-2.5 py-0.5 rounded-full font-medium border",
+                isOfficial
+                  ? "text-amber-400/80 bg-amber-500/10 border-amber-500/15"
+                  : "text-primary/80 bg-primary/10 border-primary/15"
+              )}>
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Reaction + comment stats row */}
+        {(post.like_count > 0 || post.comment_count > 0) && (
+          <div className="flex items-center justify-between text-xs text-muted-foreground pb-3 mb-3 border-b border-border/40">
+            <div className="flex items-center gap-1.5">
+              {post.like_count > 0 && (
+                <>
+                  <span className="flex -space-x-0.5">
+                    {REACTIONS.slice(0, 3).map(r => (
+                      <span key={r.id} className="text-sm leading-none">{r.emoji}</span>
+                    ))}
+                  </span>
+                  <span>{post.like_count}</span>
+                </>
+              )}
+            </div>
+            {post.comment_count > 0 && (
+              <span>{post.comment_count} comment{post.comment_count !== 1 ? "s" : ""}</span>
+            )}
+          </div>
+        )}
+
+        {/* Action bar */}
+        <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
+          <ReactionPickerButton
+            liked={post.liked_by_me}
+            likeCount={post.like_count}
+            activeReaction={activeReaction}
+            onReact={rid => onLike(post.id, rid)}
+          />
+
+          <button
+            className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all px-3 py-1.5 rounded-xl"
+            onClick={() => router.push(`/feed/post/${post.id}`)}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <span>{post.comment_count > 0 ? post.comment_count : "Comment"}</span>
+          </button>
+
+          <button
+            className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all px-3 py-1.5 rounded-xl ml-auto"
+            onClick={() => onShare(post)}
+          >
+            <Share2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Share</span>
+          </button>
+
+          {isBlog && (
+            <span className="flex items-center gap-1 text-xs text-muted-foreground px-2 ml-1">
+              <Clock className="h-3.5 w-3.5" />
+              {post.reading_time}m
+            </span>
           )}
         </div>
-      )}
 
-      {/* Action bar */}
-      <div
-        className="flex items-center gap-0.5"
-        onClick={e => e.stopPropagation()}
-      >
-        <ReactionPickerButton
-          liked={post.liked_by_me}
-          likeCount={post.like_count}
-          activeReaction={activeReaction}
-          onReact={rid => onLike(post.id, rid)}
-        />
-
-        <button
-          className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all px-3 py-1.5 rounded-xl"
-          onClick={() => router.push(`/feed/post/${post.id}`)}
-        >
-          <MessageCircle className="h-4 w-4" />
-          <span>{post.comment_count > 0 ? post.comment_count : "Comment"}</span>
-        </button>
-
-        <button
-          className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-accent hover:bg-accent/10 transition-all px-3 py-1.5 rounded-xl ml-auto"
-          onClick={() => onShare(post)}
-        >
-          <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Share</span>
-        </button>
-
-        {isBlog && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground px-2 ml-1">
-            <Clock className="h-3.5 w-3.5" />
-            {post.reading_time}m
-          </span>
-        )}
       </div>
     </GlassCard>
   )

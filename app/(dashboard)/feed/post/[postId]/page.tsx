@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   ArrowLeft, MessageCircle, Clock, BookOpen,
   PenLine, Send, Loader2, Trash2, Globe, Share2,
+  ShieldCheck, Megaphone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -17,7 +18,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface Author { id: number; name: string; branch: string | null }
+interface Author { id: number; name: string; role: string; branch: string | null }
 interface Comment {
   id: number; content: string; like_count: number; liked_by_me: boolean
   parent_id: number | null; replies: Comment[]; author: Author; created_at: string
@@ -432,14 +433,32 @@ export default function PostDetailPage() {
       </button>
 
       {/* ── Post card ── */}
-      <GlassCard className="relative overflow-hidden border-border/60">
-        {/* Accent bar */}
-        <div className={cn(
-          "absolute top-0 left-0 right-0 h-1",
-          isBlog
-            ? "bg-gradient-to-r from-purple-500 via-pink-400 to-purple-500"
-            : "bg-gradient-to-r from-primary via-accent to-primary"
-        )} />
+      {(() => {
+        const isOfficial = post.author.role === "college_admin" || post.author.role === "branch_admin"
+        const adminLabel = post.author.role === "branch_admin" ? "Branch Admin" : "College Admin"
+        return (
+      <GlassCard className={cn(
+        "relative overflow-hidden",
+        isOfficial
+          ? "border-amber-500/40 shadow-[0_0_32px_rgba(245,158,11,0.09)]"
+          : "border-border/60"
+      )}>
+        {/* Accent bar / announcement banner */}
+        {isOfficial ? (
+          <div className="absolute top-0 left-0 right-0 flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 border-b border-amber-500/25">
+            <Megaphone className="h-3 w-3 text-amber-400 flex-shrink-0" />
+            <span className="text-[11px] font-semibold text-amber-400 tracking-wide uppercase">Official Announcement</span>
+          </div>
+        ) : (
+          <div className={cn(
+            "absolute top-0 left-0 right-0 h-1",
+            isBlog
+              ? "bg-gradient-to-r from-purple-500 via-pink-400 to-purple-500"
+              : "bg-gradient-to-r from-primary via-accent to-primary"
+          )} />
+        )}
+
+        <div className={cn(isOfficial && "mt-7")}>
 
         {/* Cover image */}
         {isBlog && post.cover_image_url && (
@@ -452,16 +471,35 @@ export default function PostDetailPage() {
         {/* Author row */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 ring-2 ring-primary/30 ring-offset-2 ring-offset-card">
-              <AvatarFallback className="bg-primary/20 text-primary font-bold text-sm">
-                {initials(post.author.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative flex-shrink-0">
+              <Avatar className={cn(
+                "h-12 w-12 ring-2 ring-offset-2 ring-offset-card",
+                isOfficial ? "ring-amber-500/50" : "ring-primary/30"
+              )}>
+                <AvatarFallback className={cn(
+                  "font-bold text-sm",
+                  isOfficial ? "bg-amber-500/20 text-amber-400" : "bg-primary/20 text-primary"
+                )}>
+                  {initials(post.author.name)}
+                </AvatarFallback>
+              </Avatar>
+              {isOfficial && (
+                <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 ring-2 ring-card">
+                  <ShieldCheck className="w-2.5 h-2.5 text-white" />
+                </span>
+              )}
+            </div>
             <div>
-              <p className="font-bold text-foreground">{post.author.name}</p>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-                <span>{post.author.branch ?? "Student"}</span>
-                <span className="opacity-40">·</span>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <p className="font-bold text-foreground">{post.author.name}</p>
+                {isOfficial && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400">
+                    {adminLabel}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {!isOfficial && <><span>{post.author.branch ?? "Student"}</span><span className="opacity-40">·</span></>}
                 <span>{timeAgo(post.created_at)}</span>
                 <span className="opacity-40">·</span>
                 <Globe className="h-2.5 w-2.5 opacity-60" />
@@ -563,7 +601,10 @@ export default function PostDetailPage() {
             <span className="hidden sm:inline">Share</span>
           </button>
         </div>
+        </div>{/* close isOfficial mt-wrapper */}
       </GlassCard>
+        )
+      })()}
 
       {/* ── Comments section ── */}
       {post.comments.length > 0 && (

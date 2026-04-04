@@ -1,104 +1,184 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X } from "lucide-react"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { motion, AnimatePresence, useScroll } from "framer-motion"
+import { Menu, X, ArrowRight } from "lucide-react"
 import { Logo } from "@/components/logo"
 
 interface TopNavProps {
-  /** Pass a scrollTo fn on pages that have in-page sections; omit on auth pages to get href links */
   onScrollTo?: (id: string) => void
 }
 
-const navLinks = ["features", "about", "contact"]
+const navLinks = [
+  { label: "Features",     id: "features" },
+  { label: "For Colleges", id: "how-it-works" },
+  { label: "Gamification", id: "gamification" },
+  { label: "Contact",      id: "contact" },
+]
 
 export function TopNav({ onScrollTo }: TopNavProps) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const { scrollY } = useScroll()
+
+  useEffect(() => scrollY.on("change", (v) => setScrolled(v > 20)), [scrollY])
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [menuOpen])
 
   const handleLink = (id: string) => {
     setMenuOpen(false)
-    if (onScrollTo) {
-      onScrollTo(id)
-    }
+    // Small delay so the drawer closes before scrolling
+    setTimeout(() => onScrollTo?.(id), 300)
   }
 
-  const linkEl = (id: string) =>
+  const desktopLink = (id: string, label: string) =>
     onScrollTo ? (
       <button
         key={id}
-        onClick={() => handleLink(id)}
-        className="text-sm text-muted-foreground hover:text-foreground capitalize transition-colors"
+        onClick={() => onScrollTo(id)}
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
       >
-        {id}
+        {label}
       </button>
     ) : (
       <Link
         key={id}
         href={`/#${id}`}
-        className="text-sm text-muted-foreground hover:text-foreground capitalize transition-colors"
+        className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
       >
-        {id}
+        {label}
       </Link>
     )
 
   return (
-    <motion.nav
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl"
-    >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/">
-          <Logo size={34} />
-        </Link>
-
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((id) => linkEl(id))}
-        </div>
-
-        {/* Right side */}
-        <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle collapsed />
-          <Link
-            href="/login"
-            className="px-5 py-2 rounded-lg gradient-bg text-white text-sm font-medium hover:brightness-110 transition-all primary-glow-hover"
-          >
-            Login
+    <>
+      <motion.nav
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "border-b border-border bg-background/90 backdrop-blur-xl shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0">
+            <Logo size={32} />
           </Link>
+
+          {/* Desktop centre links */}
+          <div className="hidden md:flex items-center gap-7">
+            {navLinks.map(({ id, label }) => desktopLink(id, label))}
+          </div>
+
+          {/* Desktop right CTAs */}
+          <div className="hidden md:flex items-center gap-2.5">
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-lg border border-border hover:border-primary/40 text-sm font-medium transition-all hover:bg-secondary/40"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/login"
+              className="group flex items-center gap-1.5 px-4 py-2 rounded-lg gradient-bg text-white text-sm font-semibold hover:brightness-110 transition-all primary-glow-hover"
+            >
+              Book Demo
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
+      </motion.nav>
 
-        {/* Mobile toggle */}
-        <button className="md:hidden text-muted-foreground" onClick={() => setMenuOpen(!menuOpen)}>
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
+      {/* ── Mobile right-side drawer ─────────────────────────────────────────── */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden border-t border-border bg-background/95 overflow-hidden"
-          >
-            <div className="px-6 py-4 flex flex-col gap-3">
-              {navLinks.map((id) => linkEl(id))}
-              <div className="flex items-center gap-3 mt-2">
-                <ThemeToggle collapsed />
-                <Link href="/login" className="flex-1 px-5 py-2 rounded-lg gradient-bg text-white text-sm font-medium text-center">
-                  Login
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm md:hidden"
+              onClick={() => setMenuOpen(false)}
+            />
+
+            {/* Drawer panel */}
+            <motion.div
+              key="drawer"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="fixed top-0 right-0 bottom-0 z-[61] w-72 bg-background border-l border-border flex flex-col md:hidden shadow-2xl"
+            >
+              {/* Drawer header */}
+              <div className="flex items-center justify-between px-5 h-16 border-b border-border flex-shrink-0">
+                <Logo size={28} />
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-1">
+                {navLinks.map(({ id, label }, i) => (
+                  <motion.button
+                    key={id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.06 + 0.1 }}
+                    onClick={() => handleLink(id)}
+                    className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-all"
+                  >
+                    {label}
+                  </motion.button>
+                ))}
+              </nav>
+
+              {/* Bottom CTAs */}
+              <div className="px-5 py-5 border-t border-border flex flex-col gap-2.5 flex-shrink-0">
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full py-3 rounded-xl border border-border text-sm font-medium text-center hover:border-primary/40 hover:bg-secondary/40 transition-all"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full py-3 rounded-xl gradient-bg text-white text-sm font-semibold text-center hover:brightness-110 transition-all primary-glow"
+                >
+                  Book Demo
                 </Link>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </>
   )
 }
