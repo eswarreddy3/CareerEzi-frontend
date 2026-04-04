@@ -598,7 +598,7 @@ export default function AdminStudentsPage() {
       </GlassCard>
 
       <Dialog open={!!editStudent} onOpenChange={(open) => { if (!open) setEditStudent(null) }}>
-        <DialogContent className="bg-[#0A0F1E] border-border max-w-md">
+        <DialogContent className="bg-popover border-border max-w-md">
           <DialogHeader>
             <DialogTitle className="text-foreground">Edit Student</DialogTitle>
           </DialogHeader>

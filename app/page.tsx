@@ -240,7 +240,7 @@ const features = [
     tag: "PDF Export",
   },
   {
-    icon: Trophy, color: "text-teal-400", bg: "bg-teal-500/10", border: "border-teal-500/20",
+    icon: Trophy, color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20",
     title: "Gamification Engine",
     desc: "Daily streaks, XP points, leaderboards, and rewards that make students compete to learn more.",
     tag: "Streaks · Leaderboard",
@@ -311,7 +311,7 @@ const testimonials = [
   {
     name: "Dr. Meena Devi", role: "Principal · Kongu Engineering College", avatar: "M",
     text: "We saw a measurable jump in our placement percentage within one semester. The structured approach and admin controls are exactly what we needed.",
-    stars: 5, color: "from-teal-500 to-cyan-600",
+    stars: 5, color: "from-indigo-500 to-violet-600",
   },
 ]
 

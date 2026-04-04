@@ -52,7 +52,7 @@ export function generateStudentPDF(perf: StudentPerformance) {
   const filename = `Student_Report_${rollNo}_${safeName}`
   const generatedOn = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
 
-  const bar = (pct: number, color = "#00D4C8") =>
+  const bar = (pct: number, color = "#6366F1") =>
     `<div style="background:#e5e7eb;border-radius:4px;height:8px;width:100%">
        <div style="background:${color};border-radius:4px;height:8px;width:${Math.min(pct, 100)}%"></div>
      </div>`
@@ -129,12 +129,12 @@ export function generateStudentPDF(perf: StudentPerformance) {
     .stat-box { padding: 14px; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center; }
     .stat-val { font-size: 24px; font-weight: 700; color: #111827; }
     .stat-lbl { font-size: 11px; color: #6b7280; margin-top: 2px; }
-    .header-bar { background: #0A0F1E; color: #fff; padding: 20px 24px; border-radius: 10px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .header-bar { background: #18181b; color: #fff; padding: 20px 24px; border-radius: 10px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; }
     .header-name { font-size: 22px; font-weight: 700; }
     .header-meta { font-size: 12px; color: #9ca3af; margin-top: 4px; line-height: 1.8; }
     .header-right { text-align: right; }
     .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 2px; }
-    .badge-teal { background: #00D4C820; color: #00D4C8; border: 1px solid #00D4C840; }
+    .badge-teal { background: #6366F120; color: #6366F1; border: 1px solid #6366F140; }
     .badge-orange { background: #F59E0B20; color: #D97706; border: 1px solid #F59E0B40; }
     .footer { text-align: center; font-size: 10px; color: #9ca3af; padding-top: 16px; border-top: 1px solid #f3f4f6; margin-top: 24px; }
     .accuracy-big { font-size: 32px; font-weight: 700; color: #8B5CF6; }

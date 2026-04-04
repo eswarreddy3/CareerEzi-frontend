@@ -45,7 +45,7 @@ export function AvatarPicker({ open, onClose, onSelect, current }: AvatarPickerP
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent className="bg-[#0A0F1E] border-border max-w-sm">
+      <DialogContent className="bg-popover border-border max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-foreground">Choose your avatar</DialogTitle>
         </DialogHeader>

@@ -371,7 +371,7 @@ function CourseCard({
         isLocked
           ? "opacity-50 cursor-not-allowed border-border/30 bg-secondary/20"
           : isActive
-          ? `border bg-gradient-to-br from-[#0A0F1E] to-[#111827]`
+          ? `border bg-card`
           : isCompleted
           ? "border-border/40 bg-secondary/20"
           : "border-border/40 bg-secondary/30 hover:bg-secondary/50",

@@ -13,9 +13,9 @@ export function GlassCard({ children, className, hover = false, glow = false, ..
     <div
       {...props}
       className={cn(
-        "glass-card rounded-xl p-6",
-        hover && "card-hover primary-glow-hover cursor-pointer",
-        glow && "primary-glow",
+        "bg-card border border-border rounded-xl p-6",
+        hover && "card-hover cursor-pointer",
+        glow && "ring-1 ring-primary/40",
         className
       )}
     >

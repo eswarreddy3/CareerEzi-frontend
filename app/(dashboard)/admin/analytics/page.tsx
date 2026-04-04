@@ -95,7 +95,7 @@ export default function AdminAnalyticsPage() {
   const inactiveCount = analytics ? analytics.total_students - analytics.active_this_week : 0
 
   const engagementData = [
-    { name: "Active", value: analytics?.active_this_week ?? 0, fill: "#00D4C8" },
+    { name: "Active", value: analytics?.active_this_week ?? 0, fill: "#6366F1" },
     { name: "Inactive", value: inactiveCount, fill: "#EF4444" },
   ]
 
@@ -158,7 +158,7 @@ export default function AdminAnalyticsPage() {
           <h3 className="font-semibold font-serif mb-1 text-foreground">Engagement Overview</h3>
           <p className="text-xs text-muted-foreground mb-3">Active vs inactive this week</p>
           <ChartContainer
-            config={{ Active: { color: "#00D4C8" }, Inactive: { color: "#EF4444" } }}
+            config={{ Active: { color: "#6366F1" }, Inactive: { color: "#EF4444" } }}
             className="h-[200px] w-full"
           >
             <PieChart>
@@ -181,7 +181,7 @@ export default function AdminAnalyticsPage() {
           </ChartContainer>
           <div className="flex justify-around mt-1 pt-2 border-t border-border/50">
             <div className="text-center">
-              <p className="text-lg font-bold text-[#00D4C8]">{analytics?.active_this_week ?? 0}</p>
+              <p className="text-lg font-bold text-[#6366F1]">{analytics?.active_this_week ?? 0}</p>
               <p className="text-xs text-muted-foreground">Active</p>
             </div>
             <div className="text-center">
