@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import {
   PenLine, BookOpen, Clock, ChevronLeft, ChevronRight,
   Send, Loader2, Trash2, ImagePlus, Tag, Newspaper,
@@ -22,7 +22,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface Author { id: number; name: string; role: string; branch: string | null; passout_year: number | null }
+interface Author { id: number; name: string; role: string; branch: string | null; passout_year: number | null; photo_url?: string | null }
 interface Post {
   id: number; type: "post" | "blog"; title: string | null; content: string
   cover_image_url: string | null; reading_time: number; tags: string[]
@@ -211,11 +211,7 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
           onClick={() => setOpen(true)}
           className="w-full flex items-center gap-3 text-left group"
         >
-          <Avatar className="h-10 w-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background flex-shrink-0">
-            <AvatarFallback className="bg-primary/20 text-primary font-bold text-sm">
-              {initials(user?.name ?? "U")}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar name={user?.name ?? "U"} photoUrl={user?.photo_url} size="md" className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background" />
           <span className="flex-1 px-4 py-3 rounded-full bg-secondary/40 border border-border text-muted-foreground text-sm hover:border-primary/40 hover:bg-secondary/60 transition-all">
             What's on your mind, {user?.name?.split(" ")[0] ?? "there"}?
           </span>
@@ -225,11 +221,7 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-                <AvatarFallback className="bg-primary/20 text-primary font-bold text-sm">
-                  {initials(user?.name ?? "U")}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar name={user?.name ?? "U"} photoUrl={user?.photo_url} size="md" className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background" />
               <div>
                 <p className="text-sm font-bold text-foreground">{user?.name}</p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
@@ -446,21 +438,18 @@ function PostCard({
           <div className="flex items-center gap-3">
             {/* Avatar with optional verified badge */}
             <div className="relative flex-shrink-0">
-              <Avatar className={cn(
-                "h-10 w-10 ring-2 ring-offset-1 ring-offset-card transition-all",
-                isOfficial
-                  ? "ring-amber-500/50 group-hover:ring-amber-400/70"
-                  : "ring-border group-hover:ring-primary/40"
-              )}>
-                <AvatarFallback className={cn(
-                  "font-bold text-xs",
+              <UserAvatar
+                name={post.author.name}
+                photoUrl={post.author.photo_url}
+                size="md"
+                className={cn(
+                  "ring-2 ring-offset-1 ring-offset-card transition-all",
                   isOfficial
-                    ? "bg-amber-500/20 text-amber-400"
-                    : "bg-primary/20 text-primary"
-                )}>
-                  {initials(post.author.name)}
-                </AvatarFallback>
-              </Avatar>
+                    ? "ring-amber-500/50 group-hover:ring-amber-400/70"
+                    : "ring-border group-hover:ring-primary/40"
+                )}
+                fallbackClassName={cn(isOfficial ? "bg-amber-500/20 text-amber-400" : "bg-primary/20 text-primary")}
+              />
               {isOfficial && (
                 <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 ring-2 ring-card">
                   <ShieldCheck className="w-2.5 h-2.5 text-white" />

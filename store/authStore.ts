@@ -17,6 +17,7 @@ export interface User {
   roll_number?: string
   passout_year?: string | number
   phone?: string
+  photo_url?: string | null
   linkedin_url?: string
   points: number
   streak: number

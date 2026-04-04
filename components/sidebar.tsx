@@ -31,7 +31,7 @@ import {
   BarChart2,
 } from "lucide-react"
 import { useState } from "react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
@@ -228,11 +228,7 @@ export function Sidebar() {
             /* ── Collapsed ── */
             <div className="flex flex-col items-center gap-2">
               {/* Avatar */}
-              <Avatar className="h-9 w-9 border-2 border-primary/30">
-                <AvatarFallback className="bg-primary/20 text-primary font-semibold text-xs">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
 
               {/* College logo (students) */}
               {role === "student" && user?.college_name && (
@@ -291,11 +287,7 @@ export function Sidebar() {
               <div className="rounded-xl bg-secondary/40 border border-border p-2.5 space-y-2">
                 {/* Avatar + name row */}
                 <div className="flex items-center gap-2.5">
-                  <Avatar className="h-9 w-9 border-2 border-primary/30 flex-shrink-0">
-                    <AvatarFallback className="bg-primary/20 text-primary font-semibold text-sm">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate text-foreground leading-tight">
                       {user?.name || "User"}

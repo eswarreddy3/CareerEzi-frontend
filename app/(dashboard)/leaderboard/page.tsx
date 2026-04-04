@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { GlassCard } from "@/components/glass-card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { Search, Trophy, Flame, Medal, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -19,6 +19,7 @@ interface LeaderboardEntry {
   points: number
   streak: number
   is_current_user: boolean
+  photo_url?: string | null
 }
 
 const podiumColors = {
@@ -109,11 +110,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[2])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <Avatar className={cn("h-20 w-20 border-4", podiumBorders[2])}>
-                      <AvatarFallback className="bg-secondary text-foreground text-xl">
-                        {topThree[1]?.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar name={topThree[1]?.name || ""} photoUrl={topThree[1]?.photo_url} size="lg" className={cn("border-4", podiumBorders[2])} />
                     <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-slate-300 to-slate-500 flex items-center justify-center">
                       <span className="text-sm font-bold text-slate-900">2</span>
                     </div>
@@ -141,11 +138,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[1])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <Avatar className={cn("h-24 w-24 border-4", podiumBorders[1])}>
-                      <AvatarFallback className="bg-secondary text-foreground text-2xl">
-                        {topThree[0]?.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar name={topThree[0]?.name || ""} photoUrl={topThree[0]?.photo_url} size="xl" className={cn("border-4", podiumBorders[1])} />
                     <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center">
                       <Medal className="h-5 w-5 text-amber-900" />
                     </div>
@@ -173,11 +166,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[3])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <Avatar className={cn("h-20 w-20 border-4", podiumBorders[3])}>
-                      <AvatarFallback className="bg-secondary text-foreground text-xl">
-                        {topThree[2]?.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar name={topThree[2]?.name || ""} photoUrl={topThree[2]?.photo_url} size="lg" className={cn("border-4", podiumBorders[3])} />
                     <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
                       <span className="text-sm font-bold text-orange-900">3</span>
                     </div>
@@ -231,11 +220,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-secondary text-foreground text-xs">
-                              {entry.name.split(" ").map(n => n[0]).join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                          <UserAvatar name={entry.name} photoUrl={entry.photo_url} size="sm" />
                           <div>
                             <p className={cn("text-sm font-medium", entry.is_current_user ? "text-primary" : "text-foreground")}>
                               {entry.name}

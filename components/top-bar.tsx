@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { useAuthStore } from "@/store/authStore"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -22,15 +22,6 @@ interface TopBarProps {
 export function TopBar({ title }: TopBarProps) {
   const router = useRouter()
   const { user, clearAuth } = useAuthStore()
-
-  const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : "??"
 
   const handleLogout = () => {
     clearAuth()
@@ -56,12 +47,13 @@ export function TopBar({ title }: TopBarProps) {
         {/* User avatar dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8 border-2 border-primary/30">
-                <AvatarFallback className="bg-primary/20 text-primary text-xs font-semibold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+            <Button variant="ghost" size="icon" className="rounded-full p-0">
+              <UserAvatar
+                name={user?.name || "U"}
+                photoUrl={user?.photo_url}
+                size="sm"
+                className="border-2 border-primary/30"
+              />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48 bg-popover border-border">

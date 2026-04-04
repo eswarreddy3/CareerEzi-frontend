@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
@@ -493,14 +493,12 @@ export default function AdminStudentsPage() {
                     </td>
                     <td className="py-3 px-3">
                       <div className="flex items-center gap-2.5">
-                        <Avatar className="h-8 w-8 flex-shrink-0">
-                          <AvatarFallback className={cn(
-                            "text-xs font-medium",
-                            student.is_inactive ? "bg-red-500/20 text-red-400" : "bg-secondary text-foreground"
-                          )}>
-                            {student.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar
+                          name={student.name}
+                          photoUrl={student.photo_url}
+                          size="sm"
+                          fallbackClassName={student.is_inactive ? "bg-red-500/20 text-red-400" : undefined}
+                        />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
                           <p className="text-xs text-muted-foreground truncate">{student.email}</p>
