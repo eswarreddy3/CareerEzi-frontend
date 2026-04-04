@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     api.get("/admin/analytics")
-      .then((res) => setAnalytics(res.data))
+      .then((res) => setAnalytics({ inactive_students: [], inactive_count: 0, ...res.data }))
       .catch(() => toast.error("Failed to load analytics"))
       .finally(() => setLoading(false))
     api.get("/admin/college-social").then(res => {
