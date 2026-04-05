@@ -261,7 +261,7 @@ export default function OnboardingPage() {
         github_url: formData.github_url,
         dob: formData.dob,
         new_password: data.new_password,
-        photo_url: selectedAvatar || undefined,
+        avatar: selectedAvatar || undefined,
       })
       updateUser({ first_login: false })
       toast.success("Setup complete! Welcome to CareerEzi 🎉")

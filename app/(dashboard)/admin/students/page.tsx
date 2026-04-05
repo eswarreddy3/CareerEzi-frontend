@@ -495,7 +495,7 @@ export default function AdminStudentsPage() {
                       <div className="flex items-center gap-2.5">
                         <UserAvatar
                           name={student.name}
-                          photoUrl={student.photo_url}
+                          photoUrl={(student as any).avatar}
                           size="sm"
                           fallbackClassName={student.is_inactive ? "bg-red-500/20 text-red-400" : undefined}
                         />

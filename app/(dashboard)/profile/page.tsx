@@ -78,8 +78,8 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
 
   const handleAvatarSelect = async (url: string) => {
     try {
-      await api.patch("/student/profile", { photo_url: url })
-      updateUser({ photo_url: url } as any)
+      await api.patch("/student/profile", { avatar: url })
+      updateUser({ avatar: url } as any)
       toast.success("Avatar updated")
     } catch {
       toast.error("Failed to update avatar")
@@ -101,7 +101,7 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
     }
   }
 
-  const photoUrl = user?.photo_url
+  const photoUrl = user?.avatar
   const initials = user?.name ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2) : "??"
 
   return (
@@ -202,7 +202,7 @@ export default function ProfilePage() {
     ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "??"
 
-  const photoUrl: string | undefined = (user as any)?.photo_url
+  const photoUrl: string | undefined = (user as any)?.avatar
 
   const {
     register,

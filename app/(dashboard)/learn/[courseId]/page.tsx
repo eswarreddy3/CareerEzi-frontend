@@ -62,12 +62,11 @@ interface ModuleAssignment {
   title: string
   course: string
   icon: string
-  due_date: string
   duration_mins: number
   total_questions: number
   completed_questions: number
-  status: "pending" | "in-progress" | "completed" | "overdue"
-  points: number
+  status: "pending" | "completed"
+  max_score: number
   score: number
 }
 

@@ -9,7 +9,6 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Calendar,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -32,12 +31,11 @@ interface ApiAssignment {
   title: string
   course: string
   icon: string
-  due_date: string
   duration_mins: number
   total_questions: number
   completed_questions: number
-  status: "pending" | "in-progress" | "completed" | "overdue"
-  points: number
+  status: "pending" | "completed"
+  max_score: number
   score: number
   is_locked?: boolean
 }
@@ -49,40 +47,15 @@ const statusConfig = {
     icon: Clock,
     dot: "bg-muted-foreground",
   },
-  "in-progress": {
-    label: "In Progress",
-    color: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    icon: AlertCircle,
-    dot: "bg-amber-400",
-  },
   completed: {
     label: "Completed",
     color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     icon: CheckCircle,
     dot: "bg-emerald-400",
   },
-  overdue: {
-    label: "Overdue",
-    color: "bg-red-500/20 text-red-400 border-red-500/30",
-    icon: Flame,
-    dot: "bg-red-400",
-  },
 }
 
-function getDueDateUrgency(dueDate: string, status: string) {
-  if (status === "completed") return null
-  const due = new Date(dueDate)
-  const now = new Date()
-  const diffMs = due.getTime() - now.getTime()
-  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) return { label: `${Math.abs(diffDays)}d overdue`, className: "text-red-400" }
-  if (diffDays === 0) return { label: "Due today!", className: "text-red-400 font-semibold" }
-  if (diffDays === 1) return { label: "Due tomorrow", className: "text-amber-400" }
-  if (diffDays <= 3) return { label: `${diffDays} days left`, className: "text-amber-400" }
-  return { label: `${diffDays} days left`, className: "text-muted-foreground" }
-}
-
-type TabFilter = "all" | "pending" | "in-progress" | "completed" | "overdue"
+type TabFilter = "all" | "pending" | "completed"
 
 function ModuleSection({
   emoji, title, expanded, onToggle, assignments, loading, onStart,
@@ -224,9 +197,7 @@ export default function AssignmentsPage() {
 
   const unlockedAssignments = allAssignments.filter((a) => !a.is_locked)
   const pendingCount = unlockedAssignments.filter((a) => a.status === "pending").length
-  const inProgressCount = unlockedAssignments.filter((a) => a.status === "in-progress").length
   const completedCount = unlockedAssignments.filter((a) => a.status === "completed").length
-  const overdueCount = unlockedAssignments.filter((a) => a.status === "overdue").length
   const totalPoints = unlockedAssignments
     .filter((a) => a.status === "completed")
     .reduce((sum, a) => sum + a.score, 0)
@@ -248,7 +219,7 @@ export default function AssignmentsPage() {
             <Clock className="h-5 w-5 text-amber-400" />
           </div>
           <div>
-            <p className="text-xl font-bold font-serif text-foreground">{pendingCount + inProgressCount}</p>
+            <p className="text-xl font-bold font-serif text-foreground">{pendingCount}</p>
             <p className="text-xs text-muted-foreground">Pending</p>
           </div>
         </GlassCard>
@@ -259,15 +230,6 @@ export default function AssignmentsPage() {
           <div>
             <p className="text-xl font-bold font-serif text-foreground">{completedCount}</p>
             <p className="text-xs text-muted-foreground">Completed</p>
-          </div>
-        </GlassCard>
-        <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg bg-red-500/20">
-            <Flame className="h-5 w-5 text-red-400" />
-          </div>
-          <div>
-            <p className="text-xl font-bold font-serif text-foreground">{overdueCount}</p>
-            <p className="text-xs text-muted-foreground">Overdue</p>
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-3 p-4">
@@ -299,13 +261,13 @@ export default function AssignmentsPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabFilter)}>
         <TabsList className="bg-secondary/50 p-1">
-          {(["all", "pending", "in-progress", "completed", "overdue"] as const).map((tab) => (
+          {(["all", "pending", "completed"] as const).map((tab) => (
             <TabsTrigger
               key={tab}
               value={tab}
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground capitalize text-xs sm:text-sm"
             >
-              {tab === "in-progress" ? "In Progress" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -333,7 +295,6 @@ export default function AssignmentsPage() {
                 assignment.total_questions > 0
                   ? (assignment.completed_questions / assignment.total_questions) * 100
                   : 0
-              const urgency = getDueDateUrgency(assignment.due_date, assignment.status)
 
               return (
                 <GlassCard
@@ -341,16 +302,9 @@ export default function AssignmentsPage() {
                   hover={!assignment.is_locked}
                   className={cn(
                     "group relative overflow-hidden",
-                    assignment.status === "overdue" && !assignment.is_locked && "border-red-500/20",
                     assignment.is_locked && "opacity-60"
                   )}
                 >
-                  {assignment.status === "overdue" && !assignment.is_locked && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-red-500 rounded-l-xl" />
-                  )}
-                  {assignment.status === "in-progress" && !assignment.is_locked && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-xl" />
-                  )}
 
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4 pl-1">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -402,23 +356,11 @@ export default function AssignmentsPage() {
                         <Progress value={progress} className="h-1.5" />
                       </div>
 
-                      <div className="flex flex-col items-start sm:items-end gap-0.5">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Calendar className="h-3 w-3" />
-                          {assignment.due_date}
-                        </div>
-                        {urgency && (
-                          <span className={cn("text-xs font-medium", urgency.className)}>
-                            {urgency.label}
-                          </span>
-                        )}
-                      </div>
-
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                         <span className="text-sm font-semibold text-foreground">
                           {assignment.status === "completed" ? `${assignment.score}/` : ""}
-                          {assignment.points} pts
+                          {assignment.max_score} pts
                         </span>
                       </div>
 
@@ -434,17 +376,11 @@ export default function AssignmentsPage() {
                           "transition-all min-w-[100px]",
                           assignment.status === "completed"
                             ? "bg-secondary hover:bg-secondary/80 text-foreground"
-                            : assignment.status === "overdue"
-                            ? "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30"
                             : "bg-primary hover:bg-primary/90 text-primary-foreground"
                         )}
                         onClick={() => router.push(`/assignments/${assignment.id}${assignment.status === "completed" ? "/results" : ""}`)}
                       >
-                        {assignment.status === "completed"
-                          ? "Review"
-                          : assignment.status === "in-progress"
-                          ? "Continue"
-                          : "Start"}
+                        {assignment.status === "completed" ? "Review" : "Start"}
                         <ArrowRight className="h-4 w-4 ml-1" />
                       </Button>
                       )}

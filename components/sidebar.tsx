@@ -228,7 +228,7 @@ export function Sidebar() {
             /* ── Collapsed ── */
             <div className="flex flex-col items-center gap-2">
               {/* Avatar */}
-              <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
+              <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" className="border-2 border-primary/30" />
 
               {/* College logo (students) */}
               {role === "student" && user?.college_name && (
@@ -287,7 +287,7 @@ export function Sidebar() {
               <div className="rounded-xl bg-secondary/40 border border-border p-2.5 space-y-2">
                 {/* Avatar + name row */}
                 <div className="flex items-center gap-2.5">
-                  <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
+                  <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" className="border-2 border-primary/30" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate text-foreground leading-tight">
                       {user?.name || "User"}
