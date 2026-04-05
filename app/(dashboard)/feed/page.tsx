@@ -190,13 +190,13 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
         is_published: publish,
         notify_students: publish && isAdmin ? notifyStudents : false,
       })
-      onCreated(res.data)
+      const { points_earned, ...postData } = res.data
+      onCreated(postData)
       setContent(""); setTitle(""); setTags(""); setCoverUrl(""); setNotifyStudents(false); setOpen(false)
-      richToast(
-        publish ? "✨" : "📝",
-        publish ? "Your post is live!" : "Draft saved",
-        publish ? "Your college community can see it now" : "You can publish it anytime"
-      )
+      const desc = publish && points_earned > 0
+        ? `Your college community can see it now — +${points_earned} pts`
+        : publish ? "Your college community can see it now" : "You can publish it anytime"
+      richToast(publish ? "✨" : "📝", publish ? "Your post is live!" : "Draft saved", desc)
     } catch {
       toast.error("Failed to publish")
     } finally {

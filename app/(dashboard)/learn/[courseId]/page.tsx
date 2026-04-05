@@ -26,7 +26,7 @@ import {
   ZoomIn,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { fireStars } from "@/lib/effects"
+import { fireStars, fireSchoolPride } from "@/lib/effects"
 import { PointsBurst } from "@/components/points-burst"
 import { GlassCard } from "@/components/glass-card"
 import { ProgressRing } from "@/components/progress-ring"
@@ -765,7 +765,7 @@ export default function CourseDetailPage() {
     setCompleting(true)
     try {
       const res = await api.post(`/learn/lessons/${activeLesson.id}/complete`)
-      const { points_earned, total_points } = res.data
+      const { points_earned, total_points, course_completion_bonus, domain_completion_bonus } = res.data
 
       // Update local state
       setCourse(prev => {
@@ -789,6 +789,19 @@ export default function CourseDetailPage() {
         toast.success(`Lesson complete! +${points_earned} pts`)
       } else {
         toast.success("Lesson marked complete")
+      }
+
+      if (course_completion_bonus > 0) {
+        setTimeout(() => {
+          fireSchoolPride()
+          toast.success(`Course complete! +${course_completion_bonus} bonus pts`)
+        }, 1200)
+      }
+      if (domain_completion_bonus > 0) {
+        setTimeout(() => {
+          fireSchoolPride()
+          toast.success(`Domain mastered! +${domain_completion_bonus} bonus pts 🎓`)
+        }, 2400)
       }
 
       // Auto-advance to next lesson
