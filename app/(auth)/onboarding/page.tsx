@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils"
 const step1Schema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
   dob: z.string().min(1, "Date of birth is required"),
+  gender: z.enum(["male", "female", "other", "prefer_not_to_say"], { required_error: "Please select a gender" }),
   linkedin_url: z.string().url("Enter a valid LinkedIn URL").optional().or(z.literal("")),
   github_url: z.string().url("Enter a valid GitHub URL").optional().or(z.literal("")),
 })
@@ -243,7 +244,7 @@ export default function OnboardingPage() {
 
   const form1 = useForm<Step1>({
     resolver: zodResolver(step1Schema),
-    defaultValues: { phone: "", dob: "", linkedin_url: "", github_url: "" },
+    defaultValues: { phone: "", dob: "", gender: undefined, linkedin_url: "", github_url: "" },
   })
   const form2 = useForm<Step2>({ resolver: zodResolver(step2Schema) })
 
@@ -260,6 +261,7 @@ export default function OnboardingPage() {
         linkedin_url: formData.linkedin_url,
         github_url: formData.github_url,
         dob: formData.dob,
+        gender: formData.gender,
         new_password: data.new_password,
         avatar: selectedAvatar || undefined,
       })
@@ -502,6 +504,24 @@ export default function OnboardingPage() {
                       <Input type="date" className="bg-secondary/50 border-border text-foreground h-10" max={new Date().toISOString().split("T")[0]} {...form1.register("dob")} />
                       {form1.formState.errors.dob && (
                         <p className="text-xs text-destructive">{form1.formState.errors.dob.message}</p>
+                      )}
+                    </div>
+
+                    {/* Gender */}
+                    <div className="space-y-1.5">
+                      <Label className="text-foreground text-sm">Gender</Label>
+                      <select
+                        className="w-full bg-secondary/50 border border-border text-foreground h-10 rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        {...form1.register("gender")}
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                      </select>
+                      {form1.formState.errors.gender && (
+                        <p className="text-xs text-destructive">{form1.formState.errors.gender.message}</p>
                       )}
                     </div>
 
