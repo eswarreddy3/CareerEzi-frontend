@@ -184,7 +184,13 @@ function PracticeMCQContent() {
     setServerResult(null)
     api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
       .then((res) => {
-        const qs: Question[] = res.data
+        const OPT_LETTERS = ["A", "B", "C", "D", "E"]
+        const qs: Question[] = res.data.map((q: any) => ({
+          ...q,
+          options: [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e].filter(Boolean),
+          selected_answer: q.selected_answer != null ? OPT_LETTERS.indexOf(q.selected_answer) : undefined,
+          correct_answer: q.correct_option != null ? OPT_LETTERS.indexOf(q.correct_option) : undefined,
+        }))
         setQuestions(qs)
         setQuestionStatuses(qs.map((q) => (q.attempted ? "answered" : "unattempted")))
         if (qs[0]?.attempted) {
@@ -221,9 +227,11 @@ function PracticeMCQContent() {
     setSubmitting(true)
     tryingAgainRef.current = false
     try {
-      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: selectedAnswer })
+      const OPT_LETTERS = ["A", "B", "C", "D", "E"]
+      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: OPT_LETTERS[selectedAnswer] })
       const result = res.data
-      setServerResult(result)
+      const correctIndex = OPT_LETTERS.indexOf(result.correct_option)
+      setServerResult({ ...result, correct_answer: correctIndex })
       setIsSubmitted(true)
       const newStatuses = [...questionStatuses]
       newStatuses[currentIndex] = "answered"
@@ -231,7 +239,7 @@ function PracticeMCQContent() {
       const updatedQuestions = [...questions]
       updatedQuestions[currentIndex] = {
         ...q, attempted: true, selected_answer: selectedAnswer,
-        is_correct: result.correct, correct_answer: result.correct_answer,
+        is_correct: result.correct, correct_answer: correctIndex,
       }
       setQuestions(updatedQuestions)
       updateUser({ points: result.total_points })
@@ -407,12 +415,6 @@ function PracticeMCQContent() {
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </div>
-              <Button
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                tabIndex={-1}
-              >
-                Start Practice →
-              </Button>
             </div>
           </motion.button>
 
@@ -445,13 +447,6 @@ function PracticeMCQContent() {
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </div>
-              <Button
-                className="w-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 font-medium"
-                variant="outline"
-                tabIndex={-1}
-              >
-                Start Practice →
-              </Button>
             </div>
           </motion.button>
         </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
@@ -24,6 +24,7 @@ import {
   Copy,
   Check,
   ZoomIn,
+  Flag,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { fireStars, fireSchoolPride } from "@/lib/effects"
@@ -658,6 +659,7 @@ export default function CourseDetailPage() {
 
   // Top-level tab (only used for Python)
   const [activeTab, setActiveTab] = useState<"lessons" | "practice" | "assignment">("lessons")
+  const [mcqTopicCounts, setMcqTopicCounts] = useState<Record<string, number>>({})
 
   // Inline MCQ state
   const [mcqTopic, setMcqTopic] = useState<{ topic: string; subtopic: string; lessonOrder: number } | null>(null)
@@ -667,20 +669,63 @@ export default function CourseDetailPage() {
   const [mcqSelected, setMcqSelected] = useState<number | null>(null)
   const [mcqSubmitted, setMcqSubmitted] = useState(false)
   const [mcqResult, setMcqResult] = useState<{ correct: boolean; correct_answer: number; explanation: string | null; points_earned: number } | null>(null)
-  const [mcqScores, setMcqScores] = useState<Record<string, { correct: number; total: number }>>({})
+  const [mcqStatuses, setMcqStatuses] = useState<("unattempted" | "answered" | "marked")[]>([])
+  const [answerFeedback, setAnswerFeedback] = useState<"correct" | "wrong" | null>(null)
+  const tryingAgainRef = useRef(false)
   const [moduleAssignments, setModuleAssignments] = useState<ModuleAssignment[]>([])
+
+  const MCQ_LETTERS = ["A", "B", "C", "D", "E"]
+
+  useEffect(() => {
+    if (activeTab !== "practice") return
+    api.get("/mcq/topics")
+      .then(res => {
+        const map: Record<string, number> = {}
+        for (const t of res.data) {
+          for (const sub of t.subtopics) {
+            map[`${t.topic}|${sub.name}`] = sub.total
+          }
+        }
+        setMcqTopicCounts(map)
+      })
+      .catch(() => {})
+  }, [activeTab])
+
+  function normalizeMcqQuestions(raw: any[]): ApiMcqQuestion[] {
+    return raw.map(q => ({
+      ...q,
+      options: [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e].filter(Boolean),
+      selected_answer: q.selected_answer != null ? MCQ_LETTERS.indexOf(q.selected_answer) : undefined,
+      correct_answer: q.correct_option != null ? MCQ_LETTERS.indexOf(q.correct_option) : undefined,
+    }))
+  }
 
   async function openMcqTopic(topic: string, subtopic: string, lessonOrder: number) {
     setMcqTopic({ topic, subtopic, lessonOrder })
     setMcqQuestions([])
+    setMcqStatuses([])
     setMcqIndex(0)
     setMcqSelected(null)
     setMcqSubmitted(false)
     setMcqResult(null)
+    setAnswerFeedback(null)
     setMcqLoading(true)
     try {
       const res = await api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
-      setMcqQuestions(res.data)
+      const normalized = normalizeMcqQuestions(res.data)
+      setMcqQuestions(normalized)
+      setMcqStatuses(normalized.map(q => q.attempted ? "answered" : "unattempted"))
+      const first = normalized[0]
+      if (first?.attempted) {
+        setMcqSelected(first.selected_answer ?? null)
+        setMcqSubmitted(true)
+        setMcqResult({
+          correct: first.is_correct ?? false,
+          correct_answer: first.correct_answer ?? -1,
+          explanation: first.explanation ?? null,
+          points_earned: 0,
+        })
+      }
     } catch {
       toast.error("Failed to load questions")
       setMcqTopic(null)
@@ -689,33 +734,55 @@ export default function CourseDetailPage() {
     }
   }
 
+  function mcqNavigateTo(index: number) {
+    const q = mcqQuestions[index]
+    setMcqIndex(index)
+    if (q?.attempted && !tryingAgainRef.current) {
+      setMcqSelected(q.selected_answer ?? null)
+      setMcqSubmitted(true)
+      // Restore result from question data so correct/wrong highlights work
+      setMcqResult({
+        correct: q.is_correct ?? false,
+        correct_answer: q.correct_answer ?? -1,
+        explanation: q.explanation ?? null,
+        points_earned: 0,
+      })
+    } else {
+      setMcqSelected(null)
+      setMcqSubmitted(false)
+      setMcqResult(null)
+    }
+    tryingAgainRef.current = false
+  }
+
   async function mcqSubmit() {
     if (mcqSelected === null) return
     const q = mcqQuestions[mcqIndex]
     try {
-      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: mcqSelected })
+      const selectedLetter = MCQ_LETTERS[mcqSelected]
+      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: selectedLetter })
       const result = res.data
-      setMcqResult(result)
+      const correctIndex = MCQ_LETTERS.indexOf(result.correct_option)
+      setMcqResult({ ...result, correct_answer: correctIndex })
       setMcqSubmitted(true)
-      const key = `${mcqTopic?.topic}|${mcqTopic?.subtopic}`
-      setMcqScores(prev => {
-        const cur = prev[key] ?? { correct: 0, total: 0 }
-        return { ...prev, [key]: { correct: cur.correct + (result.correct ? 1 : 0), total: cur.total + 1 } }
-      })
+
+      // Update status + flash
+      const newStatuses = [...mcqStatuses]
+      newStatuses[mcqIndex] = "answered"
+      setMcqStatuses(newStatuses)
+
+      if (result.correct) {
+        setAnswerFeedback("correct")
+        fireStars()
+        toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
+      } else {
+        setAnswerFeedback("wrong")
+        toast.error("Incorrect — check the explanation below")
+      }
+      setTimeout(() => setAnswerFeedback(null), 700)
       updateUser({ points: result.total_points })
-      if (result.correct) toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
-      else toast.error("Incorrect — see the explanation")
     } catch {
       toast.error("Failed to submit answer")
-    }
-  }
-
-  function mcqNext() {
-    if (mcqIndex < mcqQuestions.length - 1) {
-      setMcqIndex(i => i + 1)
-      setMcqSelected(null)
-      setMcqSubmitted(false)
-      setMcqResult(null)
     }
   }
 
@@ -1137,9 +1204,12 @@ export default function CourseDetailPage() {
               <div className="overflow-y-auto max-h-[60vh]">
                 {ACTIVE_MODULES.map((mod) => {
                   const activeMeta = COURSE_TOPIC_META[courseId] ?? PYTHON_TOPIC_META
-                  const attempted = mod.lessonOrders.filter(o => mcqScores[`${activeMeta[o]?.topic}|${activeMeta[o]?.subtopic}`]).length
+                  const withQuestions = mod.lessonOrders.filter(o => {
+                    const key = `${activeMeta[o]?.topic}|${activeMeta[o]?.subtopic}`
+                    return (mcqTopicCounts[key] ?? 0) > 0
+                  }).length
                   const total = mod.lessonOrders.length
-                  const modPct = total > 0 ? Math.round((attempted / total) * 100) : 0
+                  const modPct = total > 0 ? Math.round((withQuestions / total) * 100) : 0
                   const isExpanded = expandedModules.includes(mod.id)
                   const hasSelected = mod.lessonOrders.some(o => mcqTopic?.lessonOrder === o)
                   return (
@@ -1160,7 +1230,7 @@ export default function CourseDetailPage() {
                             <div className="flex-1 h-1 bg-secondary/30 rounded-full overflow-hidden">
                               <div className={cn("h-full rounded-full transition-all", mod.bar)} style={{ width: `${modPct}%` }} />
                             </div>
-                            <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{attempted}/{total}</span>
+                            <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{withQuestions}/{total}</span>
                           </div>
                         </div>
                         {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
@@ -1172,9 +1242,8 @@ export default function CourseDetailPage() {
                             const meta = activeMeta[order]
                             if (!meta) return null
                             const scoreKey = `${meta.topic}|${meta.subtopic}`
-                            const score = mcqScores[scoreKey]
                             const isSelected = mcqTopic?.lessonOrder === order
-                            const isDone = score && score.correct === score.total
+                            const hasQuestions = (mcqTopicCounts[scoreKey] ?? 0) > 0
                             return (
                               <button
                                 key={order}
@@ -1185,25 +1254,24 @@ export default function CourseDetailPage() {
                                 )}
                               >
                                 <div className="mt-0.5 flex-shrink-0">
-                                  {isDone
-                                    ? <CheckCircle className="h-4 w-4 text-emerald-400" />
-                                    : <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center", isSelected ? "border-primary bg-primary/20" : "border-white/20")}>
-                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
-                                      </div>
-                                  }
+                                  <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                                    isSelected ? "border-primary bg-primary/20"
+                                    : hasQuestions ? "border-white/30"
+                                    : "border-white/10"
+                                  )}>
+                                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                  </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className={cn("text-xs font-medium leading-snug", isSelected ? "text-foreground" : isDone ? "text-muted-foreground" : "text-foreground/80")}>
+                                  <p className={cn("text-xs font-medium leading-snug", isSelected ? "text-foreground" : hasQuestions ? "text-foreground/80" : "text-muted-foreground/50")}>
                                     {meta.subtopic}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1">
-                                    {score ? (
-                                      <span className={cn("text-[10px] font-medium", isDone ? "text-emerald-400" : "text-amber-400")}>
-                                        {score.correct}/{score.total} correct
-                                      </span>
-                                    ) : (
-                                      <span className="text-[10px] text-muted-foreground">5 questions</span>
-                                    )}
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {mcqTopicCounts[scoreKey] != null
+                                        ? `${mcqTopicCounts[scoreKey]} question${mcqTopicCounts[scoreKey] !== 1 ? "s" : ""}`
+                                        : "No questions yet"}
+                                    </span>
                                   </div>
                                 </div>
                               </button>
@@ -1219,7 +1287,24 @@ export default function CourseDetailPage() {
           </div>
 
           {/* MCQ question panel */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col gap-4">
+
+            {/* Answer flash overlay */}
+            <AnimatePresence>
+              {answerFeedback && (
+                <motion.div
+                  className={cn(
+                    "fixed inset-0 pointer-events-none z-40",
+                    answerFeedback === "correct" ? "bg-emerald-500/10" : "bg-red-500/10"
+                  )}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                />
+              )}
+            </AnimatePresence>
+
             {!mcqTopic ? (
               <GlassCard className="flex flex-col items-center justify-center h-64 text-center gap-3">
                 <Brain className="h-10 w-10 text-primary/40" />
@@ -1231,133 +1316,227 @@ export default function CourseDetailPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </GlassCard>
             ) : mcqQuestions.length === 0 ? (
-              <GlassCard className="flex flex-col items-center justify-center h-64">
-                <p className="text-muted-foreground text-sm">No questions for this topic yet.</p>
+              <GlassCard className="flex flex-col items-center justify-center h-64 gap-3">
+                <Brain className="h-10 w-10 text-muted-foreground/30" />
+                <p className="text-muted-foreground text-sm">No questions uploaded for this topic yet.</p>
               </GlassCard>
             ) : (() => {
               const q = mcqQuestions[mcqIndex]
               const isCorrect = mcqSubmitted && mcqResult?.correct === true
               const isWrong = mcqSubmitted && mcqResult?.correct === false
+
               return (
-                <GlassCard className="space-y-5">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">{mcqTopic.subtopic}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">
-                          Question {mcqIndex + 1} / {mcqQuestions.length}
-                        </span>
-                        <Badge variant="outline" className={cn("text-[10px] border", q.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : q.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-red-500/20 text-red-400 border-red-500/30")}>
-                          {q.difficulty}
-                        </Badge>
-                        <span className="text-xs text-amber-500">+{q.points} pts</span>
-                      </div>
-                    </div>
-                    <Progress value={((mcqIndex + 1) / mcqQuestions.length) * 100} className="w-24 h-1.5" />
-                  </div>
-
-                  {/* Question */}
-                  <p className="text-base font-medium text-foreground leading-relaxed">{q.question}</p>
-
-                  {/* Options */}
-                  <div className="space-y-2.5">
-                    {q.options.map((opt, idx) => {
-                      const isSelected = mcqSelected === idx
-                      const showCorrect = mcqSubmitted && idx === mcqResult?.correct_answer
-                      const showWrong = mcqSubmitted && isSelected && idx !== mcqResult?.correct_answer
-                      return (
-                        <button
-                          key={idx}
-                          disabled={mcqSubmitted}
-                          onClick={() => setMcqSelected(idx)}
-                          className={cn(
-                            "w-full text-left rounded-xl border px-4 py-3 flex items-start gap-3 transition-all",
-                            !mcqSubmitted && isSelected && "border-primary bg-primary/10 text-foreground",
-                            !mcqSubmitted && !isSelected && "border-white/8 bg-secondary/30 text-muted-foreground hover:border-white/20 hover:text-foreground",
-                            showCorrect && "border-emerald-500/60 bg-emerald-500/10 text-emerald-300",
-                            showWrong && "border-red-500/60 bg-red-500/10 text-red-300",
-                            mcqSubmitted && !showCorrect && !showWrong && "border-border bg-secondary/20 text-muted-foreground opacity-50"
-                          )}
-                        >
-                          <span className={cn("flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold mt-0.5",
-                            !mcqSubmitted && isSelected ? "border-primary bg-primary text-primary-foreground" : "",
-                            showCorrect ? "border-emerald-500 bg-emerald-500 text-white" : "",
-                            showWrong ? "border-red-500 bg-red-500 text-white" : "",
-                            !mcqSubmitted && !isSelected ? "border-white/20 text-muted-foreground" : "",
-                            mcqSubmitted && !showCorrect && !showWrong ? "border-border" : ""
-                          )}>
-                            {String.fromCharCode(65 + idx)}
-                          </span>
-                          <span className="flex-1 text-sm leading-relaxed pt-0.5">{opt}</span>
-                          {showCorrect && <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
-                          {showWrong && <XCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />}
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  {/* Explanation */}
-                  {mcqSubmitted && mcqResult && (
-                    <div className={cn("p-3 rounded-xl border text-sm", isCorrect ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20")}>
-                      <p className={cn("font-semibold text-xs mb-1", isCorrect ? "text-emerald-400" : "text-red-400")}>
-                        {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
-                      </p>
-                      <p className="text-muted-foreground leading-relaxed">{mcqResult.explanation ?? q.explanation}</p>
+                <>
+                  {/* Min-5 warning */}
+                  {mcqQuestions.length < 5 && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
+                      <Flag className="h-3.5 w-3.5 flex-shrink-0" />
+                      Only {mcqQuestions.length} question{mcqQuestions.length !== 1 ? "s" : ""} available — upload more via the course manager for a full set.
                     </div>
                   )}
 
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <button
-                      onClick={() => { setMcqIndex(i => Math.max(0, i - 1)); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}
-                      disabled={mcqIndex === 0}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                    >
-                      <ChevronLeft className="h-4 w-4" /> Prev
-                    </button>
+                  {/* Top strip */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-sm text-muted-foreground truncate">
+                        <span className="text-foreground font-medium">{mcqTopic.topic}</span>
+                        {" › "}
+                        <span className="text-foreground">{mcqTopic.subtopic}</span>
+                      </span>
+                      <Progress value={((mcqIndex + 1) / mcqQuestions.length) * 100} className="w-28 h-1.5 hidden sm:block" />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        Q {mcqIndex + 1}/{mcqQuestions.length}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className={cn(
+                      "text-[10px] flex-shrink-0",
+                      q.difficulty === "Easy" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                      : q.difficulty === "Medium" ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                      : "bg-red-500/15 text-red-400 border-red-500/30"
+                    )}>
+                      {q.difficulty}
+                    </Badge>
+                  </div>
 
-                    <div className="flex gap-2">
-                      {!mcqSubmitted ? (
-                        <Button
-                          size="sm"
-                          disabled={mcqSelected === null}
-                          onClick={mcqSubmit}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        >
-                          Submit
-                        </Button>
-                      ) : mcqIndex < mcqQuestions.length - 1 ? (
-                        <Button size="sm" onClick={mcqNext} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                          Next <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" className="gap-2 border-border" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}>
-                          <RotateCcw className="h-3.5 w-3.5" /> Restart
-                        </Button>
-                      )}
+                  {/* Question card */}
+                  <GlassCard className="flex flex-col overflow-y-auto">
+                    {/* Question */}
+                    <div className="flex items-start gap-3 mb-5">
+                      <span className="flex-shrink-0 px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold border border-primary/20">
+                        Q{mcqIndex + 1}
+                      </span>
+                      <p className="text-base font-medium text-foreground leading-relaxed flex-1">{q.question}</p>
+                      <Badge variant="outline" className="flex-shrink-0 text-xs text-amber-400 border-amber-500/30 bg-amber-500/5">
+                        +{q.points} pts
+                      </Badge>
                     </div>
 
-                    <button
-                      onClick={() => { if (mcqIndex < mcqQuestions.length - 1) { setMcqIndex(i => i + 1); setMcqSelected(null); setMcqSubmitted(false) } }}
-                      disabled={mcqIndex === mcqQuestions.length - 1}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                    >
-                      Next <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
+                    {/* Options */}
+                    <div className="space-y-3">
+                      {q.options.map((opt, idx) => {
+                        const isSelected = mcqSelected === idx
+                        const showCorrect = mcqSubmitted && idx === mcqResult?.correct_answer
+                        const showWrong = mcqSubmitted && isSelected && idx !== mcqResult?.correct_answer
+                        return (
+                          <motion.button
+                            key={idx}
+                            onClick={() => !mcqSubmitted && setMcqSelected(idx)}
+                            disabled={mcqSubmitted}
+                            animate={showWrong ? { x: [0, -8, 8, -6, 6, 0] } : {}}
+                            transition={{ duration: 0.4 }}
+                            className={cn(
+                              "w-full p-4 rounded-xl text-left transition-all duration-200 border",
+                              !mcqSubmitted && isSelected && "border-primary bg-primary/10 text-foreground",
+                              !mcqSubmitted && !isSelected && "border-border hover:border-primary/50 hover:bg-primary/5 text-foreground",
+                              showCorrect && "border-emerald-500 bg-emerald-500/10 text-emerald-400",
+                              showWrong && "border-red-500 bg-red-500/10 text-red-400",
+                              mcqSubmitted && !showCorrect && !showWrong && "border-border text-muted-foreground opacity-50"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border flex-shrink-0",
+                                !mcqSubmitted && isSelected && "border-primary bg-primary text-primary-foreground",
+                                !mcqSubmitted && !isSelected && "border-border text-muted-foreground",
+                                showCorrect && "border-emerald-500 bg-emerald-500 text-white",
+                                showWrong && "border-red-500 bg-red-500 text-white",
+                                mcqSubmitted && !showCorrect && !showWrong && "border-border text-muted-foreground"
+                              )}>
+                                {String.fromCharCode(65 + idx)}
+                              </div>
+                              <span className="flex-1 text-sm leading-relaxed">{opt}</span>
+                              {showCorrect && <CheckCircle className="h-5 w-5 ml-auto text-emerald-400 flex-shrink-0" />}
+                              {showWrong && <XCircle className="h-5 w-5 ml-auto text-red-400 flex-shrink-0" />}
+                            </div>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
 
-                  {/* Question dots */}
-                  <div className="flex gap-1.5 justify-center flex-wrap">
-                    {mcqQuestions.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => { setMcqIndex(i); setMcqSelected(null); setMcqSubmitted(false) }}
-                        className={cn("w-2 h-2 rounded-full transition-all", i === mcqIndex ? "bg-primary w-4" : "bg-white/20 hover:bg-white/40")}
-                      />
-                    ))}
-                  </div>
-                </GlassCard>
+                    {/* Explanation */}
+                    {mcqSubmitted && (mcqResult?.explanation || q.explanation) && (
+                      <div className="mt-5 p-4 rounded-xl border-l-4 border-primary bg-primary/5 border border-primary/20">
+                        <h4 className="font-medium mb-1.5 text-foreground flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-primary" />
+                          Explanation
+                        </h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {mcqResult?.explanation ?? q.explanation}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action bar */}
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-border">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => {
+                            const s = [...mcqStatuses]
+                            s[mcqIndex] = "marked"
+                            setMcqStatuses(s)
+                            toast.info("Marked for review")
+                          }}
+                          className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                          disabled={mcqSubmitted}
+                        >
+                          <Flag className="h-3.5 w-3.5 mr-1.5" />Mark
+                        </Button>
+                        {mcqSubmitted && (
+                          <Button
+                            variant="outline" size="sm"
+                            onClick={() => {
+                              tryingAgainRef.current = true
+                              setMcqSubmitted(false)
+                              setMcqSelected(null)
+                              setMcqResult(null)
+                            }}
+                            className="border-primary/30 text-primary hover:bg-primary/10"
+                          >
+                            <RotateCcw className="h-3.5 w-3.5 mr-1.5" />Try Again
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={() => mcqNavigateTo(mcqIndex - 1)}
+                          disabled={mcqIndex === 0}
+                          className="text-foreground"
+                        >
+                          <ArrowLeft className="h-4 w-4 mr-1" />Prev
+                        </Button>
+                        {!mcqSubmitted ? (
+                          <Button
+                            size="sm"
+                            disabled={mcqSelected === null}
+                            onClick={mcqSubmit}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          >
+                            Submit
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => mcqNavigateTo(mcqIndex + 1)}
+                            disabled={mcqIndex === mcqQuestions.length - 1}
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          >
+                            Next <ArrowRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </GlassCard>
+
+                  {/* Question palette */}
+                  <GlassCard className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-foreground">Question Palette</h4>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary/80 inline-block" />Current</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/30 inline-block" />Done</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/30 inline-block" />Marked</span>
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-secondary/50 border border-border inline-block" />Todo</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {mcqStatuses.map((status, i) => (
+                        <button
+                          key={i}
+                          onClick={() => mcqNavigateTo(i)}
+                          className={cn(
+                            "w-9 h-9 rounded-lg text-xs font-medium transition-all",
+                            i === mcqIndex
+                              ? "bg-primary text-primary-foreground"
+                              : status === "answered"
+                              ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                              : status === "marked"
+                              ? "bg-amber-500/20 border border-amber-500/30 text-amber-400"
+                              : "bg-secondary/50 border border-border text-muted-foreground hover:bg-secondary/80"
+                          )}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                    {mcqStatuses.every(s => s === "answered") && (
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-xs text-emerald-400 font-medium">
+                          ✓ All {mcqQuestions.length} questions answered
+                        </span>
+                        <Button
+                          size="sm" variant="outline"
+                          className="h-7 text-xs gap-1.5 border-border"
+                          onClick={() => openMcqTopic(mcqTopic.topic, mcqTopic.subtopic, mcqTopic.lessonOrder)}
+                        >
+                          <RotateCcw className="h-3 w-3" />Restart
+                        </Button>
+                      </div>
+                    )}
+                  </GlassCard>
+                </>
               )
             })()}
           </div>

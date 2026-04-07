@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Plus, Pencil, Trash2, ChevronDown, ChevronRight,
   BookOpen, Loader2, GripVertical, Layers, FileText,
   Clock, Star, Code2, Database, Globe, Brain, Zap,
-  AlertTriangle, X, Check,
+  AlertTriangle, X, Check, Upload, Search, Download,
+  CheckCircle2, AlertCircle, SkipForward,
 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -37,6 +38,30 @@ interface LessonRow {
   order: number
   points: number
   is_active: boolean
+  mcq_count: number
+}
+
+interface MCQQuestionRow {
+  id: number
+  question: string
+  option_a: string
+  option_b: string
+  option_c: string
+  option_d: string
+  option_e?: string | null
+  correct_option: string
+  correct_answer: string
+  explanation?: string | null
+  difficulty: "Easy" | "Medium" | "Hard"
+  points: number
+}
+
+interface UploadResult {
+  imported: number
+  skipped: number
+  errors: number
+  skipped_questions: { row: number; question: string; reason: string }[]
+  error_details: { row: number; question?: string; reason: string }[]
 }
 
 interface LevelRow {
@@ -371,6 +396,557 @@ function LessonModal({ initial, courseId, onSave, onClose }: {
   )
 }
 
+// ── MCQ Upload Modal ──────────────────────────────────────────────────────────
+
+const CSV_HEADERS = [
+  "question", "option_a", "option_b", "option_c", "option_d", "option_e",
+  "correct_option", "correct_answer", "explanation", "difficulty", "points",
+  "image_url", "tag",
+]
+
+// Two filled sample rows so the user sees exactly what every column expects
+const CSV_SAMPLE_ROWS = [
+  [
+    "What is a variable in Python?",
+    "A named memory location",
+    "A loop construct",
+    "A function definition",
+    "A class object",
+    "",                                    // option_e — leave blank if unused
+    "A",
+    "A named memory location",
+    "Variables store data values that can be referenced and manipulated in a program.",
+    "Easy",
+    "2",
+    "",                                    // image_url — URL or blank
+    "",                                    // tag — e.g. TCS, Infosys, or blank
+  ],
+  [
+    "Which keyword defines a function in Python?",
+    "func",
+    "def",
+    "define",
+    "function",
+    "",
+    "B",
+    "def",
+    "The def keyword is used to define a function in Python.",
+    "Easy",
+    "2",
+    "",
+    "TCS",
+  ],
+]
+
+function downloadSampleCSV() {
+  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`
+  const lines = [
+    CSV_HEADERS.join(","),
+    ...CSV_SAMPLE_ROWS.map(row => row.map(escape).join(",")),
+  ]
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = "mcq_sample.csv"
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function MCQUploadModal({ lesson, onClose, onSuccess }: {
+  lesson: LessonRow
+  onClose: () => void
+  onSuccess: (result: UploadResult) => void
+}) {
+  const [file, setFile] = useState<File | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [result, setResult] = useState<UploadResult | null>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragging(false)
+    const f = e.dataTransfer.files[0]
+    if (f?.name.endsWith(".csv")) setFile(f)
+    else toast.error("Only CSV files are supported")
+  }
+
+  const handleUpload = async () => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await api.post(`/super-admin/lessons/${lesson.id}/mcq/upload`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      setResult(res.data)
+      onSuccess(res.data)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.15 }}
+        className="w-full max-w-xl bg-[#0F1628] border border-border rounded-2xl shadow-2xl"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Upload MCQ</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-sm">{lesson.title}</p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {/* Sample CSV download */}
+          <button
+            onClick={downloadSampleCSV}
+            className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-primary/25 bg-primary/5 hover:bg-primary/10 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <Download className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-foreground">Download Sample CSV</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  13 columns · 2 filled rows · open in Excel or Sheets
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-primary/60 group-hover:text-primary transition-colors" />
+          </button>
+
+          {/* Upload result */}
+          {result ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
+                  <p className="text-2xl font-bold text-emerald-400">{result.imported}</p>
+                  <p className="text-xs text-emerald-400/70 mt-0.5">Imported</p>
+                </div>
+                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-center">
+                  <p className="text-2xl font-bold text-amber-400">{result.skipped}</p>
+                  <p className="text-xs text-amber-400/70 mt-0.5">Skipped</p>
+                </div>
+                <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-center">
+                  <p className="text-2xl font-bold text-red-400">{result.errors}</p>
+                  <p className="text-xs text-red-400/70 mt-0.5">Errors</p>
+                </div>
+              </div>
+
+              {result.skipped_questions.length > 0 && (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1.5 max-h-32 overflow-y-auto">
+                  <p className="text-xs font-medium text-amber-400 flex items-center gap-1.5">
+                    <SkipForward className="h-3.5 w-3.5" />Skipped (duplicates)
+                  </p>
+                  {result.skipped_questions.map((s, i) => (
+                    <p key={i} className="text-xs text-muted-foreground">
+                      Row {s.row}: <span className="text-foreground/80">{s.question}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              {result.error_details.length > 0 && (
+                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 space-y-1.5 max-h-32 overflow-y-auto">
+                  <p className="text-xs font-medium text-red-400 flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5" />Errors
+                  </p>
+                  {result.error_details.map((e, i) => (
+                    <p key={i} className="text-xs text-muted-foreground">
+                      Row {e.row}: <span className="text-red-400">{e.reason}</span>
+                      {e.question && <> — <span className="text-foreground/80">{e.question}</span></>}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <Button variant="outline" className="flex-1 border-border text-sm" onClick={() => { setResult(null); setFile(null) }}>
+                  Upload More
+                </Button>
+                <Button className="flex-1 bg-primary text-primary-foreground text-sm" onClick={onClose}>
+                  Done
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Drop zone */}
+              <div
+                onDragOver={e => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => inputRef.current?.click()}
+                className={cn(
+                  "relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all",
+                  dragging
+                    ? "border-primary bg-primary/10"
+                    : file
+                    ? "border-emerald-500/50 bg-emerald-500/5"
+                    : "border-border hover:border-border/70 hover:bg-white/[0.02]"
+                )}
+              >
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={e => {
+                    const f = e.target.files?.[0]
+                    if (f) setFile(f)
+                  }}
+                />
+                {file ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                    <p className="text-sm font-medium text-foreground">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+                    <button
+                      onClick={e => { e.stopPropagation(); setFile(null) }}
+                      className="text-xs text-muted-foreground hover:text-red-400 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-foreground">Drop your CSV here or click to browse</p>
+                    <p className="text-xs text-muted-foreground">Only .csv files are supported</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 border-border" onClick={onClose}>Cancel</Button>
+                <Button
+                  className="flex-1 bg-primary text-primary-foreground"
+                  disabled={!file || uploading}
+                  onClick={handleUpload}
+                >
+                  {uploading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {uploading ? "Uploading…" : "Upload"}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// ── MCQ Manage Panel ──────────────────────────────────────────────────────────
+
+const diffMCQ: Record<string, string> = {
+  Easy:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  Medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  Hard:   "bg-red-500/15 text-red-400 border-red-500/30",
+}
+
+function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
+  lesson: LessonRow
+  onClose: () => void
+  onUploadClick: () => void
+  onChanged: () => void
+}) {
+  const [questions, setQuestions]   = useState<MCQQuestionRow[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [search, setSearch]         = useState("")
+  const [deleteTarget, setDeleteTarget] = useState<MCQQuestionRow | null>(null)
+  const [clearConfirm, setClearConfirm] = useState(false)
+  const [deleting, setDeleting]     = useState(false)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await api.get(`/super-admin/lessons/${lesson.id}/mcq`)
+      setQuestions(res.data)
+    } catch {
+      toast.error("Failed to load questions")
+    } finally {
+      setLoading(false)
+    }
+  }, [lesson.id])
+
+  useEffect(() => { load() }, [load])
+
+  const filtered = questions.filter(q =>
+    q.question.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      await api.delete(`/super-admin/mcq/${deleteTarget.id}`)
+      setQuestions(prev => prev.filter(q => q.id !== deleteTarget.id))
+      setDeleteTarget(null)
+      onChanged()
+      toast.success("Question deleted")
+    } catch {
+      toast.error("Delete failed")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleClearAll = async () => {
+    setDeleting(true)
+    try {
+      await api.delete(`/super-admin/lessons/${lesson.id}/mcq`)
+      setQuestions([])
+      setClearConfirm(false)
+      onChanged()
+      toast.success("All questions cleared")
+    } catch {
+      toast.error("Clear failed")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.15 }}
+        className="w-full max-w-3xl bg-[#0F1628] border border-border rounded-2xl shadow-2xl flex flex-col max-h-[88vh]"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">MCQ Questions</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{lesson.title}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground bg-white/5 px-2.5 py-1 rounded-full">
+              {questions.length} question{questions.length !== 1 ? "s" : ""}
+            </span>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors ml-1">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Action bar */}
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-border flex-shrink-0">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search questions…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-sm bg-secondary/50 border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+            />
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-border h-9 text-xs gap-1.5 flex-shrink-0"
+            onClick={onUploadClick}
+          >
+            <Upload className="h-3.5 w-3.5" />Upload More
+          </Button>
+          {questions.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-9 text-xs gap-1.5 flex-shrink-0"
+              onClick={() => setClearConfirm(true)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />Clear All
+            </Button>
+          )}
+        </div>
+
+        {/* Question list */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="space-y-2 p-6">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-14 rounded-lg bg-white/5 animate-pulse" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Brain className="h-10 w-10 text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">
+                {search ? "No questions match your search" : "No questions uploaded yet"}
+              </p>
+              {!search && (
+                <Button
+                  size="sm"
+                  className="mt-4 bg-primary text-primary-foreground text-xs"
+                  onClick={onUploadClick}
+                >
+                  <Upload className="h-3.5 w-3.5 mr-1.5" />Upload CSV
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {filtered.map((q, idx) => (
+                <div key={q.id}>
+                  <div
+                    className="flex items-start gap-3 px-6 py-3.5 hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                    onClick={() => setExpandedId(expandedId === q.id ? null : q.id)}
+                  >
+                    {/* Index */}
+                    <span className="text-xs text-muted-foreground w-6 text-right flex-shrink-0 mt-0.5 font-mono">
+                      {idx + 1}
+                    </span>
+
+                    {/* Question text */}
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        "text-sm text-foreground leading-snug",
+                        expandedId !== q.id && "line-clamp-2"
+                      )}>
+                        {q.question}
+                      </p>
+                      {expandedId === q.id && (
+                        <div className="mt-3 space-y-1.5">
+                          {(["a","b","c","d","e"] as const).map(letter => {
+                            const opt = q[`option_${letter}` as keyof MCQQuestionRow] as string
+                            if (!opt) return null
+                            const isCorrect = q.correct_option === letter.toUpperCase()
+                            return (
+                              <div key={letter} className={cn(
+                                "flex items-start gap-2 text-xs px-2.5 py-1.5 rounded-lg",
+                                isCorrect
+                                  ? "bg-emerald-500/10 border border-emerald-500/20"
+                                  : "bg-white/[0.03] border border-border/50"
+                              )}>
+                                <span className={cn(
+                                  "font-bold flex-shrink-0 w-4",
+                                  isCorrect ? "text-emerald-400" : "text-muted-foreground"
+                                )}>{letter.toUpperCase()}.</span>
+                                <span className={isCorrect ? "text-emerald-300" : "text-muted-foreground"}>{opt}</span>
+                                {isCorrect && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 ml-auto flex-shrink-0 mt-0.5" />}
+                              </div>
+                            )
+                          })}
+                          {q.explanation && (
+                            <div className="mt-2 px-2.5 py-2 rounded-lg bg-primary/5 border border-primary/20">
+                              <p className="text-xs text-muted-foreground"><span className="text-primary font-medium">Explanation: </span>{q.explanation}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Meta */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", diffMCQ[q.difficulty])}>
+                        {q.difficulty}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground hidden sm:block">
+                        {q.points}pt{q.points !== 1 ? "s" : ""}
+                      </span>
+                      <ChevronDown className={cn(
+                        "h-3.5 w-3.5 text-muted-foreground transition-transform flex-shrink-0",
+                        expandedId === q.id && "rotate-180"
+                      )} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        onClick={e => { e.stopPropagation(); setDeleteTarget(q) }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer count */}
+        {!loading && filtered.length > 0 && (
+          <div className="px-6 py-3 border-t border-border flex-shrink-0 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {search ? `${filtered.length} of ${questions.length}` : questions.length} question{questions.length !== 1 ? "s" : ""}
+            </p>
+            <p className="text-xs text-muted-foreground">Click a row to expand options</p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Delete single question confirm */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={o => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-400" />Delete Question
+            </AlertDialogTitle>
+            <AlertDialogDescription className="line-clamp-3">
+              {deleteTarget?.question}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear all confirm */}
+      <AlertDialog open={clearConfirm} onOpenChange={o => !o && setClearConfirm(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-400" />Clear All Questions
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete all <strong>{questions.length} questions</strong> for <strong>{lesson.title}</strong>?
+              Student attempt history will also be removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearAll}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function CoursesPage() {
@@ -390,6 +966,10 @@ export default function CoursesPage() {
   const [deleteLesson, setDeleteLesson]   = useState<{ courseId: string; lesson: LessonRow } | null>(null)
 
   const [deleting, setDeleting]           = useState(false)
+
+  // MCQ modals
+  const [mcqManage, setMcqManage]         = useState<LessonRow | null>(null)
+  const [mcqUpload, setMcqUpload]         = useState<LessonRow | null>(null)
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -763,7 +1343,7 @@ export default function CoursesPage() {
                                         {lesson.order}
                                       </span>
                                       <span className="flex-1 text-sm text-foreground truncate">{lesson.title}</span>
-                                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-shrink-0">
                                         <span className="flex items-center gap-1">
                                           <Clock className="h-3 w-3" />{lesson.duration_mins}m
                                         </span>
@@ -771,7 +1351,24 @@ export default function CoursesPage() {
                                           <Star className="h-3 w-3" />{lesson.points}
                                         </span>
                                       </div>
-                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      {/* MCQ count badge — always visible when > 0 */}
+                                      {lesson.mcq_count > 0 && (
+                                        <button
+                                          onClick={() => setMcqManage(lesson)}
+                                          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-[10px] text-violet-400 hover:bg-violet-500/25 transition-colors flex-shrink-0"
+                                        >
+                                          <Brain className="h-3 w-3" />
+                                          {lesson.mcq_count} MCQ
+                                        </button>
+                                      )}
+                                      {/* Action buttons — appear on hover */}
+                                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                        <Button size="sm" variant="ghost"
+                                          className="h-6 w-6 p-0 text-muted-foreground hover:text-violet-400"
+                                          title="Upload MCQ"
+                                          onClick={() => setMcqUpload(lesson)}>
+                                          <Upload className="h-3 w-3" />
+                                        </Button>
                                         <Button size="sm" variant="ghost"
                                           className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                                           onClick={() => setLessonModal({
@@ -824,6 +1421,25 @@ export default function CoursesPage() {
       )}
 
       {/* ── Modals ────────────────────────────────────────────────────────── */}
+      {/* ── MCQ Panels ───────────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {mcqManage && (
+          <MCQManagePanel
+            lesson={mcqManage}
+            onClose={() => setMcqManage(null)}
+            onUploadClick={() => { setMcqUpload(mcqManage); setMcqManage(null) }}
+            onChanged={fetchCourses}
+          />
+        )}
+        {mcqUpload && (
+          <MCQUploadModal
+            lesson={mcqUpload}
+            onClose={() => setMcqUpload(null)}
+            onSuccess={() => fetchCourses()}
+          />
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {courseModal === "create" && (
           <CourseModal
