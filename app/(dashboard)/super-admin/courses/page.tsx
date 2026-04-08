@@ -650,6 +650,185 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
   )
 }
 
+// ── Assignment Upload Modal ────────────────────────────────────────────────────
+
+const ASSIGNMENT_SAMPLE_CSV = [
+  "question,option_a,option_b,option_c,option_d,correct_option,topic,subtopic,explanation,difficulty,points,tag",
+  "What is the output of print(2**3)?,6,8,9,4,B,Python,Operators,2**3 is 2 to the power 3 which equals 8,Easy,5,",
+  "Which keyword is used to define a function in Python?,func,def,function,lambda,B,Python,Functions,The 'def' keyword is used to define a function.,Easy,5,",
+].join("\n")
+
+function AssignmentUploadModal({ level, onClose, onSuccess }: {
+  level: LevelRow
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [file, setFile] = useState<File | null>(null)
+  const [dragging, setDragging] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [result, setResult] = useState<UploadResult | null>(null)
+
+  const handleFile = (f: File) => {
+    if (!f.name.toLowerCase().endsWith(".csv")) {
+      toast.error("Only CSV files are supported")
+      return
+    }
+    setFile(f)
+    setResult(null)
+  }
+
+  const handleUpload = async () => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append("file", file)
+      const res = await api.post(`/super-admin/levels/${level.id}/assignments/upload`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      setResult(res.data)
+      if (res.data.imported > 0) onSuccess()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Upload failed")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const downloadSample = () => {
+    const blob = new Blob([ASSIGNMENT_SAMPLE_CSV], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "assignment_questions_sample.csv"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-popover border border-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Upload Assignments</h3>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-sm">{level.name}</p>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <Button size="sm" variant="outline" className="border-border text-xs gap-1.5 w-full" onClick={downloadSample}>
+            <Download className="h-3.5 w-3.5" />
+            Download Sample CSV
+          </Button>
+
+          {!result ? (
+            <>
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+                onClick={() => document.getElementById("assignment-csv-input")?.click()}
+                className={cn(
+                  "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors",
+                  dragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-white/[0.02]"
+                )}
+              >
+                <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                {file ? (
+                  <p className="text-sm font-medium text-foreground">{file.name}</p>
+                ) : (
+                  <>
+                    <p className="text-sm text-foreground font-medium">Drop CSV here or click to browse</p>
+                    <p className="text-xs text-muted-foreground mt-1">Required: question, option_a–d, correct_option, topic, subtopic</p>
+                  </>
+                )}
+                <input
+                  id="assignment-csv-input"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
+                />
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" className="border-border" onClick={onClose}>Cancel</Button>
+                <Button
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5"
+                  disabled={!file || uploading}
+                  onClick={handleUpload}
+                >
+                  {uploading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                  {uploading ? "Uploading…" : "Upload"}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-emerald-400">{result.imported}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Imported</p>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-amber-400">{result.skipped}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Skipped</p>
+                </div>
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
+                  <p className="text-2xl font-bold text-red-400">{result.errors}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Errors</p>
+                </div>
+              </div>
+
+              {result.error_details.length > 0 && (
+                <div className="space-y-1 max-h-36 overflow-y-auto">
+                  <p className="text-xs font-semibold text-red-400">Errors:</p>
+                  {result.error_details.map((e, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="h-3 w-3 text-red-400 flex-shrink-0 mt-0.5" />
+                      <span>Row {e.row}: {e.reason}{e.question ? ` — "${e.question}"` : ""}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {result.skipped_questions.length > 0 && (
+                <div className="space-y-1 max-h-28 overflow-y-auto">
+                  <p className="text-xs font-semibold text-amber-400">Skipped (duplicates):</p>
+                  {result.skipped_questions.map((s, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <SkipForward className="h-3 w-3 text-amber-400 flex-shrink-0 mt-0.5" />
+                      <span>Row {s.row}: {s.question}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                <Button size="sm" variant="outline" className="border-border" onClick={() => { setFile(null); setResult(null) }}>
+                  Upload More
+                </Button>
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onClose}>
+                  Done
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 // ── MCQ Manage Panel ──────────────────────────────────────────────────────────
 
 const diffMCQ: Record<string, string> = {
@@ -970,6 +1149,9 @@ export default function CoursesPage() {
   // MCQ modals
   const [mcqManage, setMcqManage]         = useState<LessonRow | null>(null)
   const [mcqUpload, setMcqUpload]         = useState<LessonRow | null>(null)
+
+  // Assignment upload modal
+  const [assignmentUpload, setAssignmentUpload] = useState<LevelRow | null>(null)
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -1304,6 +1486,13 @@ export default function CoursesPage() {
                             </div>
                             <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                               <Button size="sm" variant="ghost"
+                                className="h-7 px-2 text-[11px] text-muted-foreground hover:text-amber-400 gap-1"
+                                title="Upload Assignments"
+                                onClick={() => setAssignmentUpload(level)}>
+                                <Upload className="h-3 w-3" />
+                                <span className="hidden sm:inline">Assignments</span>
+                              </Button>
+                              <Button size="sm" variant="ghost"
                                 className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
                                 onClick={() => setLevelModal({ courseId: selected.id, level })}>
                                 <Pencil className="h-3 w-3" />
@@ -1435,6 +1624,13 @@ export default function CoursesPage() {
           <MCQUploadModal
             lesson={mcqUpload}
             onClose={() => setMcqUpload(null)}
+            onSuccess={() => fetchCourses()}
+          />
+        )}
+        {assignmentUpload && (
+          <AssignmentUploadModal
+            level={assignmentUpload}
+            onClose={() => setAssignmentUpload(null)}
             onSuccess={() => fetchCourses()}
           />
         )}
