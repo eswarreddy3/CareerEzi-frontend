@@ -82,6 +82,7 @@ const superAdminNavItems = [
   { href: "/super-admin/packages", label: "Packages", icon: Package },
   { href: "/super-admin/courses", label: "Courses", icon: BookOpen },
   { href: "/super-admin/aptitude", label: "Aptitude Questions", icon: Calculator },
+  { href: "/super-admin/coding", label: "Coding Problems", icon: Code2 },
   { href: "/super-admin/jobs", label: "Job Postings", icon: BriefcaseBusiness },
   { href: "/super-admin/feedback", label: "Feedback", icon: MessageSquare },
 ]
