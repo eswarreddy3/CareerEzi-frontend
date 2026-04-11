@@ -535,6 +535,32 @@ export default function LandingPage() {
           style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
 
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 w-full max-w-5xl mx-auto text-center">
+
+          {/* Logo — hero centrepiece */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.05, type: "spring", stiffness: 200, damping: 18 }}
+            className="flex justify-center mb-7"
+          >
+            <MagneticWrap>
+              <motion.div
+                whileHover={{ scale: 1.07, rotate: [-1, 1, -1, 0] }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 350, damping: 18 }}
+                className="relative"
+              >
+                <Logo size={80} />
+                {/* subtle glow ring on hover */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl pointer-events-none"
+                  whileHover={{ boxShadow: "0 0 40px rgba(99,102,241,0.35)" }}
+                  transition={{ duration: 0.3 }}
+                />
+              </motion.div>
+            </MagneticWrap>
+          </motion.div>
+
           {/* Badge */}
           <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.15, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs sm:text-sm mb-7 font-semibold tracking-wide uppercase">
@@ -563,6 +589,59 @@ export default function LandingPage() {
             className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-9 leading-relaxed">
             persistence. <strong className="text-foreground/80">Learn.</strong> Practice. Code. Get Placed — everything your college needs to turn every student into a hire.
           </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.6 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12"
+          >
+            <MagneticWrap>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
+                >
+                  Get Started Free <ArrowRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
+            </MagneticWrap>
+            <MagneticWrap>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all"
+                >
+                  Log In <ChevronRight className="w-4 h-4" />
+                </Link>
+              </motion.div>
+            </MagneticWrap>
+          </motion.div>
+
+          {/* Hero stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.68, duration: 0.7 }}
+            className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 max-w-2xl mx-auto"
+          >
+            {heroStats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.72 + i * 0.07, type: "spring", stiffness: 260, damping: 18 }}
+                whileHover={{ scale: 1.08, y: -4 }}
+                className="flex flex-col items-center gap-1 glass-card rounded-xl py-3 px-2 border border-border hover:border-primary/30 transition-colors cursor-default select-none"
+              >
+                <span className={`text-lg sm:text-xl font-bold font-mono ${stat.color}`}>
+                  <Counter to={stat.value} suffix={stat.suffix} />
+                </span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground text-center leading-tight">{stat.label}</span>
+              </motion.div>
+            ))}
+          </motion.div>
 
         </motion.div>
 
@@ -902,6 +981,22 @@ export default function LandingPage() {
               <div className="absolute inset-0 opacity-[0.04]"
                 style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
               <div className="relative z-10">
+                {/* Logo in CTA */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, type: "spring", stiffness: 220, damping: 18 }}
+                  className="flex justify-center mb-6"
+                >
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Logo size={56} />
+                  </motion.div>
+                </motion.div>
+
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs sm:text-sm mb-6 font-medium">
                   <Rocket className="w-3.5 h-3.5" />
                   Get Started Today
@@ -915,6 +1010,36 @@ export default function LandingPage() {
                 <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-9">
                   Every great placement record started with one decision. Make yours today — your students are waiting.
                 </p>
+
+                {/* CTA action buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="flex flex-col sm:flex-row items-center justify-center gap-3"
+                >
+                  <MagneticWrap>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                      <Link
+                        href="/login"
+                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
+                      >
+                        Get Started Free <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </motion.div>
+                  </MagneticWrap>
+                  <MagneticWrap>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                      <button
+                        onClick={() => scrollTo("contact")}
+                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all"
+                      >
+                        Contact Us <Mail className="w-4 h-4" />
+                      </button>
+                    </motion.div>
+                  </MagneticWrap>
+                </motion.div>
               </div>
             </motion.div>
           </FadeIn>

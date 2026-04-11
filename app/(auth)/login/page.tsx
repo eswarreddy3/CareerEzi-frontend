@@ -78,9 +78,20 @@ export default function LoginPage() {
         <div className="absolute bottom-0 right-0 w-56 h-56 rounded-full bg-amber-500/8 blur-3xl pointer-events-none" />
 
         {/* Logo */}
-        <div className="relative z-10">
-          <Logo size={38} />
-        </div>
+        <motion.div
+          className="relative z-10"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.05, type: "spring", stiffness: 260, damping: 20 }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <Logo size={44} />
+          </motion.div>
+        </motion.div>
 
         {/* Headline + features */}
         <div className="relative z-10 space-y-7">
@@ -117,11 +128,18 @@ export default function LoginPage() {
 
         {/* Stats */}
         <div className="relative z-10 grid grid-cols-4 gap-2 pt-6 border-t border-border">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
+          {STATS.map((s, i) => (
+            <motion.div
+              key={s.label}
+              className="text-center"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
+              whileHover={{ scale: 1.08 }}
+            >
               <p className="text-base font-bold text-foreground">{s.value}</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

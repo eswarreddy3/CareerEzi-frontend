@@ -298,7 +298,7 @@ export default function AdminDashboardPage() {
                   <span className="w-6 text-center text-base">
                     {i < 3 ? MEDALS[i] : <span className="text-xs text-muted-foreground font-medium">{i + 1}</span>}
                   </span>
-                  <UserAvatar name={s.name} photoUrl={(s as any).photo_url} size="sm" />
+                  <UserAvatar name={s.name} photoUrl={(s as any).avatar} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.branch || "—"}</p>
@@ -359,7 +359,7 @@ export default function AdminDashboardPage() {
                 {analytics?.inactive_students.slice(0, 8).map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-2 min-w-0">
-                      <UserAvatar name={student.name} photoUrl={(student as any).photo_url} size="xs" fallbackClassName="bg-red-500/20 text-red-400" />
+                      <UserAvatar name={student.name} photoUrl={(student as any).avatar} size="xs" fallbackClassName="bg-red-500/20 text-red-400" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
                         <p className="text-xs text-muted-foreground">Last: {formatLastActive(student.last_active)}</p>

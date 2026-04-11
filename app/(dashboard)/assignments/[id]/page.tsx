@@ -31,7 +31,7 @@ import api from "@/lib/api"
 
 interface ApiQuestion {
   id: number
-  module_id: string
+  level_id: number
   topic: string
   subtopic: string
   question: string
@@ -42,14 +42,14 @@ interface ApiQuestion {
 }
 
 interface AssignmentMeta {
-  id: string
-  module_id: string
+  id: number
+  level_id: number
   title: string
   course: string
   icon: string
   duration_mins: number
   total_questions: number
-  points: number
+  max_score: number
 }
 
 type QStatus = "unattempted" | "answered" | "marked" | "answered-marked"
@@ -81,7 +81,7 @@ function getQBtnClass(status: QStatus, isCurrent: boolean) {
 export default function AssignmentExamPage() {
   const params = useParams()
   const router = useRouter()
-  const moduleId = params.id as string
+  const levelId = params.id as string
 
   const [assignmentMeta, setAssignmentMeta] = useState<AssignmentMeta | null>(null)
   const [questions, setQuestions] = useState<ApiQuestion[]>([])
@@ -100,10 +100,10 @@ export default function AssignmentExamPage() {
 
   // Load questions from API; redirect to results if already completed
   useEffect(() => {
-    api.get(`/assignments/${moduleId}/questions`)
+    api.get(`/assignments/${levelId}/questions`)
       .then((res) => {
         if (res.data.already_completed) {
-          router.replace(`/assignments/${moduleId}/results`)
+          router.replace(`/assignments/${levelId}/results`)
           return
         }
         setAssignmentMeta(res.data.assignment)
@@ -115,7 +115,7 @@ export default function AssignmentExamPage() {
         router.push("/assignments")
       })
       .finally(() => setLoading(false))
-  }, [moduleId])
+  }, [levelId])
 
   const submit = useCallback(() => {
     if (!assignmentMeta || submitting) return
@@ -129,13 +129,13 @@ export default function AssignmentExamPage() {
       answersPayload[qId] = idx
     }
 
-    api.post(`/assignments/${moduleId}/submit`, { answers: answersPayload })
+    api.post(`/assignments/${levelId}/submit`, { answers: answersPayload })
       .then((res) => {
         sessionStorage.setItem(
-          `assignment-result-${moduleId}`,
+          `assignment-result-${levelId}`,
           JSON.stringify(res.data)
         )
-        router.push(`/assignments/${moduleId}/results`)
+        router.push(`/assignments/${levelId}/results`)
       })
       .catch(() => {
         // Offline fallback: evaluate locally
@@ -153,23 +153,23 @@ export default function AssignmentExamPage() {
         const wrong = results.filter((r) => r.selectedIndex !== -1).length
         const unanswered = results.filter((r) => r.selectedIndex === -1).length
         sessionStorage.setItem(
-          `assignment-result-${moduleId}`,
+          `assignment-result-${levelId}`,
           JSON.stringify({
-            assignmentId: moduleId,
+            assignmentId: levelId,
             title: assignmentMeta.title,
             course: assignmentMeta.course,
             correct,
             wrong,
             unanswered,
             score: 0,
-            maxScore: assignmentMeta.points,
+            maxScore: assignmentMeta.max_score,
             results,
           })
         )
-        router.push(`/assignments/${moduleId}/results`)
+        router.push(`/assignments/${levelId}/results`)
       })
       .finally(() => setSubmitting(false))
-  }, [assignmentMeta, answers, moduleId, questions, router, submitting])
+  }, [assignmentMeta, answers, levelId, questions, router, submitting])
 
   // Timer — only starts after user confirms the pre-start dialog
   useEffect(() => {
@@ -249,7 +249,7 @@ export default function AssignmentExamPage() {
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border space-y-1">
                 <p className="text-xs text-muted-foreground">Max Score</p>
-                <p className="text-lg font-bold text-amber-400">{assignmentMeta.points} pts</p>
+                <p className="text-lg font-bold text-amber-400">{assignmentMeta.max_score} pts</p>
               </div>
             </div>
 

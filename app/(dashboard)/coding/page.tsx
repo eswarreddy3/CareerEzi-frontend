@@ -238,11 +238,13 @@ export default function CodingPage() {
         language,
         code,
       })
-      const { status, message, test_results, points_awarded } = res.data
+      const { status, message, test_results, points_awarded, milestone_bonus } = res.data
       if (status === "accepted") {
-        toast.success("Solution Accepted!", {
-          description: points_awarded > 0 ? `+${points_awarded} points earned!` : message,
-        })
+        const baseDesc = points_awarded > 0 ? `+${points_awarded} points earned!` : message
+        toast.success("Solution Accepted!", { description: baseDesc })
+        if (milestone_bonus > 0) {
+          setTimeout(() => toast.success(`Milestone! +${milestone_bonus} pts — 10 problems solved!`), 800)
+        }
       } else {
         toast.error(
           status === "runtime_error" ? "Runtime Error"

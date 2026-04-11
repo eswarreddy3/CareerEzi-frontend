@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -20,7 +21,6 @@ import {
   Users,
   BarChart3,
   Globe,
-  Package,
   LogOut,
   ChevronDown,
   Newspaper,
@@ -29,8 +29,10 @@ import {
   BriefcaseBusiness,
   MessageSquare,
   BarChart2,
+  Calculator,
 } from "lucide-react"
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { UserAvatar } from "@/components/user-avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -73,15 +75,44 @@ const branchAdminNavItems = [
   { href: "/feed", label: "College Feed", icon: Newspaper },
 ]
 
-const superAdminNavItems = [
-  { href: "/super-admin", label: "Overview", icon: Globe },
-  { href: "/super-admin/colleges", label: "Colleges", icon: Building2 },
-  { href: "/super-admin/students", label: "Students", icon: Users },
-  { href: "/super-admin/branch-admins", label: "Branch Admins", icon: BarChart3 },
-  { href: "/super-admin/packages", label: "Packages", icon: Package },
-  { href: "/super-admin/jobs", label: "Job Postings", icon: BriefcaseBusiness },
-  { href: "/super-admin/feedback", label: "Feedback", icon: MessageSquare },
-]
+type NavItem = { href: string; label: string; icon: React.ElementType }
+type NavGroup = { label: string; icon: React.ElementType; items: NavItem[] }
+type SuperAdminNav = { standalone: NavItem[]; groups: NavGroup[] }
+
+const superAdminNav: SuperAdminNav = {
+  standalone: [
+    { href: "/super-admin", label: "Overview", icon: Globe },
+  ],
+  groups: [
+    {
+      label: "People & Colleges",
+      icon: Users,
+      items: [
+        { href: "/super-admin/colleges", label: "Colleges", icon: Building2 },
+        { href: "/super-admin/students", label: "Students", icon: Users },
+        { href: "/super-admin/branch-admins", label: "Branch Admins", icon: BarChart3 },
+      ],
+    },
+    {
+      label: "Content Management",
+      icon: BookOpen,
+      items: [
+        { href: "/super-admin/courses", label: "Courses", icon: BookOpen },
+        { href: "/super-admin/domains", label: "Domain Programs", icon: Layers },
+        { href: "/super-admin/aptitude", label: "Aptitude Questions", icon: Calculator },
+        { href: "/super-admin/coding", label: "Coding Problems", icon: Code2 },
+      ],
+    },
+    {
+      label: "Jobs & Feedback",
+      icon: BriefcaseBusiness,
+      items: [
+        { href: "/super-admin/jobs", label: "Job Postings", icon: BriefcaseBusiness },
+        { href: "/super-admin/feedback", label: "Feedback", icon: MessageSquare },
+      ],
+    },
+  ],
+}
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ?? "http://localhost:5000"
 
@@ -107,13 +138,26 @@ export function Sidebar() {
 
   const role = user?.role ?? "student"
   const navItems =
-    role === "super_admin"
-      ? superAdminNavItems
-      : role === "college_admin"
+    role === "college_admin"
       ? collegeAdminNavItems
       : role === "branch_admin"
       ? branchAdminNavItems
       : studentNavItems
+
+  // Track which super-admin groups are open; default open if any child is active
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    const state: Record<string, boolean> = {}
+    superAdminNav.groups.forEach((g) => {
+      state[g.label] = g.items.some(
+        (item) =>
+          pathname === item.href || pathname.startsWith(item.href + "/")
+      )
+    })
+    return state
+  })
+
+  const toggleGroup = (label: string) =>
+    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }))
 
   const initials = user?.name
     ? user.name
@@ -162,12 +206,18 @@ export function Sidebar() {
         {/* Logo */}
         <div
           className={cn(
-            "flex items-center h-16 px-4 border-b border-sidebar-border",
+            "flex items-center h-20 px-4 border-b border-sidebar-border",
             isCollapsed ? "justify-center" : "justify-between"
           )}
         >
           <Link href="/dashboard" className="flex items-center">
-            <Logo size={36} showText={!isCollapsed} />
+            <motion.div
+              whileHover={{ scale: 1.07, rotate: -2 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: "spring", stiffness: 400, damping: 18 }}
+            >
+              <Logo size={60} showText={!isCollapsed} />
+            </motion.div>
           </Link>
           <Button
             variant="ghost"
@@ -184,42 +234,149 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <ul className="space-y-1">
-            {navItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard" &&
-                  item.href !== "/admin" &&
-                  item.href !== "/branch-admin" &&
-                  item.href !== "/super-admin" &&
-                  pathname.startsWith(item.href + "/"))
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setIsMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                      isCollapsed && "justify-center px-2",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_0_16px_var(--glow-primary)]"
-                        : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
-                    )}
-                  >
-                    <item.icon
+          {role === "super_admin" ? (
+            <ul className="space-y-1">
+              {/* Standalone items */}
+              {superAdminNav.standalone.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
                       className={cn(
-                        "h-5 w-5 flex-shrink-0",
-                        isActive && "text-primary"
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                        isCollapsed && "justify-center px-2",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_0_16px_var(--glow-primary)]"
+                          : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
                       )}
-                    />
-                    {!isCollapsed && (
-                      <span className="text-sm font-medium">{item.label}</span>
+                    >
+                      <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-primary")} />
+                      {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                    </Link>
+                  </li>
+                )
+              })}
+
+              {/* Grouped items */}
+              {superAdminNav.groups.map((group) => {
+                const isGroupOpen = openGroups[group.label] ?? false
+                const hasActiveChild = group.items.some(
+                  (item) =>
+                    pathname === item.href || pathname.startsWith(item.href + "/")
+                )
+
+                return (
+                  <li key={group.label}>
+                    {/* Group header */}
+                    <button
+                      onClick={() => !isCollapsed && toggleGroup(group.label)}
+                      title={isCollapsed ? group.label : undefined}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                        isCollapsed && "justify-center px-2",
+                        hasActiveChild
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                      )}
+                    >
+                      <group.icon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          hasActiveChild && "text-primary"
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <>
+                          <span className="text-sm font-medium flex-1 text-left">{group.label}</span>
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+                              isGroupOpen && "rotate-180"
+                            )}
+                          />
+                        </>
+                      )}
+                    </button>
+
+                    {/* Group children */}
+                    {(isCollapsed || isGroupOpen) && (
+                      <ul className={cn("space-y-0.5", !isCollapsed && "mt-0.5 ml-3 pl-3 border-l border-sidebar-border")}>
+                        {group.items.map((item) => {
+                          const isActive =
+                            pathname === item.href ||
+                            pathname.startsWith(item.href + "/")
+                          return (
+                            <li key={item.href}>
+                              <Link
+                                href={item.href}
+                                onClick={() => setIsMobileOpen(false)}
+                                title={isCollapsed ? item.label : undefined}
+                                className={cn(
+                                  "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200",
+                                  isCollapsed && "justify-center px-2",
+                                  isActive
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_0_16px_var(--glow-primary)]"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                                )}
+                              >
+                                <item.icon
+                                  className={cn(
+                                    "h-4 w-4 flex-shrink-0",
+                                    isActive && "text-primary"
+                                  )}
+                                />
+                                {!isCollapsed && (
+                                  <span className="text-sm">{item.label}</span>
+                                )}
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
                     )}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <ul className="space-y-1">
+              {navItems.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/dashboard" &&
+                    item.href !== "/admin" &&
+                    item.href !== "/branch-admin" &&
+                    pathname.startsWith(item.href + "/"))
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                        isCollapsed && "justify-center px-2",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_0_16px_var(--glow-primary)]"
+                          : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isActive && "text-primary"
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <span className="text-sm font-medium">{item.label}</span>
+                      )}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </nav>
 
         {/* User section */}
@@ -228,7 +385,7 @@ export function Sidebar() {
             /* ── Collapsed ── */
             <div className="flex flex-col items-center gap-2">
               {/* Avatar */}
-              <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
+              <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" className="border-2 border-primary/30" />
 
               {/* College logo (students) */}
               {role === "student" && user?.college_name && (
@@ -287,7 +444,7 @@ export function Sidebar() {
               <div className="rounded-xl bg-secondary/40 border border-border p-2.5 space-y-2">
                 {/* Avatar + name row */}
                 <div className="flex items-center gap-2.5">
-                  <UserAvatar name={user?.name || "U"} photoUrl={user?.photo_url} size="sm" className="border-2 border-primary/30" />
+                  <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" className="border-2 border-primary/30" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate text-foreground leading-tight">
                       {user?.name || "User"}
