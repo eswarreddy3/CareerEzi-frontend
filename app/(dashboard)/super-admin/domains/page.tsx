@@ -110,24 +110,24 @@ function Modal({ title, onClose, wide, children }: {
   title: string; onClose: () => void; wide?: boolean; children: React.ReactNode
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
         className={cn(
-          "w-full bg-[#0F1628] border border-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh]",
+          "w-full bg-popover border border-border rounded-2xl shadow-2xl flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh] my-auto",
           wide ? "max-w-3xl" : "max-w-lg",
         )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <h3 className="text-base font-semibold text-foreground">{title}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-6 py-5 overflow-y-auto">{children}</div>
+        <div className="px-4 sm:px-6 py-5 overflow-y-auto">{children}</div>
       </motion.div>
     </div>
   )
@@ -225,7 +225,7 @@ function DomainModal({ initial, isEdit, onSave, onClose }: {
         </Field>
 
         {/* Icon + Color row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Icon">
             <Select value={form.icon} onValueChange={v => set("icon")(v)}>
               <SelectTrigger className="bg-secondary/50">
@@ -286,7 +286,7 @@ function DomainModal({ initial, isEdit, onSave, onClose }: {
         </Field>
 
         {/* Order + Active row */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Display Order">
             <Input
               type="number" min={0}
@@ -786,7 +786,7 @@ export default function DomainsPage() {
 
       {/* Delete confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
-        <AlertDialogContent className="bg-[#0F1628] border-border">
+        <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Domain</AlertDialogTitle>
             <AlertDialogDescription>

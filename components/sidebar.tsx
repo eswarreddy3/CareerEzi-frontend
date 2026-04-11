@@ -21,7 +21,6 @@ import {
   Users,
   BarChart3,
   Globe,
-  Package,
   LogOut,
   ChevronDown,
   Newspaper,
@@ -92,7 +91,6 @@ const superAdminNav: SuperAdminNav = {
         { href: "/super-admin/colleges", label: "Colleges", icon: Building2 },
         { href: "/super-admin/students", label: "Students", icon: Users },
         { href: "/super-admin/branch-admins", label: "Branch Admins", icon: BarChart3 },
-        { href: "/super-admin/packages", label: "Packages", icon: Package },
       ],
     },
     {

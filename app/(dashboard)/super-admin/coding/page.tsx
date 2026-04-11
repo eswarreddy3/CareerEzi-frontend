@@ -156,22 +156,22 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
-        className="w-full max-w-lg bg-[#0F1628] border border-border rounded-2xl shadow-2xl"
+        className="w-full max-w-lg bg-popover border border-border rounded-2xl shadow-2xl my-auto flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh]"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <h3 className="text-base font-semibold text-foreground">Import Coding Problems</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4 overflow-y-auto">
           {!result ? (
             <>
               <div
@@ -388,16 +388,16 @@ function ProblemFormModal({
   const sectionHeadCls = "text-sm font-semibold text-foreground border-b border-border pb-2"
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.97, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97 }}
         transition={{ duration: 0.18 }}
-        className="w-full max-w-4xl bg-[#0F1628] border border-border rounded-2xl shadow-2xl flex flex-col max-h-[92vh]"
+        className="w-full max-w-4xl bg-popover border border-border rounded-2xl shadow-2xl flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[92vh] my-auto"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <Terminal className="h-5 w-5 text-primary" />
             <h3 className="text-base font-semibold text-foreground">
@@ -410,12 +410,12 @@ function ProblemFormModal({
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-7">
+        <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-5 space-y-7">
 
           {/* ── Section 1: Basic Info ── */}
           <div className={sectionCls}>
             <p className={sectionHeadCls}>Basic Info</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Title *</label>
                 <Input
@@ -959,7 +959,7 @@ export default function CodingProblemsAdminPage() {
 
       {/* Delete confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
-        <AlertDialogContent className="bg-[#0F1628] border-border">
+        <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Problem?</AlertDialogTitle>
             <AlertDialogDescription>

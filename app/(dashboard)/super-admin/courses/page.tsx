@@ -145,21 +145,21 @@ function Modal({ title, onClose, children }: {
   title: string; onClose: () => void; children: React.ReactNode
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
-        className="w-full max-w-lg bg-[#0F1628] border border-border rounded-2xl shadow-2xl"
+        className="w-full max-w-lg bg-popover border border-border rounded-2xl shadow-2xl my-auto flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh]"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <h3 className="text-base font-semibold text-foreground">{title}</h3>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="px-6 py-5">{children}</div>
+        <div className="px-4 sm:px-6 py-5 overflow-y-auto">{children}</div>
       </motion.div>
     </div>
   )
@@ -223,7 +223,7 @@ function CourseModal({ initial, isEdit, courses, onSave, onClose }: {
           <Input placeholder="Short description..." className="bg-secondary/50" value={form.description}
             onChange={e => set("description")(e.target.value)} />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Category">
             <Select value={form.category} onValueChange={set("category")}>
               <SelectTrigger className="bg-secondary/50"><SelectValue /></SelectTrigger>
@@ -241,7 +241,7 @@ function CourseModal({ initial, isEdit, courses, onSave, onClose }: {
             </Select>
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Icon">
             <Select value={form.icon} onValueChange={set("icon")}>
               <SelectTrigger className="bg-secondary/50"><SelectValue /></SelectTrigger>
@@ -263,7 +263,7 @@ function CourseModal({ initial, isEdit, courses, onSave, onClose }: {
             </Select>
           </Field>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Points / Lesson">
             <Input type="number" min={1} className="bg-secondary/50" value={form.points_per_lesson}
               onChange={e => set("points_per_lesson")(e.target.value)} />
@@ -367,7 +367,7 @@ function LessonModal({ initial, courseId, onSave, onClose }: {
           <Input placeholder="Introduction to Python" className="bg-secondary/50" value={form.title}
             onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required />
         </Field>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
           <Field label="Duration (min)">
             <Input type="number" min={1} className="bg-secondary/50" value={form.duration_mins}
               onChange={e => setForm(p => ({ ...p, duration_mins: e.target.value }))} />
@@ -491,25 +491,25 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
-        className="w-full max-w-xl bg-[#0F1628] border border-border rounded-2xl shadow-2xl"
+        className="w-full max-w-xl bg-popover border border-border rounded-2xl shadow-2xl my-auto flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh]"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <div>
             <h3 className="text-base font-semibold text-foreground">Upload MCQ</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-sm">{lesson.title}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px] sm:max-w-sm">{lesson.title}</p>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 sm:px-6 py-5 space-y-4 overflow-y-auto">
           {/* Sample CSV download */}
           <button
             onClick={downloadSampleCSV}
@@ -706,24 +706,24 @@ function AssignmentUploadModal({ level, onClose, onSuccess }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-popover border border-border rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+        className="bg-popover border border-border rounded-2xl w-full max-w-lg shadow-2xl my-auto flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh]"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <div>
             <h3 className="text-base font-semibold text-foreground">Upload Assignments</h3>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-sm">{level.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[200px] sm:max-w-sm">{level.name}</p>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto">
           <Button size="sm" variant="outline" className="border-border text-xs gap-1.5 w-full" onClick={downloadSample}>
             <Download className="h-3.5 w-3.5" />
             Download Sample CSV
@@ -901,16 +901,16 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.15 }}
-        className="w-full max-w-3xl bg-[#0F1628] border border-border rounded-2xl shadow-2xl flex flex-col max-h-[88vh]"
+        className="w-full max-w-3xl bg-popover border border-border rounded-2xl shadow-2xl flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[88vh] my-auto"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border flex-shrink-0">
           <div>
             <h3 className="text-base font-semibold text-foreground">MCQ Questions</h3>
             <p className="text-xs text-muted-foreground mt-0.5">{lesson.title}</p>
@@ -926,7 +926,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
         </div>
 
         {/* Action bar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-border flex-shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 border-b border-border flex-shrink-0">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <input
@@ -937,24 +937,26 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
               className="w-full pl-9 pr-3 py-2 text-sm bg-secondary/50 border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
             />
           </div>
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-border h-9 text-xs gap-1.5 flex-shrink-0"
-            onClick={onUploadClick}
-          >
-            <Upload className="h-3.5 w-3.5" />Upload More
-          </Button>
-          {questions.length > 0 && (
+          <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-9 text-xs gap-1.5 flex-shrink-0"
-              onClick={() => setClearConfirm(true)}
+              className="border-border h-9 text-xs gap-1.5 flex-1 sm:flex-none"
+              onClick={onUploadClick}
             >
-              <Trash2 className="h-3.5 w-3.5" />Clear All
+              <Upload className="h-3.5 w-3.5" />Upload More
             </Button>
-          )}
+            {questions.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-9 text-xs gap-1.5 flex-1 sm:flex-none"
+                onClick={() => setClearConfirm(true)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />Clear All
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Question list */}
