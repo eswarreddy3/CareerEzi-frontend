@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import {
   ArrowLeft,
@@ -26,7 +26,7 @@ import {
   ZoomIn,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { fireStars } from "@/lib/effects"
+import { fireStars, fireSchoolPride } from "@/lib/effects"
 import { PointsBurst } from "@/components/points-burst"
 import { GlassCard } from "@/components/glass-card"
 import { ProgressRing } from "@/components/progress-ring"
@@ -39,7 +39,13 @@ import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { getLessonContent } from "@/content"
-import { PYTHON_TOPIC_META, COURSE_TOPIC_META } from "@/lib/python-topics"
+
+interface McqQState {
+  selected: number | null
+  submitting: boolean
+  result: { correct: boolean; correct_answer: number; explanation: string | null; points_earned: number; total_points: number } | null
+  locked: boolean
+}
 
 interface ApiMcqQuestion {
   id: number
@@ -57,18 +63,25 @@ interface ApiMcqQuestion {
 }
 
 interface ModuleAssignment {
-  id: string
-  module_id: string
+  id: number
+  level_id: number
   title: string
   course: string
+  course_id: string
   icon: string
-  due_date: string
   duration_mins: number
   total_questions: number
-  completed_questions: number
-  status: "pending" | "in-progress" | "completed" | "overdue"
-  points: number
+  status: "pending" | "completed"
+  max_score: number
   score: number
+  is_locked: boolean
+}
+
+interface CourseLevel {
+  id: number
+  name: string
+  order: number
+  lesson_ids: number[]
 }
 
 interface Lesson {
@@ -90,6 +103,7 @@ interface Course {
   total_lessons: number
   lessons_completed: number
   lessons: Lesson[]
+  levels: CourseLevel[]
 }
 
 const difficultyColors = {
@@ -652,36 +666,65 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
   const [completing, setCompleting] = useState(false)
-  const [expandedModules, setExpandedModules] = useState<number[]>([1, 2, 3])
+  const [expandedModules, setExpandedModules] = useState<number[]>([])
   const [lessonCompleteAnim, setLessonCompleteAnim] = useState(false)
   const [earnedPoints, setEarnedPoints] = useState(0)
   const [showPointsBurst, setShowPointsBurst] = useState(false)
 
-  // Top-level tab (only used for Python)
   const [activeTab, setActiveTab] = useState<"lessons" | "practice" | "assignment">("lessons")
+  const [mcqLessonCounts, setMcqLessonCounts] = useState<Record<string, number>>({})
 
   // Inline MCQ state
-  const [mcqTopic, setMcqTopic] = useState<{ topic: string; subtopic: string; lessonOrder: number } | null>(null)
+  const [mcqTopic, setMcqTopic] = useState<{ lessonId: number; lessonTitle: string } | null>(null)
   const [mcqQuestions, setMcqQuestions] = useState<ApiMcqQuestion[]>([])
   const [mcqLoading, setMcqLoading] = useState(false)
-  const [mcqIndex, setMcqIndex] = useState(0)
-  const [mcqSelected, setMcqSelected] = useState<number | null>(null)
-  const [mcqSubmitted, setMcqSubmitted] = useState(false)
-  const [mcqResult, setMcqResult] = useState<{ correct: boolean; correct_answer: number; explanation: string | null; points_earned: number } | null>(null)
-  const [mcqScores, setMcqScores] = useState<Record<string, { correct: number; total: number }>>({})
+  const [mcqPage, setMcqPage] = useState(1)
+  const MCQ_PAGE_SIZE = 5
+  const [mcqQStates, setMcqQStates] = useState<McqQState[]>([])
+  const [answerFeedback, setAnswerFeedback] = useState<"correct" | "wrong" | null>(null)
   const [moduleAssignments, setModuleAssignments] = useState<ModuleAssignment[]>([])
 
-  async function openMcqTopic(topic: string, subtopic: string, lessonOrder: number) {
-    setMcqTopic({ topic, subtopic, lessonOrder })
+  const MCQ_LETTERS = ["A", "B", "C", "D", "E"]
+
+  useEffect(() => {
+    if (activeTab !== "practice" || !courseId) return
+    api.get(`/mcq/lesson-counts?course_id=${courseId}`)
+      .then(res => setMcqLessonCounts(res.data))
+      .catch(() => {})
+  }, [activeTab, courseId])
+
+  function normalizeMcqQuestions(raw: any[]): ApiMcqQuestion[] {
+    return raw.map(q => ({
+      ...q,
+      options: [q.option_a, q.option_b, q.option_c, q.option_d, q.option_e].filter(Boolean),
+      selected_answer: q.selected_answer != null ? MCQ_LETTERS.indexOf(q.selected_answer) : undefined,
+      correct_answer: q.correct_option != null ? MCQ_LETTERS.indexOf(q.correct_option) : undefined,
+    }))
+  }
+
+  async function openMcqTopic(lessonId: number, lessonTitle: string) {
+    setMcqTopic({ lessonId, lessonTitle })
     setMcqQuestions([])
-    setMcqIndex(0)
-    setMcqSelected(null)
-    setMcqSubmitted(false)
-    setMcqResult(null)
+    setMcqQStates([])
+    setMcqPage(1)
+    setAnswerFeedback(null)
     setMcqLoading(true)
     try {
-      const res = await api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
-      setMcqQuestions(res.data)
+      const res = await api.get(`/mcq/questions?lesson_id=${lessonId}`)
+      const normalized = normalizeMcqQuestions(res.data)
+      setMcqQuestions(normalized)
+      setMcqQStates(normalized.map((q) => ({
+        selected: q.attempted ? (q.selected_answer ?? null) : null,
+        submitting: false,
+        result: q.attempted ? {
+          correct: q.is_correct ?? false,
+          correct_answer: q.correct_answer ?? -1,
+          explanation: q.explanation ?? null,
+          points_earned: 0,
+          total_points: 0,
+        } : null,
+        locked: q.attempted && (q.is_correct ?? false),
+      })))
     } catch {
       toast.error("Failed to load questions")
       setMcqTopic(null)
@@ -690,34 +733,45 @@ export default function CourseDetailPage() {
     }
   }
 
-  async function mcqSubmit() {
-    if (mcqSelected === null) return
-    const q = mcqQuestions[mcqIndex]
+  function updateMcqQState(index: number, patch: Partial<McqQState>) {
+    setMcqQStates((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)))
+  }
+
+  async function handleMcqAnswer(qIndex: number, optionIndex: number) {
+    const state = mcqQStates[qIndex]
+    if (!state || state.locked || state.submitting) return
+    updateMcqQState(qIndex, { selected: optionIndex, submitting: true })
+    const q = mcqQuestions[qIndex]
     try {
-      const res = await api.post("/mcq/answer", { question_id: q.id, selected_answer: mcqSelected })
+      const res = await api.post("/mcq/answer", {
+        question_id: q.id,
+        selected_answer: MCQ_LETTERS[optionIndex],
+      })
       const result = res.data
-      setMcqResult(result)
-      setMcqSubmitted(true)
-      const key = `${mcqTopic?.topic}|${mcqTopic?.subtopic}`
-      setMcqScores(prev => {
-        const cur = prev[key] ?? { correct: 0, total: 0 }
-        return { ...prev, [key]: { correct: cur.correct + (result.correct ? 1 : 0), total: cur.total + 1 } }
+      const correctIndex = MCQ_LETTERS.indexOf(result.correct_option)
+      updateMcqQState(qIndex, {
+        submitting: false,
+        result: { ...result, correct_answer: correctIndex },
+        locked: result.correct,
       })
       updateUser({ points: result.total_points })
-      if (result.correct) toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
-      else toast.error("Incorrect — see the explanation")
+      if (result.correct) {
+        setAnswerFeedback("correct")
+        fireStars()
+        toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
+      } else {
+        setAnswerFeedback("wrong")
+        toast.error("Incorrect — check the explanation below")
+      }
+      setTimeout(() => setAnswerFeedback(null), 700)
     } catch {
+      updateMcqQState(qIndex, { submitting: false, selected: null })
       toast.error("Failed to submit answer")
     }
   }
 
-  function mcqNext() {
-    if (mcqIndex < mcqQuestions.length - 1) {
-      setMcqIndex(i => i + 1)
-      setMcqSelected(null)
-      setMcqSubmitted(false)
-      setMcqResult(null)
-    }
+  function mcqTryAgain(qIndex: number) {
+    updateMcqQState(qIndex, { selected: null, result: null, locked: false })
   }
 
   useEffect(() => {
@@ -725,6 +779,9 @@ export default function CourseDetailPage() {
       .then((res) => {
         const data: Course = res.data
         setCourse(data)
+        if (data.levels?.length > 0) {
+          setExpandedModules(data.levels.map(lv => lv.id))
+        }
         // Auto-select first incomplete lesson, or first lesson
         const first = data.lessons.find(l => !l.is_completed) ?? data.lessons[0]
         setActiveLesson(first ?? null)
@@ -737,18 +794,9 @@ export default function CourseDetailPage() {
   }, [courseId])
 
   useEffect(() => {
-    if (courseId !== "python" && courseId !== "sql" && courseId !== "html-css") return
-    const moduleIds =
-      courseId === "sql"
-        ? ["sql-basics", "sql-intermediate", "sql-advanced"]
-        : courseId === "html-css"
-        ? ["html-basics", "css-basics", "css-advanced"]
-        : ["python-basics", "python-intermediate", "python-advanced"]
     api.get("/assignments/list")
       .then((res) => {
-        const filtered = (res.data as ModuleAssignment[]).filter((a) =>
-          moduleIds.includes(a.module_id)
-        )
+        const filtered = (res.data as ModuleAssignment[]).filter(a => a.course_id === courseId)
         setModuleAssignments(filtered)
       })
       .catch(() => {/* silently fail — assignment tab will be empty */})
@@ -766,7 +814,7 @@ export default function CourseDetailPage() {
     setCompleting(true)
     try {
       const res = await api.post(`/learn/lessons/${activeLesson.id}/complete`)
-      const { points_earned, total_points } = res.data
+      const { points_earned, total_points, course_completion_bonus, domain_completion_bonus } = res.data
 
       // Update local state
       setCourse(prev => {
@@ -790,6 +838,19 @@ export default function CourseDetailPage() {
         toast.success(`Lesson complete! +${points_earned} pts`)
       } else {
         toast.success("Lesson marked complete")
+      }
+
+      if (course_completion_bonus > 0) {
+        setTimeout(() => {
+          fireSchoolPride()
+          toast.success(`Course complete! +${course_completion_bonus} bonus pts`)
+        }, 1200)
+      }
+      if (domain_completion_bonus > 0) {
+        setTimeout(() => {
+          fireSchoolPride()
+          toast.success(`Domain mastered! +${domain_completion_bonus} bonus pts 🎓`)
+        }, 2400)
       }
 
       // Auto-advance to next lesson
@@ -821,38 +882,26 @@ export default function CourseDetailPage() {
 
   const activeIdx = course.lessons.findIndex(l => l.id === activeLesson?.id)
 
-  // ── Module definitions for tiered courses ─────────────────────────────────
-  const PYTHON_MODULES = [
-    { id: 1, title: "Python Basics",        emoji: "🌱", lessonOrders: [1, 2, 3, 4],   bar: "bg-emerald-500" },
-    { id: 2, title: "Python Intermediate",  emoji: "⚙️",  lessonOrders: [5, 6, 7, 8],   bar: "bg-amber-500"   },
-    { id: 3, title: "Python Advanced",      emoji: "🚀", lessonOrders: [9, 10, 11, 12], bar: "bg-violet-500"  },
+  // ── Module definitions derived from course levels (DB-driven) ────────────
+  const MODULE_STYLES = [
+    { emoji: "🌱", bar: "bg-emerald-500" },
+    { emoji: "⚙️",  bar: "bg-amber-500"   },
+    { emoji: "🚀", bar: "bg-violet-500"  },
+    { emoji: "🎯", bar: "bg-blue-500"    },
+    { emoji: "💡", bar: "bg-pink-500"    },
   ]
-  const SQL_MODULES = [
-    { id: 1, title: "SQL Basics",        emoji: "🌱", lessonOrders: [1, 2, 3, 4],   bar: "bg-emerald-500" },
-    { id: 2, title: "SQL Intermediate",  emoji: "⚙️",  lessonOrders: [5, 6, 7, 8],   bar: "bg-amber-500"   },
-    { id: 3, title: "SQL Advanced",      emoji: "🚀", lessonOrders: [9, 10, 11, 12], bar: "bg-violet-500"  },
-  ]
-  const HTML_CSS_MODULES = [
-    { id: 1, title: "HTML Basics",        emoji: "🌐", lessonOrders: [1, 2, 3, 4, 5],      bar: "bg-emerald-500" },
-    { id: 2, title: "CSS Basics & Intermediate", emoji: "🎨", lessonOrders: [6, 7, 8, 9, 10, 11, 12], bar: "bg-amber-500" },
-    { id: 3, title: "CSS Advanced",       emoji: "✨", lessonOrders: [13, 14, 15],           bar: "bg-violet-500"  },
-  ]
-  const EXCEL_MODULES = [
-    { id: 1, title: "Excel Beginner",      emoji: "🌱", lessonOrders: [1, 2, 3, 4, 5, 6],          bar: "bg-emerald-500" },
-    { id: 2, title: "Excel Intermediate",  emoji: "⚙️",  lessonOrders: [7, 8, 9, 10, 11, 12, 13, 14], bar: "bg-amber-500"   },
-    { id: 3, title: "Excel Advanced",      emoji: "🚀", lessonOrders: [15, 16, 17, 18, 19, 20, 21], bar: "bg-violet-500"  },
-  ]
+  const ACTIVE_MODULES = (course.levels ?? []).map((lv, idx) => ({
+    id: lv.id,
+    title: lv.name,
+    ...MODULE_STYLES[idx % MODULE_STYLES.length],
+    lesson_ids: lv.lesson_ids,
+  }))
+
   function toggleModule(mid: number) {
     setExpandedModules(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])
   }
 
-  const isPython = courseId === "python"
-  const isModular = isPython || courseId === "sql" || courseId === "html-css" || courseId === "excel"
-  const ACTIVE_MODULES =
-    courseId === "sql" ? SQL_MODULES :
-    courseId === "html-css" ? HTML_CSS_MODULES :
-    courseId === "excel" ? EXCEL_MODULES :
-    PYTHON_MODULES
+  const isModular = ACTIVE_MODULES.length > 0
 
   return (
     <div className="space-y-6">
@@ -937,7 +986,7 @@ export default function CourseDetailPage() {
               <div className="overflow-y-auto max-h-[60vh]">
                 {isModular ? (
                   ACTIVE_MODULES.map((mod) => {
-                    const modLessons = course.lessons.filter(l => mod.lessonOrders.includes(l.order))
+                    const modLessons = course.lessons.filter(l => mod.lesson_ids.includes(l.id))
                     const completed = modLessons.filter(l => l.is_completed).length
                     const total = modLessons.length
                     const modProgress = total > 0 ? Math.round((completed / total) * 100) : 0
@@ -972,7 +1021,7 @@ export default function CourseDetailPage() {
                           <div className="bg-secondary/10">
                             {modLessons.map((lesson) => {
                               const isActive = activeLesson?.id === lesson.id
-                              const lessonNum = mod.lessonOrders.indexOf(lesson.order) + 1
+                              const lessonNum = mod.lesson_ids.indexOf(lesson.id) + 1
                               return (
                                 <button
                                   key={lesson.id}
@@ -1124,12 +1173,11 @@ export default function CourseDetailPage() {
               </div>
               <div className="overflow-y-auto max-h-[60vh]">
                 {ACTIVE_MODULES.map((mod) => {
-                  const activeMeta = COURSE_TOPIC_META[courseId] ?? PYTHON_TOPIC_META
-                  const attempted = mod.lessonOrders.filter(o => mcqScores[`${activeMeta[o]?.topic}|${activeMeta[o]?.subtopic}`]).length
-                  const total = mod.lessonOrders.length
-                  const modPct = total > 0 ? Math.round((attempted / total) * 100) : 0
+                  const withQuestions = mod.lesson_ids.filter(id => (mcqLessonCounts[String(id)] ?? 0) > 0).length
+                  const total = mod.lesson_ids.length
+                  const modPct = total > 0 ? Math.round((withQuestions / total) * 100) : 0
                   const isExpanded = expandedModules.includes(mod.id)
-                  const hasSelected = mod.lessonOrders.some(o => mcqTopic?.lessonOrder === o)
+                  const hasSelected = mod.lesson_ids.some(id => mcqTopic?.lessonId === id)
                   return (
                     <div key={mod.id} className="border-b border-border last:border-0">
                       <button
@@ -1148,7 +1196,7 @@ export default function CourseDetailPage() {
                             <div className="flex-1 h-1 bg-secondary/30 rounded-full overflow-hidden">
                               <div className={cn("h-full rounded-full transition-all", mod.bar)} style={{ width: `${modPct}%` }} />
                             </div>
-                            <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{attempted}/{total}</span>
+                            <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{withQuestions}/{total}</span>
                           </div>
                         </div>
                         {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
@@ -1156,42 +1204,38 @@ export default function CourseDetailPage() {
 
                       {isExpanded && (
                         <div className="bg-secondary/10">
-                          {mod.lessonOrders.map((order) => {
-                            const meta = activeMeta[order]
-                            if (!meta) return null
-                            const scoreKey = `${meta.topic}|${meta.subtopic}`
-                            const score = mcqScores[scoreKey]
-                            const isSelected = mcqTopic?.lessonOrder === order
-                            const isDone = score && score.correct === score.total
+                          {mod.lesson_ids.map((lessonId) => {
+                            const lesson = course.lessons.find(l => l.id === lessonId)
+                            if (!lesson) return null
+                            const count = mcqLessonCounts[String(lessonId)] ?? 0
+                            const isSelected = mcqTopic?.lessonId === lessonId
+                            const hasQuestions = count > 0
                             return (
                               <button
-                                key={order}
-                                onClick={() => openMcqTopic(meta.topic, meta.subtopic, order)}
+                                key={lessonId}
+                                onClick={() => openMcqTopic(lesson.id, lesson.title)}
                                 className={cn(
                                   "w-full flex items-start gap-3 pl-6 pr-4 py-3 text-left border-t border-border transition-colors hover:bg-secondary/30",
                                   isSelected && "bg-primary/10 border-l-2 border-l-primary pl-[22px]"
                                 )}
                               >
                                 <div className="mt-0.5 flex-shrink-0">
-                                  {isDone
-                                    ? <CheckCircle className="h-4 w-4 text-emerald-400" />
-                                    : <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center", isSelected ? "border-primary bg-primary/20" : "border-white/20")}>
-                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
-                                      </div>
-                                  }
+                                  <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                                    isSelected ? "border-primary bg-primary/20"
+                                    : hasQuestions ? "border-white/30"
+                                    : "border-white/10"
+                                  )}>
+                                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                  </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className={cn("text-xs font-medium leading-snug", isSelected ? "text-foreground" : isDone ? "text-muted-foreground" : "text-foreground/80")}>
-                                    {meta.subtopic}
+                                  <p className={cn("text-xs font-medium leading-snug", isSelected ? "text-foreground" : hasQuestions ? "text-foreground/80" : "text-muted-foreground/50")}>
+                                    {lesson.title}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1">
-                                    {score ? (
-                                      <span className={cn("text-[10px] font-medium", isDone ? "text-emerald-400" : "text-amber-400")}>
-                                        {score.correct}/{score.total} correct
-                                      </span>
-                                    ) : (
-                                      <span className="text-[10px] text-muted-foreground">5 questions</span>
-                                    )}
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {hasQuestions ? `${count} question${count !== 1 ? "s" : ""}` : "No questions yet"}
+                                    </span>
                                   </div>
                                 </div>
                               </button>
@@ -1207,7 +1251,24 @@ export default function CourseDetailPage() {
           </div>
 
           {/* MCQ question panel */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex flex-col gap-4">
+
+            {/* Answer flash overlay */}
+            <AnimatePresence>
+              {answerFeedback && (
+                <motion.div
+                  className={cn(
+                    "fixed inset-0 pointer-events-none z-40",
+                    answerFeedback === "correct" ? "bg-emerald-500/10" : "bg-red-500/10"
+                  )}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                />
+              )}
+            </AnimatePresence>
+
             {!mcqTopic ? (
               <GlassCard className="flex flex-col items-center justify-center h-64 text-center gap-3">
                 <Brain className="h-10 w-10 text-primary/40" />
@@ -1219,135 +1280,198 @@ export default function CourseDetailPage() {
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
               </GlassCard>
             ) : mcqQuestions.length === 0 ? (
-              <GlassCard className="flex flex-col items-center justify-center h-64">
-                <p className="text-muted-foreground text-sm">No questions for this topic yet.</p>
+              <GlassCard className="flex flex-col items-center justify-center h-64 gap-3">
+                <Brain className="h-10 w-10 text-muted-foreground/30" />
+                <p className="text-muted-foreground text-sm">No questions uploaded for this topic yet.</p>
               </GlassCard>
-            ) : (() => {
-              const q = mcqQuestions[mcqIndex]
-              const isCorrect = mcqSubmitted && mcqResult?.correct === true
-              const isWrong = mcqSubmitted && mcqResult?.correct === false
-              return (
-                <GlassCard className="space-y-5">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">{mcqTopic.subtopic}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-foreground">
-                          Question {mcqIndex + 1} / {mcqQuestions.length}
-                        </span>
-                        <Badge variant="outline" className={cn("text-[10px] border", q.difficulty === "Easy" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : q.difficulty === "Medium" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-red-500/20 text-red-400 border-red-500/30")}>
-                          {q.difficulty}
-                        </Badge>
-                        <span className="text-xs text-amber-500">+{q.points} pts</span>
-                      </div>
-                    </div>
-                    <Progress value={((mcqIndex + 1) / mcqQuestions.length) * 100} className="w-24 h-1.5" />
+            ) : (
+              <>
+                {/* Top strip */}
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm text-muted-foreground truncate">
+                      <span className="text-foreground font-medium">{mcqTopic.lessonTitle}</span>
+                    </span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      — Page {mcqPage}/{Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE)} ({mcqQuestions.length} Qs)
+                    </span>
                   </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-emerald-400">Correct</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-red-500/20 bg-red-500/5">
+                      <div className="w-2 h-2 rounded-full bg-red-500" />
+                      <span className="text-red-400">Wrong</span>
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Question */}
-                  <p className="text-base font-medium text-foreground leading-relaxed">{q.question}</p>
+                {/* 5 question cards */}
+                <div className="space-y-4">
+                  {mcqQuestions.slice((mcqPage - 1) * MCQ_PAGE_SIZE, mcqPage * MCQ_PAGE_SIZE).map((q, localIdx) => {
+                    const qIndex = (mcqPage - 1) * MCQ_PAGE_SIZE + localIdx
+                    const state = mcqQStates[qIndex]
+                    if (!state) return null
+                    const result = state.result
+                    const isLocked = state.locked
 
-                  {/* Options */}
-                  <div className="space-y-2.5">
-                    {q.options.map((opt, idx) => {
-                      const isSelected = mcqSelected === idx
-                      const showCorrect = mcqSubmitted && idx === mcqResult?.correct_answer
-                      const showWrong = mcqSubmitted && isSelected && idx !== mcqResult?.correct_answer
-                      return (
+                    return (
+                      <GlassCard
+                        key={q.id}
+                        className={cn(
+                          "transition-all duration-200",
+                          isLocked && "border-emerald-500/30 bg-emerald-500/5"
+                        )}
+                      >
+                        {/* Question header */}
+                        <div className="flex items-start gap-3 mb-4">
+                          <span className={cn(
+                            "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border",
+                            isLocked
+                              ? "bg-emerald-500 border-emerald-500 text-white"
+                              : result && !result.correct
+                              ? "bg-red-500/20 border-red-500/50 text-red-400"
+                              : "bg-secondary border-border text-muted-foreground"
+                          )}>
+                            {qIndex + 1}
+                          </span>
+                          <p className="text-sm font-medium text-foreground leading-relaxed flex-1">{q.question}</p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <Badge variant="outline" className={cn(
+                              "text-[10px]",
+                              q.difficulty === "Easy" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                              : q.difficulty === "Medium" ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                              : "bg-red-500/15 text-red-400 border-red-500/30"
+                            )}>
+                              {q.difficulty}
+                            </Badge>
+                            <span className="text-xs text-primary whitespace-nowrap">{q.points} pts</span>
+                          </div>
+                        </div>
+
+                        {/* Options */}
+                        <div className="space-y-2">
+                          {q.options.map((opt, idx) => {
+                            const isSelected = state.selected === idx
+                            const correctAnswer = result?.correct_answer ?? -1
+                            const isCorrectOpt = result ? idx === correctAnswer : false
+                            const wasSelectedWrong = !!(result && isSelected && !isCorrectOpt)
+                            const isLockCorrect = isLocked && idx === correctAnswer
+
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => !isLocked && !result && !state.submitting && handleMcqAnswer(qIndex, idx)}
+                                disabled={isLocked || !!result || state.submitting}
+                                className={cn(
+                                  "w-full p-3 rounded-xl text-left transition-all duration-150 border text-sm",
+                                  !result && !isLocked && isSelected && "border-primary bg-primary/10 text-foreground",
+                                  !result && !isLocked && !isSelected && "border-border hover:border-primary/40 hover:bg-primary/5 text-foreground",
+                                  isLockCorrect && "border-emerald-500 bg-emerald-500/10 text-emerald-400",
+                                  result && isCorrectOpt && "border-emerald-500 bg-emerald-500/10 text-emerald-400",
+                                  result && wasSelectedWrong && "border-red-500 bg-red-500/10 text-red-400",
+                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-40",
+                                  isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-40",
+                                )}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className={cn(
+                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border flex-shrink-0",
+                                    (result && isCorrectOpt) || isLockCorrect ? "bg-emerald-500 border-emerald-500 text-white"
+                                    : result && wasSelectedWrong ? "bg-red-500 border-red-500 text-white"
+                                    : "border-border text-muted-foreground"
+                                  )}>
+                                    {String.fromCharCode(65 + idx)}
+                                  </span>
+                                  <span className="flex-1 text-sm leading-relaxed">{opt}</span>
+                                  {state.submitting && isSelected && <Loader2 className="h-4 w-4 animate-spin ml-auto flex-shrink-0" />}
+                                  {((result && isCorrectOpt) || isLockCorrect) && <CheckCircle className="h-4 w-4 ml-auto text-emerald-400 flex-shrink-0" />}
+                                  {result && wasSelectedWrong && <XCircle className="h-4 w-4 ml-auto text-red-400 flex-shrink-0" />}
+                                </div>
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        {/* Feedback strip */}
+                        {(result || isLocked) && (
+                          <div className="mt-3 flex items-start justify-between gap-3">
+                            <div className={cn(
+                              "flex-1 p-3 rounded-lg text-xs leading-relaxed",
+                              isLocked || result?.correct
+                                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                                : "bg-red-500/10 border border-red-500/20 text-red-400"
+                            )}>
+                              {isLocked && !result && <p className="font-medium mb-1">Already answered correctly!</p>}
+                              {result && (
+                                <p className="font-medium mb-1">
+                                  {result.correct
+                                    ? `Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`
+                                    : `Wrong — correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
+                                </p>
+                              )}
+                              {result?.explanation && <p className="text-muted-foreground mt-1">{result.explanation}</p>}
+                            </div>
+                            {result && !result.correct && (
+                              <Button
+                                size="sm" variant="outline"
+                                onClick={() => mcqTryAgain(qIndex)}
+                                className="border-primary/30 text-primary hover:bg-primary/10 flex-shrink-0"
+                              >
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                Try Again
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </GlassCard>
+                    )
+                  })}
+                </div>
+
+                {/* Pagination */}
+                {Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE) > 1 && (
+                  <div className="flex items-center justify-between pt-2">
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={() => setMcqPage((p) => Math.max(1, p - 1))}
+                      disabled={mcqPage <= 1}
+                      className="text-foreground"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE) }, (_, i) => i + 1).map((p) => (
                         <button
-                          key={idx}
-                          disabled={mcqSubmitted}
-                          onClick={() => setMcqSelected(idx)}
+                          key={p}
+                          onClick={() => setMcqPage(p)}
                           className={cn(
-                            "w-full text-left rounded-xl border px-4 py-3 flex items-start gap-3 transition-all",
-                            !mcqSubmitted && isSelected && "border-primary bg-primary/10 text-foreground",
-                            !mcqSubmitted && !isSelected && "border-white/8 bg-secondary/30 text-muted-foreground hover:border-white/20 hover:text-foreground",
-                            showCorrect && "border-emerald-500/60 bg-emerald-500/10 text-emerald-300",
-                            showWrong && "border-red-500/60 bg-red-500/10 text-red-300",
-                            mcqSubmitted && !showCorrect && !showWrong && "border-border bg-secondary/20 text-muted-foreground opacity-50"
+                            "w-8 h-8 rounded-lg text-xs font-medium transition-all",
+                            p === mcqPage
+                              ? "bg-primary/20 text-primary border border-primary/30"
+                              : "bg-secondary/50 text-muted-foreground border border-border hover:border-primary/30 hover:text-primary"
                           )}
                         >
-                          <span className={cn("flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold mt-0.5",
-                            !mcqSubmitted && isSelected ? "border-primary bg-primary text-primary-foreground" : "",
-                            showCorrect ? "border-emerald-500 bg-emerald-500 text-white" : "",
-                            showWrong ? "border-red-500 bg-red-500 text-white" : "",
-                            !mcqSubmitted && !isSelected ? "border-white/20 text-muted-foreground" : "",
-                            mcqSubmitted && !showCorrect && !showWrong ? "border-border" : ""
-                          )}>
-                            {String.fromCharCode(65 + idx)}
-                          </span>
-                          <span className="flex-1 text-sm leading-relaxed pt-0.5">{opt}</span>
-                          {showCorrect && <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
-                          {showWrong && <XCircle className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />}
+                          {p}
                         </button>
-                      )
-                    })}
-                  </div>
-
-                  {/* Explanation */}
-                  {mcqSubmitted && mcqResult && (
-                    <div className={cn("p-3 rounded-xl border text-sm", isCorrect ? "bg-emerald-500/5 border-emerald-500/20" : "bg-red-500/5 border-red-500/20")}>
-                      <p className={cn("font-semibold text-xs mb-1", isCorrect ? "text-emerald-400" : "text-red-400")}>
-                        {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
-                      </p>
-                      <p className="text-muted-foreground leading-relaxed">{mcqResult.explanation ?? q.explanation}</p>
+                      ))}
                     </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <button
-                      onClick={() => { setMcqIndex(i => Math.max(0, i - 1)); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}
-                      disabled={mcqIndex === 0}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={() => setMcqPage((p) => Math.min(Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE), p + 1))}
+                      disabled={mcqPage >= Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE)}
+                      className="text-foreground"
                     >
-                      <ChevronLeft className="h-4 w-4" /> Prev
-                    </button>
-
-                    <div className="flex gap-2">
-                      {!mcqSubmitted ? (
-                        <Button
-                          size="sm"
-                          disabled={mcqSelected === null}
-                          onClick={mcqSubmit}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        >
-                          Submit
-                        </Button>
-                      ) : mcqIndex < mcqQuestions.length - 1 ? (
-                        <Button size="sm" onClick={mcqNext} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                          Next <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      ) : (
-                        <Button size="sm" variant="outline" className="gap-2 border-border" onClick={() => { setMcqIndex(0); setMcqSelected(null); setMcqSubmitted(false); setMcqResult(null) }}>
-                          <RotateCcw className="h-3.5 w-3.5" /> Restart
-                        </Button>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => { if (mcqIndex < mcqQuestions.length - 1) { setMcqIndex(i => i + 1); setMcqSelected(null); setMcqSubmitted(false) } }}
-                      disabled={mcqIndex === mcqQuestions.length - 1}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 transition-colors"
-                    >
-                      Next <ChevronRight className="h-4 w-4" />
-                    </button>
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
                   </div>
-
-                  {/* Question dots */}
-                  <div className="flex gap-1.5 justify-center flex-wrap">
-                    {mcqQuestions.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => { setMcqIndex(i); setMcqSelected(null); setMcqSubmitted(false) }}
-                        className={cn("w-2 h-2 rounded-full transition-all", i === mcqIndex ? "bg-primary w-4" : "bg-white/20 hover:bg-white/40")}
-                      />
-                    ))}
-                  </div>
-                </GlassCard>
-              )
-            })()}
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -1360,14 +1484,17 @@ export default function CourseDetailPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {moduleAssignments.map((a, i) => {
-              const mod = ACTIVE_MODULES[i]
-              const activeMeta = COURSE_TOPIC_META[courseId] ?? PYTHON_TOPIC_META
-              const pct = a.total_questions > 0 ? Math.round((a.completed_questions / a.total_questions) * 100) : 0
+              const mod = ACTIVE_MODULES.find(m => m.id === a.id)
+              const matchingLevel = course.levels?.find(lv => lv.id === a.id)
+              const levelLessons = (matchingLevel?.lesson_ids ?? [])
+                .map(lid => course.lessons.find(l => l.id === lid))
+                .filter(Boolean) as Lesson[]
+              const pct = a.status === "completed" ? 100 : 0
               return (
                 <GlassCard key={a.id} hover className="flex flex-col gap-4">
                   {/* Module identity */}
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">{mod?.emoji}</span>
+                    <span className="text-3xl">{mod?.emoji ?? "📋"}</span>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Module {i + 1}</p>
                       <h3 className="font-bold font-serif text-foreground text-base">{a.title}</h3>
@@ -1378,9 +1505,9 @@ export default function CourseDetailPage() {
                   <div className="space-y-1.5">
                     <p className="text-xs text-muted-foreground font-medium">Covers:</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {ACTIVE_MODULES[i]?.lessonOrders.map((order) => (
-                        <span key={order} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border">
-                          {activeMeta[order]?.subtopic}
+                      {levelLessons.map(lesson => (
+                        <span key={lesson.id} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border">
+                          {lesson.title}
                         </span>
                       ))}
                     </div>
@@ -1395,7 +1522,7 @@ export default function CourseDetailPage() {
                       <FileText className="h-3.5 w-3.5" />{a.total_questions} questions
                     </span>
                     <span className="flex items-center gap-1 text-amber-500">
-                      <Star className="h-3.5 w-3.5 fill-amber-500" />{a.points} pts
+                      <Star className="h-3.5 w-3.5 fill-amber-500" />{a.max_score} pts
                     </span>
                   </div>
 
@@ -1411,7 +1538,7 @@ export default function CourseDetailPage() {
 
                   <Button
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 mt-auto"
-                    onClick={() => router.push(`/assignments/${a.module_id}`)}
+                    onClick={() => router.push(`/assignments/${a.id}`)}
                   >
                     <ClipboardList className="h-4 w-4" />
                     {a.status === "completed" ? "Review" : a.completed_questions > 0 ? "Continue" : "Start Assessment"}

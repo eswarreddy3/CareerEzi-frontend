@@ -39,8 +39,13 @@ interface AssignmentResult {
   correct: number
   wrong: number
   unanswered: number
-  score: number
+  score: number          // base_score + bonus_points (assignment total)
   maxScore: number
+  base_score?: number
+  bonus_points?: number
+  bonus_reason?: string
+  course_completion_bonus?: number
+  domain_completion_bonus?: number
   total_points?: number  // user's total accumulated points (from API)
   results: QuestionResult[]
 }
@@ -209,9 +214,36 @@ export default function AssignmentResultsPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
-          <span className="text-lg font-bold font-serif text-foreground">+{result.score} points earned</span>
+        {/* Points breakdown */}
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center justify-center gap-2">
+            <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+            <span className="text-lg font-bold font-serif text-foreground">+{result.score} points earned</span>
+          </div>
+
+          {/* Bonus badges */}
+          {((result.bonus_points ?? 0) > 0 || (result.course_completion_bonus ?? 0) > 0 || (result.domain_completion_bonus ?? 0) > 0) && (
+            <div className="flex flex-wrap justify-center gap-2 pt-1">
+              {(result.bonus_points ?? 0) > 0 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-xs font-medium text-amber-400">
+                  <Trophy className="h-3 w-3" />
+                  +{result.bonus_points} perfect score bonus
+                </span>
+              )}
+              {(result.course_completion_bonus ?? 0) > 0 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-xs font-medium text-primary">
+                  <Star className="h-3 w-3 fill-current" />
+                  +{result.course_completion_bonus} course completed!
+                </span>
+              )}
+              {(result.domain_completion_bonus ?? 0) > 0 && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-xs font-medium text-violet-400">
+                  <Trophy className="h-3 w-3" />
+                  +{result.domain_completion_bonus} domain mastered! 🎓
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {result.total_points !== undefined && (

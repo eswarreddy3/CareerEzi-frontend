@@ -19,7 +19,7 @@ interface LeaderboardEntry {
   points: number
   streak: number
   is_current_user: boolean
-  photo_url?: string | null
+  avatar?: string | null
 }
 
 const podiumColors = {
@@ -110,7 +110,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[2])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <UserAvatar name={topThree[1]?.name || ""} photoUrl={topThree[1]?.photo_url} size="lg" className={cn("border-4", podiumBorders[2])} />
+                    <UserAvatar name={topThree[1]?.name || ""} photoUrl={topThree[1]?.avatar} size="lg" className={cn("border-4", podiumBorders[2])} />
                     <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-slate-300 to-slate-500 flex items-center justify-center">
                       <span className="text-sm font-bold text-slate-900">2</span>
                     </div>
@@ -138,7 +138,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[1])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <UserAvatar name={topThree[0]?.name || ""} photoUrl={topThree[0]?.photo_url} size="xl" className={cn("border-4", podiumBorders[1])} />
+                    <UserAvatar name={topThree[0]?.name || ""} photoUrl={topThree[0]?.avatar} size="xl" className={cn("border-4", podiumBorders[1])} />
                     <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center">
                       <Medal className="h-5 w-5 text-amber-900" />
                     </div>
@@ -166,7 +166,7 @@ export default function LeaderboardPage() {
                 <div className={cn("absolute top-0 left-0 right-0 h-1 bg-gradient-to-r", podiumColors[3])} />
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
-                    <UserAvatar name={topThree[2]?.name || ""} photoUrl={topThree[2]?.photo_url} size="lg" className={cn("border-4", podiumBorders[3])} />
+                    <UserAvatar name={topThree[2]?.name || ""} photoUrl={topThree[2]?.avatar} size="lg" className={cn("border-4", podiumBorders[3])} />
                     <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
                       <span className="text-sm font-bold text-orange-900">3</span>
                     </div>
@@ -220,7 +220,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <UserAvatar name={entry.name} photoUrl={entry.photo_url} size="sm" />
+                          <UserAvatar name={entry.name} photoUrl={entry.avatar} size="sm" />
                           <div>
                             <p className={cn("text-sm font-medium", entry.is_current_user ? "text-primary" : "text-foreground")}>
                               {entry.name}

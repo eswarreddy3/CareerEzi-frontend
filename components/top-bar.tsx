@@ -50,7 +50,7 @@ export function TopBar({ title }: TopBarProps) {
             <Button variant="ghost" size="icon" className="rounded-full p-0">
               <UserAvatar
                 name={user?.name || "U"}
-                photoUrl={user?.photo_url}
+                photoUrl={user?.avatar}
                 size="sm"
                 className="border-2 border-primary/30"
               />
