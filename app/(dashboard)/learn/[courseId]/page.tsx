@@ -39,7 +39,6 @@ import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { getLessonContent } from "@/content"
-import { PYTHON_TOPIC_META, COURSE_TOPIC_META } from "@/lib/python-topics"
 
 interface McqQState {
   selected: number | null
@@ -64,17 +63,25 @@ interface ApiMcqQuestion {
 }
 
 interface ModuleAssignment {
-  id: string
-  module_id: string
+  id: number
+  level_id: number
   title: string
   course: string
+  course_id: string
   icon: string
   duration_mins: number
   total_questions: number
-  completed_questions: number
   status: "pending" | "completed"
   max_score: number
   score: number
+  is_locked: boolean
+}
+
+interface CourseLevel {
+  id: number
+  name: string
+  order: number
+  lesson_ids: number[]
 }
 
 interface Lesson {
@@ -96,6 +103,7 @@ interface Course {
   total_lessons: number
   lessons_completed: number
   lessons: Lesson[]
+  levels: CourseLevel[]
 }
 
 const difficultyColors = {
@@ -658,17 +666,16 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
   const [completing, setCompleting] = useState(false)
-  const [expandedModules, setExpandedModules] = useState<number[]>([1, 2, 3])
+  const [expandedModules, setExpandedModules] = useState<number[]>([])
   const [lessonCompleteAnim, setLessonCompleteAnim] = useState(false)
   const [earnedPoints, setEarnedPoints] = useState(0)
   const [showPointsBurst, setShowPointsBurst] = useState(false)
 
-  // Top-level tab (only used for Python)
   const [activeTab, setActiveTab] = useState<"lessons" | "practice" | "assignment">("lessons")
-  const [mcqTopicCounts, setMcqTopicCounts] = useState<Record<string, number>>({})
+  const [mcqLessonCounts, setMcqLessonCounts] = useState<Record<string, number>>({})
 
   // Inline MCQ state
-  const [mcqTopic, setMcqTopic] = useState<{ topic: string; subtopic: string; lessonOrder: number } | null>(null)
+  const [mcqTopic, setMcqTopic] = useState<{ lessonId: number; lessonTitle: string } | null>(null)
   const [mcqQuestions, setMcqQuestions] = useState<ApiMcqQuestion[]>([])
   const [mcqLoading, setMcqLoading] = useState(false)
   const [mcqPage, setMcqPage] = useState(1)
@@ -680,19 +687,11 @@ export default function CourseDetailPage() {
   const MCQ_LETTERS = ["A", "B", "C", "D", "E"]
 
   useEffect(() => {
-    if (activeTab !== "practice") return
-    api.get("/mcq/topics")
-      .then(res => {
-        const map: Record<string, number> = {}
-        for (const t of res.data) {
-          for (const sub of t.subtopics) {
-            map[`${t.topic}|${sub.name}`] = sub.total
-          }
-        }
-        setMcqTopicCounts(map)
-      })
+    if (activeTab !== "practice" || !courseId) return
+    api.get(`/mcq/lesson-counts?course_id=${courseId}`)
+      .then(res => setMcqLessonCounts(res.data))
       .catch(() => {})
-  }, [activeTab])
+  }, [activeTab, courseId])
 
   function normalizeMcqQuestions(raw: any[]): ApiMcqQuestion[] {
     return raw.map(q => ({
@@ -703,15 +702,15 @@ export default function CourseDetailPage() {
     }))
   }
 
-  async function openMcqTopic(topic: string, subtopic: string, lessonOrder: number) {
-    setMcqTopic({ topic, subtopic, lessonOrder })
+  async function openMcqTopic(lessonId: number, lessonTitle: string) {
+    setMcqTopic({ lessonId, lessonTitle })
     setMcqQuestions([])
     setMcqQStates([])
     setMcqPage(1)
     setAnswerFeedback(null)
     setMcqLoading(true)
     try {
-      const res = await api.get(`/mcq/questions?topic=${encodeURIComponent(topic)}&subtopic=${encodeURIComponent(subtopic)}`)
+      const res = await api.get(`/mcq/questions?lesson_id=${lessonId}`)
       const normalized = normalizeMcqQuestions(res.data)
       setMcqQuestions(normalized)
       setMcqQStates(normalized.map((q) => ({
@@ -780,6 +779,9 @@ export default function CourseDetailPage() {
       .then((res) => {
         const data: Course = res.data
         setCourse(data)
+        if (data.levels?.length > 0) {
+          setExpandedModules(data.levels.map(lv => lv.id))
+        }
         // Auto-select first incomplete lesson, or first lesson
         const first = data.lessons.find(l => !l.is_completed) ?? data.lessons[0]
         setActiveLesson(first ?? null)
@@ -792,18 +794,9 @@ export default function CourseDetailPage() {
   }, [courseId])
 
   useEffect(() => {
-    if (courseId !== "python" && courseId !== "sql" && courseId !== "html-css") return
-    const moduleIds =
-      courseId === "sql"
-        ? ["sql-basics", "sql-intermediate", "sql-advanced"]
-        : courseId === "html-css"
-        ? ["html-basics", "css-basics", "css-advanced"]
-        : ["python-basics", "python-intermediate", "python-advanced"]
     api.get("/assignments/list")
       .then((res) => {
-        const filtered = (res.data as ModuleAssignment[]).filter((a) =>
-          moduleIds.includes(a.module_id)
-        )
+        const filtered = (res.data as ModuleAssignment[]).filter(a => a.course_id === courseId)
         setModuleAssignments(filtered)
       })
       .catch(() => {/* silently fail — assignment tab will be empty */})
@@ -889,38 +882,26 @@ export default function CourseDetailPage() {
 
   const activeIdx = course.lessons.findIndex(l => l.id === activeLesson?.id)
 
-  // ── Module definitions for tiered courses ─────────────────────────────────
-  const PYTHON_MODULES = [
-    { id: 1, title: "Python Basics",        emoji: "🌱", lessonOrders: [1, 2, 3, 4],   bar: "bg-emerald-500" },
-    { id: 2, title: "Python Intermediate",  emoji: "⚙️",  lessonOrders: [5, 6, 7, 8],   bar: "bg-amber-500"   },
-    { id: 3, title: "Python Advanced",      emoji: "🚀", lessonOrders: [9, 10, 11, 12], bar: "bg-violet-500"  },
+  // ── Module definitions derived from course levels (DB-driven) ────────────
+  const MODULE_STYLES = [
+    { emoji: "🌱", bar: "bg-emerald-500" },
+    { emoji: "⚙️",  bar: "bg-amber-500"   },
+    { emoji: "🚀", bar: "bg-violet-500"  },
+    { emoji: "🎯", bar: "bg-blue-500"    },
+    { emoji: "💡", bar: "bg-pink-500"    },
   ]
-  const SQL_MODULES = [
-    { id: 1, title: "SQL Basics",        emoji: "🌱", lessonOrders: [1, 2, 3, 4],   bar: "bg-emerald-500" },
-    { id: 2, title: "SQL Intermediate",  emoji: "⚙️",  lessonOrders: [5, 6, 7, 8],   bar: "bg-amber-500"   },
-    { id: 3, title: "SQL Advanced",      emoji: "🚀", lessonOrders: [9, 10, 11, 12], bar: "bg-violet-500"  },
-  ]
-  const HTML_CSS_MODULES = [
-    { id: 1, title: "HTML Basics",        emoji: "🌐", lessonOrders: [1, 2, 3, 4, 5],      bar: "bg-emerald-500" },
-    { id: 2, title: "CSS Basics & Intermediate", emoji: "🎨", lessonOrders: [6, 7, 8, 9, 10, 11, 12], bar: "bg-amber-500" },
-    { id: 3, title: "CSS Advanced",       emoji: "✨", lessonOrders: [13, 14, 15],           bar: "bg-violet-500"  },
-  ]
-  const EXCEL_MODULES = [
-    { id: 1, title: "Excel Beginner",      emoji: "🌱", lessonOrders: [1, 2, 3, 4, 5, 6],          bar: "bg-emerald-500" },
-    { id: 2, title: "Excel Intermediate",  emoji: "⚙️",  lessonOrders: [7, 8, 9, 10, 11, 12, 13, 14], bar: "bg-amber-500"   },
-    { id: 3, title: "Excel Advanced",      emoji: "🚀", lessonOrders: [15, 16, 17, 18, 19, 20, 21], bar: "bg-violet-500"  },
-  ]
+  const ACTIVE_MODULES = (course.levels ?? []).map((lv, idx) => ({
+    id: lv.id,
+    title: lv.name,
+    ...MODULE_STYLES[idx % MODULE_STYLES.length],
+    lesson_ids: lv.lesson_ids,
+  }))
+
   function toggleModule(mid: number) {
     setExpandedModules(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])
   }
 
-  const isPython = courseId === "python"
-  const isModular = isPython || courseId === "sql" || courseId === "html-css" || courseId === "excel"
-  const ACTIVE_MODULES =
-    courseId === "sql" ? SQL_MODULES :
-    courseId === "html-css" ? HTML_CSS_MODULES :
-    courseId === "excel" ? EXCEL_MODULES :
-    PYTHON_MODULES
+  const isModular = ACTIVE_MODULES.length > 0
 
   return (
     <div className="space-y-6">
@@ -1005,7 +986,7 @@ export default function CourseDetailPage() {
               <div className="overflow-y-auto max-h-[60vh]">
                 {isModular ? (
                   ACTIVE_MODULES.map((mod) => {
-                    const modLessons = course.lessons.filter(l => mod.lessonOrders.includes(l.order))
+                    const modLessons = course.lessons.filter(l => mod.lesson_ids.includes(l.id))
                     const completed = modLessons.filter(l => l.is_completed).length
                     const total = modLessons.length
                     const modProgress = total > 0 ? Math.round((completed / total) * 100) : 0
@@ -1040,7 +1021,7 @@ export default function CourseDetailPage() {
                           <div className="bg-secondary/10">
                             {modLessons.map((lesson) => {
                               const isActive = activeLesson?.id === lesson.id
-                              const lessonNum = mod.lessonOrders.indexOf(lesson.order) + 1
+                              const lessonNum = mod.lesson_ids.indexOf(lesson.id) + 1
                               return (
                                 <button
                                   key={lesson.id}
@@ -1192,15 +1173,11 @@ export default function CourseDetailPage() {
               </div>
               <div className="overflow-y-auto max-h-[60vh]">
                 {ACTIVE_MODULES.map((mod) => {
-                  const activeMeta = COURSE_TOPIC_META[courseId] ?? PYTHON_TOPIC_META
-                  const withQuestions = mod.lessonOrders.filter(o => {
-                    const key = `${activeMeta[o]?.topic}|${activeMeta[o]?.subtopic}`
-                    return (mcqTopicCounts[key] ?? 0) > 0
-                  }).length
-                  const total = mod.lessonOrders.length
+                  const withQuestions = mod.lesson_ids.filter(id => (mcqLessonCounts[String(id)] ?? 0) > 0).length
+                  const total = mod.lesson_ids.length
                   const modPct = total > 0 ? Math.round((withQuestions / total) * 100) : 0
                   const isExpanded = expandedModules.includes(mod.id)
-                  const hasSelected = mod.lessonOrders.some(o => mcqTopic?.lessonOrder === o)
+                  const hasSelected = mod.lesson_ids.some(id => mcqTopic?.lessonId === id)
                   return (
                     <div key={mod.id} className="border-b border-border last:border-0">
                       <button
@@ -1227,16 +1204,16 @@ export default function CourseDetailPage() {
 
                       {isExpanded && (
                         <div className="bg-secondary/10">
-                          {mod.lessonOrders.map((order) => {
-                            const meta = activeMeta[order]
-                            if (!meta) return null
-                            const scoreKey = `${meta.topic}|${meta.subtopic}`
-                            const isSelected = mcqTopic?.lessonOrder === order
-                            const hasQuestions = (mcqTopicCounts[scoreKey] ?? 0) > 0
+                          {mod.lesson_ids.map((lessonId) => {
+                            const lesson = course.lessons.find(l => l.id === lessonId)
+                            if (!lesson) return null
+                            const count = mcqLessonCounts[String(lessonId)] ?? 0
+                            const isSelected = mcqTopic?.lessonId === lessonId
+                            const hasQuestions = count > 0
                             return (
                               <button
-                                key={order}
-                                onClick={() => openMcqTopic(meta.topic, meta.subtopic, order)}
+                                key={lessonId}
+                                onClick={() => openMcqTopic(lesson.id, lesson.title)}
                                 className={cn(
                                   "w-full flex items-start gap-3 pl-6 pr-4 py-3 text-left border-t border-border transition-colors hover:bg-secondary/30",
                                   isSelected && "bg-primary/10 border-l-2 border-l-primary pl-[22px]"
@@ -1253,13 +1230,11 @@ export default function CourseDetailPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className={cn("text-xs font-medium leading-snug", isSelected ? "text-foreground" : hasQuestions ? "text-foreground/80" : "text-muted-foreground/50")}>
-                                    {meta.subtopic}
+                                    {lesson.title}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1">
                                     <span className="text-[10px] text-muted-foreground">
-                                      {mcqTopicCounts[scoreKey] != null
-                                        ? `${mcqTopicCounts[scoreKey]} question${mcqTopicCounts[scoreKey] !== 1 ? "s" : ""}`
-                                        : "No questions yet"}
+                                      {hasQuestions ? `${count} question${count !== 1 ? "s" : ""}` : "No questions yet"}
                                     </span>
                                   </div>
                                 </div>
@@ -1315,9 +1290,7 @@ export default function CourseDetailPage() {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-sm text-muted-foreground truncate">
-                      <span className="text-foreground font-medium">{mcqTopic.topic}</span>
-                      {" › "}
-                      <span className="text-foreground">{mcqTopic.subtopic}</span>
+                      <span className="text-foreground font-medium">{mcqTopic.lessonTitle}</span>
                     </span>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
                       — Page {mcqPage}/{Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE)} ({mcqQuestions.length} Qs)
@@ -1511,14 +1484,17 @@ export default function CourseDetailPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {moduleAssignments.map((a, i) => {
-              const mod = ACTIVE_MODULES[i]
-              const activeMeta = COURSE_TOPIC_META[courseId] ?? PYTHON_TOPIC_META
-              const pct = a.total_questions > 0 ? Math.round((a.completed_questions / a.total_questions) * 100) : 0
+              const mod = ACTIVE_MODULES.find(m => m.id === a.id)
+              const matchingLevel = course.levels?.find(lv => lv.id === a.id)
+              const levelLessons = (matchingLevel?.lesson_ids ?? [])
+                .map(lid => course.lessons.find(l => l.id === lid))
+                .filter(Boolean) as Lesson[]
+              const pct = a.status === "completed" ? 100 : 0
               return (
                 <GlassCard key={a.id} hover className="flex flex-col gap-4">
                   {/* Module identity */}
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">{mod?.emoji}</span>
+                    <span className="text-3xl">{mod?.emoji ?? "📋"}</span>
                     <div>
                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Module {i + 1}</p>
                       <h3 className="font-bold font-serif text-foreground text-base">{a.title}</h3>
@@ -1529,9 +1505,9 @@ export default function CourseDetailPage() {
                   <div className="space-y-1.5">
                     <p className="text-xs text-muted-foreground font-medium">Covers:</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {ACTIVE_MODULES[i]?.lessonOrders.map((order) => (
-                        <span key={order} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border">
-                          {activeMeta[order]?.subtopic}
+                      {levelLessons.map(lesson => (
+                        <span key={lesson.id} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/60 text-muted-foreground border border-border">
+                          {lesson.title}
                         </span>
                       ))}
                     </div>
@@ -1546,7 +1522,7 @@ export default function CourseDetailPage() {
                       <FileText className="h-3.5 w-3.5" />{a.total_questions} questions
                     </span>
                     <span className="flex items-center gap-1 text-amber-500">
-                      <Star className="h-3.5 w-3.5 fill-amber-500" />{a.points} pts
+                      <Star className="h-3.5 w-3.5 fill-amber-500" />{a.max_score} pts
                     </span>
                   </div>
 
@@ -1562,7 +1538,7 @@ export default function CourseDetailPage() {
 
                   <Button
                     className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2 mt-auto"
-                    onClick={() => router.push(`/assignments/${a.module_id}`)}
+                    onClick={() => router.push(`/assignments/${a.id}`)}
                   >
                     <ClipboardList className="h-4 w-4" />
                     {a.status === "completed" ? "Review" : a.completed_questions > 0 ? "Continue" : "Start Assessment"}
