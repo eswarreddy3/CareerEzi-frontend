@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock } from "lucide-react"
+import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield } from "lucide-react"
 import { AvatarPicker } from "@/components/avatar-picker"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
@@ -17,6 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
 import api from "@/lib/api"
+import { SHIELDS, getShieldProgress } from "@/lib/shields"
+import { UserAvatar } from "@/components/user-avatar"
+import { cn } from "@/lib/utils"
 
 const passwordSchema = z
   .object({
@@ -180,6 +183,116 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
   )
 }
 
+function ShieldSection({ points }: { points: number }) {
+  const { current, next, progressPct, pointsNeeded } = getShieldProgress(points)
+
+  return (
+    <div className="mt-6 pt-5 border-t border-border/50">
+      <div className="flex items-center gap-2 mb-4">
+        <Shield className="h-4 w-4 text-muted-foreground" />
+        <h4 className="text-sm font-semibold text-foreground">Shield Rank</h4>
+      </div>
+
+      {/* Current shield */}
+      <div
+        className="flex items-center gap-3 p-3 rounded-xl border mb-4"
+        style={
+          current.tier > 0
+            ? {
+                background: `linear-gradient(135deg, ${current.gradientFrom}15, ${current.gradientTo}10)`,
+                borderColor: `${current.gradientFrom}50`,
+                boxShadow: `0 0 14px ${current.glowColor}`,
+              }
+            : {}
+        }
+      >
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+          style={
+            current.tier > 0
+              ? {
+                  background: `linear-gradient(135deg, ${current.gradientFrom}, ${current.gradientTo})`,
+                  boxShadow: `0 0 10px ${current.glowColor}`,
+                }
+              : { background: "hsl(var(--secondary))" }
+          }
+        >
+          {current.tier > 0 ? current.emoji : "🛡️"}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={cn("font-semibold text-sm", current.labelColor)}>
+            {current.name} Shield
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {current.tier === 0
+              ? `${200 - points} pts to Bronze`
+              : next
+              ? `${pointsNeeded.toLocaleString()} pts to ${next.name}`
+              : "Max tier reached!"}
+          </p>
+        </div>
+        <span className={cn("text-xs font-bold px-2 py-0.5 rounded-full border", current.badgeClass)}>
+          {current.tier > 0 ? `Tier ${current.tier}` : "Unranked"}
+        </span>
+      </div>
+
+      {/* Progress bar to next tier */}
+      {next && (
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+            <span>{current.name}</span>
+            <span>{next.emoji} {next.name} — {next.minPoints.toLocaleString()} pts</span>
+          </div>
+          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-700"
+              style={{
+                width: `${progressPct}%`,
+                background:
+                  next.tier > 0
+                    ? `linear-gradient(90deg, ${next.gradientFrom}, ${next.gradientTo})`
+                    : "hsl(var(--primary))",
+              }}
+            />
+          </div>
+          <p className="text-right text-xs text-muted-foreground mt-1">{progressPct}%</p>
+        </div>
+      )}
+
+      {/* All tiers grid */}
+      <div className="grid grid-cols-5 gap-1.5">
+        {SHIELDS.filter(s => s.tier > 0).map((s) => {
+          const earned = points >= s.minPoints
+          return (
+            <div
+              key={s.tier}
+              title={`${s.name}: ${s.minPoints.toLocaleString()} pts`}
+              className={cn(
+                "flex flex-col items-center gap-1 p-2 rounded-lg border transition-all",
+                earned
+                  ? "border-transparent"
+                  : "border-border/40 opacity-35 grayscale"
+              )}
+              style={
+                earned
+                  ? {
+                      background: `linear-gradient(135deg, ${s.gradientFrom}20, ${s.gradientTo}15)`,
+                      borderColor: `${s.gradientFrom}40`,
+                      boxShadow: `0 0 8px ${s.glowColor}`,
+                    }
+                  : {}
+              }
+            >
+              <span className="text-lg leading-none">{s.emoji}</span>
+              <span className="text-[10px] font-medium text-muted-foreground leading-none">{s.name}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const { user, updateUser } = useAuthStore()
   const [showCurrent, setShowCurrent] = useState(false)
@@ -247,14 +360,14 @@ export default function ProfilePage() {
         <div className="lg:col-span-1">
           <GlassCard>
             <div className="flex flex-col items-center text-center">
-              {/* Avatar */}
+              {/* Avatar with shield border */}
               <div className="relative mb-4">
-                <div className="w-24 h-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center primary-glow overflow-hidden">
-                  {photoUrl
-                    ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
-                    : <span className="text-3xl font-bold text-primary font-serif">{initials}</span>
-                  }
-                </div>
+                <UserAvatar
+                  name={user?.name || "?"}
+                  photoUrl={photoUrl}
+                  size="xl"
+                  points={(user as any)?.points ?? 0}
+                />
               </div>
 
               <h2 className="text-xl font-bold font-serif text-foreground">
@@ -333,6 +446,9 @@ export default function ProfilePage() {
                 )}
               </div>
             )}
+
+            {/* Shield section */}
+            <ShieldSection points={(user as any)?.points ?? 0} />
           </GlassCard>
         </div>
 

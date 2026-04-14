@@ -52,7 +52,7 @@ export function TopBar({ title }: TopBarProps) {
                 name={user?.name || "U"}
                 photoUrl={user?.avatar}
                 size="sm"
-                className="border-2 border-primary/30"
+                points={user?.points}
               />
             </Button>
           </DropdownMenuTrigger>

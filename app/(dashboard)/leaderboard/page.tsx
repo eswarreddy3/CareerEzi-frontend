@@ -220,7 +220,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <UserAvatar name={entry.name} photoUrl={entry.avatar} size="sm" />
+                          <UserAvatar name={entry.name} photoUrl={entry.avatar} size="sm" points={entry.points} />
                           <div>
                             <p className={cn("text-sm font-medium", entry.is_current_user ? "text-primary" : "text-foreground")}>
                               {entry.name}

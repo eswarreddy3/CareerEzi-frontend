@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+import { getShield } from "@/lib/shields"
 
 interface UserAvatarProps {
   name: string
@@ -7,6 +8,8 @@ interface UserAvatarProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl"
   className?: string
   fallbackClassName?: string
+  /** When provided, renders a shield-tier gradient ring around the avatar */
+  points?: number
 }
 
 const SIZE_MAP = {
@@ -25,6 +28,15 @@ const TEXT_MAP = {
   xl: "text-lg",
 }
 
+/** Ring thickness per size (px) */
+const RING_MAP = {
+  xs: 2,
+  sm: 2,
+  md: 3,
+  lg: 3,
+  xl: 4,
+}
+
 function initials(name: string) {
   return name
     .split(" ")
@@ -34,13 +46,24 @@ function initials(name: string) {
     .toUpperCase()
 }
 
-export function UserAvatar({ name, photoUrl, size = "sm", className, fallbackClassName }: UserAvatarProps) {
-  return (
-    <Avatar className={cn(SIZE_MAP[size], "flex-shrink-0", className)}>
+export function UserAvatar({
+  name,
+  photoUrl,
+  size = "sm",
+  className,
+  fallbackClassName,
+  points,
+}: UserAvatarProps) {
+  const shield = points !== undefined ? getShield(points) : null
+  const hasShield = shield !== null && shield.tier > 0
+
+  const avatarNode = (
+    <Avatar className={cn(SIZE_MAP[size], hasShield ? "" : "flex-shrink-0")}>
       {photoUrl && <AvatarImage src={photoUrl} alt={name} className="object-cover" />}
       <AvatarFallback
         className={cn(
-          "bg-primary/15 text-primary font-semibold",
+          hasShield ? "bg-card" : "bg-primary/15",
+          "text-primary font-semibold",
           TEXT_MAP[size],
           fallbackClassName
         )}
@@ -48,5 +71,37 @@ export function UserAvatar({ name, photoUrl, size = "sm", className, fallbackCla
         {initials(name)}
       </AvatarFallback>
     </Avatar>
+  )
+
+  if (!hasShield) {
+    return (
+      <Avatar className={cn(SIZE_MAP[size], "flex-shrink-0", className)}>
+        {photoUrl && <AvatarImage src={photoUrl} alt={name} className="object-cover" />}
+        <AvatarFallback
+          className={cn(
+            "bg-primary/15 text-primary font-semibold",
+            TEXT_MAP[size],
+            fallbackClassName
+          )}
+        >
+          {initials(name)}
+        </AvatarFallback>
+      </Avatar>
+    )
+  }
+
+  const ring = RING_MAP[size]
+
+  return (
+    <div
+      className={cn("rounded-full flex-shrink-0 inline-flex items-center justify-center", className)}
+      style={{
+        padding: `${ring}px`,
+        background: `linear-gradient(135deg, ${shield.gradientFrom}, ${shield.gradientTo}, ${shield.gradientFrom})`,
+        boxShadow: `0 0 ${ring * 4}px ${shield.glowColor}`,
+      }}
+    >
+      {avatarNode}
+    </div>
   )
 }
