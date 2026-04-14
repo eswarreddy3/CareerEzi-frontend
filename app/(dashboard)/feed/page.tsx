@@ -211,7 +211,7 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
           onClick={() => setOpen(true)}
           className="w-full flex items-center gap-3 text-left group"
         >
-          <UserAvatar name={user?.name ?? "U"} photoUrl={user?.avatar} size="md" className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background" />
+          <UserAvatar name={user?.name ?? "U"} photoUrl={user?.avatar} size="md" points={user?.points} />
           <span className="flex-1 px-4 py-3 rounded-full bg-secondary/40 border border-border text-muted-foreground text-sm hover:border-primary/40 hover:bg-secondary/60 transition-all">
             What's on your mind, {user?.name?.split(" ")[0] ?? "there"}?
           </span>
@@ -221,7 +221,7 @@ function CreatePostPanel({ user, onCreated }: { user: any; onCreated: (p: Post) 
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <UserAvatar name={user?.name ?? "U"} photoUrl={user?.avatar} size="md" className="ring-2 ring-primary/20 ring-offset-2 ring-offset-background" />
+              <UserAvatar name={user?.name ?? "U"} photoUrl={user?.avatar} size="md" points={user?.points} />
               <div>
                 <p className="text-sm font-bold text-foreground">{user?.name}</p>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">

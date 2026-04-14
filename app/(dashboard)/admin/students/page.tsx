@@ -497,6 +497,7 @@ export default function AdminStudentsPage() {
                           name={student.name}
                           photoUrl={(student as any).avatar}
                           size="sm"
+                          points={student.points}
                           fallbackClassName={student.is_inactive ? "bg-red-500/20 text-red-400" : undefined}
                         />
                         <div className="min-w-0">

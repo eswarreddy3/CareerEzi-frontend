@@ -298,7 +298,7 @@ export default function AdminDashboardPage() {
                   <span className="w-6 text-center text-base">
                     {i < 3 ? MEDALS[i] : <span className="text-xs text-muted-foreground font-medium">{i + 1}</span>}
                   </span>
-                  <UserAvatar name={s.name} photoUrl={(s as any).avatar} size="sm" />
+                  <UserAvatar name={s.name} photoUrl={(s as any).avatar} size="sm" points={s.points} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
                     <p className="text-xs text-muted-foreground">{s.branch || "—"}</p>

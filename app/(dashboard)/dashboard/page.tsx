@@ -18,6 +18,8 @@ import {
 } from "framer-motion"
 import { getDailyQuote } from "@/lib/quotes"
 import { getLevelProgress } from "@/lib/levels"
+import { getShield } from "@/lib/shields"
+import { UserAvatar } from "@/components/user-avatar"
 import type { LucideIcon } from "lucide-react"
 
 interface DashboardData {
@@ -128,7 +130,26 @@ function LevelCard({ points }: { points: number }) {
         {/* Info */}
         <div className="flex-1 min-w-0 text-center sm:text-left">
           <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Your Level</p>
-          <p className={`text-3xl font-bold font-serif leading-tight ${current.color}`}>{current.name}</p>
+          <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+            <p className={`text-3xl font-bold font-serif leading-tight ${current.color}`}>{current.name}</p>
+            {(() => {
+              const shield = getShield(points)
+              if (shield.tier === 0) return null
+              return (
+                <span
+                  className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border"
+                  style={{
+                    background: `linear-gradient(135deg, ${shield.gradientFrom}20, ${shield.gradientTo}15)`,
+                    borderColor: `${shield.gradientFrom}50`,
+                    color: shield.gradientFrom,
+                    boxShadow: `0 0 8px ${shield.glowColor}`,
+                  }}
+                >
+                  {shield.emoji} {shield.name}
+                </span>
+              )
+            })()}
+          </div>
           <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1">
             <span className="text-2xl font-bold font-serif text-foreground">
               <AnimatedNumber value={points} />
