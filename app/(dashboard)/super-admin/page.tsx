@@ -65,26 +65,26 @@ export default function SuperAdminPage() {
   }, [fetchData])
 
   const statCards = [
-    { label: "Total Colleges", value: stats?.total_colleges ?? "—", icon: Building2, color: "text-blue-400", bg: "bg-blue-500/20" },
-    { label: "Active Colleges", value: stats?.active_colleges ?? "—", icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-500/20" },
+    { label: "Total Colleges", value: stats?.total_colleges ?? "—", icon: Building2, color: "text-primary", bg: "bg-primary/20" },
+    { label: "Active Colleges", value: stats?.active_colleges ?? "—", icon: CheckCircle, color: "text-success", bg: "bg-success/20" },
     { label: "Total Students", value: stats?.total_students?.toLocaleString() ?? "—", icon: Users, color: "text-primary", bg: "bg-primary/20" },
-    { label: "Active Packages", value: stats?.total_packages ?? "—", icon: Package, color: "text-purple-400", bg: "bg-purple-500/20" },
+    { label: "Active Packages", value: stats?.total_packages ?? "—", icon: Package, color: "text-coding", bg: "bg-coding/20" },
   ]
 
   const activityItems = [
     { label: "New Students", value: stats?.activity_week.new_students ?? "—", icon: UserPlus, color: "text-primary" },
-    { label: "Lessons Completed", value: stats?.activity_week.lessons_completed ?? "—", icon: BookOpen, color: "text-blue-400" },
-    { label: "Code Submissions", value: stats?.activity_week.code_submissions ?? "—", icon: Code2, color: "text-purple-400" },
-    { label: "Assignments Submitted", value: stats?.activity_week.assignment_submissions ?? "—", icon: ClipboardList, color: "text-amber-400" },
+    { label: "Lessons Completed", value: stats?.activity_week.lessons_completed ?? "—", icon: BookOpen, color: "text-primary" },
+    { label: "Code Submissions", value: stats?.activity_week.code_submissions ?? "—", icon: Code2, color: "text-coding" },
+    { label: "Assignments Submitted", value: stats?.activity_week.assignment_submissions ?? "—", icon: ClipboardList, color: "text-warning" },
   ]
 
   const contentItems = [
-    { label: "Courses", value: stats?.content.courses ?? "—", icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/20" },
-    { label: "Lessons", value: stats?.content.lessons ?? "—", icon: Layers, color: "text-teal-400", bg: "bg-teal-500/20" },
-    { label: "Domains", value: stats?.content.domains ?? "—", icon: Globe, color: "text-teal-400", bg: "bg-teal-500/20" },
-    { label: "MCQ Questions", value: stats?.content.mcq_questions ?? "—", icon: FileQuestion, color: "text-amber-400", bg: "bg-amber-500/20" },
-    { label: "Aptitude Questions", value: stats?.content.aptitude_questions ?? "—", icon: Brain, color: "text-pink-400", bg: "bg-pink-500/20" },
-    { label: "Coding Problems", value: stats?.content.coding_problems ?? "—", icon: Code2, color: "text-purple-400", bg: "bg-purple-500/20" },
+    { label: "Courses", value: stats?.content.courses ?? "—", icon: BookOpen, color: "text-primary", bg: "bg-primary/20" },
+    { label: "Lessons", value: stats?.content.lessons ?? "—", icon: Layers, color: "text-primary", bg: "bg-primary/20" },
+    { label: "Domains", value: stats?.content.domains ?? "—", icon: Globe, color: "text-primary", bg: "bg-primary/20" },
+    { label: "MCQ Questions", value: stats?.content.mcq_questions ?? "—", icon: FileQuestion, color: "text-warning", bg: "bg-warning/20" },
+    { label: "Aptitude Questions", value: stats?.content.aptitude_questions ?? "—", icon: Brain, color: "text-coral", bg: "bg-coral/20" },
+    { label: "Coding Problems", value: stats?.content.coding_problems ?? "—", icon: Code2, color: "text-coding", bg: "bg-coding/20" },
   ]
 
   return (

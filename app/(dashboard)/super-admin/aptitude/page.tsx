@@ -60,9 +60,9 @@ interface UploadResult {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const difficultyColor: Record<string, string> = {
-  Easy:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  Medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  Hard:   "bg-red-500/15 text-red-400 border-red-500/30",
+  Easy:   "chip chip-success",
+  Medium: "chip chip-warning",
+  Hard:   "chip chip-danger",
 }
 
 const TEMPLATE_CSV = `topic,sub_topic,question,option_a,option_b,option_c,option_d,option_e,correct_option,correct_answer,explanation,difficulty,points,tag
@@ -177,26 +177,26 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
             <>
               {/* Result summary */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-emerald-400">{result.imported}</p>
+                <div className="info-box info-box-success p-3 text-center">
+                  <CheckCircle2 className="h-5 w-5 text-success mx-auto mb-1" />
+                  <p className="text-xl font-bold text-success">{result.imported}</p>
                   <p className="text-xs text-muted-foreground">Imported</p>
                 </div>
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-center">
-                  <SkipForward className="h-5 w-5 text-amber-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-amber-400">{result.skipped}</p>
+                <div className="info-box info-box-warning p-3 text-center">
+                  <SkipForward className="h-5 w-5 text-warning mx-auto mb-1" />
+                  <p className="text-xl font-bold text-warning">{result.skipped}</p>
                   <p className="text-xs text-muted-foreground">Skipped</p>
                 </div>
-                <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-center">
-                  <AlertCircle className="h-5 w-5 text-red-400 mx-auto mb-1" />
-                  <p className="text-xl font-bold text-red-400">{result.errors}</p>
+                <div className="info-box info-box-danger p-3 text-center">
+                  <AlertCircle className="h-5 w-5 text-danger mx-auto mb-1" />
+                  <p className="text-xl font-bold text-danger">{result.errors}</p>
                   <p className="text-xs text-muted-foreground">Errors</p>
                 </div>
               </div>
 
               {result.error_details.length > 0 && (
-                <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-3 max-h-36 overflow-y-auto space-y-1">
-                  <p className="text-xs font-medium text-red-400 mb-1">Errors:</p>
+                <div className="info-box info-box-danger p-3 max-h-36 overflow-y-auto space-y-1">
+                  <p className="text-xs font-medium text-danger mb-1">Errors:</p>
                   {result.error_details.map((e, i) => (
                     <p key={i} className="text-xs text-muted-foreground">
                       Row {e.row}: {e.reason}{e.question ? ` — "${e.question}"` : ""}
@@ -206,8 +206,8 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
               )}
 
               {result.skipped_questions.length > 0 && (
-                <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 max-h-28 overflow-y-auto space-y-1">
-                  <p className="text-xs font-medium text-amber-400 mb-1">Skipped (duplicates):</p>
+                <div className="info-box info-box-warning p-3 max-h-28 overflow-y-auto space-y-1">
+                  <p className="text-xs font-medium text-warning mb-1">Skipped (duplicates):</p>
                   {result.skipped_questions.map((s, i) => (
                     <p key={i} className="text-xs text-muted-foreground">Row {s.row}: "{s.question}"</p>
                   ))}
@@ -404,7 +404,7 @@ export default function AptitudeAdminPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    className="h-8 w-8 text-danger hover:text-danger/80 hover:bg-danger/10"
                     onClick={e => {
                       e.stopPropagation()
                       setDeleteTarget({ type: "topic", topic: topicSummary.topic })
@@ -466,7 +466,7 @@ export default function AptitudeAdminPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    className="h-7 w-7 text-danger hover:text-danger/80 hover:bg-danger/10"
                                     onClick={() => setDeleteTarget({ type: "question", id: q.id })}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -514,7 +514,7 @@ export default function AptitudeAdminPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-danger hover:bg-danger/90"
               onClick={deleteTarget?.type === "topic" ? handleDeleteTopic : handleDeleteQuestion}
               disabled={deleting}
             >

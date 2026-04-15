@@ -54,11 +54,11 @@ function timeAgo(iso: string): string {
 function getActionMeta(action: string): { Icon: LucideIcon; color: string; bg: string } {
   const a = action.toLowerCase()
   if (a.includes("lesson"))                       return { Icon: BookOpen,          color: "text-primary",     bg: "bg-primary/15" }
-  if (a.includes("assignment"))                   return { Icon: ClipboardList,     color: "text-amber-500",   bg: "bg-amber-500/15" }
-  if (a.includes("code") || a.includes("coding")) return { Icon: Code2,             color: "text-violet-400",  bg: "bg-violet-400/15" }
-  if (a.includes("job"))                          return { Icon: BriefcaseBusiness, color: "text-blue-400",    bg: "bg-blue-400/15" }
-  if (a.includes("post"))                         return { Icon: Newspaper,         color: "text-pink-400",    bg: "bg-pink-400/15" }
-  if (a.includes("comment"))                      return { Icon: MessageSquare,     color: "text-emerald-400", bg: "bg-emerald-400/15" }
+  if (a.includes("assignment"))                   return { Icon: ClipboardList,     color: "text-warning", bg: "bg-warning/15" }
+  if (a.includes("code") || a.includes("coding")) return { Icon: Code2,             color: "text-coding",  bg: "bg-coding/15"  }
+  if (a.includes("job"))                          return { Icon: BriefcaseBusiness, color: "text-primary", bg: "bg-primary/15" }
+  if (a.includes("post"))                         return { Icon: Newspaper,         color: "text-coral",   bg: "bg-coral/15"   }
+  if (a.includes("comment"))                      return { Icon: MessageSquare,     color: "text-success", bg: "bg-success/15" }
   return { Icon: Zap, color: "text-primary", bg: "bg-primary/15" }
 }
 
@@ -331,17 +331,17 @@ export default function DashboardPage() {
   })()
 
   const STAT_CARDS = [
-    { title: "Total Points",    value: data?.points ?? 0,       prefix: "",  suffix: "",       icon: Star,          color: "text-amber-500",  bg: "bg-amber-500/10",  border: "border-amber-500/20" },
-    { title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "",  suffix: "",       icon: Code2,         color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20" },
-    { title: "Current Streak",  value: data?.streak ?? 0,       prefix: "",  suffix: " days",  icon: Flame,         color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-    { title: "College Rank",    value: data?.rank ?? 0,         prefix: "#", suffix: "",       icon: Trophy,        color: "text-primary",    bg: "bg-primary/10",    border: "border-primary/20" },
+    { title: "Total Points",    value: data?.points ?? 0,       prefix: "",  suffix: "",       icon: Star,          color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+    { title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "",  suffix: "",       icon: Code2,         color: "text-coding",  bg: "bg-coding/10",  border: "border-coding/20"  },
+    { title: "Current Streak",  value: data?.streak ?? 0,       prefix: "",  suffix: " days",  icon: Flame,         color: "text-streak",  bg: "bg-streak/10",  border: "border-streak/20"  },
+    { title: "College Rank",    value: data?.rank ?? 0,         prefix: "#", suffix: "",       icon: Trophy,        color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
   ]
 
   const QUICK_ACTIONS = [
-    { href: "/coding",       icon: Code2,          color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20", label: "Solve Problem",   desc: "Practice coding challenges" },
-    { href: "/practice-mcq", icon: FileQuestion,   color: "text-amber-500",  bg: "bg-amber-500/10",  border: "border-amber-500/20",  label: "Practice MCQ",    desc: "Test your knowledge" },
-    { href: "/learn",        icon: BookOpen,       color: "text-primary",    bg: "bg-primary/10",    border: "border-primary/20",    label: "Learn",           desc: "Continue your course" },
-    { href: "/leaderboard",  icon: Trophy,         color: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20", label: "Leaderboard",     desc: `#${data?.rank ?? "—"} in college` },
+    { href: "/coding",       icon: Code2,          color: "text-coding",  bg: "bg-coding/10",  border: "border-coding/20",  label: "Solve Problem",   desc: "Practice coding challenges" },
+    { href: "/practice-mcq", icon: FileQuestion,   color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", label: "Practice MCQ",    desc: "Test your knowledge" },
+    { href: "/learn",        icon: BookOpen,       color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "Learn",           desc: "Continue your course" },
+    { href: "/leaderboard",  icon: Trophy,         color: "text-streak",  bg: "bg-streak/10",  border: "border-streak/20",  label: "Leaderboard",     desc: `#${data?.rank ?? "—"} in college` },
   ]
 
   return (
@@ -383,7 +383,7 @@ export default function DashboardPage() {
           {/* Streak badge */}
           {data && (
             <motion.div
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-500/25 bg-orange-500/10 self-start sm:self-auto"
+              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-streak/25 bg-streak/10 self-start sm:self-auto"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, type: "spring", stiffness: 220 }}
@@ -396,8 +396,8 @@ export default function DashboardPage() {
                 🔥
               </motion.span>
               <div>
-                <p className="text-sm font-bold text-orange-400 leading-tight">{data.streak} day streak</p>
-                <p className="text-[10px] text-orange-400/60">Best: {data.longest_streak} days</p>
+                <p className="text-sm font-bold text-streak leading-tight">{data.streak} day streak</p>
+                <p className="text-[10px] text-streak/60">Best: {data.longest_streak} days</p>
               </div>
             </motion.div>
           )}

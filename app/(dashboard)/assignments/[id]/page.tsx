@@ -61,20 +61,20 @@ function formatTime(seconds: number) {
 }
 
 const statusLabel: Record<QStatus, { label: string; className: string }> = {
-  unattempted: { label: "Not visited", className: "bg-secondary/80 text-muted-foreground border-white/10" },
-  answered: { label: "Answered", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-  marked: { label: "Marked for review", className: "bg-violet-500/20 text-violet-400 border-violet-500/30" },
-  "answered-marked": { label: "Answered + Marked", className: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
+  unattempted: { label: "Not visited", className: "chip chip-primary opacity-50" },
+  answered: { label: "Answered", className: "chip chip-success" },
+  marked: { label: "Marked for review", className: "chip chip-coding" },
+  "answered-marked": { label: "Answered + Marked", className: "chip chip-warning" },
 }
 
 function getQBtnClass(status: QStatus, isCurrent: boolean) {
   const base = "w-9 h-9 rounded-lg text-sm font-medium transition-all border flex items-center justify-center"
   if (isCurrent) return cn(base, "ring-2 ring-primary ring-offset-1 ring-offset-background bg-primary/20 border-primary text-primary")
   switch (status) {
-    case "answered":        return cn(base, "bg-emerald-500/20 border-emerald-500/40 text-emerald-300")
-    case "marked":          return cn(base, "bg-violet-500/20 border-violet-500/40 text-violet-300")
-    case "answered-marked": return cn(base, "bg-amber-500/20 border-amber-500/40 text-amber-300")
-    default:                return cn(base, "bg-secondary/60 border-white/10 text-muted-foreground hover:border-white/20")
+    case "answered":        return cn(base, "icon-box-success border border-success/40")
+    case "marked":          return cn(base, "icon-box-coding  border border-coding/40")
+    case "answered-marked": return cn(base, "icon-box-warning border border-warning/40")
+    default:                return cn(base, "bg-secondary/60 border-border text-muted-foreground hover:border-primary/30")
   }
 }
 
@@ -249,7 +249,7 @@ export default function AssignmentExamPage() {
               </div>
               <div className="bg-secondary/50 rounded-xl p-3 border border-border space-y-1">
                 <p className="text-xs text-muted-foreground">Max Score</p>
-                <p className="text-lg font-bold text-amber-400">{assignmentMeta.max_score} pts</p>
+                <p className="text-lg font-bold text-warning">{assignmentMeta.max_score} pts</p>
               </div>
             </div>
 
@@ -393,7 +393,7 @@ export default function AssignmentExamPage() {
                 className={cn(
                   "gap-1.5 text-xs border",
                   isMarked
-                    ? "bg-violet-500/20 border-violet-500/40 text-violet-300 hover:bg-violet-500/30"
+                    ? "icon-box-coding border border-coding/40 hover:bg-coding/20"
                     : "bg-secondary/50 border-white/10 text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -510,11 +510,11 @@ export default function AssignmentExamPage() {
             <div className="space-y-2 pt-2 border-t border-white/5 text-xs text-muted-foreground">
               <div className="flex justify-between">
                 <span>Answered</span>
-                <span className="text-emerald-400 font-medium">{answeredCount}</span>
+                <span className="text-success font-medium">{answeredCount}</span>
               </div>
               <div className="flex justify-between">
                 <span>Marked for review</span>
-                <span className="text-violet-400 font-medium">{markedCount}</span>
+                <span className="text-coding font-medium">{markedCount}</span>
               </div>
               <div className="flex justify-between">
                 <span>Unanswered</span>
@@ -546,12 +546,12 @@ export default function AssignmentExamPage() {
 
           <div className="space-y-3 my-2">
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold font-serif text-emerald-400">{answeredCount}</p>
+              <div className="info-box info-box-success rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold font-serif text-success">{answeredCount}</p>
                 <p className="text-xs text-muted-foreground mt-1">Answered</p>
               </div>
-              <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-3 text-center">
-                <p className="text-2xl font-bold font-serif text-violet-400">{markedCount}</p>
+              <div className="info-box info-box-coding rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold font-serif text-coding">{markedCount}</p>
                 <p className="text-xs text-muted-foreground mt-1">Marked</p>
               </div>
               <div className="bg-secondary/50 border border-white/10 rounded-xl p-3 text-center">
@@ -560,9 +560,9 @@ export default function AssignmentExamPage() {
               </div>
             </div>
             {totalQ - answeredCount > 0 && (
-              <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                <AlertTriangle className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-300">
+              <div className="info-box info-box-warning flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-warning">
                   You have {totalQ - answeredCount} unanswered question{totalQ - answeredCount > 1 ? "s" : ""}.
                   Unanswered questions earn zero points.
                 </p>

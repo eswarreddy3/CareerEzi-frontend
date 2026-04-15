@@ -305,10 +305,10 @@ export default function AdminStudentsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total", value: total, icon: Users, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20" },
-          { label: "Active", value: activeCount, icon: CheckCircle, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
-          { label: "Inactive", value: inactiveCount, icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
-          { label: "Selected", value: selectedIds.size, icon: Users, color: "text-violet-400", bg: "bg-violet-500/10 border-violet-500/20" },
+          { label: "Total", value: total, icon: Users, color: "text-primary", bg: "bg-primary/10 border-primary/20" },
+          { label: "Active", value: activeCount, icon: CheckCircle, color: "text-success", bg: "bg-success/10 border-success/20" },
+          { label: "Inactive", value: inactiveCount, icon: AlertTriangle, color: "text-danger", bg: "bg-danger/10 border-danger/20" },
+          { label: "Selected", value: selectedIds.size, icon: Users, color: "text-coding", bg: "bg-coding/10 border-coding/20" },
         ].map((stat) => (
           <motion.div
             key={stat.label}
@@ -386,7 +386,7 @@ export default function AdminStudentsPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 gap-1"
+                  className="border-danger/30 text-danger hover:bg-danger/10 gap-1"
                   onClick={handleRemindSelected}
                   disabled={remindingSelected}
                 >
@@ -480,7 +480,7 @@ export default function AdminStudentsPage() {
                     key={student.id}
                     className={cn(
                       "border-b border-border/50 transition-colors hover:bg-secondary/30",
-                      student.is_inactive && "bg-red-500/5",
+                      student.is_inactive && "bg-danger/5",
                       selectedIds.has(student.id) && "bg-primary/5 hover:bg-primary/8",
                     )}
                   >
@@ -498,7 +498,7 @@ export default function AdminStudentsPage() {
                           photoUrl={(student as any).avatar}
                           size="sm"
                           points={student.points}
-                          fallbackClassName={student.is_inactive ? "bg-red-500/20 text-red-400" : undefined}
+                          fallbackClassName={student.is_inactive ? "bg-danger/20 text-danger" : undefined}
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
@@ -523,12 +523,12 @@ export default function AdminStudentsPage() {
                     </td>
                     <td className="py-3 px-3 text-right hidden xl:table-cell">
                       <div className="flex items-center justify-end gap-1">
-                        <Flame className={cn("h-3 w-3", student.streak > 0 ? "text-orange-500" : "text-muted-foreground")} />
+                        <Flame className={cn("h-3 w-3", student.streak > 0 ? "text-streak" : "text-muted-foreground")} />
                         <span className="text-sm text-foreground">{student.streak}</span>
                       </div>
                     </td>
                     <td className="py-3 px-3 text-right">
-                      <span className={cn("text-sm", student.is_inactive ? "text-red-400" : "text-muted-foreground")}>
+                      <span className={cn("text-sm", student.is_inactive ? "text-danger" : "text-muted-foreground")}>
                         {formatLastActive(student.last_active)}
                       </span>
                     </td>

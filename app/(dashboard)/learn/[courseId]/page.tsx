@@ -107,9 +107,9 @@ interface Course {
 }
 
 const difficultyColors = {
-  Beginner: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  Intermediate: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  Advanced: "bg-red-500/20 text-red-400 border-red-500/30",
+  Beginner: "chip chip-success",
+  Intermediate: "chip chip-warning",
+  Advanced: "chip chip-danger",
 }
 
 // ─── Copy button for code blocks ─────────────────────────────────────────────

@@ -123,9 +123,9 @@ const COLOR_OPTIONS = [
 ]
 
 const difficultyColor: Record<string, string> = {
-  Beginner:     "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  Intermediate: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  Advanced:     "bg-red-500/15 text-red-400 border-red-500/30",
+  Beginner:     "chip chip-success",
+  Intermediate: "chip chip-warning",
+  Advanced:     "chip chip-danger",
 }
 
 // ── Small helpers ─────────────────────────────────────────────────────────────
@@ -533,23 +533,23 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
           {result ? (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-3 text-center">
-                  <p className="text-2xl font-bold text-emerald-400">{result.imported}</p>
-                  <p className="text-xs text-emerald-400/70 mt-0.5">Imported</p>
+                <div className="info-box info-box-success p-3 text-center">
+                  <p className="text-2xl font-bold text-success">{result.imported}</p>
+                  <p className="text-xs text-success/70 mt-0.5">Imported</p>
                 </div>
-                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-center">
-                  <p className="text-2xl font-bold text-amber-400">{result.skipped}</p>
-                  <p className="text-xs text-amber-400/70 mt-0.5">Skipped</p>
+                <div className="info-box info-box-warning p-3 text-center">
+                  <p className="text-2xl font-bold text-warning">{result.skipped}</p>
+                  <p className="text-xs text-warning/70 mt-0.5">Skipped</p>
                 </div>
-                <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-center">
-                  <p className="text-2xl font-bold text-red-400">{result.errors}</p>
-                  <p className="text-xs text-red-400/70 mt-0.5">Errors</p>
+                <div className="info-box info-box-danger p-3 text-center">
+                  <p className="text-2xl font-bold text-danger">{result.errors}</p>
+                  <p className="text-xs text-danger/70 mt-0.5">Errors</p>
                 </div>
               </div>
 
               {result.skipped_questions.length > 0 && (
-                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1.5 max-h-32 overflow-y-auto">
-                  <p className="text-xs font-medium text-amber-400 flex items-center gap-1.5">
+                <div className="info-box info-box-warning p-3 space-y-1.5 max-h-32 overflow-y-auto">
+                  <p className="text-xs font-medium text-warning flex items-center gap-1.5">
                     <SkipForward className="h-3.5 w-3.5" />Skipped (duplicates)
                   </p>
                   {result.skipped_questions.map((s, i) => (
@@ -561,13 +561,13 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
               )}
 
               {result.error_details.length > 0 && (
-                <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-3 space-y-1.5 max-h-32 overflow-y-auto">
-                  <p className="text-xs font-medium text-red-400 flex items-center gap-1.5">
+                <div className="info-box info-box-danger p-3 space-y-1.5 max-h-32 overflow-y-auto">
+                  <p className="text-xs font-medium text-danger flex items-center gap-1.5">
                     <AlertCircle className="h-3.5 w-3.5" />Errors
                   </p>
                   {result.error_details.map((e, i) => (
                     <p key={i} className="text-xs text-muted-foreground">
-                      Row {e.row}: <span className="text-red-400">{e.reason}</span>
+                      Row {e.row}: <span className="text-danger">{e.reason}</span>
                       {e.question && <> — <span className="text-foreground/80">{e.question}</span></>}
                     </p>
                   ))}
@@ -596,7 +596,7 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
                   dragging
                     ? "border-primary bg-primary/10"
                     : file
-                    ? "border-emerald-500/50 bg-emerald-500/5"
+                    ? "border-success/50 bg-success/5"
                     : "border-border hover:border-border/70 hover:bg-white/[0.02]"
                 )}
               >
@@ -612,12 +612,12 @@ function MCQUploadModal({ lesson, onClose, onSuccess }: {
                 />
                 {file ? (
                   <div className="flex flex-col items-center gap-2">
-                    <CheckCircle2 className="h-8 w-8 text-emerald-400" />
+                    <CheckCircle2 className="h-8 w-8 text-success" />
                     <p className="text-sm font-medium text-foreground">{file.name}</p>
                     <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
                     <button
                       onClick={e => { e.stopPropagation(); setFile(null) }}
-                      className="text-xs text-muted-foreground hover:text-red-400 transition-colors"
+                      className="text-xs text-muted-foreground hover:text-danger transition-colors"
                     >
                       Remove
                     </button>
@@ -775,26 +775,26 @@ function AssignmentUploadModal({ level, onClose, onSuccess }: {
           ) : (
             <>
               <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-emerald-400">{result.imported}</p>
+                <div className="info-box info-box-success p-3">
+                  <p className="text-2xl font-bold text-success">{result.imported}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Imported</p>
                 </div>
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-amber-400">{result.skipped}</p>
+                <div className="info-box info-box-warning p-3">
+                  <p className="text-2xl font-bold text-warning">{result.skipped}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Skipped</p>
                 </div>
-                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                  <p className="text-2xl font-bold text-red-400">{result.errors}</p>
+                <div className="info-box info-box-danger p-3">
+                  <p className="text-2xl font-bold text-danger">{result.errors}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Errors</p>
                 </div>
               </div>
 
               {result.error_details.length > 0 && (
                 <div className="space-y-1 max-h-36 overflow-y-auto">
-                  <p className="text-xs font-semibold text-red-400">Errors:</p>
+                  <p className="text-xs font-semibold text-danger">Errors:</p>
                   {result.error_details.map((e, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <AlertCircle className="h-3 w-3 text-red-400 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="h-3 w-3 text-danger flex-shrink-0 mt-0.5" />
                       <span>Row {e.row}: {e.reason}{e.question ? ` — "${e.question}"` : ""}</span>
                     </div>
                   ))}
@@ -803,10 +803,10 @@ function AssignmentUploadModal({ level, onClose, onSuccess }: {
 
               {result.skipped_questions.length > 0 && (
                 <div className="space-y-1 max-h-28 overflow-y-auto">
-                  <p className="text-xs font-semibold text-amber-400">Skipped (duplicates):</p>
+                  <p className="text-xs font-semibold text-warning">Skipped (duplicates):</p>
                   {result.skipped_questions.map((s, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                      <SkipForward className="h-3 w-3 text-amber-400 flex-shrink-0 mt-0.5" />
+                      <SkipForward className="h-3 w-3 text-warning flex-shrink-0 mt-0.5" />
                       <span>Row {s.row}: {s.question}</span>
                     </div>
                   ))}
@@ -832,9 +832,9 @@ function AssignmentUploadModal({ level, onClose, onSuccess }: {
 // ── MCQ Manage Panel ──────────────────────────────────────────────────────────
 
 const diffMCQ: Record<string, string> = {
-  Easy:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  Medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  Hard:   "bg-red-500/15 text-red-400 border-red-500/30",
+  Easy:   "chip chip-success",
+  Medium: "chip chip-warning",
+  Hard:   "chip chip-danger",
 }
 
 function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
@@ -950,7 +950,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-9 text-xs gap-1.5 flex-1 sm:flex-none"
+                className="border-danger/30 text-danger hover:bg-danger/10 h-9 text-xs gap-1.5 flex-1 sm:flex-none"
                 onClick={() => setClearConfirm(true)}
               >
                 <Trash2 className="h-3.5 w-3.5" />Clear All
@@ -1014,15 +1014,15 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
                               <div key={letter} className={cn(
                                 "flex items-start gap-2 text-xs px-2.5 py-1.5 rounded-lg",
                                 isCorrect
-                                  ? "bg-emerald-500/10 border border-emerald-500/20"
+                                  ? "bg-success/10 border border-success/20"
                                   : "bg-white/[0.03] border border-border/50"
                               )}>
                                 <span className={cn(
                                   "font-bold flex-shrink-0 w-4",
-                                  isCorrect ? "text-emerald-400" : "text-muted-foreground"
+                                  isCorrect ? "text-success" : "text-muted-foreground"
                                 )}>{letter.toUpperCase()}.</span>
-                                <span className={isCorrect ? "text-emerald-300" : "text-muted-foreground"}>{opt}</span>
-                                {isCorrect && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 ml-auto flex-shrink-0 mt-0.5" />}
+                                <span className={isCorrect ? "text-success" : "text-muted-foreground"}>{opt}</span>
+                                {isCorrect && <CheckCircle2 className="h-3.5 w-3.5 text-success ml-auto flex-shrink-0 mt-0.5" />}
                               </div>
                             )
                           })}
@@ -1050,7 +1050,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-danger opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                         onClick={e => { e.stopPropagation(); setDeleteTarget(q) }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1079,7 +1079,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-400" />Delete Question
+              <AlertTriangle className="h-4 w-4 text-danger" />Delete Question
             </AlertDialogTitle>
             <AlertDialogDescription className="line-clamp-3">
               {deleteTarget?.question}
@@ -1090,7 +1090,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete
@@ -1104,7 +1104,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-400" />Clear All Questions
+              <AlertTriangle className="h-4 w-4 text-danger" />Clear All Questions
             </AlertDialogTitle>
             <AlertDialogDescription>
               Delete all <strong>{questions.length} questions</strong> for <strong>{lesson.title}</strong>?
@@ -1116,7 +1116,7 @@ function MCQManagePanel({ lesson, onClose, onUploadClick, onChanged }: {
             <AlertDialogAction
               onClick={handleClearAll}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Clear All
@@ -1408,7 +1408,7 @@ export default function CoursesPage() {
                           <Pencil className="h-3.5 w-3.5 mr-1.5" />Edit
                         </Button>
                         <Button size="sm" variant="outline"
-                          className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8"
+                          className="border-danger/30 text-danger hover:bg-danger/10 h-8"
                           onClick={() => setDeleteCourse(selected)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -1430,7 +1430,7 @@ export default function CoursesPage() {
                         <Star className="h-3 w-3 mr-1" />{selected.points_per_lesson} pts/lesson
                       </Badge>
                       {selected.prerequisite_id && (
-                        <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-400">
+                        <Badge variant="outline" className="text-xs border-warning/30 text-warning">
                           Requires: {selected.prerequisite_id}
                         </Badge>
                       )}
@@ -1488,7 +1488,7 @@ export default function CoursesPage() {
                             </div>
                             <div className="flex gap-1" onClick={e => e.stopPropagation()}>
                               <Button size="sm" variant="ghost"
-                                className="h-7 px-2 text-[11px] text-muted-foreground hover:text-amber-400 gap-1"
+                                className="h-7 px-2 text-[11px] text-muted-foreground hover:text-warning gap-1"
                                 title="Upload Assignments"
                                 onClick={() => setAssignmentUpload(level)}>
                                 <Upload className="h-3 w-3" />
@@ -1500,7 +1500,7 @@ export default function CoursesPage() {
                                 <Pencil className="h-3 w-3" />
                               </Button>
                               <Button size="sm" variant="ghost"
-                                className="h-7 w-7 p-0 text-muted-foreground hover:text-red-400"
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-danger"
                                 onClick={() => setDeleteLevel({ courseId: selected.id, level })}>
                                 <Trash2 className="h-3 w-3" />
                               </Button>
@@ -1546,7 +1546,7 @@ export default function CoursesPage() {
                                       {lesson.mcq_count > 0 && (
                                         <button
                                           onClick={() => setMcqManage(lesson)}
-                                          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/15 border border-violet-500/30 text-[10px] text-violet-400 hover:bg-violet-500/25 transition-colors flex-shrink-0"
+                                          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-coding/15 border border-coding/30 text-[10px] text-coding hover:bg-coding/25 transition-colors flex-shrink-0"
                                         >
                                           <Brain className="h-3 w-3" />
                                           {lesson.mcq_count} MCQ
@@ -1555,7 +1555,7 @@ export default function CoursesPage() {
                                       {/* Action buttons — appear on hover */}
                                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                                         <Button size="sm" variant="ghost"
-                                          className="h-6 w-6 p-0 text-muted-foreground hover:text-violet-400"
+                                          className="h-6 w-6 p-0 text-muted-foreground hover:text-coding"
                                           title="Upload MCQ"
                                           onClick={() => setMcqUpload(lesson)}>
                                           <Upload className="h-3 w-3" />
@@ -1570,7 +1570,7 @@ export default function CoursesPage() {
                                           <Pencil className="h-3 w-3" />
                                         </Button>
                                         <Button size="sm" variant="ghost"
-                                          className="h-6 w-6 p-0 text-muted-foreground hover:text-red-400"
+                                          className="h-6 w-6 p-0 text-muted-foreground hover:text-danger"
                                           onClick={() => setDeleteLesson({ courseId: selected.id, lesson })}>
                                           <Trash2 className="h-3 w-3" />
                                         </Button>
@@ -1711,7 +1711,7 @@ export default function CoursesPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <AlertTriangle className="h-4 w-4 text-danger" />
               Delete Course
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -1724,7 +1724,7 @@ export default function CoursesPage() {
             <AlertDialogAction
               onClick={handleDeleteCourse}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete
@@ -1747,7 +1747,7 @@ export default function CoursesPage() {
             <AlertDialogAction
               onClick={handleDeleteLevel}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete Level
@@ -1770,7 +1770,7 @@ export default function CoursesPage() {
             <AlertDialogAction
               onClick={handleDeleteLesson}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Delete Lesson

@@ -159,7 +159,7 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
         {/* LinkedIn */}
         <div className="space-y-1.5">
           <Label className="text-foreground flex items-center gap-1.5">
-            <Linkedin className="h-3.5 w-3.5 text-blue-400" /> LinkedIn URL
+            <Linkedin className="h-3.5 w-3.5 text-primary" /> LinkedIn URL
           </Label>
           <Input placeholder="https://linkedin.com/in/yourname" className="bg-secondary/50 border-border text-foreground" {...register("linkedin")} />
           {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                     href={(user as any).linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors"
                   >
                     <Linkedin className="h-3.5 w-3.5 flex-shrink-0" />
                     <span className="truncate">LinkedIn</span>

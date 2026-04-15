@@ -177,15 +177,15 @@ export default function AdminDashboardPage() {
       label: "Total Students",
       value: analytics?.total_students ?? "—",
       icon: Users,
-      bg: "bg-blue-500/20",
-      text: "text-blue-400",
+      bg: "bg-primary/20",
+      text: "text-primary",
     },
     {
       label: "Active This Week",
       value: analytics?.active_this_week ?? "—",
       icon: TrendingUp,
-      bg: "bg-emerald-500/20",
-      text: "text-emerald-400",
+      bg: "bg-success/20",
+      text: "text-success",
       sub: `of ${analytics?.total_students ?? 0} total`,
       progress: engagementRate,
     },
@@ -193,23 +193,23 @@ export default function AdminDashboardPage() {
       label: "Avg Streak",
       value: analytics?.avg_streak ?? "—",
       icon: Flame,
-      bg: "bg-orange-500/20",
-      text: "text-orange-400",
+      bg: "bg-streak/20",
+      text: "text-streak",
       sub: "days",
     },
     {
       label: "Avg Points",
       value: typeof analytics?.avg_points === "number" ? analytics.avg_points.toLocaleString() : "—",
       icon: Star,
-      bg: "bg-amber-500/20",
-      text: "text-amber-400",
+      bg: "bg-warning/20",
+      text: "text-warning",
     },
     {
       label: "Engagement Rate",
       value: `${engagementRate}%`,
       icon: Zap,
-      bg: "bg-violet-500/20",
-      text: "text-violet-400",
+      bg: "bg-coding/20",
+      text: "text-coding",
       progress: engagementRate,
     },
   ]
@@ -229,7 +229,7 @@ export default function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+          <Badge className="bg-warning/20 text-warning border-warning/30">
             <Crown className="h-4 w-4 mr-2" />
             {user?.college_name || "Your College"}
           </Badge>
@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
           <GlassCard className="h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-400" />
+                <Trophy className="h-5 w-5 text-warning" />
                 <h3 className="font-semibold font-serif text-foreground">Top Students</h3>
               </div>
               <Link href="/admin/students">
@@ -306,7 +306,7 @@ export default function AdminDashboardPage() {
                   <div className="text-right">
                     <p className="text-sm font-semibold text-primary">{s.points.toLocaleString()}</p>
                     <div className="flex items-center justify-end gap-1">
-                      <Flame className="h-3 w-3 text-orange-400" />
+                      <Flame className="h-3 w-3 text-streak" />
                       <span className="text-xs text-muted-foreground">{s.streak}</span>
                     </div>
                   </div>
@@ -321,16 +321,16 @@ export default function AdminDashboardPage() {
 
         {/* Inactive Alert */}
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-          <GlassCard className={`h-full ${analytics && analytics.inactive_students.length > 0 ? "border-red-500/30 bg-red-500/5" : ""}`}>
+          <GlassCard className={`h-full ${analytics && analytics.inactive_students.length > 0 ? "border-danger/30 bg-danger/5" : ""}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 {analytics?.inactive_students.length === 0
-                  ? <CheckCircle className="h-5 w-5 text-emerald-400" />
-                  : <AlertTriangle className="h-5 w-5 text-red-400" />
+                  ? <CheckCircle className="h-5 w-5 text-success" />
+                  : <AlertTriangle className="h-5 w-5 text-danger" />
                 }
                 <h3 className="font-semibold font-serif text-foreground">Inactive Students</h3>
                 {analytics && (
-                  <Badge variant="outline" className="text-red-400 border-red-400/30 text-xs">
+                  <Badge variant="outline" className="text-danger border-danger/30 text-xs">
                     {analytics.inactive_students.length}
                   </Badge>
                 )}
@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs gap-1"
+                  className="border-danger/30 text-danger hover:bg-danger/10 text-xs gap-1"
                   onClick={handleRemindAll}
                   disabled={remindingAll}
                 >
@@ -351,7 +351,7 @@ export default function AdminDashboardPage() {
 
             {analytics && analytics.inactive_students.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2">
-                <CheckCircle className="h-10 w-10 text-emerald-400/50" />
+                <CheckCircle className="h-10 w-10 text-success/50" />
                 <p className="text-sm text-muted-foreground">All students are active!</p>
               </div>
             ) : (
@@ -359,7 +359,7 @@ export default function AdminDashboardPage() {
                 {analytics?.inactive_students.slice(0, 8).map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-2 min-w-0">
-                      <UserAvatar name={student.name} photoUrl={(student as any).avatar} size="xs" fallbackClassName="bg-red-500/20 text-red-400" />
+                      <UserAvatar name={student.name} photoUrl={(student as any).avatar} size="xs" fallbackClassName="bg-danger/20 text-danger" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
                         <p className="text-xs text-muted-foreground">Last: {formatLastActive(student.last_active)}</p>
@@ -368,7 +368,7 @@ export default function AdminDashboardPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="border-red-500/30 text-red-400 hover:bg-red-500/10 ml-2 flex-shrink-0"
+                      className="border-danger/30 text-danger hover:bg-danger/10 ml-2 flex-shrink-0"
                       onClick={() => handleSendReminder(student)}
                       disabled={remindingId === student.id}
                     >
@@ -443,7 +443,7 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     onClick={() => { setLogoFile(null); setLogoPreview(null) }}
-                    className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300"
+                    className="flex items-center gap-1 text-xs text-danger hover:text-danger/80"
                   >
                     <X className="h-3 w-3" /> Cancel
                   </button>

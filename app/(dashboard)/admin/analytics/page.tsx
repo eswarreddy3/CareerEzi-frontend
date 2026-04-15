@@ -51,16 +51,16 @@ interface Analytics {
 
 /* ─── helpers ────────────────────────────────────────────────────────────── */
 const MEDALS = ["🥇", "🥈", "🥉"]
-const BRANCH_COLORS = ["#0E8080", "#8B5CF6", "#3B82F6", "#06B6D4", "#10B981", "#F59E0B"]
+const BRANCH_COLORS = ["var(--primary)", "var(--coding)", "#3B82F6", "#06B6D4", "var(--success)", "var(--warning)"]
 
 function daysSince(iso: string | null) {
   if (!iso) return null
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
 }
-function accuracyColor(p: number) { return p >= 70 ? "#10B981" : p >= 40 ? "#F59E0B" : "#EF4444" }
-function passColor(p: number)     { return p >= 70 ? "#10B981" : p >= 40 ? "#F59E0B" : "#EF4444" }
-function readinessColor(i: number){ return ["#EF4444","#F59E0B","#0E8080","#10B981"][i] }
-function diffColor(d: string)     { return d === "Easy" ? "#10B981" : d === "Medium" ? "#F59E0B" : "#EF4444" }
+function accuracyColor(p: number) { return p >= 70 ? "var(--success)" : p >= 40 ? "var(--warning)" : "var(--danger)" }
+function passColor(p: number)     { return p >= 70 ? "var(--success)" : p >= 40 ? "var(--warning)" : "var(--danger)" }
+function readinessColor(i: number){ return ["var(--danger)","var(--warning)","var(--primary)","var(--success)"][i] }
+function diffColor(d: string)     { return d === "Easy" ? "var(--success)" : d === "Medium" ? "var(--warning)" : "var(--danger)" }
 
 /* ─── count-up hook ──────────────────────────────────────────────────────── */
 function useCountUp(end: number, duration = 1100) {
@@ -178,11 +178,11 @@ export default function AdminAnalyticsPage() {
   const maxPts = a.top_students[0]?.points || 1
 
   const statCards = [
-    { label: "Total Students",   value: a.total_students,   suffix: "",  icon: Users,         bg: "bg-blue-500/10",    text: "text-blue-500"    },
-    { label: "Active This Week", value: a.active_this_week, suffix: "",  icon: Activity,      bg: "bg-emerald-500/10", text: "text-emerald-500", live: true },
-    { label: "Avg Streak",       value: a.avg_streak,       suffix: "d", icon: Flame,         bg: "bg-orange-500/10",  text: "text-orange-500"  },
-    { label: "At Risk (14d)",    value: a.at_risk_count,    suffix: "",  icon: AlertTriangle, bg: "bg-red-500/10",     text: "text-red-500"     },
-    { label: "Avg Course Done",  value: avgCoursePct,       suffix: "%", icon: BookOpen,      bg: "bg-violet-500/10",  text: "text-violet-500"  },
+    { label: "Total Students",   value: a.total_students,   suffix: "",  icon: Users,         bg: "bg-primary/10",  text: "text-primary"  },
+    { label: "Active This Week", value: a.active_this_week, suffix: "",  icon: Activity,      bg: "bg-success/10",  text: "text-success",  live: true },
+    { label: "Avg Streak",       value: a.avg_streak,       suffix: "d", icon: Flame,         bg: "bg-streak/10",   text: "text-streak"   },
+    { label: "At Risk (14d)",    value: a.at_risk_count,    suffix: "",  icon: AlertTriangle, bg: "bg-danger/10",   text: "text-danger"   },
+    { label: "Avg Course Done",  value: avgCoursePct,       suffix: "%", icon: BookOpen,      bg: "bg-coding/10",   text: "text-coding"   },
   ]
 
   return (
@@ -219,8 +219,8 @@ export default function AdminAnalyticsPage() {
                 <div className={`p-2 rounded-lg ${s.bg} flex-shrink-0 relative`}>
                   <s.icon className={`h-4 w-4 ${s.text}`} />
                   {"live" in s && s.live && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400">
-                      <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success">
+                      <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-75" />
                     </span>
                   )}
                 </div>
@@ -248,26 +248,26 @@ export default function AdminAnalyticsPage() {
             </div>
             <p className="text-xs text-muted-foreground mb-4">Distinct active students per week · last 8 weeks</p>
             {a.weekly_trend.length > 0 ? (
-              <ChartContainer config={{ active: { label: "Active Students", color: "#0E8080" } }} className="h-[210px] w-full">
+              <ChartContainer config={{ active: { label: "Active Students", color: "var(--primary)" } }} className="h-[210px] w-full">
                 <AreaChart data={a.weekly_trend} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
                   <defs>
                     <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%"   stopColor="#0E8080" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#0E8080" stopOpacity={0}    />
+                      <stop offset="0%"   stopColor="var(--primary)" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity={0}    />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} allowDecimals={false} tickLine={false} axisLine={false} />
-                  <ChartTooltip content={<ChartTooltipContent />} cursor={{ stroke: "#0E8080", strokeWidth: 1, strokeDasharray: "4 2" }} />
+                  <ChartTooltip content={<ChartTooltipContent />} cursor={{ stroke: "var(--primary)", strokeWidth: 1, strokeDasharray: "4 2" }} />
                   <Area
                     type="monotone"
                     dataKey="active"
-                    stroke="#0E8080"
+                    stroke="var(--primary)"
                     strokeWidth={2.5}
                     fill="url(#areaGrad)"
-                    dot={{ r: 3.5, fill: "#0E8080", strokeWidth: 0 }}
-                    activeDot={{ r: 5.5, fill: "#0E8080", stroke: "var(--background)", strokeWidth: 2 }}
+                    dot={{ r: 3.5, fill: "var(--primary)", strokeWidth: 0 }}
+                    activeDot={{ r: 5.5, fill: "var(--primary)", stroke: "var(--background)", strokeWidth: 2 }}
                     animationDuration={1200}
                     animationEasing="ease-out"
                   />
@@ -318,7 +318,7 @@ export default function AdminAnalyticsPage() {
             </div>
             {a.zero_activity_count > 0 && (
               <p className="text-xs text-muted-foreground pt-3 mt-3 border-t border-border/50">
-                <span className="text-red-500 font-semibold">{a.zero_activity_count}</span> never been active
+                <span className="text-danger font-semibold">{a.zero_activity_count}</span> never been active
               </p>
             )}
           </GlassCard>
@@ -361,7 +361,7 @@ export default function AdminAnalyticsPage() {
                   ))}
                 </div>
                 <div className="flex gap-4 mt-4 pt-3 border-t border-border/50">
-                  {[["#EF4444","<40% weak"],["#F59E0B","40–69%"],["#10B981","≥70% good"]].map(([c,l]) => (
+                  {[["var(--danger)","<40% weak"],["var(--warning)","40–69%"],["var(--success)","≥70% good"]].map(([c,l]) => (
                     <span key={l} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ background: c }} />{l}
                     </span>
@@ -420,7 +420,7 @@ export default function AdminAnalyticsPage() {
               <h3 className="font-semibold font-serif text-foreground">Branch Performance</h3>
             </div>
             <p className="text-xs text-muted-foreground mb-4">Average points per branch · highest first</p>
-            <ChartContainer config={{ avgPoints: { label: "Avg Points", color: "#0E8080" } }} className="h-[220px] w-full">
+            <ChartContainer config={{ avgPoints: { label: "Avg Points", color: "var(--primary)" } }} className="h-[220px] w-full">
               <BarChart data={a.branch_stats} layout="vertical" margin={{ left: 8, right: 32, top: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
                 <XAxis type="number" stroke="var(--muted-foreground)" fontSize={11} tick={{ fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
@@ -457,8 +457,8 @@ export default function AdminAnalyticsPage() {
             {a.assignment_module_stats.length > 0 ? (
               <ChartContainer
                 config={{
-                  pass_rate: { label: "Pass Rate %", color: "#10B981" },
-                  avg_score: { label: "Avg Score %", color: "#0E8080" },
+                  pass_rate: { label: "Pass Rate %", color: "var(--success)" },
+                  avg_score: { label: "Avg Score %", color: "var(--primary)" },
                 }}
                 className="h-[260px] w-full"
               >
@@ -482,7 +482,7 @@ export default function AdminAnalyticsPage() {
                     ))}
                   </Bar>
                   <Bar dataKey="avg_score" name="Avg Score %" radius={[0, 4, 4, 0]} maxBarSize={14}
-                    fill="#0E8080" opacity={0.3} animationDuration={900} animationBegin={200} />
+                    fill="var(--primary)" opacity={0.3} animationDuration={900} animationBegin={200} />
                 </BarChart>
               </ChartContainer>
             ) : (
@@ -493,7 +493,7 @@ export default function AdminAnalyticsPage() {
             {a.assignment_module_stats.length > 0 && (
               <div className="flex gap-4 mt-3 pt-3 border-t border-border/50">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className="w-3 h-2 rounded inline-block bg-emerald-500" /> Pass Rate
+                  <span className="w-3 h-2 rounded inline-block bg-success" /> Pass Rate
                 </span>
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <span className="w-3 h-2 rounded inline-block bg-primary opacity-40" /> Avg Score
@@ -514,9 +514,9 @@ export default function AdminAnalyticsPage() {
               <div className="flex-1 flex flex-col">
                 <ChartContainer
                   config={{
-                    Easy:   { label: "Easy",   color: "#10B981" },
-                    Medium: { label: "Medium", color: "#F59E0B" },
-                    Hard:   { label: "Hard",   color: "#EF4444" },
+                    Easy:   { label: "Easy",   color: "var(--success)" },
+                    Medium: { label: "Medium", color: "var(--warning)" },
+                    Hard:   { label: "Hard",   color: "var(--danger)" },
                   }}
                   className="h-[170px] w-full"
                 >
@@ -580,7 +580,7 @@ export default function AdminAnalyticsPage() {
         <GlassCard>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <UserX className="h-4 w-4 text-red-500" />
+              <UserX className="h-4 w-4 text-danger" />
               <h3 className="font-semibold font-serif text-foreground">At-Risk Students</h3>
               {a.at_risk_count > 0 && (
                 <Badge variant="destructive" className="text-xs h-5">{a.at_risk_count}</Badge>
@@ -605,12 +605,12 @@ export default function AdminAnalyticsPage() {
                     className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-default"
                   >
                     <div className="relative flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                        <span className="text-xs font-bold text-red-500">{s.name.charAt(0).toUpperCase()}</span>
+                      <div className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center">
+                        <span className="text-xs font-bold text-danger">{s.name.charAt(0).toUpperCase()}</span>
                       </div>
                       <span
                         className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-card"
-                        style={{ background: urgency === "high" ? "#EF4444" : urgency === "med" ? "#F59E0B" : "#0E8080" }}
+                        style={{ background: urgency === "high" ? "var(--danger)" : urgency === "med" ? "var(--warning)" : "var(--primary)" }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -622,7 +622,7 @@ export default function AdminAnalyticsPage() {
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <div className="text-right hidden sm:block">
                         <p className="text-xs font-semibold text-foreground tabular-nums">{s.points} pts</p>
-                        <p className="text-xs" style={{ color: urgency === "high" ? "#EF4444" : urgency === "med" ? "#F59E0B" : "#0E8080" }}>
+                        <p className="text-xs" style={{ color: urgency === "high" ? "var(--danger)" : urgency === "med" ? "var(--warning)" : "var(--primary)" }}>
                           {days === null ? "Never active" : `${days}d ago`}
                         </p>
                       </div>
@@ -655,7 +655,7 @@ export default function AdminAnalyticsPage() {
       <Section delay={0.05}>
         <GlassCard>
           <div className="flex items-center gap-2 mb-5">
-            <Trophy className="h-4 w-4 text-amber-400" />
+            <Trophy className="h-4 w-4 text-warning" />
             <h3 className="font-semibold font-serif text-foreground">Top 10 Students</h3>
           </div>
 
@@ -683,7 +683,7 @@ export default function AdminAnalyticsPage() {
                     />
                     <motion.div
                       className="absolute left-0 top-0 bottom-0 rounded-l-lg opacity-10"
-                      style={{ background: i < 3 ? ["#F59E0B","#94A3B8","#CD7F32"][i] : "#0E8080", width: `${pct}%` }}
+                      style={{ background: i < 3 ? ["var(--warning)","#94A3B8","#CD7F32"][i] : "var(--primary)", width: `${pct}%` }}
                       initial={{ scaleX: 0, originX: 0 }}
                       whileInView={{ scaleX: 1 }}
                       viewport={{ once: true }}
@@ -701,7 +701,7 @@ export default function AdminAnalyticsPage() {
                     </div>
                     <div className="relative flex items-center gap-4">
                       <div className="flex items-center gap-1">
-                        <Flame className="h-3 w-3 text-orange-400" />
+                        <Flame className="h-3 w-3 text-streak" />
                         <span className="text-xs text-muted-foreground tabular-nums">{s.streak}d</span>
                       </div>
                       <span className="text-sm font-semibold text-primary w-24 text-right font-mono tabular-nums">

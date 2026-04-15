@@ -78,16 +78,16 @@ interface TestResult {
 type Language = "python" | "java" | "cpp" | "javascript"
 
 const difficultyColors = {
-  Easy: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  Medium: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  Hard: "bg-red-500/20 text-red-400 border-red-500/30",
+  Easy: "chip chip-success",
+  Medium: "chip chip-warning",
+  Hard: "chip chip-danger",
 }
 
 const statusColors: Record<string, string> = {
-  accepted: "text-emerald-400",
-  wrong_answer: "text-red-400",
-  runtime_error: "text-orange-400",
-  time_limit: "text-amber-400",
+  accepted: "text-success",
+  wrong_answer: "text-danger",
+  runtime_error: "text-streak",
+  time_limit: "text-warning",
 }
 
 const DEFAULT_CODE: Record<Language, string> = {

@@ -45,9 +45,9 @@ const statusConfig = {
   },
   completed: {
     label: "Completed",
-    color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    color: "chip chip-success",
     icon: CheckCircle,
-    dot: "bg-emerald-400",
+    dot: "bg-success",
   },
 }
 
@@ -121,13 +121,13 @@ function CourseSection({
                       </p>
                     </div>
                     {a.status === "completed" && !a.is_locked && (
-                      <div className="text-xs text-emerald-400 font-medium">
+                      <div className="text-xs text-success font-medium">
                         Score: {a.score} / {a.max_score} pts
                       </div>
                     )}
                     <div className="flex items-center justify-between mt-auto">
                       <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                        <Star className="h-4 w-4 text-warning fill-warning" />
                         <span className="text-sm font-semibold text-foreground">{a.max_score} pts</span>
                       </div>
                       {a.is_locked ? (
@@ -200,8 +200,8 @@ export default function AssignmentsPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg bg-amber-500/20">
-            <Clock className="h-5 w-5 text-amber-400" />
+          <div className="p-2 rounded-lg icon-box-warning">
+            <Clock className="h-5 w-5 text-warning" />
           </div>
           <div>
             <p className="text-xl font-bold font-serif text-foreground">{pendingCount}</p>
@@ -209,8 +209,8 @@ export default function AssignmentsPage() {
           </div>
         </GlassCard>
         <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg bg-emerald-500/20">
-            <CheckCircle className="h-5 w-5 text-emerald-400" />
+          <div className="p-2 rounded-lg icon-box-success">
+            <CheckCircle className="h-5 w-5 text-success" />
           </div>
           <div>
             <p className="text-xl font-bold font-serif text-foreground">{completedCount}</p>

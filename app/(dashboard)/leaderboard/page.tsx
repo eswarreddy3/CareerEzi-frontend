@@ -23,15 +23,15 @@ interface LeaderboardEntry {
 }
 
 const podiumColors = {
-  1: "from-amber-400 to-amber-600",
+  1: "from-warning to-amber-600",
   2: "from-slate-300 to-slate-500",
-  3: "from-orange-400 to-orange-600",
+  3: "from-streak to-orange-600",
 }
 
 const podiumBorders = {
-  1: "border-amber-400",
+  1: "border-warning",
   2: "border-slate-400",
-  3: "border-orange-400",
+  3: "border-streak",
 }
 
 export default function LeaderboardPage() {
@@ -126,7 +126,7 @@ export default function LeaderboardPage() {
                       <span className="text-sm font-medium text-foreground">{topThree[1]?.points.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Flame className="h-4 w-4 text-orange-500" />
+                      <Flame className="h-4 w-4 text-streak" />
                       <span className="text-sm font-medium text-foreground">{topThree[1]?.streak}</span>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ export default function LeaderboardPage() {
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
                     <UserAvatar name={topThree[0]?.name || ""} photoUrl={topThree[0]?.avatar} size="xl" points={topThree[0]?.points} />
-                    <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center">
+                    <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-gradient-to-r from-warning to-amber-600 flex items-center justify-center">
                       <Medal className="h-5 w-5 text-amber-900" />
                     </div>
                   </div>
@@ -154,7 +154,7 @@ export default function LeaderboardPage() {
                       <span className="text-sm font-medium text-foreground">{topThree[0]?.points.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Flame className="h-4 w-4 text-orange-500" />
+                      <Flame className="h-4 w-4 text-streak" />
                       <span className="text-sm font-medium text-foreground">{topThree[0]?.streak}</span>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default function LeaderboardPage() {
                 <div className="flex flex-col items-center text-center pt-4">
                   <div className="relative mb-4">
                     <UserAvatar name={topThree[2]?.name || ""} photoUrl={topThree[2]?.avatar} size="lg" points={topThree[2]?.points} />
-                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-r from-streak to-orange-600 flex items-center justify-center">
                       <span className="text-sm font-bold text-orange-900">3</span>
                     </div>
                   </div>
@@ -182,7 +182,7 @@ export default function LeaderboardPage() {
                       <span className="text-sm font-medium text-foreground">{topThree[2]?.points.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Flame className="h-4 w-4 text-orange-500" />
+                      <Flame className="h-4 w-4 text-streak" />
                       <span className="text-sm font-medium text-foreground">{topThree[2]?.streak}</span>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="py-3 px-4 text-right hidden md:table-cell">
                         <div className="flex items-center justify-end gap-1">
-                          <Flame className="h-3 w-3 text-orange-500" />
+                          <Flame className="h-3 w-3 text-streak" />
                           <span className="text-sm text-foreground">{entry.streak}</span>
                         </div>
                       </td>

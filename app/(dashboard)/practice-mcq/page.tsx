@@ -67,9 +67,9 @@ interface ProgQState {
 }
 
 const difficultyColors = {
-  Easy: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  Medium: "bg-amber-500/20 text-amber-600 border-amber-500/30",
-  Hard: "bg-red-500/20 text-red-400 border-red-500/30",
+  Easy: "chip chip-success",
+  Medium: "chip chip-warning",
+  Hard: "chip chip-danger",
 }
 
 // ── Aptitude types ────────────────────────────────────────────────────────────

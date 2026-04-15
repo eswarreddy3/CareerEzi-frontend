@@ -55,12 +55,12 @@ function ScoreCircle({ score, max }: { score: number; max: number }) {
   const r = 52
   const circ = 2 * Math.PI * r
   const dash = (pct / 100) * circ
-  const color = pct >= 80 ? "#8B5CF6" : pct >= 50 ? "#F59E0B" : "#EF4444"
+  const color = pct >= 80 ? "var(--coding)" : pct >= 50 ? "var(--warning)" : "var(--danger)"
 
   return (
     <div className="relative w-36 h-36 mx-auto">
       <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+        <circle cx="60" cy="60" r={r} fill="none" stroke="var(--border)" strokeWidth="10" />
         <circle
           cx="60" cy="60" r={r} fill="none"
           stroke={color} strokeWidth="10"
@@ -78,11 +78,11 @@ function ScoreCircle({ score, max }: { score: number; max: number }) {
 }
 
 function getRank(pct: number) {
-  if (pct >= 90) return { label: "Outstanding!", color: "text-amber-400" }
+  if (pct >= 90) return { label: "Outstanding!", color: "text-warning" }
   if (pct >= 75) return { label: "Great Job!", color: "text-primary" }
-  if (pct >= 60) return { label: "Good Effort", color: "text-emerald-400" }
-  if (pct >= 40) return { label: "Keep Practicing", color: "text-amber-400" }
-  return { label: "Needs Improvement", color: "text-red-400" }
+  if (pct >= 60) return { label: "Good Effort", color: "text-success" }
+  if (pct >= 40) return { label: "Keep Practicing", color: "text-warning" }
+  return { label: "Needs Improvement", color: "text-danger" }
 }
 
 export default function AssignmentResultsPage() {
@@ -176,15 +176,15 @@ export default function AssignmentResultsPage() {
         <div className="grid grid-cols-3 gap-4 pt-2">
           <div className="space-y-1">
             <div className="flex items-center justify-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span className="text-2xl font-bold font-serif text-emerald-400">{result.correct}</span>
+              <CheckCircle2 className="h-4 w-4 text-success" />
+              <span className="text-2xl font-bold font-serif text-success">{result.correct}</span>
             </div>
             <p className="text-xs text-muted-foreground">Correct</p>
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-center gap-1.5">
-              <XCircle className="h-4 w-4 text-red-400" />
-              <span className="text-2xl font-bold font-serif text-red-400">{result.wrong}</span>
+              <XCircle className="h-4 w-4 text-danger" />
+              <span className="text-2xl font-bold font-serif text-danger">{result.wrong}</span>
             </div>
             <p className="text-xs text-muted-foreground">Wrong</p>
           </div>
@@ -208,7 +208,7 @@ export default function AssignmentResultsPage() {
               className="h-full rounded-full transition-all duration-1000"
               style={{
                 width: `${accuracy}%`,
-                background: accuracy >= 75 ? "#8B5CF6" : accuracy >= 50 ? "#F59E0B" : "#EF4444",
+                background: accuracy >= 75 ? "var(--coding)" : accuracy >= 50 ? "var(--warning)" : "var(--danger)",
               }}
             />
           </div>
@@ -217,7 +217,7 @@ export default function AssignmentResultsPage() {
         {/* Points breakdown */}
         <div className="space-y-2 pt-2">
           <div className="flex items-center justify-center gap-2">
-            <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+            <Star className="h-5 w-5 text-warning fill-warning" />
             <span className="text-lg font-bold font-serif text-foreground">+{result.score} points earned</span>
           </div>
 
@@ -225,7 +225,7 @@ export default function AssignmentResultsPage() {
           {((result.bonus_points ?? 0) > 0 || (result.course_completion_bonus ?? 0) > 0 || (result.domain_completion_bonus ?? 0) > 0) && (
             <div className="flex flex-wrap justify-center gap-2 pt-1">
               {(result.bonus_points ?? 0) > 0 && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-xs font-medium text-amber-400">
+                <span className="chip chip-warning">
                   <Trophy className="h-3 w-3" />
                   +{result.bonus_points} perfect score bonus
                 </span>
@@ -237,7 +237,7 @@ export default function AssignmentResultsPage() {
                 </span>
               )}
               {(result.domain_completion_bonus ?? 0) > 0 && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-xs font-medium text-violet-400">
+                <span className="chip chip-coding">
                   <Trophy className="h-3 w-3" />
                   +{result.domain_completion_bonus} domain mastered! 🎓
                 </span>
@@ -267,13 +267,13 @@ export default function AssignmentResultsPage() {
                   "px-3 py-1 rounded-lg text-xs font-medium border transition-all capitalize",
                   filter === f
                     ? f === "correct"
-                      ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                      ? "bg-success/20 border-success/40 text-success"
                       : f === "wrong"
-                      ? "bg-red-500/20 border-red-500/40 text-red-300"
+                      ? "bg-danger/20 border-danger/40 text-danger"
                       : f === "unanswered"
-                      ? "bg-secondary/80 border-white/20 text-muted-foreground"
+                      ? "bg-secondary/80 border-border text-muted-foreground"
                       : "bg-primary/20 border-primary/40 text-primary"
-                    : "bg-secondary/30 border-white/10 text-muted-foreground hover:border-white/20"
+                    : "bg-secondary/30 border-border text-muted-foreground hover:border-border"
                 )}
               >
                 {f === "all"
@@ -307,11 +307,11 @@ export default function AssignmentResultsPage() {
                 >
                   <div className="flex-shrink-0 mt-0.5">
                     {qr.isCorrect ? (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <CheckCircle2 className="h-5 w-5 text-success" />
                     ) : qr.selectedIndex === -1 ? (
                       <MinusCircle className="h-5 w-5 text-muted-foreground" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-400" />
+                      <XCircle className="h-5 w-5 text-danger" />
                     )}
                   </div>
 
@@ -326,10 +326,10 @@ export default function AssignmentResultsPage() {
                         className={cn(
                           "text-xs border",
                           qr.isCorrect
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            ? "bg-success/10 text-success border-success/30"
                             : qr.selectedIndex === -1
-                            ? "bg-secondary/50 text-muted-foreground border-white/10"
-                            : "bg-red-500/10 text-red-400 border-red-500/30"
+                            ? "bg-secondary/50 text-muted-foreground border-border"
+                            : "bg-danger/10 text-danger border-danger/30"
                         )}
                       >
                         {qr.isCorrect ? "Correct" : qr.selectedIndex === -1 ? "Skipped" : "Incorrect"}
@@ -359,27 +359,27 @@ export default function AssignmentResultsPage() {
                             className={cn(
                               "flex items-start gap-3 rounded-lg px-3 py-2.5 border text-sm",
                               isCorrect
-                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                                ? "bg-success/10 border-success/30 text-success"
                                 : isWrongSelected
-                                ? "bg-red-500/10 border-red-500/30 text-red-300"
-                                : "bg-secondary/20 border-white/5 text-muted-foreground"
+                                ? "bg-danger/10 border-danger/30 text-danger"
+                                : "bg-secondary/20 border-border text-muted-foreground"
                             )}
                           >
                             <span
                               className={cn(
                                 "flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold",
                                 isCorrect
-                                  ? "bg-emerald-500 border-emerald-500 text-white"
+                                  ? "bg-success border-success text-white"
                                   : isWrongSelected
-                                  ? "bg-red-500 border-red-500 text-white"
-                                  : "bg-transparent border-white/20"
+                                  ? "bg-danger border-danger text-white"
+                                  : "bg-transparent border-border"
                               )}
                             >
                               {String.fromCharCode(65 + oIdx)}
                             </span>
                             <span className="flex-1">{opt}</span>
-                            {isCorrect && <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />}
-                            {isWrongSelected && <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />}
+                            {isCorrect && <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />}
+                            {isWrongSelected && <XCircle className="h-4 w-4 text-danger flex-shrink-0" />}
                           </div>
                         )
                       })}
@@ -389,7 +389,7 @@ export default function AssignmentResultsPage() {
                       {qr.selectedIndex !== -1 && (
                         <span>
                           Your answer:{" "}
-                          <span className={cn("font-medium", qr.isCorrect ? "text-emerald-400" : "text-red-400")}>
+                          <span className={cn("font-medium", qr.isCorrect ? "text-success" : "text-danger")}>
                             {String.fromCharCode(65 + qr.selectedIndex)}
                           </span>
                         </span>
@@ -397,7 +397,7 @@ export default function AssignmentResultsPage() {
                       {!qr.isCorrect && qr.correctIndex >= 0 && (
                         <span>
                           Correct answer:{" "}
-                          <span className="font-medium text-emerald-400">
+                          <span className="font-medium text-success">
                             {String.fromCharCode(65 + qr.correctIndex)}
                           </span>
                         </span>

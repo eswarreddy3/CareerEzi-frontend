@@ -61,9 +61,9 @@ interface BulkResult {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const DIFF_COLOR: Record<string, string> = {
-  Easy:   "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  Medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  Hard:   "bg-red-500/15 text-red-400 border-red-500/30",
+  Easy:   "chip chip-success",
+  Medium: "chip chip-warning",
+  Hard:   "chip chip-danger",
 }
 
 const DIFF_POINTS: Record<string, number> = { Easy: 20, Medium: 30, Hard: 50 }
@@ -206,7 +206,7 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                 <p className="font-mono text-[11px]">title, test_cases (array of &#123;input, expected&#125;)</p>
                 <p className="font-medium text-foreground mt-2">Optional fields:</p>
                 <p className="font-mono text-[11px]">slug, difficulty, tags, description, examples, constraints, starter_code, points</p>
-                <p className="mt-2 text-amber-400/80">Existing problems (matched by slug) are updated, not duplicated.</p>
+                <p className="mt-2 text-warning/80">Existing problems (matched by slug) are updated, not duplicated.</p>
               </div>
 
               <div className="flex gap-2 justify-between">
@@ -226,31 +226,31 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
           ) : (
             <>
               <div className="grid grid-cols-4 gap-2">
-                <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-3 text-center">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-emerald-400">{result.imported}</p>
+                <div className="info-box info-box-success p-3 text-center">
+                  <CheckCircle2 className="h-4 w-4 text-success mx-auto mb-1" />
+                  <p className="text-lg font-bold text-success">{result.imported}</p>
                   <p className="text-[11px] text-muted-foreground">New</p>
                 </div>
-                <div className="rounded-xl bg-blue-500/10 border border-blue-500/30 p-3 text-center">
-                  <RefreshCcw className="h-4 w-4 text-blue-400 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-blue-400">{result.updated}</p>
+                <div className="info-box info-box-primary p-3 text-center">
+                  <RefreshCcw className="h-4 w-4 text-primary mx-auto mb-1" />
+                  <p className="text-lg font-bold text-primary">{result.updated}</p>
                   <p className="text-[11px] text-muted-foreground">Updated</p>
                 </div>
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-center">
-                  <SkipForward className="h-4 w-4 text-amber-400 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-amber-400">{result.skipped}</p>
+                <div className="info-box info-box-warning p-3 text-center">
+                  <SkipForward className="h-4 w-4 text-warning mx-auto mb-1" />
+                  <p className="text-lg font-bold text-warning">{result.skipped}</p>
                   <p className="text-[11px] text-muted-foreground">Skipped</p>
                 </div>
-                <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-3 text-center">
-                  <AlertCircle className="h-4 w-4 text-red-400 mx-auto mb-1" />
-                  <p className="text-lg font-bold text-red-400">{result.errors}</p>
+                <div className="info-box info-box-danger p-3 text-center">
+                  <AlertCircle className="h-4 w-4 text-danger mx-auto mb-1" />
+                  <p className="text-lg font-bold text-danger">{result.errors}</p>
                   <p className="text-[11px] text-muted-foreground">Errors</p>
                 </div>
               </div>
 
               {result.error_details.length > 0 && (
-                <div className="rounded-lg bg-red-500/5 border border-red-500/20 p-3 max-h-32 overflow-y-auto space-y-1">
-                  <p className="text-xs font-medium text-red-400 mb-1">Errors:</p>
+                <div className="info-box info-box-danger p-3 max-h-32 overflow-y-auto space-y-1">
+                  <p className="text-xs font-medium text-danger mb-1">Errors:</p>
                   {result.error_details.map((e, i) => (
                     <p key={i} className="text-xs text-muted-foreground">#{e.index} {e.slug}: {e.reason}</p>
                   ))}
@@ -258,8 +258,8 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
               )}
 
               {result.skipped_problems.length > 0 && (
-                <div className="rounded-lg bg-amber-500/5 border border-amber-500/20 p-3 max-h-28 overflow-y-auto space-y-1">
-                  <p className="text-xs font-medium text-amber-400 mb-1">Skipped:</p>
+                <div className="info-box info-box-warning p-3 max-h-28 overflow-y-auto space-y-1">
+                  <p className="text-xs font-medium text-warning mb-1">Skipped:</p>
                   {result.skipped_problems.map((s, i) => (
                     <p key={i} className="text-xs text-muted-foreground">#{s.index} {s.slug}: {s.reason}</p>
                   ))}
@@ -529,7 +529,7 @@ function ProblemFormModal({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Example {i + 1}</span>
                   {form.examples.length > 1 && (
-                    <button onClick={() => removeExample(i)} className="text-muted-foreground hover:text-red-400 transition-colors">
+                    <button onClick={() => removeExample(i)} className="text-muted-foreground hover:text-danger transition-colors">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
@@ -620,7 +620,7 @@ function ProblemFormModal({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-muted-foreground">Test Case {i + 1}</span>
                     {form.test_cases.length > 1 && (
-                      <button onClick={() => removeTestCase(i)} className="text-muted-foreground hover:text-red-400 transition-colors">
+                      <button onClick={() => removeTestCase(i)} className="text-muted-foreground hover:text-danger transition-colors">
                         <X className="h-3.5 w-3.5" />
                       </button>
                     )}
@@ -693,8 +693,8 @@ function ProblemRow({
       {/* Difficulty dot */}
       <div className={cn(
         "w-2 h-2 rounded-full shrink-0",
-        problem.difficulty === "Easy" ? "bg-emerald-400" :
-        problem.difficulty === "Medium" ? "bg-amber-400" : "bg-red-400"
+        problem.difficulty === "Easy" ? "bg-success" :
+        problem.difficulty === "Medium" ? "bg-warning" : "bg-danger"
       )} />
 
       {/* Title + slug */}
@@ -738,7 +738,7 @@ function ProblemRow({
         <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 w-8 p-0">
           <Pencil className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={onDelete} className="h-8 w-8 p-0 hover:text-red-400">
+        <Button variant="ghost" size="sm" onClick={onDelete} className="h-8 w-8 p-0 hover:text-danger">
           <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -833,9 +833,9 @@ export default function CodingProblemsAdminPage() {
           <h1 className="text-2xl font-bold text-foreground font-serif">Coding Problems</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {counts.total} problems &mdash;{" "}
-            <span className="text-emerald-400">{counts.easy} Easy</span>,{" "}
-            <span className="text-amber-400">{counts.medium} Medium</span>,{" "}
-            <span className="text-red-400">{counts.hard} Hard</span>
+            <span className="text-success">{counts.easy} Easy</span>,{" "}
+            <span className="text-warning">{counts.medium} Medium</span>,{" "}
+            <span className="text-danger">{counts.hard} Hard</span>
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -972,7 +972,7 @@ export default function CodingProblemsAdminPage() {
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-danger hover:bg-danger/90 text-white"
             >
               {deleting ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
               Delete

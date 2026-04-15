@@ -41,22 +41,22 @@ function fmtDayHeader(dateStr: string) {
   return d.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })
 }
 
-const DIFF_COLORS: Record<string, string> = { Easy: "#10B981", Medium: "#F59E0B", Hard: "#EF4444" }
-const BAR_COLORS = ["#8B5CF6", "#3B82F6", "#F59E0B", "#EC4899", "#10B981", "#06B6D4"]
+const DIFF_COLORS: Record<string, string> = { Easy: "var(--success)", Medium: "var(--warning)", Hard: "var(--danger)" }
+const BAR_COLORS = ["var(--coding)", "var(--primary)", "var(--warning)", "var(--coral)", "var(--success)", "var(--streak)"]
 
 function ActivityIcon({ type, details }: { type: string; details: Record<string, unknown> }) {
   if (type === "mcq") {
     return details.is_correct
-      ? <CheckCircle className="h-4 w-4 text-emerald-400" />
-      : <XCircle className="h-4 w-4 text-red-400" />
+      ? <CheckCircle className="h-4 w-4 text-success" />
+      : <XCircle className="h-4 w-4 text-danger" />
   }
   if (type === "coding") {
     return (details.status as string) === "accepted"
-      ? <CheckCircle className="h-4 w-4 text-emerald-400" />
-      : <Code2 className="h-4 w-4 text-orange-400" />
+      ? <CheckCircle className="h-4 w-4 text-success" />
+      : <Code2 className="h-4 w-4 text-streak" />
   }
-  if (type === "lesson") return <BookOpen className="h-4 w-4 text-blue-400" />
-  if (type === "assignment") return <FileText className="h-4 w-4 text-violet-400" />
+  if (type === "lesson") return <BookOpen className="h-4 w-4 text-primary" />
+  if (type === "assignment") return <FileText className="h-4 w-4 text-coding" />
   return <Activity className="h-4 w-4 text-muted-foreground" />
 }
 
@@ -74,9 +74,9 @@ function ActivityCard({ event }: { event: ActivityEvent }) {
               MCQ — {String(d.topic)}{d.subtopic ? ` › ${String(d.subtopic)}` : ""}
             </p>
             <p className="text-xs text-muted-foreground">
-              {d.is_correct ? <span className="text-emerald-400">Correct</span> : <span className="text-red-400">Wrong</span>}
+              {d.is_correct ? <span className="text-success">Correct</span> : <span className="text-danger">Wrong</span>}
               {typeof d.points_earned === "number" && d.points_earned > 0 && (
-                <span className="ml-1 text-amber-400">+{String(d.points_earned)} pts</span>
+                <span className="ml-1 text-warning">+{String(d.points_earned)} pts</span>
               )}
             </p>
           </>
@@ -86,13 +86,13 @@ function ActivityCard({ event }: { event: ActivityEvent }) {
             <p className="text-sm font-medium text-foreground">{String(d.problem_title)}</p>
             <p className="text-xs text-muted-foreground">
               <span className={cn(
-                d.status === "accepted" ? "text-emerald-400" :
-                d.status === "wrong_answer" ? "text-red-400" : "text-orange-400"
+                d.status === "accepted" ? "text-success" :
+                d.status === "wrong_answer" ? "text-danger" : "text-streak"
               )}>
                 {String(d.status).replace("_", " ")}
               </span>
               {" · "}{String(d.language)}{" · "}
-              <span style={{ color: DIFF_COLORS[String(d.difficulty)] ?? "#8B92A5" }}>{String(d.difficulty)}</span>
+              <span style={{ color: DIFF_COLORS[String(d.difficulty)] ?? "var(--muted-foreground)" }}>{String(d.difficulty)}</span>
             </p>
           </>
         )}
@@ -102,7 +102,7 @@ function ActivityCard({ event }: { event: ActivityEvent }) {
             <p className="text-xs text-muted-foreground">
               Lesson completed
               {typeof d.points_earned === "number" && d.points_earned > 0 && (
-                <span className="ml-1 text-amber-400">+{String(d.points_earned)} pts</span>
+                <span className="ml-1 text-warning">+{String(d.points_earned)} pts</span>
               )}
             </p>
           </>
@@ -225,7 +225,7 @@ export default function MyReportPage() {
               <Badge className="bg-primary/20 text-primary border-primary/30 gap-1">
                 <Star className="h-3 w-3" />{student.points.toLocaleString()} pts
               </Badge>
-              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 gap-1">
+              <Badge className="bg-streak/20 text-streak border-streak/30 gap-1">
                 <Flame className="h-3 w-3" />{student.streak} day streak
               </Badge>
               {student.last_active && (
@@ -241,12 +241,12 @@ export default function MyReportPage() {
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: "Points", value: student.points.toLocaleString(), icon: Star, color: "text-amber-400", bg: "bg-amber-500/15" },
-          { label: "Streak", value: `${student.streak}d`, icon: Flame, color: "text-orange-400", bg: "bg-orange-500/15" },
-          { label: "MCQ Accuracy", value: `${mcq.accuracy}%`, icon: Brain, color: "text-violet-400", bg: "bg-violet-500/15" },
-          { label: "Lessons Done", value: lessons.completed, icon: BookOpen, color: "text-blue-400", bg: "bg-blue-500/15" },
-          { label: "Problems Solved", value: coding.problems_solved, icon: Code2, color: "text-emerald-400", bg: "bg-emerald-500/15" },
-          { label: "Assignments", value: assignments.total, icon: FileText, color: "text-pink-400", bg: "bg-pink-500/15" },
+          { label: "Points", value: student.points.toLocaleString(), icon: Star, color: "text-warning", bg: "bg-warning/15" },
+          { label: "Streak", value: `${student.streak}d`, icon: Flame, color: "text-streak", bg: "bg-streak/15" },
+          { label: "MCQ Accuracy", value: `${mcq.accuracy}%`, icon: Brain, color: "text-coding", bg: "bg-coding/15" },
+          { label: "Lessons Done", value: lessons.completed, icon: BookOpen, color: "text-primary", bg: "bg-primary/15" },
+          { label: "Problems Solved", value: coding.problems_solved, icon: Code2, color: "text-success", bg: "bg-success/15" },
+          { label: "Assignments", value: assignments.total, icon: FileText, color: "text-coral", bg: "bg-coral/15" },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, scale: 0.93 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
             <GlassCard className="p-4">
@@ -277,37 +277,37 @@ export default function MyReportPage() {
             {/* MCQ */}
             <GlassCard className="min-w-0">
               <div className="flex items-center gap-2 mb-4">
-                <Brain className="h-5 w-5 text-violet-400" />
+                <Brain className="h-5 w-5 text-coding" />
                 <h3 className="font-semibold font-serif text-foreground">MCQ Performance</h3>
-                <Badge className="ml-auto bg-violet-500/20 text-violet-400 border-violet-500/30 text-xs">
+                <Badge className="ml-auto bg-coding/20 text-coding border-coding/30 text-xs">
                   {mcq.correct}/{mcq.total} correct
                 </Badge>
               </div>
               <div className="flex items-center gap-6 mb-4">
                 <div className="relative h-20 w-20 flex-shrink-0">
                   <svg className="h-20 w-20 -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#8B5CF6" strokeWidth="3"
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--coding)" strokeWidth="3"
                       strokeDasharray={`${mcq.accuracy} ${100 - mcq.accuracy}`} strokeLinecap="round" />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-sm font-bold text-violet-400">{mcq.accuracy}%</span>
+                    <span className="text-sm font-bold text-coding">{mcq.accuracy}%</span>
                   </div>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total: <span className="text-foreground font-medium">{mcq.total}</span></p>
-                  <p className="text-sm text-muted-foreground">Correct: <span className="text-emerald-400 font-medium">{mcq.correct}</span></p>
-                  <p className="text-sm text-muted-foreground">Wrong: <span className="text-red-400 font-medium">{mcq.total - mcq.correct}</span></p>
+                  <p className="text-sm text-muted-foreground">Correct: <span className="text-success font-medium">{mcq.correct}</span></p>
+                  <p className="text-sm text-muted-foreground">Wrong: <span className="text-danger font-medium">{mcq.total - mcq.correct}</span></p>
                 </div>
               </div>
               {mcq.topics.length > 0 ? (
                 <>
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Topic-wise accuracy</p>
-                  <ChartContainer config={{ accuracy: { label: "Accuracy %", color: "#8B5CF6" } }} className="h-[200px] w-full">
+                  <ChartContainer config={{ accuracy: { label: "Accuracy %", color: "var(--coding)" } }} className="h-[200px] w-full">
                     <BarChart data={mcq.topics.slice(0, 8)} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.07)" />
-                      <XAxis type="number" domain={[0, 100]} stroke="#8B92A5" fontSize={10} tickFormatter={v => `${v}%`} />
-                      <YAxis dataKey="topic" type="category" stroke="#8B92A5" fontSize={10} width={70} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis type="number" domain={[0, 100]} stroke="var(--muted-foreground)" fontSize={10} tickFormatter={v => `${v}%`} />
+                      <YAxis dataKey="topic" type="category" stroke="var(--muted-foreground)" fontSize={10} width={70} />
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <Bar dataKey="accuracy" radius={[0, 3, 3, 0]}>
                         {mcq.topics.slice(0, 8).map((_, i) => <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />)}
@@ -323,9 +323,9 @@ export default function MyReportPage() {
             {/* Coding */}
             <GlassCard className="min-w-0">
               <div className="flex items-center gap-2 mb-4">
-                <Code2 className="h-5 w-5 text-emerald-400" />
+                <Code2 className="h-5 w-5 text-success" />
                 <h3 className="font-semibold font-serif text-foreground">Coding</h3>
-                <Badge className="ml-auto bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">
+                <Badge className="ml-auto bg-success/20 text-success border-success/30 text-xs">
                   {coding.problems_solved} solved
                 </Badge>
               </div>
@@ -344,11 +344,11 @@ export default function MyReportPage() {
                   {coding.recent.map((s, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/40 text-xs">
                       {s.status === "accepted"
-                        ? <CheckCircle className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
-                        : <XCircle className="h-3.5 w-3.5 text-red-400 flex-shrink-0" />
+                        ? <CheckCircle className="h-3.5 w-3.5 text-success flex-shrink-0" />
+                        : <XCircle className="h-3.5 w-3.5 text-danger flex-shrink-0" />
                       }
                       <span className="flex-1 truncate text-foreground">{s.problem_title}</span>
-                      <span style={{ color: DIFF_COLORS[s.difficulty] ?? "#8B92A5" }} className="flex-shrink-0">{s.difficulty}</span>
+                      <span style={{ color: DIFF_COLORS[s.difficulty] ?? "var(--muted-foreground)" }} className="flex-shrink-0">{s.difficulty}</span>
                       <span className="text-muted-foreground flex-shrink-0">{s.language}</span>
                     </div>
                   ))}
@@ -363,9 +363,9 @@ export default function MyReportPage() {
             {/* Assignments */}
             <GlassCard>
               <div className="flex items-center gap-2 mb-4">
-                <FileText className="h-5 w-5 text-pink-400" />
+                <FileText className="h-5 w-5 text-coral" />
                 <h3 className="font-semibold font-serif text-foreground">Assignments</h3>
-                <Badge className="ml-auto bg-pink-500/20 text-pink-400 border-pink-500/30 text-xs">
+                <Badge className="ml-auto bg-coral/20 text-coral border-coral/30 text-xs">
                   {assignments.total} attempted · avg {assignments.avg_percentage}%
                 </Badge>
               </div>
@@ -376,7 +376,7 @@ export default function MyReportPage() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-foreground truncate max-w-[65%]">{a.module_id}</span>
                         <span className={cn("text-xs font-semibold",
-                          a.percentage >= 80 ? "text-emerald-400" : a.percentage >= 50 ? "text-amber-400" : "text-red-400"
+                          a.percentage >= 80 ? "text-success" : a.percentage >= 50 ? "text-warning" : "text-danger"
                         )}>
                           {a.correct_count}/{a.total_questions} ({a.percentage}%)
                         </span>
@@ -394,9 +394,9 @@ export default function MyReportPage() {
             {/* Course Progress */}
             <GlassCard>
               <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="h-5 w-5 text-blue-400" />
+                <BookOpen className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold font-serif text-foreground">Course Progress</h3>
-                <Badge className="ml-auto bg-blue-500/20 text-blue-400 border-blue-500/30 text-xs">
+                <Badge className="ml-auto bg-primary/20 text-primary border-primary/30 text-xs">
                   {lessons.completed} lessons done
                 </Badge>
               </div>
