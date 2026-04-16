@@ -85,7 +85,7 @@
   --danger:    #F87171;
   --coding:    #A78BFA;
   --streak:    #FB923C;
-  --coral:     var(--coral);
+  --coral:     #E8825A;
 
   --chart-1:                 #2BBDBD;
   --chart-2:                 #4ADE80;
@@ -228,6 +228,16 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
+}
+
+/* Dark mode: use brighter stops so the gradient is clearly visible */
+.dark .gradient-text {
+  background: linear-gradient(135deg, #2BBDBD 0%, #E8825A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ── Solid primary bg (replaces gradient-bg) ─────────────────────────────── */

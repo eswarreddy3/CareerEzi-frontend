@@ -127,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         {/* Stats */}
-        <div className="relative z-10 grid grid-cols-4 gap-2 pt-6 border-t border-border">
+        {/* <div className="relative z-10 grid grid-cols-4 gap-2 pt-6 border-t border-border">
           {STATS.map((s, i) => (
             <motion.div
               key={s.label}
@@ -141,7 +141,7 @@ export default function LoginPage() {
               <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
             </motion.div>
           ))}
-        </div>
+        </div> */}
       </div>
 
       {/* ── Right panel: form ── */}

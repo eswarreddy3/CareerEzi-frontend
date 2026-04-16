@@ -120,7 +120,7 @@ function MobileBottomCTA() {
         >
           <Link href="/login"
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl gradient-bg text-white font-semibold text-sm primary-glow">
-            Get Started Free <ArrowRight className="w-4 h-4" />
+            Log In <ChevronRight className="w-4 h-4" />
           </Link>
         </motion.div>
       )}
@@ -603,16 +603,6 @@ export default function LandingPage() {
                   href="/login"
                   className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
                 >
-                  Get Started Free <ArrowRight className="w-4 h-4" />
-                </Link>
-              </motion.div>
-            </MagneticWrap>
-            <MagneticWrap>
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all"
-                >
                   Log In <ChevronRight className="w-4 h-4" />
                 </Link>
               </motion.div>
@@ -620,7 +610,7 @@ export default function LandingPage() {
           </motion.div>
 
           {/* Hero stats */}
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.68, duration: 0.7 }}
@@ -641,14 +631,14 @@ export default function LandingPage() {
                 <span className="text-[10px] sm:text-xs text-muted-foreground text-center leading-tight">{stat.label}</span>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.div> */}
 
         </motion.div>
 
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}
+        {/* <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }}
           className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground/40">
           <ChevronDown className="w-5 h-5" />
-        </motion.div>
+        </motion.div> */}
       </section>
 
 
@@ -1025,7 +1015,7 @@ export default function LandingPage() {
                         href="/login"
                         className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
                       >
-                        Get Started Free <ArrowRight className="w-4 h-4" />
+                        Log In <ChevronRight className="w-4 h-4" />
                       </Link>
                     </motion.div>
                   </MagneticWrap>
