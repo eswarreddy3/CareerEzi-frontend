@@ -1195,9 +1195,22 @@ export default function LandingPage() {
 
           {/* Bottom bar */}
           <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              © 2026 <span className="text-foreground/70 font-medium">Finity Innovations</span>. All rights reserved.
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-muted-foreground">
+                © 2026 CareerEzi. All rights reserved.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Developed by{" "}
+                <a
+                  href="https://www.fynityinnovations.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-primary hover:underline transition-colors"
+                >
+                  Fynity Innovations
+                </a>
+              </p>
+            </div>
             <div className="flex items-center gap-4">
               <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                 Student Login
@@ -1221,14 +1234,34 @@ export default function LandingPage() {
 
 // ─── Contact Form (extracted to avoid hook-in-callback issues) ─────────────────
 function ContactForm() {
-  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
+  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleContact = (e: React.FormEvent) => {
+  const handleContact = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 4000)
-    setContactForm({ name: "", email: "", message: "" })
+    setLoading(true)
+    setError("")
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contact/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || "Something went wrong. Please try again.")
+      } else {
+        setSubmitted(true)
+        setContactForm({ name: "", email: "", phone: "", message: "" })
+        setTimeout(() => setSubmitted(false), 5000)
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -1250,12 +1283,22 @@ function ContactForm() {
         </div>
       </div>
       <div className="space-y-2">
+        <label className="text-sm text-muted-foreground font-medium">Phone Number <span className="text-muted-foreground/50">(optional)</span></label>
+        <input type="tel" value={contactForm.phone}
+          onChange={(e) => setContactForm((p) => ({ ...p, phone: e.target.value }))}
+          placeholder="+91 98765 43210"
+          className="w-full bg-secondary/40 border border-border rounded-xl px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" />
+      </div>
+      <div className="space-y-2">
         <label className="text-sm text-muted-foreground font-medium">Message</label>
         <textarea required rows={4} value={contactForm.message}
           onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
           placeholder="Tell us about your college and how we can help..."
           className="w-full bg-secondary/40 border border-border rounded-xl px-4 py-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none" />
       </div>
+      {error && (
+        <p className="text-sm text-red-400 text-center">{error}</p>
+      )}
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div key="ok" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
@@ -1265,9 +1308,9 @@ function ContactForm() {
           </motion.div>
         ) : (
           <motion.button key="btn" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            type="submit" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
-            className="w-full py-3.5 rounded-xl gradient-bg text-white font-bold hover:brightness-110 transition-all primary-glow flex items-center justify-center gap-2">
-            Send Message <ArrowRight className="w-4 h-4" />
+            type="submit" disabled={loading} whileHover={{ scale: loading ? 1 : 1.01 }} whileTap={{ scale: loading ? 1 : 0.98 }}
+            className="w-full py-3.5 rounded-xl gradient-bg text-white font-bold hover:brightness-110 transition-all primary-glow flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+            {loading ? "Sending..." : <><span>Send Message</span> <ArrowRight className="w-4 h-4" /></>}
           </motion.button>
         )}
       </AnimatePresence>
