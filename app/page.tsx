@@ -791,8 +791,8 @@ export default function LandingPage() {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1920&q=75&auto=format&fit=crop')" }}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-transparent to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/15" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/80" />
         </div>
 
         <Orb className="w-[500px] h-[500px] bg-violet-500/12 -top-32 -left-24 z-[1]" />
@@ -1401,26 +1401,25 @@ export default function LandingPage() {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1920&q=75&auto=format&fit=crop')" }}
           />
-          <div className="absolute inset-0 bg-background/85" />
+          <div className="absolute inset-0 bg-black/62" />
         </div>
-        <Orb className="w-[500px] h-[500px] bg-cyan-500/8 left-1/4 top-0" />
         <div className="max-w-4xl mx-auto relative z-10 text-center">
           <FadeIn>
             <motion.div
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 200 }}
-              className="glass-card rounded-3xl border border-primary/20 p-8 sm:p-14"
+              className="rounded-3xl p-8 sm:p-14"
             >
-              <div className="text-primary/40 text-6xl font-serif leading-none mb-4 select-none">"</div>
-              <p className="text-xl sm:text-2xl md:text-3xl font-semibold font-serif leading-snug text-foreground/90">
+              <div className="text-primary text-6xl font-serif leading-none mb-4 select-none drop-shadow-lg">"</div>
+              <p className="text-xl sm:text-2xl md:text-3xl font-semibold font-serif leading-snug text-white drop-shadow-lg">
                 The difference between a student who gets placed and one who doesn't is not talent.
                 It's{" "}
                 <span className="gradient-text">preparation with the right system.</span>
               </p>
               <div className="mt-8 flex items-center justify-center gap-3">
-                <div className="w-8 h-px bg-border" />
-                <span className="text-sm text-muted-foreground">CareerEzi Mission</span>
-                <div className="w-8 h-px bg-border" />
+                <div className="w-8 h-px bg-white/30" />
+                <span className="text-sm text-white/70">CareerEzi Mission</span>
+                <div className="w-8 h-px bg-white/30" />
               </div>
             </motion.div>
           </FadeIn>
@@ -1632,84 +1631,82 @@ export default function LandingPage() {
 
       {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
-        {/* Background image */}
+        {/* Background image — dark gradient so white text always readable */}
         <div className="absolute inset-0 z-0">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920&q=75&auto=format&fit=crop')" }}
           />
-          <div className="absolute inset-0 bg-background/88" />
+          {/* layered dark overlay: centre stays lighter to see the image, edges go dark */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
         </div>
-        <Orb className="w-[600px] h-[600px] bg-cyan-500/10 left-1/4 top-0" />
+
         <div className="max-w-4xl mx-auto relative z-10 text-center">
           <FadeIn>
-            <motion.div
-              className="glass-card rounded-3xl border border-primary/20 p-10 sm:p-16 relative overflow-hidden"
-            >
-              <div className="absolute inset-0 opacity-[0.04]"
-                style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-              <div className="relative z-10">
-                {/* Logo in CTA */}
+            <div className="p-10 sm:p-16">
+              {/* Logo */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, type: "spring", stiffness: 220, damping: 18 }}
+                className="flex justify-center mb-6"
+              >
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, type: "spring", stiffness: 220, damping: 18 }}
-                  className="flex justify-center mb-6"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Logo size={56} />
-                  </motion.div>
+                  <Logo size={56} />
                 </motion.div>
+              </motion.div>
 
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs sm:text-sm mb-6 font-medium">
-                  <Rocket className="w-3.5 h-3.5" />
-                  Get Started Today
-                </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif mb-5 leading-tight">
-                  Your next batch's placement
-                  <br />
-                  record starts{" "}
-                  <span className="gradient-text">today.</span>
-                </h2>
-                <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto mb-9">
-                  Every great placement record started with one decision. Make yours today — your students are waiting.
-                </p>
-
-                {/* CTA action buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="flex flex-col sm:flex-row items-center justify-center gap-3"
-                >
-                  <MagneticWrap>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
-                      <Link
-                        href="/login"
-                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
-                      >
-                        Log In <ChevronRight className="w-4 h-4" />
-                      </Link>
-                    </motion.div>
-                  </MagneticWrap>
-                  <MagneticWrap>
-                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
-                      <button
-                        onClick={() => scrollTo("contact")}
-                        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all"
-                      >
-                        Contact Us <Mail className="w-4 h-4" />
-                      </button>
-                    </motion.div>
-                  </MagneticWrap>
-                </motion.div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/25 bg-white/10 text-white text-xs sm:text-sm mb-6 font-medium backdrop-blur-sm">
+                <Rocket className="w-3.5 h-3.5" />
+                Get Started Today
               </div>
-            </motion.div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif mb-5 leading-tight text-white drop-shadow-lg">
+                Your next batch's placement
+                <br />
+                record starts{" "}
+                <span className="gradient-text">today.</span>
+              </h2>
+
+              <p className="text-white/70 text-base sm:text-lg max-w-xl mx-auto mb-9 drop-shadow">
+                Every great placement record started with one decision. Make yours today — your students are waiting.
+              </p>
+
+              {/* CTA buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-3"
+              >
+                <MagneticWrap>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                    <Link
+                      href="/login"
+                      className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl gradient-bg text-white font-bold text-sm sm:text-base primary-glow hover:brightness-110 transition-all"
+                    >
+                      Log In <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </motion.div>
+                </MagneticWrap>
+                <MagneticWrap>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                    <button
+                      onClick={() => scrollTo("contact")}
+                      className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 text-white text-sm sm:text-base font-semibold backdrop-blur-sm transition-all"
+                    >
+                      Contact Us <Mail className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                </MagneticWrap>
+              </motion.div>
+            </div>
           </FadeIn>
         </div>
       </section>
