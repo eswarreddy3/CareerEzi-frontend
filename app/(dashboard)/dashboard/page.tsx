@@ -36,6 +36,38 @@ interface DashboardData {
     details: Record<string, any> | null
     created_at: string
   }[]
+  mcq_week_count: number
+  mcq_accuracy: number
+  best_assignment_pct: number
+  lesson_week_count: number
+  course_progress: CourseProgress[]
+}
+
+interface LeaderboardEntry {
+  rank: number
+  id: number
+  name: string
+  points: number
+  streak: number
+  avatar?: string
+  is_current_user: boolean
+}
+
+interface CourseProgress {
+  course_id: string
+  course_title: string
+  completed: number
+  total: number
+  percentage: number
+}
+
+interface Job {
+  id: number
+  title: string
+  company: string
+  type: string
+  deadline: string | null
+  is_active: boolean
 }
 
 function getActionMeta(action: string): { Icon: LucideIcon; color: string; bg: string } {
@@ -125,7 +157,7 @@ function LevelCard({ points }: { points: number }) {
           ) : (
             <div className="mt-2 flex items-center gap-2">
               <motion.span animate={{ scale: [1, 1.25, 1] }} transition={{ repeat: Infinity, duration: 2.5 }}>👑</motion.span>
-              <p className="text-sm font-semibold text-warning">Maximum level — You're a Legend.</p>
+              <p className="text-sm font-semibold text-warning">Maximum level — You&apos;re a Legend.</p>
             </div>
           )}
         </div>
@@ -202,9 +234,11 @@ function PlacementReadinessCard({ data }: { data: DashboardData }) {
   const streakPct  = Math.min(100, Math.round((data.streak / 30) * 100))
   const codingPct  = Math.min(100, Math.round((data.solved_count / 50) * 100))
   const basePct    = Math.min(100, Math.round((data.points / 5000) * 100))
-  const mcqPct     = Math.min(100, Math.round(basePct * 0.85))
-  const assignPct  = Math.min(100, Math.round(basePct * 0.75))
-  const modulePct  = Math.min(100, Math.round(basePct * 0.80))
+  const mcqPct     = Math.min(100, data.mcq_accuracy > 0 ? data.mcq_accuracy : Math.round(basePct * 0.85))
+  const assignPct  = Math.min(100, data.best_assignment_pct > 0 ? data.best_assignment_pct : Math.round(basePct * 0.75))
+  const modulePct  = Math.min(100, data.course_progress.length > 0
+    ? Math.round(data.course_progress.reduce((s, c) => s + c.percentage, 0) / data.course_progress.length)
+    : Math.round(basePct * 0.80))
   const overall    = Math.round(modulePct * 0.25 + mcqPct * 0.25 + codingPct * 0.20 + assignPct * 0.15 + streakPct * 0.15)
 
   const R = 52
@@ -369,27 +403,23 @@ function ActivityHeatmapCard({ data }: { data: DashboardData }) {
 }
 
 // ── College Leaderboard Card ──────────────────────────────────────────────────
-function CollegeLeaderboardCard({ data }: { data: DashboardData }) {
-  const userRank = data.rank
-  const userPts  = data.points
+function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry[] }) {
+  const top3 = leaderboard.slice(0, 3)
 
-  const students = useMemo(() => {
-    const list: { rank: number; name: string; initials: string; pts: number; isUser: boolean }[] = []
-    const names = ["Vikram K.", "Meera S.", "Kiran J.", "Arjun P.", "Sneha R.", "Dev M."]
-    for (let r = Math.max(1, userRank - 2); r <= Math.min(userRank + 3, data.total_in_college); r++) {
-      if (r === userRank) continue
-      const pts = r < userRank ? userPts + (userRank - r) * 80 : Math.max(0, userPts - (r - userRank) * 60)
-      const nm = names[(r - 1) % names.length]
-      list.push({ rank: r, name: nm, initials: nm.split(" ").map(w => w[0]).join(""), pts, isUser: false })
-    }
-    list.push({ rank: userRank, name: "You", initials: "You", pts: userPts, isUser: true })
-    return list.sort((a, b) => a.rank - b.rank).slice(0, 6)
-  }, [userRank, userPts, data.total_in_college])
+  const listStudents = useMemo(() => {
+    if (!leaderboard.length) return []
+    const idx = leaderboard.findIndex(s => s.is_current_user)
+    if (idx === -1) return leaderboard.slice(0, 6)
+    const start = Math.max(0, Math.min(idx - 2, leaderboard.length - 6))
+    return leaderboard.slice(start, start + 6)
+  }, [leaderboard])
 
-  const podiumOrder = students.length >= 3 ? [students[1], students[0], students[2]] : students
+  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3
   const podiumH = ["h-12", "h-20", "h-8"]
   const podiumLabel = ["#2", "#1", "#3"]
   const podiumColor = ["text-muted-foreground", "text-warning", "text-streak"]
+
+  const initials = (name: string) => name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
 
   return (
     <GlassCard className="h-full">
@@ -400,12 +430,12 @@ function CollegeLeaderboardCard({ data }: { data: DashboardData }) {
         <Link href="/leaderboard" className="text-xs text-primary hover:underline">View all</Link>
       </div>
 
-      {students.length >= 3 && (
+      {top3.length >= 3 && (
         <div className="flex items-end justify-center gap-2 mb-4">
           {podiumOrder.map((s, i) => (
             <div key={s.rank} className="flex flex-col items-center gap-1">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${s.isUser ? "ring-2 ring-primary bg-primary/20 text-primary" : i === 1 ? "bg-warning/20 text-warning" : "bg-secondary text-foreground"}`}>
-                {s.isUser ? "You" : s.initials}
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${s.is_current_user ? "ring-2 ring-primary bg-primary/20 text-primary" : i === 1 ? "bg-warning/20 text-warning" : "bg-secondary text-foreground"}`}>
+                {s.is_current_user ? "You" : initials(s.name)}
               </div>
               <div className={`w-12 rounded-t flex items-end justify-center pb-1 ${podiumH[i]} ${i === 1 ? "bg-warning/20" : "bg-secondary/40"}`}>
                 <span className={`text-[10px] font-bold ${podiumColor[i]}`}>{podiumLabel[i]}</span>
@@ -415,31 +445,35 @@ function CollegeLeaderboardCard({ data }: { data: DashboardData }) {
         </div>
       )}
 
-      <div className="space-y-1.5">
-        {students.map((s, i) => (
-          <motion.div key={s.rank}
-            className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${s.isUser ? "bg-primary/10 border border-primary/20" : "bg-secondary/20 hover:bg-secondary/40"} transition-colors`}
-            initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
-            <span className={`text-xs font-bold w-6 text-center ${s.rank <= 3 ? "text-warning" : "text-muted-foreground"}`}>#{s.rank}</span>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${s.isUser ? "bg-primary/20 text-primary" : "bg-secondary text-foreground"}`}>
-              {s.isUser ? "You" : s.initials}
-            </div>
-            <span className={`flex-1 text-xs font-medium truncate ${s.isUser ? "text-primary" : "text-foreground"}`}>{s.name}</span>
-            <span className="text-xs text-warning font-semibold">🔥 {s.pts.toLocaleString()}</span>
-          </motion.div>
-        ))}
-      </div>
+      {leaderboard.length === 0 ? (
+        <p className="text-xs text-muted-foreground text-center py-4">No leaderboard data yet</p>
+      ) : (
+        <div className="space-y-1.5">
+          {listStudents.map((s, i) => (
+            <motion.div key={s.rank}
+              className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${s.is_current_user ? "bg-primary/10 border border-primary/20" : "bg-secondary/20 hover:bg-secondary/40"} transition-colors`}
+              initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
+              <span className={`text-xs font-bold w-6 text-center ${s.rank <= 3 ? "text-warning" : "text-muted-foreground"}`}>#{s.rank}</span>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${s.is_current_user ? "bg-primary/20 text-primary" : "bg-secondary text-foreground"}`}>
+                {s.is_current_user ? "You" : initials(s.name)}
+              </div>
+              <span className={`flex-1 text-xs font-medium truncate ${s.is_current_user ? "text-primary" : "text-foreground"}`}>
+                {s.is_current_user ? "You" : s.name}
+              </span>
+              <span className="text-xs text-warning font-semibold">🔥 {s.points.toLocaleString()}</span>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </GlassCard>
   )
 }
 
 // ── Active Courses ────────────────────────────────────────────────────────────
-function ActiveCoursesCard() {
-  const courses = [
-    { name: "Python Programming",    sub: "Module 4 of 8 · Functions & OOP",    pct: 68, pts: 320, bar: "bg-success" },
-    { name: "SQL Fundamentals",      sub: "Module 2 of 6 · Joins & Subqueries", pct: 40, pts: 120, bar: "bg-primary" },
-    { name: "Quantitative Aptitude", sub: "Topic 5 of 10 · Time & Work",        pct: 52, pts: 210, bar: "bg-warning" },
-  ]
+function ActiveCoursesCard({ courses }: { courses: CourseProgress[] }) {
+  const barColors = ["bg-success", "bg-primary", "bg-warning"]
+  const activeCourses = courses.filter(c => c.percentage < 100).slice(0, 3)
+
   return (
     <GlassCard className="h-full">
       <div className="flex items-center justify-between mb-4">
@@ -448,42 +482,80 @@ function ActiveCoursesCard() {
         </h3>
         <Link href="/learn" className="text-xs text-primary hover:underline">All courses</Link>
       </div>
-      <div className="space-y-3">
-        {courses.map((c, i) => (
-          <motion.div key={c.name} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * i }}>
-            <Link href="/learn">
-              <div className="p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{c.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{c.sub}</p>
+      {activeCourses.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 gap-3">
+          <p className="text-sm text-muted-foreground">No courses in progress yet</p>
+          <Link href="/learn">
+            <button className="text-xs text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">
+              Browse Courses →
+            </button>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {activeCourses.map((c, i) => (
+            <motion.div key={c.course_id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * i }}>
+              <Link href="/learn">
+                <div className="p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer group">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{c.course_title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.completed} of {c.total} lessons complete</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{c.percentage}%</span>
                   </div>
-                  <span className="text-xs text-warning font-semibold ml-2 flex-shrink-0">+{c.pts} pts</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 rounded-full bg-secondary/60 overflow-hidden">
-                    <motion.div className={`h-full rounded-full ${c.bar}`}
-                      initial={{ width: 0 }} animate={{ width: `${c.pct}%` }} transition={{ duration: 1, ease: "easeOut", delay: 0.2 + i * 0.1 }} />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full bg-secondary/60 overflow-hidden">
+                      <motion.div className={`h-full rounded-full ${barColors[i % barColors.length]}`}
+                        initial={{ width: 0 }} animate={{ width: `${c.percentage}%` }} transition={{ duration: 1, ease: "easeOut", delay: 0.2 + i * 0.1 }} />
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">{c.pct}%</span>
                 </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </GlassCard>
   )
 }
 
 // ── Upcoming Drives ───────────────────────────────────────────────────────────
-function UpcomingDrivesCard({ data }: { data: DashboardData }) {
-  const base = Math.min(100, Math.round((data.points / 50)))
-  const drives = [
-    { company: "Tata Consultancy Services", abbr: "TCS", bg: "bg-primary/15 text-primary",  days: 23, ready: Math.min(100, base + 4) },
-    { company: "Infosys",                   abbr: "INF", bg: "bg-success/15 text-success",  days: 45, ready: Math.min(100, base + 11) },
-    { company: "Accenture",                 abbr: "ACC", bg: "bg-coding/15 text-coding",    days: 60, ready: Math.max(0, base - 5) },
+function UpcomingDrivesCard({ jobs, data }: { jobs: Job[]; data: DashboardData }) {
+  const base = Math.min(100, Math.round(data.points / 50))
+
+  const driveColors = [
+    "bg-primary/15 text-primary",
+    "bg-success/15 text-success",
+    "bg-coding/15 text-coding",
+    "bg-warning/15 text-warning",
   ]
+
+  const drives = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const withDeadline = jobs
+      .filter(j => j.deadline)
+      .map(j => {
+        const dl = new Date(j.deadline!)
+        dl.setHours(0, 0, 0, 0)
+        const daysAway = Math.ceil((dl.getTime() - today.getTime()) / 86400000)
+        return { ...j, daysAway }
+      })
+      .filter(j => j.daysAway > 0)
+      .sort((a, b) => a.daysAway - b.daysAway)
+      .slice(0, 3)
+
+    if (withDeadline.length > 0) return withDeadline
+
+    // Fallback: show recent jobs even without deadline
+    return jobs.slice(0, 3).map(j => ({ ...j, daysAway: null as number | null }))
+  }, [jobs])
+
+  const abbr = (company: string) =>
+    company.split(" ").slice(0, 3).map(w => w[0]).join("").toUpperCase().slice(0, 4)
+
   return (
     <GlassCard className="h-full">
       <div className="flex items-center justify-between mb-4">
@@ -492,22 +564,40 @@ function UpcomingDrivesCard({ data }: { data: DashboardData }) {
         </h3>
         <span className="text-xs bg-warning/15 text-warning px-2 py-0.5 rounded-full font-semibold">{drives.length} upcoming</span>
       </div>
-      <div className="space-y-3">
-        {drives.map((d, i) => (
-          <motion.div key={d.company} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 * i }}>
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${d.bg}`}>{d.abbr}</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{d.company}</p>
-                <p className="text-xs text-muted-foreground">⚡ {d.days} days away</p>
-              </div>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${d.ready >= 70 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
-                {d.ready}% Ready
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {drives.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 gap-3">
+          <p className="text-sm text-muted-foreground">No upcoming drives posted yet</p>
+          <Link href="/jobs">
+            <button className="text-xs text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">
+              View Jobs →
+            </button>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {drives.map((d, i) => {
+            const ready = Math.min(100, base + (i === 0 ? 4 : i === 1 ? 11 : -5 < 0 ? 0 : base - 5))
+            return (
+              <motion.div key={d.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 * i }}>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${driveColors[i % driveColors.length]}`}>
+                    {abbr(d.company)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{d.company}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {d.daysAway != null ? `⚡ ${d.daysAway} days away` : "📋 Applications open"}
+                    </p>
+                  </div>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${ready >= 70 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"}`}>
+                    {ready}% Ready
+                  </span>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
     </GlassCard>
   )
 }
@@ -515,11 +605,11 @@ function UpcomingDrivesCard({ data }: { data: DashboardData }) {
 // ── Weekly Missions ───────────────────────────────────────────────────────────
 function WeeklyMissionsCard({ data }: { data: DashboardData }) {
   const missions = [
-    { label: "Solve 3 medium problems",           done: data.solved_count >= 3 },
-    { label: "Score 80%+ on any assignment",       done: data.points >= 500 },
-    { label: "Practice 20 MCQs",                  done: data.points >= 300 },
-    { label: "Complete 1 domain component",        done: false },
-    { label: "Help a squad member (share notes)",  done: false },
+    { label: "Solve 3 coding problems",          done: data.solved_count >= 3 },
+    { label: "Score 80%+ on any assignment",      done: data.best_assignment_pct >= 80 },
+    { label: "Practice 20 MCQs this week",        done: data.mcq_week_count >= 20 },
+    { label: "Complete 1 lesson this week",       done: data.lesson_week_count >= 1 },
+    { label: "Maintain a daily streak",           done: data.streak >= 1 },
   ]
   const done = missions.filter(m => m.done).length
   const pct  = Math.round((done / missions.length) * 100)
@@ -566,27 +656,29 @@ function InsightsRow({ data }: { data: DashboardData }) {
     { label: "5 MCQs",         pts: 15, icon: "❓" },
     { label: "1 Problem",      pts: 30, icon: "💻" },
     { label: "Streak bonus",   pts: 25, icon: "🔥" },
-    { label: "Weak area",      pts: 40, icon: "⚠️" },
+    ...(data.mcq_accuracy < 70 && data.mcq_accuracy > 0
+      ? [{ label: "Weak area practice", pts: 40, icon: "⚠️" }]
+      : [{ label: "Extra credit",       pts: 20, icon: "⭐" }]),
   ]
   const totalAvail = pointItems.reduce((s, p) => s + p.pts, 0)
 
   const codingPct = Math.min(100, Math.round((data.solved_count / 50) * 100))
-  const attnLabel = codingPct < 50 ? "Coding Practice" : "Logical Reasoning"
-  const attnPct   = codingPct < 50 ? codingPct : Math.min(100, Math.round((data.points / 2000) * 65))
+  const weakerArea = codingPct <= data.mcq_accuracy ? "Coding Practice" : "MCQ Practice"
+  const weakerPct  = codingPct <= data.mcq_accuracy ? codingPct : data.mcq_accuracy
 
-  const squad = [
-    { name: "Ravi Verma", initials: "RV", activity: "Solved 2 problems today",  active: true },
-    { name: "Sneha Nair",  initials: "SN", activity: "Completed MCQ set",        active: true },
-    { name: "Arjun P.",   initials: "AP", activity: "Python module 80%",         active: true },
-    { name: "Divya K.",   initials: "DK", activity: "Not active today",          active: false },
-  ]
+  // Derived achievements from real stats
+  const achievements = useMemo(() => {
+    const list: { name: string; emoji: string; pts: number; desc: string }[] = []
+    if (data.streak >= 7)              list.push({ name: `${data.streak}-Day Streak`,    emoji: "🔥", pts: 25, desc: "Active streak" })
+    if (data.streak >= 30)             list.push({ name: "30-Day Warrior",               emoji: "⚡", pts: 100, desc: "Monthly streak" })
+    if (data.solved_count >= 1)        list.push({ name: "First Problem Solved",         emoji: "💻", pts: 30, desc: `${data.solved_count} solved total` })
+    if (data.solved_count >= 10)       list.push({ name: "10 Problems Solved",           emoji: "🧠", pts: 50, desc: "Coding milestone" })
+    if (data.best_assignment_pct >= 80) list.push({ name: "Assignment Star",             emoji: "📋", pts: 50, desc: `${data.best_assignment_pct}% best score` })
+    if (data.mcq_accuracy >= 80)       list.push({ name: "MCQ Master",                  emoji: "❓", pts: 40, desc: `${data.mcq_accuracy}% accuracy` })
+    if (list.length === 0)             list.push({ name: "Getting Started",             emoji: "🌱", pts: 0,  desc: "Keep going!" })
+    return list.slice(0, 4)
+  }, [data])
 
-  const badges = [
-    { name: "14-Day Streak Hero",       emoji: "🔥", pts: 25, when: "Today · Active" },
-    { name: "Python Intermediate",      emoji: "🐍", pts: 50, when: "2 days ago"      },
-    { name: "Perfect Score — SQL Test", emoji: "💯", pts: 30, when: "4 days ago"      },
-    { name: "First Hard Problem Solved",emoji: "⚡", pts: 40, when: "6 days ago"      },
-  ]
   const badgeGap = Math.max(0, 5000 - data.points)
 
   return (
@@ -615,61 +707,78 @@ function InsightsRow({ data }: { data: DashboardData }) {
         {/* Needs Attention */}
         <GlassCard>
           <h4 className="text-xs font-semibold text-foreground mb-3">⚠️ Needs Attention</h4>
-          <span className="inline-block px-2.5 py-1 rounded-full bg-danger/15 text-danger text-xs font-semibold mb-2">🎯 {attnLabel}</span>
+          <span className="inline-block px-2.5 py-1 rounded-full bg-danger/15 text-danger text-xs font-semibold mb-2">🎯 {weakerArea}</span>
           <motion.p className="text-3xl font-bold font-serif text-danger mb-1"
             initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.35, type: "spring" }}>
-            {attnPct}%
+            {weakerPct}%
           </motion.p>
-          <p className="text-xs text-muted-foreground mb-3">Accuracy — below your 68% average</p>
           <p className="text-xs text-muted-foreground mb-3">
-            3 students in your squad completed this week. 10 minutes of practice could push you above 70%.
+            {data.mcq_accuracy > 0
+              ? `MCQ accuracy: ${data.mcq_accuracy}% · Coding: ${codingPct}%`
+              : "Start practicing to see your accuracy"}
           </p>
-          <Link href="/practice-mcq">
+          <p className="text-xs text-muted-foreground mb-3">
+            10 minutes of focused practice can push you above 70%.
+          </p>
+          <Link href={weakerArea === "Coding Practice" ? "/coding" : "/practice-mcq"}>
             <button className="w-full py-2 rounded-lg bg-danger/15 hover:bg-danger/25 text-danger text-xs font-semibold transition-colors">
-              Practice Now · +40 pts
+              Practice Now · +{data.mcq_accuracy < 70 && data.mcq_accuracy > 0 ? 40 : 30} pts
             </button>
           </Link>
         </GlassCard>
 
-        {/* Study Squad */}
+        {/* Recent Activity */}
         <GlassCard>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-semibold text-foreground">👥 Study Squad</h4>
-            <span className="text-xs bg-success/15 text-success px-2 py-0.5 rounded-full">{squad.filter(s => s.active).length} active today</span>
+            <h4 className="text-xs font-semibold text-foreground">📋 Recent Activity</h4>
+            <span className="text-xs bg-primary/15 text-primary px-2 py-0.5 rounded-full">{data.recent_activity.length} events</span>
           </div>
-          <div className="space-y-2.5 mb-3">
-            {squad.map((s) => (
-              <div key={s.name} className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-foreground flex-shrink-0">{s.initials}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-foreground">{s.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{s.activity}</p>
-                </div>
-                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.active ? "bg-success" : "bg-muted-foreground/25"}`} />
-              </div>
-            ))}
-          </div>
-          <button className="w-full py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors">
-            ⚔️ Challenge to a Duel
-          </button>
+          {data.recent_activity.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-4 text-center">No activity yet — start learning!</p>
+          ) : (
+            <div className="space-y-2.5 mb-3">
+              {data.recent_activity.slice(0, 4).map((a) => {
+                const { Icon, color, bg } = getActionMeta(a.action)
+                const timeAgo = (() => {
+                  const diff = Date.now() - new Date(a.created_at).getTime()
+                  const mins = Math.floor(diff / 60000)
+                  if (mins < 60) return `${mins}m ago`
+                  const hrs = Math.floor(mins / 60)
+                  if (hrs < 24) return `${hrs}h ago`
+                  return `${Math.floor(hrs / 24)}d ago`
+                })()
+                return (
+                  <div key={a.id} className="flex items-center gap-2.5">
+                    <div className={`w-7 h-7 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`h-3.5 w-3.5 ${color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{a.action}</p>
+                      <p className="text-[10px] text-muted-foreground">{timeAgo}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </GlassCard>
 
-        {/* Recent Badges */}
+        {/* Achievements */}
         <GlassCard>
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-xs font-semibold text-foreground">🏅 Recent Badges</h4>
-            <span className="text-xs text-primary cursor-pointer hover:underline">All badges</span>
+            <h4 className="text-xs font-semibold text-foreground">🏅 Achievements</h4>
+            <span className="text-xs text-primary cursor-pointer hover:underline">{achievements.length} earned</span>
           </div>
           <div className="space-y-2.5 mb-3">
-            {badges.map((b) => (
+            {achievements.map((b, i) => (
               <motion.div key={b.name} className="flex items-center gap-2.5"
-                initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
+                initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }}>
                 <span className="text-lg flex-shrink-0">{b.emoji}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-foreground truncate">{b.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{b.when}</p>
+                  <p className="text-[10px] text-muted-foreground">{b.desc}</p>
                 </div>
-                <span className="text-xs text-success font-semibold">+{b.pts}</span>
+                {b.pts > 0 && <span className="text-xs text-success font-semibold">+{b.pts}</span>}
               </motion.div>
             ))}
           </div>
@@ -688,17 +797,25 @@ function InsightsRow({ data }: { data: DashboardData }) {
 export default function DashboardPage() {
   const { user, updateUser } = useAuthStore()
   const [data, setData] = useState<DashboardData | null>(null)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.get("/student/dashboard")
-      .then((res) => {
-        setData(res.data)
+    Promise.all([
+      api.get("/student/dashboard"),
+      api.get("/student/leaderboard?scope=college"),
+      api.get("/jobs/"),
+    ])
+      .then(([dashRes, lbRes, jobsRes]) => {
+        setData(dashRes.data)
+        setLeaderboard(lbRes.data)
+        setJobs(jobsRes.data)
         updateUser({
-          points: res.data.points,
-          streak: res.data.streak,
-          college_name: res.data.college_name ?? undefined,
-          college_logo_url: res.data.college_logo_url ?? undefined,
+          points: dashRes.data.points,
+          streak: dashRes.data.streak,
+          college_name: dashRes.data.college_name ?? undefined,
+          college_logo_url: dashRes.data.college_logo_url ?? undefined,
         })
       })
       .catch(() => toast.error("Failed to load dashboard"))
@@ -723,10 +840,10 @@ export default function DashboardPage() {
     : 0
 
   const STAT_CARDS = [
-    { title: "Readiness Score", value: readinessScore,        prefix: "",  suffix: "",       icon: Target, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-    { title: "Total Points",    value: data?.points ?? 0,     prefix: "",  suffix: "",       icon: Star,   color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
-    { title: "Day Streak",      value: data?.streak ?? 0,     prefix: "",  suffix: " days",  icon: Flame,  color: "text-streak",  bg: "bg-streak/10",  border: "border-streak/20"  },
-    { title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "", suffix: "",      icon: Code2,  color: "text-coding",  bg: "bg-coding/10",  border: "border-coding/20"  },
+    { title: "Readiness Score", value: readinessScore,          prefix: "",  suffix: "",       icon: Target, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+    { title: "Total Points",    value: data?.points ?? 0,       prefix: "",  suffix: "",       icon: Star,   color: "text-warning", bg: "bg-warning/10", border: "border-warning/20" },
+    { title: "Day Streak",      value: data?.streak ?? 0,       prefix: "",  suffix: " days",  icon: Flame,  color: "text-streak",  bg: "bg-streak/10",  border: "border-streak/20"  },
+    { title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "",  suffix: "",       icon: Code2,  color: "text-coding",  bg: "bg-coding/10",  border: "border-coding/20"  },
   ]
 
   return (
@@ -829,7 +946,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
           <PlacementReadinessCard data={data} />
           <ActivityHeatmapCard data={data} />
-          <CollegeLeaderboardCard data={data} />
+          <CollegeLeaderboardCard leaderboard={leaderboard} />
         </motion.div>
       )}
 
@@ -837,8 +954,8 @@ export default function DashboardPage() {
       {data && (
         <motion.div className="grid grid-cols-1 lg:grid-cols-2 gap-5"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <ActiveCoursesCard />
-          <UpcomingDrivesCard data={data} />
+          <ActiveCoursesCard courses={data.course_progress} />
+          <UpcomingDrivesCard jobs={jobs} data={data} />
         </motion.div>
       )}
 
