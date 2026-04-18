@@ -96,91 +96,102 @@ function AnimatedNumber({ value }: { value: number }) {
   return <span>{display}</span>
 }
 
-// ── XP Level card ─────────────────────────────────────────────────────────────
-function LevelCard({ points }: { points: number }) {
-  const { current, next, progressPct, pointsNeeded } = getLevelProgress(points)
-  const R = 48
+// ── Combined Hero + XP Level card ────────────────────────────────────────────
+function HeroLevelCard({ firstName, collegeName, data, rank }: { firstName: string; collegeName?: string; data: DashboardData; rank: number }) {
+  const { current, next, progressPct, pointsNeeded } = getLevelProgress(data.points)
+  const R = 38
   const circumference = 2 * Math.PI * R
+  const shield = getShield(data.points)
 
   return (
-    <GlassCard className="relative overflow-hidden">
-      <div className="absolute -top-14 -right-14 w-56 h-56 rounded-full opacity-20 blur-3xl pointer-events-none" style={{ background: current.barColor }} />
-      <div className="absolute -bottom-12 -left-12 w-40 h-40 rounded-full opacity-10 blur-2xl pointer-events-none" style={{ background: current.barColor }} />
-      <motion.div className="absolute top-0 left-0 h-0.5 w-full"
-        style={{ background: `linear-gradient(90deg, transparent, ${current.barColor}80, transparent)` }}
-        initial={{ x: "-100%" }} animate={{ x: "100%" }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 5 }} />
-      <div className="flex flex-col sm:flex-row items-center gap-6">
+    <GlassCard className="h-full p-5 flex flex-col justify-between border-l-4 border-l-primary">
+      {/* ── Top: greeting + badges ── */}
+      <div>
+        <motion.h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground leading-tight"
+          initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+          {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening" })()},{" "}
+          <span className="gradient-text">{firstName}</span> 👋
+        </motion.h1>
+
+        {/* ── Single row: college + rank + active days ── */}
+        <motion.div className="flex items-center gap-2 flex-wrap mt-3"
+          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          {collegeName && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-full bg-primary/20 text-primary border-2 border-primary/40">
+              🏫 {collegeName}
+            </span>
+          )}
+          {rank > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-warning/15 text-warning border border-warning/30">
+              🏆 Rank #{rank}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-success/15 text-success border border-success/30">
+            📅 {data.active_days?.length ?? 0} active days
+          </span>
+          {data.solved_count > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-coding/15 text-coding border border-coding/30">
+              💻 {data.solved_count} solved
+            </span>
+          )}
+        </motion.div>
+      </div>
+
+      {/* ── Bottom: XP ring + level ── */}
+      <motion.div className="flex items-center gap-4 mt-4 pt-4 border-t border-border"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
         <div className="relative flex-shrink-0">
-          <svg width="120" height="120" className="-rotate-90">
-            <circle cx="60" cy="60" r={R} fill="none" stroke="currentColor" className="text-secondary/80" strokeWidth="9" />
-            <motion.circle cx="60" cy="60" r={R} fill="none" stroke={current.barColor} strokeWidth="9" strokeLinecap="round"
+          <svg width="96" height="96" className="-rotate-90">
+            <circle cx="48" cy="48" r={R} fill="none" stroke="currentColor" className="text-secondary/80" strokeWidth="7" />
+            <motion.circle cx="48" cy="48" r={R} fill="none" stroke={current.barColor} strokeWidth="7" strokeLinecap="round"
               strokeDasharray={circumference}
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: circumference - (progressPct / 100) * circumference }}
-              transition={{ duration: 1.4, ease: "easeOut", delay: 0.35 }}
-              style={{ filter: `drop-shadow(0 0 8px ${current.barColor}cc)` }}
+              transition={{ duration: 1.4, ease: "easeOut", delay: 0.4 }}
+              style={{ filter: `drop-shadow(0 0 6px ${current.barColor}aa)` }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <motion.span className="text-3xl leading-none" animate={{ rotate: [0, -12, 12, -6, 6, 0] }} transition={{ delay: 0.65, duration: 0.7 }}>
+            <motion.span className="text-2xl leading-none" animate={{ rotate: [0, -12, 12, -6, 6, 0] }} transition={{ delay: 0.7, duration: 0.7 }}>
               {current.emoji}
             </motion.span>
-            <span className="text-[10px] text-muted-foreground mt-1">Lv.{current.level}</span>
+            <span className="text-[9px] text-muted-foreground mt-0.5">Lv.{current.level}</span>
           </div>
         </div>
-        <div className="flex-1 min-w-0 text-center sm:text-left">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Your Level</p>
-          <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-            <p className={`text-3xl font-bold font-serif leading-tight ${current.color}`}>{current.name}</p>
-            {(() => {
-              const shield = getShield(points)
-              if (shield.tier === 0) return null
-              return (
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border"
-                  style={{ background: `linear-gradient(135deg, ${shield.gradientFrom}20, ${shield.gradientTo}15)`, borderColor: `${shield.gradientFrom}50`, color: shield.gradientFrom, boxShadow: `0 0 8px ${shield.glowColor}` }}>
-                  {shield.emoji} {shield.name}
-                </span>
-              )
-            })()}
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Your Level</p>
+          <div className="flex items-center gap-2 flex-wrap mt-0.5">
+            <p className={`text-2xl font-bold font-serif ${current.color}`}>{current.name}</p>
+            {shield.tier > 0 && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border"
+                style={{ borderColor: `${shield.gradientFrom}50`, color: shield.gradientFrom, background: `${shield.gradientFrom}18` }}>
+                {shield.emoji} {shield.name}
+              </span>
+            )}
           </div>
-          <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-1">
-            <span className="text-2xl font-bold font-serif text-foreground"><AnimatedNumber value={points} /></span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-xl font-bold font-serif text-foreground"><AnimatedNumber value={data.points} /></span>
             <span className="text-sm text-muted-foreground">XP</span>
           </div>
           {next ? (
-            <div className="mt-3 space-y-1.5">
-              <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
-                <motion.div className="h-full rounded-full relative overflow-hidden"
-                  style={{ background: `linear-gradient(90deg, ${current.barColor}80, ${current.barColor})` }}
-                  initial={{ width: 0 }} animate={{ width: `${progressPct}%` }} transition={{ duration: 1.2, ease: "easeOut", delay: 0.4 }}>
-                  <motion.div className="absolute inset-0 bg-white/20"
-                    initial={{ x: "-100%" }} animate={{ x: "200%" }}
-                    transition={{ duration: 1.5, delay: 1.5, ease: "easeInOut" }} />
-                </motion.div>
+            <div className="mt-2 space-y-1">
+              <div className="h-1.5 rounded-full bg-secondary/60 overflow-hidden">
+                <motion.div className="h-full rounded-full" style={{ background: current.barColor }}
+                  initial={{ width: 0 }} animate={{ width: `${progressPct}%` }} transition={{ duration: 1.2, ease: "easeOut", delay: 0.45 }} />
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{progressPct}% complete</span>
-                <span><span style={{ color: next.barColor }}>{next.emoji} {next.name}</span><span className="opacity-60"> in {pointsNeeded} pts</span></span>
+                <span>{progressPct}%</span>
+                <span style={{ color: next.barColor }}>{next.emoji} {next.name} · {pointsNeeded} pts</span>
               </div>
             </div>
           ) : (
-            <div className="mt-2 flex items-center gap-2">
+            <div className="flex items-center gap-1.5 mt-1">
               <motion.span animate={{ scale: [1, 1.25, 1] }} transition={{ repeat: Infinity, duration: 2.5 }}>👑</motion.span>
-              <p className="text-sm font-semibold text-warning">Maximum level — You&apos;re a Legend.</p>
+              <p className="text-sm font-semibold text-warning">Legend.</p>
             </div>
           )}
         </div>
-        {next && (
-          <div className="hidden lg:flex flex-col items-center px-5 py-4 rounded-2xl border flex-shrink-0"
-            style={{ borderColor: `${current.barColor}40`, background: `linear-gradient(135deg, ${current.barColor}12, ${current.barColor}06)` }}>
-            <Zap className="h-4 w-4 mb-1" style={{ color: current.barColor }} />
-            <p className="text-[10px] text-muted-foreground">Next up</p>
-            <p className="text-2xl mt-0.5">{next.emoji}</p>
-            <p className="text-xs font-semibold mt-0.5" style={{ color: next.barColor }}>{next.name}</p>
-          </div>
-        )}
-      </div>
+      </motion.div>
     </GlassCard>
   )
 }
@@ -350,24 +361,22 @@ function ActivityHeatmapCard({ data }: { data: DashboardData }) {
   }).length, [data.activity_map]) // eslint-disable-line
 
   const cellColor = (count: number) => {
-    if (count === 0) return "bg-secondary/40"
-    if (count === 1) return "bg-success/25"
-    if (count === 2) return "bg-success/45"
-    if (count <= 4) return "bg-success/65"
+    if (count === 0) return "bg-muted-foreground/20"
+    if (count === 1) return "bg-success/50"
+    if (count === 2) return "bg-success/70"
+    if (count <= 4) return "bg-success/90"
     return "bg-success"
   }
 
-  const barGradient = (val: number) => {
-    const pct = (val / maxW) * 100
-    if (pct >= 75) return "bg-gradient-to-t from-success to-primary"
-    if (pct >= 40) return "bg-gradient-to-t from-primary/60 to-primary"
-    return "bg-gradient-to-t from-primary/30 to-primary/50"
+  const barColor = (i: number) => {
+    const colors = ["bg-primary", "bg-success", "bg-warning", "bg-coding", "bg-streak", "bg-coral", "bg-primary", "bg-success"]
+    return colors[i % colors.length]
   }
 
   const miniStats = [
-    { label: "Current Streak", value: data.streak,         icon: "🔥", colorClass: "text-streak",   bgClass: "bg-streak/12 border border-streak/20"   },
-    { label: "Best Streak",    value: data.longest_streak, icon: "⚡", colorClass: "text-warning",  bgClass: "bg-warning/12 border border-warning/20"  },
-    { label: "Days Active",    value: activeCount,         icon: "📅", colorClass: "text-primary",  bgClass: "bg-primary/12 border border-primary/20"  },
+    { label: "Current Streak", value: data.streak,         icon: "🔥", colorClass: "text-streak",   bgClass: "bg-streak/20 border border-streak/30"   },
+    { label: "Best Streak",    value: data.longest_streak, icon: "⚡", colorClass: "text-warning",  bgClass: "bg-warning/20 border border-warning/30"  },
+    { label: "Days Active",    value: activeCount,         icon: "📅", colorClass: "text-primary",  bgClass: "bg-primary/20 border border-primary/30"  },
   ]
 
   return (
@@ -408,7 +417,7 @@ function ActivityHeatmapCard({ data }: { data: DashboardData }) {
           {weeklyData.map((val, i) => (
             <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5" style={{ height: "100%" }}>
               <motion.div
-                className={`w-full rounded-sm transition-opacity cursor-default hover:opacity-90 ${barGradient(val)}`}
+                className={`w-full rounded-sm transition-opacity cursor-default hover:opacity-80 ${barColor(i)}`}
                 style={{ height: `${Math.max(4, (val / maxW) * 100)}%` }}
                 initial={{ scaleY: 0, originY: "100%" }}
                 animate={{ scaleY: 1 }}
@@ -460,6 +469,37 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
 
   const initials = (name: string) => name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
 
+  const Avatar = ({ student, size, ringClass, bgClass, textClass }: {
+    student: LeaderboardEntry
+    size: "sm" | "md"
+    ringClass: string
+    bgClass: string
+    textClass: string
+  }) => {
+    const wh = size === "md" ? "w-10 h-10" : "w-7 h-7"
+    const textSize = size === "md" ? "text-xs" : "text-[9px]"
+    if (student.is_current_user) {
+      return (
+        <div className={`${wh} rounded-full flex items-center justify-center font-bold flex-shrink-0 ${ringClass} ${bgClass} ${textClass} ${textSize}`}>
+          You
+        </div>
+      )
+    }
+    if (student.avatar) {
+      return (
+        <img src={student.avatar} alt={student.name}
+          className={`${wh} rounded-full object-cover flex-shrink-0 ${ringClass}`}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+        />
+      )
+    }
+    return (
+      <div className={`${wh} rounded-full flex items-center justify-center font-bold flex-shrink-0 ${ringClass} ${bgClass} ${textClass} ${textSize}`}>
+        {initials(student.name)}
+      </div>
+    )
+  }
+
   return (
     <GlassCard className="h-full">
       <div className="flex items-center justify-between mb-3">
@@ -470,14 +510,17 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
       </div>
 
       {top3.length >= 3 && (
-        <div className="flex items-end justify-center gap-2 mb-4">
+        <div className="flex items-end justify-center gap-3 mb-4">
           {podiumOrder.map((s, i) => (
             <div key={s.rank} className="flex flex-col items-center gap-1">
-              <span className="text-sm">{podiumMedal[i]}</span>
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold ${s.is_current_user ? "ring-2 ring-primary bg-primary/20 text-primary shadow-lg shadow-primary/25" : podiumAvatarStyle[i]}`}>
-                {s.is_current_user ? "You" : initials(s.name)}
-              </div>
-              <div className={`w-12 rounded-t flex items-end justify-center pb-1 bg-gradient-to-t border-x border-t ${podiumH[i]} ${podiumGrad[i]}`}>
+              <span className="text-base">{podiumMedal[i]}</span>
+              <Avatar student={s} size="md"
+                ringClass={s.is_current_user ? "ring-2 ring-primary shadow-lg shadow-primary/25" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("ring")).join(" ")}
+                bgClass={s.is_current_user ? "bg-primary/20" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("bg")).join(" ")}
+                textClass={s.is_current_user ? "text-primary" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("text")).join(" ")}
+              />
+              <p className="text-[10px] text-muted-foreground font-medium truncate max-w-[60px] text-center">{s.is_current_user ? "You" : s.name.split(" ")[0]}</p>
+              <div className={`w-14 rounded-t flex items-end justify-center pb-1 bg-gradient-to-t border-x border-t ${podiumH[i]} ${podiumGrad[i]}`}>
                 <span className="text-[10px] font-bold text-muted-foreground">{podiumLabel[i]}</span>
               </div>
             </div>
@@ -493,14 +536,16 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
             <motion.div key={s.rank}
               className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${s.is_current_user ? "bg-primary/10 border border-primary/25" : `bg-secondary/20 hover:bg-secondary/40 ${rankBorderColor(s.rank)}`} transition-colors`}
               initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
-              <span className={`text-xs font-bold w-6 text-center ${s.rank === 1 ? "text-warning" : s.rank === 2 ? "text-muted-foreground" : s.rank === 3 ? "text-streak" : "text-muted-foreground/60"}`}>#{s.rank}</span>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${s.is_current_user ? "bg-primary/20 text-primary" : "bg-secondary text-foreground"}`}>
-                {s.is_current_user ? "You" : initials(s.name)}
-              </div>
+              <span className={`text-xs font-bold w-6 text-center flex-shrink-0 ${s.rank === 1 ? "text-warning" : s.rank === 2 ? "text-muted-foreground" : s.rank === 3 ? "text-streak" : "text-muted-foreground/60"}`}>#{s.rank}</span>
+              <Avatar student={s} size="sm"
+                ringClass={s.is_current_user ? "ring-1 ring-primary" : "ring-1 ring-border"}
+                bgClass={s.is_current_user ? "bg-primary/20" : "bg-secondary"}
+                textClass={s.is_current_user ? "text-primary" : "text-foreground"}
+              />
               <span className={`flex-1 text-xs font-medium truncate ${s.is_current_user ? "text-primary" : "text-foreground"}`}>
                 {s.is_current_user ? "You" : s.name}
               </span>
-              <span className="text-xs text-warning font-semibold">⭐ {s.points.toLocaleString()}</span>
+              <span className="text-xs text-warning font-semibold flex-shrink-0">⭐ {s.points.toLocaleString()}</span>
             </motion.div>
           ))}
         </div>
@@ -572,10 +617,10 @@ function UpcomingDrivesCard({ jobs, data }: { jobs: Job[]; data: DashboardData }
   const base = Math.min(100, Math.round(data.points / 50))
 
   const driveStyles = [
-    { bg: "bg-gradient-to-br from-primary/25 to-primary/10", text: "text-primary", border: "border border-primary/25", glow: "shadow-primary/15" },
-    { bg: "bg-gradient-to-br from-success/25 to-success/10", text: "text-success", border: "border border-success/25", glow: "shadow-success/15" },
-    { bg: "bg-gradient-to-br from-coding/25 to-coding/10",   text: "text-coding",  border: "border border-coding/25",  glow: "shadow-coding/15"  },
-    { bg: "bg-gradient-to-br from-warning/25 to-warning/10", text: "text-warning", border: "border border-warning/25", glow: "shadow-warning/15" },
+    { bg: "bg-primary/20",  text: "text-primary", border: "border border-primary/30" },
+    { bg: "bg-success/20",  text: "text-success", border: "border border-success/30" },
+    { bg: "bg-coding/20",   text: "text-coding",  border: "border border-coding/30"  },
+    { bg: "bg-warning/20",  text: "text-warning", border: "border border-warning/30" },
   ]
 
   const drives = useMemo(() => {
@@ -627,7 +672,7 @@ function UpcomingDrivesCard({ jobs, data }: { jobs: Job[]; data: DashboardData }
             return (
               <motion.div key={d.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 * i }}>
                 <div className={`flex items-center gap-3 p-3 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-all hover:shadow-md ${st.glow}`}>
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${st.bg} ${st.text} ${st.border} shadow-sm`}>
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${st.bg} ${st.text} ${st.border}`}>
                     {abbr(d.company)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -898,72 +943,53 @@ export default function DashboardPage() {
   const STAT_CARDS = [
     {
       title: "Readiness Score", value: readinessScore, prefix: "", suffix: "",
-      icon: Target, color: "text-primary", iconBg: "bg-gradient-to-br from-primary/25 to-primary/10",
-      cardBg: "bg-gradient-to-br from-primary/8 to-transparent", border: "border-primary/25",
-      glow: "hover:shadow-primary/20",
+      icon: Target, color: "text-primary", iconBg: "bg-primary/25",
+      cardBg: "bg-primary/[0.12]", border: "border-primary/30", glow: "hover:shadow-lg hover:shadow-primary/20",
     },
     {
       title: "Total Points", value: data?.points ?? 0, prefix: "", suffix: "",
-      icon: Star, color: "text-warning", iconBg: "bg-gradient-to-br from-warning/30 to-warning/10",
-      cardBg: "bg-gradient-to-br from-warning/8 to-transparent", border: "border-warning/25",
-      glow: "hover:shadow-warning/20",
+      icon: Star, color: "text-warning", iconBg: "bg-warning/25",
+      cardBg: "bg-warning/[0.12]", border: "border-warning/30", glow: "hover:shadow-lg hover:shadow-warning/20",
     },
     {
       title: "Day Streak", value: data?.streak ?? 0, prefix: "", suffix: " days",
-      icon: Flame, color: "text-streak", iconBg: "bg-gradient-to-br from-streak/30 to-streak/10",
-      cardBg: "bg-gradient-to-br from-streak/8 to-transparent", border: "border-streak/25",
-      glow: "hover:shadow-streak/20",
+      icon: Flame, color: "text-streak", iconBg: "bg-streak/25",
+      cardBg: "bg-streak/[0.12]", border: "border-streak/30", glow: "hover:shadow-lg hover:shadow-streak/20",
     },
     {
       title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "", suffix: "",
-      icon: Code2, color: "text-coding", iconBg: "bg-gradient-to-br from-coding/30 to-coding/10",
-      cardBg: "bg-gradient-to-br from-coding/8 to-transparent", border: "border-coding/25",
-      glow: "hover:shadow-coding/20",
+      icon: Code2, color: "text-coding", iconBg: "bg-coding/25",
+      cardBg: "bg-coding/[0.12]", border: "border-coding/30", glow: "hover:shadow-lg hover:shadow-coding/20",
     },
   ]
 
   return (
     <div className="space-y-6">
 
-      {/* ── Hero ── */}
-      <motion.div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/8 via-background to-coding/5 px-6 py-7"
-        initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-        <div className="absolute -top-16 -left-16 w-60 h-60 rounded-full bg-primary/12 blur-3xl pointer-events-none" />
-        <div className="absolute top-4 right-1/3 w-32 h-32 rounded-full bg-warning/8 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 right-8 w-52 h-52 rounded-full bg-coding/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 w-28 h-28 rounded-full bg-success/6 blur-2xl pointer-events-none" />
-        <motion.div className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent"
-          initial={{ x: "-100%" }} animate={{ x: "100%" }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear", repeatDelay: 6 }} />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <motion.h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground leading-tight"
-              initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
-              {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; })()}, <span className="gradient-text">{firstName}</span> 👋
-            </motion.h1>
-            <motion.p className="text-sm text-muted-foreground mt-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
-              {user?.college_name
-                ? `${user.college_name} · Continue your placement preparation`
-                : "Continue your placement preparation journey"}
-            </motion.p>
+      {/* ── Hero + Stat cards row ── */}
+      {data && (
+        <motion.div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch"
+          initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+          <div className="lg:col-span-3">
+            <HeroLevelCard firstName={firstName} collegeName={user?.college_name} data={data} rank={data.rank} />
           </div>
-          {data && (
-            <motion.div className="flex items-center gap-2 flex-wrap" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, type: "spring", stiffness: 220 }}>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-warning/30 bg-gradient-to-br from-warning/15 to-warning/5 shadow-sm shadow-warning/10">
-                <Star className="h-4 w-4 text-warning" />
-                <span className="text-sm font-bold text-warning">{data.points.toLocaleString()} pts</span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-streak/30 bg-gradient-to-br from-streak/15 to-streak/5 shadow-sm shadow-streak/10">
-                <motion.span className="text-lg" animate={{ scale: [1, 1.2, 1], rotate: [0, -8, 8, 0] }} transition={{ repeat: Infinity, duration: 2.5, repeatDelay: 1.5 }}>🔥</motion.span>
-                <div>
-                  <p className="text-sm font-bold text-streak leading-tight">{data.streak}-day streak</p>
-                  <p className="text-[10px] text-streak/60">Best: {data.longest_streak} days</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+          <div className="lg:col-span-2 grid grid-cols-2 gap-3">
+            {STAT_CARDS.map((s, i) => (
+              <motion.div key={s.title} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * i + 0.15 }}>
+                <GlassCard className={`h-full p-4 ${s.cardBg} border ${s.border} transition-all ${s.glow} group cursor-pointer`}>
+                  <div className={`w-9 h-9 rounded-lg ${s.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                    <s.icon className={`h-4 w-4 ${s.color}`} />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground font-medium leading-tight">{s.title}</p>
+                  <p className={`text-xl font-bold font-serif mt-0.5 ${s.color}`}>
+                    {s.prefix}<AnimatedNumber value={s.value} />{s.suffix}
+                  </p>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* ── Rank alert banner ── */}
       {data && data.rank > 1 && (
@@ -995,36 +1021,6 @@ export default function DashboardPage() {
           <QuoteBanner streak={data.streak} />
         </motion.div>
       )}
-
-      {/* ── XP Level card ── */}
-      {data && (
-        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
-          <LevelCard points={data.points} />
-        </motion.div>
-      )}
-
-      {/* ── Stat cards ── */}
-      <motion.div className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.38 } } }}>
-        {STAT_CARDS.map((s) => (
-          <motion.div key={s.title} variants={{ hidden: { opacity: 0, y: 22 }, show: { opacity: 1, y: 0 } }}>
-            <GlassCard hover className={`relative overflow-hidden border ${s.border} ${s.cardBg} transition-all hover:shadow-lg ${s.glow} group`}>
-              <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-30 blur-2xl pointer-events-none" style={{ background: `var(--${s.color.replace("text-", "")})` }} />
-              <motion.div className="absolute top-0 left-0 h-0.5 w-full opacity-60"
-                style={{ background: `linear-gradient(90deg, transparent, var(--${s.color.replace("text-", "")}), transparent)` }}
-                initial={{ x: "-100%" }} animate={{ x: "100%" }}
-                transition={{ duration: 2.5, delay: Math.random() * 2, repeat: Infinity, ease: "linear", repeatDelay: 5 }} />
-              <div className={`w-11 h-11 rounded-xl ${s.iconBg} flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform`}>
-                <s.icon className={`h-5 w-5 ${s.color}`} />
-              </div>
-              <p className="text-xs text-muted-foreground font-medium">{s.title}</p>
-              <p className={`text-2xl font-bold font-serif mt-1 ${s.color}`}>
-                {s.prefix}<AnimatedNumber value={s.value} />{s.suffix}
-              </p>
-            </GlassCard>
-          </motion.div>
-        ))}
-      </motion.div>
 
       {/* ── 3-col: Placement Readiness | Heatmap | Leaderboard ── */}
       {data && (
