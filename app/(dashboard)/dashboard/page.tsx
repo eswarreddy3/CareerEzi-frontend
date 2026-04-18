@@ -70,6 +70,13 @@ interface Job {
   is_active: boolean
 }
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ?? "http://localhost:5000"
+function resolveAvatarUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith("blob:") || url.startsWith("http")) return url
+  return `${BACKEND}${url}`
+}
+
 function getActionMeta(action: string): { Icon: LucideIcon; color: string; bg: string } {
   const a = action.toLowerCase()
   if (a.includes("lesson"))                       return { Icon: BookOpen,          color: "text-primary",  bg: "bg-primary/15" }
@@ -485,11 +492,16 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
         </div>
       )
     }
-    if (student.avatar) {
+    const avatarUrl = resolveAvatarUrl(student.avatar)
+    if (avatarUrl) {
       return (
-        <img src={student.avatar} alt={student.name}
+        <img src={avatarUrl} alt={student.name}
           className={`${wh} rounded-full object-cover flex-shrink-0 ${ringClass}`}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+          onError={(e) => {
+            const el = e.target as HTMLImageElement
+            el.style.display = "none"
+            el.nextElementSibling?.removeAttribute("style")
+          }}
         />
       )
     }
