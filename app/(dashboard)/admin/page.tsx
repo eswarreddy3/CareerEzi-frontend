@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -8,11 +8,15 @@ import { UserAvatar } from "@/components/user-avatar"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import {
+  Area, AreaChart, CartesianGrid, XAxis, YAxis,
+  Pie, PieChart, Cell, Label as ChartLabel,
+} from "recharts"
 import {
   Users, TrendingUp, Flame, Star, Mail, AlertTriangle, Loader2,
-  Crown, ArrowRight, Share2, Trophy, Zap, CheckCircle, Upload, X,
-  Filter, RefreshCw, BookOpen, Code2, ClipboardCheck,
+  Crown, ArrowRight, Share2, Trophy, CheckCircle, Upload, X,
+  BookOpen, Code2, ClipboardCheck,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
@@ -53,6 +57,8 @@ interface Analytics {
   assignment_avg_score: number
   total_assignment_attempts: number
   total_coding_submissions: number
+  weekly_trend: { week: string; active: number }[]
+  readiness_buckets: { range: string; label: string; count: number }[]
   course_completions: { avg_completion_pct: number }[]
   mcq_topic_stats: { topic: string; accuracy: number; total: number }[]
   assignment_module_stats: { module: string; pass_rate: number; attempts: number }[]
@@ -100,9 +106,15 @@ function FilterSelect({
 
 const MEDALS = ["🥇", "🥈", "🥉"]
 
+const READINESS_COLORS = ["var(--danger)", "var(--warning)", "var(--primary)", "var(--success)"]
+
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4 } }),
+}
+
+function readinessColor(i: number) {
+  return READINESS_COLORS[i % READINESS_COLORS.length]
 }
 
 export default function AdminDashboardPage() {
@@ -111,10 +123,6 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [remindingId, setRemindingId] = useState<number | null>(null)
   const [remindingAll, setRemindingAll] = useState(false)
-  const [branch, setBranch] = useState("")
-  const [section, setSection] = useState("")
-  const [passoutYear, setPassoutYear] = useState("")
-  const [days, setDays] = useState("30")
 
   const [linkedin, setLinkedin] = useState("")
   const [linkedinEmbeds, setLinkedinEmbeds] = useState(["", "", ""])
@@ -126,22 +134,13 @@ export default function AdminDashboardPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [savingLogo, setSavingLogo] = useState(false)
 
-  const analyticsQuery = useMemo(() => {
-    const params = new URLSearchParams()
-    if (branch) params.set("branch", branch)
-    if (section) params.set("section", section)
-    if (passoutYear) params.set("passout_year", passoutYear)
-    params.set("days", days)
-    return params.toString()
-  }, [branch, section, passoutYear, days])
-
   useEffect(() => {
     setLoading(true)
-    api.get(`/admin/analytics?${analyticsQuery}`)
+    api.get("/admin/analytics?days=30")
       .then((res) => setAnalytics({ inactive_students: [], inactive_count: 0, ...res.data }))
       .catch(() => toast.error("Failed to load analytics"))
       .finally(() => setLoading(false))
-  }, [analyticsQuery])
+  }, [])
 
   useEffect(() => {
     api.get("/admin/college-social").then(res => {
@@ -227,11 +226,13 @@ export default function AdminDashboardPage() {
 
   const data = {
     filter_options: { branches: [], sections: [], passout_years: [] },
+    weekly_trend: [] as Analytics["weekly_trend"],
+    readiness_buckets: [] as Analytics["readiness_buckets"],
     course_completions: [] as Analytics["course_completions"],
     mcq_topic_stats: [] as Analytics["mcq_topic_stats"],
     assignment_module_stats: [] as Analytics["assignment_module_stats"],
     engagement_delta: 0,
-    days: Number(days),
+    days: 30,
     zero_activity_count: 0,
     at_risk_count: 0,
     avg_mcq_accuracy: 0,
@@ -245,15 +246,9 @@ export default function AdminDashboardPage() {
   const avgCoursePct = data.course_completions.length
     ? Math.round(data.course_completions.reduce((sum, c) => sum + c.avg_completion_pct, 0) / data.course_completions.length)
     : 0
+  const readinessTotal = data.readiness_buckets.reduce((sum, bucket) => sum + bucket.count, 0)
   const weakestTopic = data.mcq_topic_stats[0]
   const weakestModule = data.assignment_module_stats[0]
-  const resetFilters = () => {
-    setBranch("")
-    setSection("")
-    setPassoutYear("")
-    setDays("30")
-  }
-
   const engagementRate = analytics?.engagement_rate ??
     (analytics && analytics.total_students > 0
       ? Math.round((analytics.active_this_week / analytics.total_students) * 100)
@@ -266,15 +261,6 @@ export default function AdminDashboardPage() {
       icon: Users,
       bg: "bg-primary/20",
       text: "text-primary",
-    },
-    {
-      label: `Active ${data.days}d`,
-      value: analytics?.active_this_week ?? "—",
-      icon: TrendingUp,
-      bg: "bg-success/20",
-      text: "text-success",
-      sub: `of ${analytics?.total_students ?? 0} total`,
-      progress: engagementRate,
     },
     {
       label: "Avg Streak",
@@ -292,21 +278,12 @@ export default function AdminDashboardPage() {
       text: "text-warning",
     },
     {
-      label: "Engagement Rate",
-      value: `${engagementRate}%`,
-      icon: Zap,
-      bg: "bg-coding/20",
-      text: "text-coding",
-      sub: `${data.engagement_delta >= 0 ? "+" : ""}${data.engagement_delta}% vs previous`,
-      progress: engagementRate,
-    },
-    {
-      label: "At Risk",
-      value: data.at_risk_count,
+      label: "Inactive",
+      value: analytics?.inactive_count ?? data.inactive_students.length,
       icon: AlertTriangle,
       bg: "bg-danger/20",
       text: "text-danger",
-      sub: "inactive 14+ days",
+      sub: "inactive 3+ days",
     },
   ]
 
@@ -316,8 +293,15 @@ export default function AdminDashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col xl:flex-row xl:items-start justify-between gap-4"
+        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-coding/10 p-5 shadow-2xl shadow-primary/5 flex flex-col xl:flex-row xl:items-start justify-between gap-4"
       >
+        <motion.div
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"
+          initial={{ x: "-100%" }}
+          animate={{ x: "100%" }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.04),transparent)] pointer-events-none" />
         <div>
           <h1 className="text-3xl font-bold font-serif text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
@@ -344,60 +328,20 @@ export default function AdminDashboardPage() {
               </Button>
             </Link>
           </div>
-          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border bg-card/50 p-3">
-            <div className="flex h-9 items-center gap-2 px-1 text-sm font-medium text-foreground">
-              <Filter className="h-4 w-4 text-primary" /> Filters
-            </div>
-            <FilterSelect
-              label="Period"
-              value={days}
-              onChange={setDays}
-              options={[
-                { label: "Last 7 days", value: "7" },
-                { label: "Last 30 days", value: "30" },
-                { label: "Last 90 days", value: "90" },
-                { label: "Last 180 days", value: "180" },
-              ]}
-            />
-            <FilterSelect
-              label="Branch"
-              value={branch}
-              onChange={setBranch}
-              options={[
-                { label: "All branches", value: "" },
-                ...data.filter_options.branches.map((b) => ({ label: b, value: b })),
-              ]}
-            />
-            <FilterSelect
-              label="Section"
-              value={section}
-              onChange={setSection}
-              options={[
-                { label: "All sections", value: "" },
-                ...data.filter_options.sections.map((s) => ({ label: s, value: s })),
-              ]}
-            />
-            <FilterSelect
-              label="Year"
-              value={passoutYear}
-              onChange={setPassoutYear}
-              options={[
-                { label: "All years", value: "" },
-                ...data.filter_options.passout_years.map((y) => ({ label: String(y), value: String(y) })),
-              ]}
-            />
-            <Button size="sm" variant="outline" onClick={resetFilters} className="h-9 gap-1">
-              <RefreshCw className="h-3.5 w-3.5" /> Reset
-            </Button>
-          </div>
         </div>
       </motion.div>
 
-      {/* Stats — 5 cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* Core stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <motion.div key={stat.label} custom={i} variants={cardVariants} initial="hidden" animate="visible">
-            <GlassCard className="h-full">
+          <motion.div key={stat.label} custom={i} variants={cardVariants} initial="hidden" animate="visible" whileHover={{ y: -4, scale: 1.01 }}>
+            <GlassCard className="h-full relative overflow-hidden border-primary/10 hover:border-primary/30 transition-colors">
+              <motion.div
+                className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent"
+                initial={{ x: "-100%" }}
+                animate={{ x: "100%" }}
+                transition={{ delay: i * 0.2, duration: 2.4, repeat: Infinity, repeatDelay: 5 }}
+              />
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl ${stat.bg} flex-shrink-0`}>
                   <stat.icon className={`h-5 w-5 ${stat.text}`} />
@@ -408,24 +352,32 @@ export default function AdminDashboardPage() {
                   {stat.sub && <p className="text-xs text-muted-foreground/70">{stat.sub}</p>}
                 </div>
               </div>
-              {stat.progress !== undefined && (
-                <div className="mt-3">
-                  <Progress value={stat.progress} className="h-1.5" />
-                </div>
-              )}
             </GlassCard>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">Today&apos;s Action Board</p>
+            <h2 className="text-xl font-bold font-serif text-foreground">Admin priorities</h2>
+          </div>
+          <Link href="/admin/analytics">
+            <Button variant="outline" size="sm" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+              Open Deep Analytics <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[
           {
             label: "Course Completion",
             value: `${avgCoursePct}%`,
             sub: "average across active courses",
             icon: BookOpen,
             tone: "text-primary",
+            href: "/admin/analytics#learning",
           },
           {
             label: "Weak MCQ Topic",
@@ -433,6 +385,7 @@ export default function AdminDashboardPage() {
             sub: weakestTopic ? `${weakestTopic.topic} - ${weakestTopic.total} attempts` : "no attempts yet",
             icon: AlertTriangle,
             tone: "text-danger",
+            href: "/admin/analytics#learning",
           },
           {
             label: "Assignment Gap",
@@ -440,6 +393,7 @@ export default function AdminDashboardPage() {
             sub: weakestModule ? `${weakestModule.module} - ${weakestModule.attempts} attempts` : "no attempts yet",
             icon: ClipboardCheck,
             tone: "text-warning",
+            href: "/admin/analytics#assessments",
           },
           {
             label: "Coding Activity",
@@ -447,23 +401,109 @@ export default function AdminDashboardPage() {
             sub: "submissions in selected cohort",
             icon: Code2,
             tone: "text-coding",
+            href: "/admin/analytics#coding",
           },
         ].map((item, i) => (
-          <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 + i * 0.05 }}>
-            <GlassCard className="p-4 h-full">
+          <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 + i * 0.05 }} whileHover={{ y: -3 }}>
+            <Link href={item.href}>
+              <GlassCard className="p-4 h-full relative overflow-hidden border-border/80 hover:border-primary/35 transition-colors cursor-pointer">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/0 via-primary/70 to-coding/0" />
               <div className="flex items-start gap-3">
                 <div className="rounded-lg bg-secondary/60 p-2">
                   <item.icon className={`h-4 w-4 ${item.tone}`} />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground">{item.label}</p>
                   <p className={`mt-1 text-xl font-bold font-serif ${item.tone}`}>{item.value}</p>
                   <p className="mt-1 text-xs text-muted-foreground truncate">{item.sub}</p>
                 </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground/60" />
               </div>
-            </GlassCard>
+              </GlassCard>
+            </Link>
           </motion.div>
         ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="lg:col-span-3">
+          <GlassCard className="relative h-full overflow-hidden border-primary/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-coding to-success" />
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-semibold font-serif text-foreground">Engagement Pulse</h3>
+                <p className="text-xs text-muted-foreground">Active students across the selected period</p>
+              </div>
+              <Badge variant="outline" className="border-success/30 text-success">{engagementRate}% live</Badge>
+            </div>
+            <ChartContainer config={{ active: { label: "Active Students", color: "var(--primary)" } }} className="h-[230px] w-full">
+              <AreaChart data={data.weekly_trend} margin={{ top: 8, right: 10, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="adminPulse" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.45} />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="week" tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} fontSize={11} stroke="var(--muted-foreground)" />
+                <ChartTooltip content={<ChartTooltipContent />} cursor={{ stroke: "var(--primary)", strokeDasharray: "4 3" }} />
+                <Area type="monotone" dataKey="active" stroke="var(--primary)" strokeWidth={3} fill="url(#adminPulse)" dot={{ r: 4, fill: "var(--primary)" }} activeDot={{ r: 7, strokeWidth: 2, stroke: "var(--background)" }} animationDuration={1400} />
+              </AreaChart>
+            </ChartContainer>
+          </GlassCard>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }} className="lg:col-span-2">
+          <GlassCard className="relative h-full overflow-hidden border-coding/20">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-danger via-warning to-success" />
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-semibold font-serif text-foreground">Readiness Distribution</h3>
+                <p className="text-xs text-muted-foreground">Placement bands for this cohort</p>
+              </div>
+              <Badge variant="outline" className="border-primary/30 text-primary">{readinessTotal} students</Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-[150px_1fr] gap-4 items-center">
+              <ChartContainer config={{ count: { label: "Students", color: "var(--primary)" } }} className="h-[170px] w-full">
+                <PieChart>
+                  <Pie data={data.readiness_buckets} dataKey="count" nameKey="label" innerRadius={44} outerRadius={70} paddingAngle={4} strokeWidth={0} animationDuration={1200}>
+                    {data.readiness_buckets.map((_, i) => <Cell key={i} fill={readinessColor(i)} />)}
+                    <ChartLabel
+                      content={({ viewBox }) => {
+                        const { cx, cy } = viewBox as { cx: number; cy: number }
+                        return (
+                          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+                            <tspan x={cx} dy="-4" fontSize="20" fontWeight="700" fill="var(--foreground)">{readinessTotal}</tspan>
+                            <tspan x={cx} dy="16" fontSize="10" fill="var(--muted-foreground)">total</tspan>
+                          </text>
+                        )
+                      }}
+                    />
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ChartContainer>
+              <div className="space-y-2">
+                {data.readiness_buckets.map((bucket, i) => {
+                  const pct = readinessTotal ? Math.round((bucket.count / readinessTotal) * 100) : 0
+                  return (
+                    <button key={bucket.label} type="button" className="w-full text-left rounded-lg border border-border/60 bg-secondary/20 px-3 py-2 hover:border-primary/40 hover:bg-secondary/40 transition-colors">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-medium text-foreground">{bucket.label}</span>
+                        <span className="text-xs font-bold" style={{ color: readinessColor(i) }}>{bucket.count}</span>
+                      </div>
+                      <div className="mt-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                        <motion.div className="h-full rounded-full" style={{ background: readinessColor(i) }} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: 0.25 + i * 0.08, duration: 0.8 }} />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </GlassCard>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

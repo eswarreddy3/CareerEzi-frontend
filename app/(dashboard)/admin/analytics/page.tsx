@@ -149,6 +149,12 @@ function Skeleton() {
         </div>
         <div className={`${shimmer} h-9 w-28`} />
       </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className={`${shimmer} h-[118px]`} style={{ animationDelay: `${i * 80}ms` }} />
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className={`${shimmer} h-[72px]`} style={{ animationDelay: `${i * 80}ms` }} />
@@ -246,6 +252,9 @@ export default function AdminAnalyticsPage() {
     ? Math.round(a.course_completions.reduce((s, c) => s + c.avg_completion_pct, 0) / a.course_completions.length) : 0
   const totalCodingSolved = a.coding_summary.reduce((s, d) => s + d.solved, 0)
   const maxPts = a.top_students[0]?.points || 1
+  const weakestTopic = a.mcq_topic_stats[0]
+  const weakestAssignment = a.assignment_module_stats[0]
+  const strongestBranch = a.branch_stats[0]
   const activeFilters = [branch, section, passoutYear].filter(Boolean).length
   const resetFilters = () => {
     setBranch("")
@@ -270,8 +279,15 @@ export default function AdminAnalyticsPage() {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="flex flex-col xl:flex-row xl:items-start justify-between gap-4"
+        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-coding/10 p-5 shadow-2xl shadow-primary/5 flex flex-col xl:flex-row xl:items-start justify-between gap-4"
       >
+        <motion.div
+          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"
+          initial={{ x: "-100%" }}
+          animate={{ x: "100%" }}
+          transition={{ duration: 3.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.04),transparent)] pointer-events-none" />
         <div>
           <h1 className="text-3xl font-bold font-serif text-foreground">Analytics</h1>
           <p className="text-muted-foreground mt-1">Performance & engagement insights for your college</p>
@@ -337,6 +353,94 @@ export default function AdminAnalyticsPage() {
       </motion.div>
 
       {/* ── Stat cards ── */}
+      <div className="sticky top-3 z-20">
+        <GlassCard className="p-2 border-primary/15 bg-card/85 backdrop-blur-xl">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: "Engagement", href: "#engagement", icon: Activity },
+              { label: "Learning", href: "#learning", icon: BookOpen },
+              { label: "Branches", href: "#branches", icon: GitBranch },
+              { label: "Assessments", href: "#assessments", icon: ClipboardCheck },
+              { label: "Coding", href: "#coding", icon: Code2 },
+              { label: "Students", href: "#students", icon: Users },
+            ].map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {[
+          {
+            label: "Weakest MCQ Signal",
+            value: weakestTopic ? `${weakestTopic.accuracy}%` : "-",
+            sub: weakestTopic ? `${weakestTopic.topic} - ${weakestTopic.total} attempts` : "No MCQ attempts yet",
+            icon: AlertTriangle,
+            tone: "text-danger",
+            bar: weakestTopic?.accuracy ?? 0,
+          },
+          {
+            label: "Assignment Bottleneck",
+            value: weakestAssignment ? `${weakestAssignment.pass_rate}%` : "-",
+            sub: weakestAssignment ? `${weakestAssignment.module} - ${weakestAssignment.attempts} attempts` : "No assignment attempts yet",
+            icon: ClipboardCheck,
+            tone: "text-warning",
+            bar: weakestAssignment?.pass_rate ?? 0,
+          },
+          {
+            label: "Strongest Branch",
+            value: strongestBranch ? strongestBranch.branch : "-",
+            sub: strongestBranch ? `${strongestBranch.avgPoints.toLocaleString()} avg pts - ${strongestBranch.count} students` : "No branch data yet",
+            icon: GitBranch,
+            tone: "text-primary",
+            bar: strongestBranch ? Math.min(100, Math.round((strongestBranch.avgPoints / Math.max(1, a.avg_points || strongestBranch.avgPoints)) * 60)) : 0,
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={item.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 + i * 0.07 }}
+            whileHover={{ y: -3, scale: 1.01 }}
+          >
+            <GlassCard className="relative h-full overflow-hidden border-primary/10">
+              <motion.div
+                className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent"
+                initial={{ x: "-100%" }}
+                animate={{ x: "100%" }}
+                transition={{ delay: i * 0.3, duration: 2.8, repeat: Infinity, repeatDelay: 4 }}
+              />
+              <div className="flex items-start gap-3">
+                <div className="rounded-xl bg-secondary/60 p-2.5">
+                  <item.icon className={`h-5 w-5 ${item.tone}`} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className={`mt-1 text-2xl font-bold font-serif truncate ${item.tone}`}>{item.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground truncate">{item.sub}</p>
+                  <div className="mt-3 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-primary"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.max(3, Math.min(100, item.bar))}%` }}
+                      transition={{ delay: 0.25 + i * 0.1, duration: 0.9 }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {statCards.map((s, i) => (
           <motion.div
@@ -346,7 +450,13 @@ export default function AdminAnalyticsPage() {
             transition={{ delay: i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ y: -2, transition: { duration: 0.15 } }}
           >
-            <GlassCard className="p-4 h-full">
+            <GlassCard className="p-4 h-full relative overflow-hidden border-primary/10 hover:border-primary/30 transition-colors">
+              <motion.div
+                className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent"
+                initial={{ x: "-100%" }}
+                animate={{ x: "100%" }}
+                transition={{ delay: i * 0.25, duration: 2.6, repeat: Infinity, repeatDelay: 5 }}
+              />
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${s.bg} flex-shrink-0 relative`}>
                   <s.icon className={`h-4 w-4 ${s.text}`} />
@@ -392,7 +502,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       <Section>
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div id="engagement" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-5 gap-6">
 
           {/* Area chart — weekly trend */}
           <GlassCard className="lg:col-span-3">
@@ -481,7 +591,7 @@ export default function AdminAnalyticsPage() {
 
       {/* ── MCQ accuracy + Course completions ── */}
       <Section delay={0.05}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div id="learning" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* MCQ accuracy */}
           <GlassCard>
@@ -568,7 +678,7 @@ export default function AdminAnalyticsPage() {
       {/* ── Branch performance ── */}
       {a.branch_stats.length > 0 && (
         <Section delay={0.05}>
-          <GlassCard>
+          <GlassCard className="scroll-mt-24" id="branches">
             <div className="flex items-center gap-2 mb-1">
               <GitBranch className="h-4 w-4 text-primary" />
               <h3 className="font-semibold font-serif text-foreground">Branch Performance</h3>
@@ -607,7 +717,7 @@ export default function AdminAnalyticsPage() {
 
       {/* ── Assignment pass rates + Coding breakdown ── */}
       <Section delay={0.05}>
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div id="assessments" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-5 gap-6">
 
           {/* Assignment pass rates */}
           <GlassCard className="lg:col-span-3">
@@ -665,7 +775,7 @@ export default function AdminAnalyticsPage() {
           </GlassCard>
 
           {/* Coding difficulty donut */}
-          <GlassCard className="lg:col-span-2 flex flex-col">
+          <GlassCard id="coding" className="scroll-mt-24 lg:col-span-2 flex flex-col">
             <div className="flex items-center gap-2 mb-1">
               <Code2 className="h-4 w-4 text-primary" />
               <h3 className="font-semibold font-serif text-foreground">Coding Solved</h3>
@@ -739,7 +849,7 @@ export default function AdminAnalyticsPage() {
 
       {/* ── At-risk students ── */}
       <Section delay={0.05}>
-        <GlassCard>
+        <GlassCard id="students" className="scroll-mt-24">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
               <UserX className="h-4 w-4 text-danger" />
