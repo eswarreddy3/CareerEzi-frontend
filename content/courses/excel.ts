@@ -53,7 +53,11 @@ Excel files are saved with the extension .xlsx. Older files use .xls. Always use
 
 ## 1.1 Workbook vs Worksheet
 
-WorkbookA Workbook is the entire Excel file (e.g., Sales_Report.xlsx). Think of it as a book. One file = one workbook. You can share it, email it, and save it.Worksheet (Sheet)A Worksheet is one page inside the workbook. Think of it as a single chapter in the book. One workbook can contain many worksheets. You can see them as tabs at the bottom of the screen (Sheet1, Sheet2, Sheet3…).WorkbookA Workbook is the entire Excel file (e.g., Sales_Report.xlsx). Think of it as a book. One file = one workbook. You can share it, email it, and save it.Worksheet (Sheet)A Worksheet is one page inside the workbook. Think of it as a single chapter in the book. One workbook can contain many worksheets. You can see them as tabs at the bottom of the screen (Sheet1, Sheet2, Sheet3…).
+**Workbook**
+A Workbook is the entire Excel file (e.g., Sales_Report.xlsx). Think of it as a book. One file = one workbook. You can share it, email it, and save it.
+
+**Worksheet (Sheet)**
+A Worksheet is one page inside the workbook. Think of it as a single chapter in the book. One workbook can contain many worksheets. You can see them as tabs at the bottom of the screen (Sheet1, Sheet2, Sheet3…).
 
 | Feature | Workbook | Worksheet |
 | --- | --- | --- |
@@ -61,7 +65,10 @@ WorkbookA Workbook is the entire Excel file (e.g., Sales_Report.xlsx). Think of 
 | Max sheets | Limited by memory | 1,048,576 rows × 16,384 cols each |
 | Analogy | A book | A page in that book |
 
-Example: Workbook vs WorksheetCompany_Finance_2024.xlsx is the Workbook.Inside it you might have worksheets: Jan_Sales, Feb_Sales, Expenses, Summary. Each worksheet holds its own data but can reference data from other sheets.
+:::scenario
+**Example: Workbook vs Worksheet**
+`Company_Finance_2024.xlsx` is the Workbook. Inside it you might have worksheets: Jan_Sales, Feb_Sales, Expenses, Summary. Each worksheet holds its own data but can reference data from other sheets.
+:::
 
 ## 1.2 Rows, Columns, and Cells
 
@@ -134,9 +141,20 @@ Formatting makes your data look professional and easy to read. Excel formatting 
 | Fill Color | Home -> Fill Color (paint bucket icon) | Color rows/columns for readability |
 | Borders | Home -> Borders (box icon) | Create table-like grid lines |
 
-Example: Making a Header Row Stand OutClick row 1 header (the number '1') to select the entire row.Press Ctrl + B to bold all text in row 1.Click Fill Color -> choose Dark Green (#217346).Click Font Color -> choose White.Your header now looks like a professional table.2.2 Cell Formatting — Currency, Date, Percent
-When you type a number like 1234.5, Excel stores it as a plain number. You can format it to display as
-$Syntax: Format Cells: Ctrl + 1 (or right-click cell -> Format Cells)Opens the Format Cells dialog box where you can set Number, Alignment, Font, Border, Fill.Syntax: Format Cells: Ctrl + 1 (or right-click cell -> Format Cells)Opens the Format Cells dialog box where you can set Number, Alignment, Font, Border, Fill.1,234.50 or 123,450% without changing the actual stored value.
+:::scenario
+**Example: Making a Header Row Stand Out**
+1. Click row 1 header (the number '1') to select the entire row.
+2. Press Ctrl + B to bold all text in row 1.
+3. Click Fill Color → choose Dark Green (#217346).
+4. Click Font Color → choose White.
+
+Your header now looks like a professional table.
+:::
+
+## 2.2 Cell Formatting — Currency, Date, Percent
+When you type a number like 1234.5, Excel stores it as a plain number. You can format it to display as $1,234.50 or 123,450% without changing the actual stored value.
+
+**Format Cells Shortcut:** `Ctrl + 1` (or right-click cell → Format Cells) — Opens the Format Cells dialog box where you can set Number, Alignment, Font, Border, Fill.
 
 | Format Type | Example Input | Displayed As | How to Apply |
 | --- | --- | --- | --- |
@@ -190,7 +208,9 @@ When your text is too long to fit in a cell, it either overflows into the next c
 ## Merge Cells
 
 Merge & Center combines two or more cells into one big cell and centers the content. It is commonly used for report titles that span multiple columns.
-Note: Be careful with merged cells in data ranges — they can break sorting, filtering, and formulas. Use Merge & Center only for titles/headers, not inside data tables.2.6 AutoFill and Flash Fill
+Note: Be careful with merged cells in data ranges — they can break sorting, filtering, and formulas. Use Merge & Center only for titles/headers, not inside data tables.
+
+## 2.6 AutoFill and Flash Fill
 
 ## AutoFill
 
@@ -208,7 +228,14 @@ AutoFill automatically continues a pattern. Type a value, then drag the small gr
 ## Flash Fill (Ctrl + E)
 
 Flash Fill is like magic — Excel detects a pattern from your example and fills the rest automatically.
-Example: Flash Fill ExampleColumn A (Full Name): Alice Johnson, Bob Smith, Carol White Column B (First Name): You type Alice in B1, then press Ctrl+E. Result: Excel automatically fills B2 = Bob, B3 = Carol.Also works for: extracting email domains, reformatting phone numbers, combining text.`,
+:::scenario
+**Example: Flash Fill**
+- Column A (Full Name): Alice Johnson, Bob Smith, Carol White
+- Column B (First Name): Type `Alice` in B1, then press Ctrl+E.
+- Result: Excel automatically fills B2 = Bob, B3 = Carol.
+
+Also works for: extracting email domains, reformatting phone numbers, combining text.
+:::`,
 
 4: `# Basic Data Entry
 
@@ -262,7 +289,10 @@ A drop-down list lets the user select from predefined options instead of typing,
 - In Source: type your options separated by commas: HR,IT,Finance,Marketing,Operations
 - Or reference a range: =E1:E5 (where E1:E5 contains your list)
 - Click OK — a drop-down arrow appears in the cell
-Example: Department Drop-Down ListCell B2 has a drop-down with: HR, IT, Finance, Marketing.When you click B2, an arrow appears. Click it to pick a department.If someone tries to type something else, Excel shows: 'The value you entered is not valid'.
+:::scenario
+**Example: Department Drop-Down List**
+Cell B2 has a drop-down with: HR, IT, Finance, Marketing. When you click B2, an arrow appears. Click it to pick a department. If someone tries to type something else, Excel shows: 'The value you entered is not valid'.
+:::
 
 ## 3.4  AutoFill & Flash Fill
 
@@ -298,19 +328,44 @@ Formulas are the heart of Excel. A formula tells Excel to perform a calculation.
 | Modulo (Remainder) | MOD() | =MOD(10, 3) | 1 |
 | Using Cell References | All | =A1 + B1 - C1 | Sum of cells |
 
-Example: Sales Calculation with FormulasSample Data:A1: Price per unit = 250  B1: Quantity = 40  C1: Discount = 10%Formula in D1: =A1*B1 -> Result: 10000 (Gross Sales)Formula in E1: =D1*(1-C1) -> Result: 9000 (After Discount)Formula in F1: =E1*0.18 -> Result: 1620 (18% GST)4.2 Essential Functions: SUM, AVERAGE, MAX, MIN, COUNT
-SUM
-Syntax: =SUM(number1, number2, …) or =SUM(A1:A10)Adds all numbers in the given range. The most used function in Excel.Example: SUM Example=SUM(B2:B13) -> Adds all monthly sales values from B2 to B13
-AVERAGE
-Syntax: =AVERAGE(number1, number2, …) or =AVERAGE(A1:A10)Calculates the arithmetic mean (sum ÷ count) of the values in the range.Example: AVERAGE Example=AVERAGE(C2:C13) -> Finds average monthly expenses
-MAX
-Syntax: =MAX(number1, number2, …) or =MAX(A1:A10)Returns the largest (highest) value in the range.Example: MAX Example=MAX(D2:D13) -> Finds the highest sales month
-MIN
-Syntax: =MIN(number1, number2, …) or =MIN(A1:A10)Returns the smallest (lowest) value in the range.Example: MIN Example=MIN(D2:D13) -> Finds the lowest sales month
-COUNT
-Syntax: =COUNT(value1, value2, …) or =COUNT(A1:A10)Counts the number of cells that contain numbers. Ignores text and blank cells.Example: COUNT Example=COUNT(B2:B13) -> Counts how many months have sales data entered
-COUNTA
-Syntax: =COUNTA(value1, …)Counts cells that are NOT empty — including text, numbers, and formulas.Example: COUNTA Example=COUNTA(A2:A100) -> Counts how many rows have any data (names, IDs, etc.)
+:::scenario
+**Example: Sales Calculation with Formulas**
+- A1: Price per unit = 250 | B1: Quantity = 40 | C1: Discount = 10%
+- `=A1*B1` → 10000 (Gross Sales)
+- `=D1*(1-C1)` → 9000 (After Discount)
+- `=E1*0.18` → 1620 (18% GST)
+:::
+
+## 4.2 Essential Functions: SUM, AVERAGE, MAX, MIN, COUNT
+### SUM
+Syntax: `=SUM(number1, number2, …)` or `=SUM(A1:A10)`
+Adds all numbers in the given range. The most used function in Excel.
+`=SUM(B2:B13)` → Adds all monthly sales values from B2 to B13
+
+### AVERAGE
+Syntax: `=AVERAGE(number1, number2, …)` or `=AVERAGE(A1:A10)`
+Calculates the arithmetic mean (sum ÷ count) of the values in the range.
+`=AVERAGE(C2:C13)` → Finds average monthly expenses
+
+### MAX
+Syntax: `=MAX(number1, number2, …)` or `=MAX(A1:A10)`
+Returns the largest (highest) value in the range.
+`=MAX(D2:D13)` → Finds the highest sales month
+
+### MIN
+Syntax: `=MIN(number1, number2, …)` or `=MIN(A1:A10)`
+Returns the smallest (lowest) value in the range.
+`=MIN(D2:D13)` → Finds the lowest sales month
+
+### COUNT
+Syntax: `=COUNT(value1, value2, …)` or `=COUNT(A1:A10)`
+Counts the number of cells that contain numbers. Ignores text and blank cells.
+`=COUNT(B2:B13)` → Counts how many months have sales data entered
+
+### COUNTA
+Syntax: `=COUNTA(value1, …)`
+Counts cells that are NOT empty — including text, numbers, and formulas.
+`=COUNTA(A2:A100)` → Counts how many rows have any data (names, IDs, etc.)
 
 ## 4.3 Absolute & Relative References
 
@@ -323,7 +378,13 @@ This is one of the MOST IMPORTANT concepts in Excel. When you copy a formula to 
 | Absolute Row | A$1 | Row stays fixed, column changes | Fixed row, variable column |
 | Fully Absolute | $A$1 | Both row and column stay fixed | Tax rates, constants |
 
-Example: Tax Calculation with Absolute ReferenceSetup: B1 = Tax Rate (18%)  A4:A10 = Item pricesFormula in B4: =A4*$B$1When you copy B4 down to B5, B6… the formula becomes =A5*$B$1, =A6*$B$1A4 changes (relative) but $B$1 stays fixed (absolute) — always pointing to the tax rate.Shortcut: Press F4 while clicking a cell reference to toggle between A1, $A$1, A$1, $A1.
+:::scenario
+**Example: Tax Calculation with Absolute Reference**
+- Setup: B1 = Tax Rate (18%) | A4:A10 = Item prices
+- Formula in B4: `=A4*$B$1`
+- When you copy B4 down to B5, B6… the formula becomes `=A5*$B$1`, `=A6*$B$1`
+- A4 changes (relative) but $B$1 stays fixed (absolute) — always pointing to the tax rate.
+:::
 Tip: Press F4 after typing a cell reference to cycle through: A1 -> $A$1 -> A$1 -> $A1 -> A1
 
 ## 4.4  Error Messages
@@ -370,7 +431,15 @@ Sorting rearranges your data rows in a specific order based on one or more colum
 - Go to Data -> Sort (opens the Sort dialog box)
 - Add levels: Sort by Department (A->Z), Then by Salary (largest to smallest)
 - Excel sorts by the first criterion, then within ties, sorts by the second criterion
-Example: Multi-Level Sort ExampleGoal: Sort an employee list by Department (A->Z), and within each department, by Salary (highest first). Level 1: Column = Department, Order = A to ZLevel 2: Column = Salary, Order = Largest to SmallestResult: Finance employees listed first by highest salary, then HR, then IT, etc.5.2 Filtering Data
+:::scenario
+**Example: Multi-Level Sort**
+- Goal: Sort by Department (A→Z), then within each department by Salary (highest first)
+- Level 1: Column = Department, Order = A to Z
+- Level 2: Column = Salary, Order = Largest to Smallest
+- Result: Finance employees listed first by highest salary, then HR, then IT, etc.
+:::
+
+## 5.2 Filtering Data
 Filtering hides rows that don't match your criteria — the data is not deleted, just hidden. This lets you focus on specific subsets of your data.
 
 ## Apply AutoFilter
@@ -418,8 +487,6 @@ Note: Always make a backup copy before removing duplicates. The action cannot be
 7: `# Basic Charts
 
 Charts transform numbers into visual stories. A well-designed chart communicates insights instantly that would take minutes to read from a table.
-A Column Chart shows data in vertical bars. It is the most common chart type and is ideal for comparing values across categories (e.g., sales by month, scores by student).
-
 ![Chart types overview](/Excel_images/eimg9.png)
 
 
@@ -446,9 +513,9 @@ A Column Chart shows data in vertical bars. It is the most common chart type and
 | 5. Format series | Right-click on bars/lines → Format Data Series → change colour, width |
 | 6. Resize & position | Drag chart handles to resize; drag chart body to move |
 
-A Column Chart shows data in vertical bars. It is the most common chart type and is ideal for comparing values across categories (e.g., sales by month, scores by student).
-
 ## 6.3 Column Chart
+
+A Column Chart shows data in vertical bars. It is the most common chart type and is ideal for comparing values across categories (e.g., sales by month, scores by student).
 
 
 ## How to Create
@@ -499,37 +566,63 @@ Text functions help you manipulate, clean, and extract parts of text strings. Th
 | A4 | "EMP-2024-001" | ID number: 001 |
 | A5 | "hello world" | Proper case: Hello World |
 
-LEFT
-Syntax: =LEFT(text, num_chars)Extracts the leftmost N characters from a text string.Example: LEFT in Action=LEFT("Alice Johnson", 5) -> Alice=LEFT(A1, 3) where A1="EMP-2024" -> EMP
-RIGHT
-Syntax: =RIGHT(text, num_chars)Extracts the rightmost N characters from a text string.Example: RIGHT in Action=RIGHT("EMP-2024-001", 3) -> 001=RIGHT(A3, 11) where A3="company.com" -> company.com
-MID
-Syntax: =MID(text, start_num, num_chars)Extracts characters from the MIDDLE of a text string. start_num = where to start (1 = first character).Example: MID in Action=MID("EMP-2024-001", 5, 4) -> 2024start_num=5 means start at the 5th character, num_chars=4 means take 4 characters.
-LEN
-Syntax: =LEN(text)Returns the number of characters in a text string. Counts spaces too.Example: LEN in Action=LEN("Hello World") -> 11 (5 + 1 space + 5)=LEN(A1) -> useful to check if data meets length requirements
-TRIM
-Syntax: =TRIM(text)Removes all extra spaces from text — leading spaces, trailing spaces, and double spaces between words. Keeps single spaces between words.Example: TRIM in Action=TRIM(" HR Manager ") -> HR ManagerExtremely useful after importing data from databases or CSV files.
-UPPER
-Syntax: =UPPER(text)Converts all text to UPPERCASE.Example: UPPER in Action=UPPER("alice johnson") -> ALICE JOHNSON
-LOWER
+### LEFT
+Syntax: `=LEFT(text, num_chars)` — Extracts the leftmost N characters.
+- `=LEFT("Alice Johnson", 5)` → Alice
+- `=LEFT(A1, 3)` where A1="EMP-2024" → EMP
 
-## Syntax: =LOWER(text)Converts all text to lowercase.
+### RIGHT
+Syntax: `=RIGHT(text, num_chars)` — Extracts the rightmost N characters.
+- `=RIGHT("EMP-2024-001", 3)` → 001
+- `=RIGHT(A3, 11)` where A3="company.com" → company.com
 
+### MID
+Syntax: `=MID(text, start_num, num_chars)` — Extracts characters from the middle. start_num = where to start (1 = first character).
+- `=MID("EMP-2024-001", 5, 4)` → 2024 (start at position 5, take 4 characters)
 
-## Example: LOWER in Action=LOWER("ALICE JOHNSON") -> alice johnson
+### LEN
+Syntax: `=LEN(text)` — Returns the number of characters (including spaces).
+- `=LEN("Hello World")` → 11 (5 + 1 space + 5)
+- `=LEN(A1)` → useful to check if data meets length requirements
 
-PROPER
-Syntax: =PROPER(text)Capitalises the First Letter Of Each Word.Example: PROPER in Action=PROPER("ALICE johnson") -> Alice JohnsonGreat for fixing name data entered with inconsistent capitalization.
-CONCAT
-Syntax: =CONCAT(text1, text2, …)Joins (concatenates) multiple text strings together. Modern replacement for & operator and CONCATENATE.Example: CONCAT in Action=CONCAT(A1, " ", B1) where A1="Alice" B1="Johnson" -> Alice Johnson
-TEXTJOIN
-Syntax: =TEXTJOIN(delimiter, ignore_empty, text1, text2, …)Joins multiple text values with a separator. ignore_empty=TRUE skips blank cells.Example: TEXTJOIN in Action=TEXTJOIN(", ", TRUE, A1:A5) -> Alice, Bob, Carol, Dave, Evedelimiter is the separator (comma-space in this case).
-FIND
-Syntax: =FIND(find_text, within_text, [start_num])Finds the position (number) of a character or text within a string. Case-sensitive.Example: FIND in Action=FIND("@", "alice@company.com") -> 6 (@ is at position 6) Combine with LEFT/MID to extract parts around a specific character.
-SEARCH
-Syntax: =SEARCH(find_text, within_text, [start_num])Same as FIND but case-insensitive. Also supports wildcard characters (* and ?).Example: SEARCH in Action=SEARCH("manager", "HR Manager") -> 4 (found at position 4, case-insensitive)
-CLEAN
-Syntax: =CLEAN(text)Removes non-printable characters (invisible characters that cause problems when importing data). Use together with TRIM for thorough text cleaning.Example: CLEAN in Action=CLEAN(TRIM(A1)) -> Removes invisible characters AND extra spaces in one step`,
+### TRIM
+Syntax: `=TRIM(text)` — Removes leading, trailing, and double spaces. Keeps single spaces between words.
+- `=TRIM(" HR Manager ")` → HR Manager
+- Extremely useful after importing data from databases or CSV files.
+
+### UPPER
+Syntax: `=UPPER(text)` — Converts all text to uppercase.
+- `=UPPER("alice johnson")` → ALICE JOHNSON
+
+### LOWER
+Syntax: `=LOWER(text)` — Converts all text to lowercase.
+- `=LOWER("ALICE JOHNSON")` → alice johnson
+
+### PROPER
+Syntax: `=PROPER(text)` — Capitalises the first letter of each word.
+- `=PROPER("ALICE johnson")` → Alice Johnson
+- Great for fixing name data entered with inconsistent capitalisation.
+
+### CONCAT
+Syntax: `=CONCAT(text1, text2, …)` — Joins multiple text strings together. Modern replacement for & and CONCATENATE.
+- `=CONCAT(A1, " ", B1)` where A1="Alice", B1="Johnson" → Alice Johnson
+
+### TEXTJOIN
+Syntax: `=TEXTJOIN(delimiter, ignore_empty, text1, text2, …)` — Joins values with a separator; ignore_empty=TRUE skips blank cells.
+- `=TEXTJOIN(", ", TRUE, A1:A5)` → Alice, Bob, Carol, Dave, Eve
+
+### FIND
+Syntax: `=FIND(find_text, within_text, [start_num])` — Finds position of a character. Case-sensitive.
+- `=FIND("@", "alice@company.com")` → 6 (@ is at position 6)
+- Combine with LEFT/MID to extract parts around a specific character.
+
+### SEARCH
+Syntax: `=SEARCH(find_text, within_text, [start_num])` — Same as FIND but case-insensitive. Supports wildcards (* and ?).
+- `=SEARCH("manager", "HR Manager")` → 4 (found at position 4, case-insensitive)
+
+### CLEAN
+Syntax: `=CLEAN(text)` — Removes non-printable characters. Use with TRIM for thorough cleaning.
+- `=CLEAN(TRIM(A1))` → Removes invisible characters AND extra spaces in one step`,
 
 9: `# Logical Functions
 
@@ -538,7 +631,10 @@ Logical functions make decisions based on conditions. They are the 'if this then
 ## 8.1 IF Function
 
 ![IF function example](/Excel_images/eimg13.png)
-Syntax: =IF(logical_test, value_if_true, value_if_false)logical_test: any expression that evaluates to TRUE or FALSE (e.g., A1>50) value_if_true: what to return when the test is TRUEvalue_if_false: what to return when the test is FALSE
+Syntax: `=IF(logical_test, value_if_true, value_if_false)`
+- `logical_test` — any expression that evaluates to TRUE or FALSE (e.g., A1>50)
+- `value_if_true` — what to return when the test is TRUE
+- `value_if_false` — what to return when the test is FALSE
 
 | Scenario | Formula | Result if TRUE | Result if FALSE |
 | --- | --- | --- | --- |
@@ -551,12 +647,66 @@ Syntax: =IF(logical_test, value_if_true, value_if_false)logical_test: any expres
 ## 8.2 Nested IF (Multiple Conditions)
 
 You can put one IF inside another IF to handle multiple conditions — like a decision tree.
-Syntax: =IF(test1, result1, IF(test2, result2, IF(test3, result3, default)))Each IF is evaluated in order. The first TRUE condition's result is returned.
-Example: Grade Calculation with Nested IFMarks in B2:=IF(B2>=90, "A+", IF(B2>=80, "A", IF(B2>=70, "B", IF(B2>=60, "C", "Fail"))))If marks=85 -> First test (>=90) is FALSE -> Second test (>=80) is TRUE -> Returns ANote: IFS function (Topic 8.8) is cleaner than Nested IF for multiple conditions.8.3 AND Function
-Syntax: =AND(condition1, condition2, condition3, …)Returns TRUE only if ALL conditions are TRUE. Returns FALSE if even one is FALSE.Example: AND Example=AND(B2>50, C2="Present", D2="Submitted")Returns TRUE only if marks > 50 AND attendance is Present AND assignment is Submitted. Use inside IF: =IF(AND(B2>50, C2>80), "Eligible", "Not Eligible")8.4 OR FunctionSyntax: =AND(condition1, condition2, condition3, …)Returns TRUE only if ALL conditions are TRUE. Returns FALSE if even one is FALSE.Example: AND Example=AND(B2>50, C2="Present", D2="Submitted")Returns TRUE only if marks > 50 AND attendance is Present AND assignment is Submitted. Use inside IF: =IF(AND(B2>50, C2>80), "Eligible", "Not Eligible")8.4 OR FunctionSyntax: =OR(condition1, condition2, condition3, …)Returns TRUE if AT LEAST ONE condition is TRUE. Returns FALSE only if ALL are FALSE.Example: OR Example=IF(OR(A2="Manager", A2="Director", A2="VP"), "Senior", "Junior") Returns 'Senior' if the person is a Manager OR Director OR VP.8.5 NOT FunctionSyntax: =OR(condition1, condition2, condition3, …)Returns TRUE if AT LEAST ONE condition is TRUE. Returns FALSE only if ALL are FALSE.Example: OR Example=IF(OR(A2="Manager", A2="Director", A2="VP"), "Senior", "Junior") Returns 'Senior' if the person is a Manager OR Director OR VP.8.5 NOT FunctionSyntax: =NOT(logical)Reverses the logical value. NOT(TRUE) = FALSE, NOT(FALSE) = TRUE.Example: NOT Example=IF(NOT(ISBLANK(A2)), "Has Data", "Empty")Returns 'Has Data' if A2 is NOT blank.8.6 IFERROR FunctionSyntax: =NOT(logical)Reverses the logical value. NOT(TRUE) = FALSE, NOT(FALSE) = TRUE.Example: NOT Example=IF(NOT(ISBLANK(A2)), "Has Data", "Empty")Returns 'Has Data' if A2 is NOT blank.8.6 IFERROR Function
-Syntax: =IFERROR(value, value_if_error)If the formula produces an error (like #N/A, #DIV/0!, #VALUE!), returns the fallback value instead.Example: IFERROR Example=IFERROR(VLOOKUP(A2, D:F, 2, FALSE), "Not Found")If VLOOKUP can't find the value, instead of showing #N/A, it shows 'Not Found'.=IFERROR(B2/C2, 0) -> If C2=0 (division by zero), returns 0 instead of #DIV/0!8.7 XOR Function
-Syntax: =XOR(condition1, condition2, …)Returns TRUE if an ODD number of conditions are TRUE (exclusive OR). Returns FALSE if an even number of conditions are TRUE or all are FALSE.8.8 IFS Function (Modern alternative to Nested IF)Syntax: =XOR(condition1, condition2, …)Returns TRUE if an ODD number of conditions are TRUE (exclusive OR). Returns FALSE if an even number of conditions are TRUE or all are FALSE.8.8 IFS Function (Modern alternative to Nested IF)Syntax: =IFS(condition1, result1, condition2, result2, condition3, result3, …)Tests multiple conditions in order and returns the result of the first TRUE condition. Much cleaner than nested IFs.Example: IFS for Grade Calculation=IFS(B2>=90, "A+", B2>=80, "A", B2>=70, "B", B2>=60, "C", TRUE, "Fail")The last TRUE acts as the 'else' — catches everything that didn't match above.8.9 SWITCH FunctionSyntax: =IFS(condition1, result1, condition2, result2, condition3, result3, …)Tests multiple conditions in order and returns the result of the first TRUE condition. Much cleaner than nested IFs.Example: IFS for Grade Calculation=IFS(B2>=90, "A+", B2>=80, "A", B2>=70, "B", B2>=60, "C", TRUE, "Fail")The last TRUE acts as the 'else' — catches everything that didn't match above.8.9 SWITCH FunctionSyntax: =SWITCH(expression, value1, result1, value2, result2, …, [default])Matches an expression against a list of values and returns the corresponding result.Example: SWITCH for Day Name=SWITCH(WEEKDAY(A2), 1, "Sunday", 2, "Monday", 3, "Tuesday", 4, "Wednesday", 5, "Thursday", 6, "Friday", 7, "Saturday", "Unknown")Syntax: =SWITCH(expression, value1, result1, value2, result2, …, [default])Matches an expression against a list of values and returns the corresponding result.Example: SWITCH for Day Name=SWITCH(WEEKDAY(A2), 1, "Sunday", 2, "Monday", 3, "Tuesday", 4, "Wednesday", 5, "Thursday", 6, "Friday", 7, "Saturday", "Unknown")
-Syntax: =VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])lookup_value: The value you are searching for (e.g., employee ID) table_array: The table range to search in (e.g., A:D or $A$2:$D$100) col_index_num: Which column to return (1=first col, 2=second col…)range_lookup: FALSE = exact match (use this always for IDs/names), TRUE = approximateSyntax: =VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])lookup_value: The value you are searching for (e.g., employee ID) table_array: The table range to search in (e.g., A:D or $A$2:$D$100) col_index_num: Which column to return (1=first col, 2=second col…)range_lookup: FALSE = exact match (use this always for IDs/names), TRUE = approximate9Lookup Functions9Lookup Functions`,
+Syntax: `=IF(test1, result1, IF(test2, result2, IF(test3, result3, default)))`
+Each IF is evaluated in order. The first TRUE condition's result is returned.
+
+:::scenario
+**Example: Grade Calculation with Nested IF**
+`=IF(B2>=90, "A+", IF(B2>=80, "A", IF(B2>=70, "B", IF(B2>=60, "C", "Fail"))))`
+If marks=85 → First test (>=90) is FALSE → Second test (>=80) is TRUE → Returns A
+:::
+
+Note: IFS function (Topic 8.8) is cleaner than Nested IF for multiple conditions.
+
+## 8.3 AND Function
+Syntax: `=AND(condition1, condition2, condition3, …)`
+Returns TRUE only if ALL conditions are TRUE. Returns FALSE if even one is FALSE.
+
+`=AND(B2>50, C2="Present", D2="Submitted")` → TRUE only if marks > 50 AND attendance is Present AND assignment is Submitted.
+
+Use inside IF: `=IF(AND(B2>50, C2>80), "Eligible", "Not Eligible")`
+
+## 8.4 OR Function
+Syntax: `=OR(condition1, condition2, condition3, …)`
+Returns TRUE if AT LEAST ONE condition is TRUE. Returns FALSE only if ALL are FALSE.
+
+`=IF(OR(A2="Manager", A2="Director", A2="VP"), "Senior", "Junior")` → Returns 'Senior' if the person is a Manager OR Director OR VP.
+
+## 8.5 NOT Function
+Syntax: `=NOT(logical)` — Reverses the logical value. NOT(TRUE) = FALSE, NOT(FALSE) = TRUE.
+
+`=IF(NOT(ISBLANK(A2)), "Has Data", "Empty")` → Returns 'Has Data' if A2 is NOT blank.
+
+## 8.6 IFERROR Function
+Syntax: `=IFERROR(value, value_if_error)`
+If the formula produces an error (like #N/A, #DIV/0!, #VALUE!), returns the fallback value instead.
+- `=IFERROR(VLOOKUP(A2, D:F, 2, FALSE), "Not Found")` → shows 'Not Found' instead of #N/A
+- `=IFERROR(B2/C2, 0)` → returns 0 instead of #DIV/0! when C2=0
+
+## 8.7 XOR Function
+Syntax: `=XOR(condition1, condition2, …)`
+Returns TRUE if an ODD number of conditions are TRUE (exclusive OR). Returns FALSE if an even number of conditions are TRUE or all are FALSE.
+
+## 8.8 IFS Function (Modern alternative to Nested IF)
+Syntax: `=IFS(condition1, result1, condition2, result2, condition3, result3, …)`
+Tests multiple conditions in order and returns the result of the first TRUE condition. Much cleaner than nested IFs.
+
+`=IFS(B2>=90, "A+", B2>=80, "A", B2>=70, "B", B2>=60, "C", TRUE, "Fail")`
+The last `TRUE` acts as the 'else' — catches everything that didn't match above.
+
+## 8.9 SWITCH Function
+Syntax: `=SWITCH(expression, value1, result1, value2, result2, …, [default])`
+Matches an expression against a list of values and returns the corresponding result.
+
+:::scenario
+**Example: SWITCH for Day Name**
+`=SWITCH(WEEKDAY(A2), 1, "Sunday", 2, "Monday", 3, "Tuesday", 4, "Wednesday", 5, "Thursday", 6, "Friday", 7, "Saturday", "Unknown")`
+:::
+Syntax: `=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])`
+- `lookup_value` — The value you are searching for (e.g., employee ID)
+- `table_array` — The table range to search in (e.g., A:D or $A$2:$D$100)
+- `col_index_num` — Which column to return (1=first col, 2=second col…)
+- `range_lookup` — FALSE = exact match (use this always for IDs/names), TRUE = approximate`,
 
 10: `# Lookup Functions
 
@@ -573,8 +723,40 @@ Lookup functions find and retrieve data from tables. They are the backbone of da
 | E003 | Carol | Finance | 52,000 |
 | E004 | Dave | IT | 58,000 |
 
-Syntax: =XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])lookup_value: What to search forlookup_array: The column/row to search in (can be any column — not restricted to first!)return_array: The column/row to return values fromif_not_found: Optional — what to show if not found (e.g., 'Not Found') match_mode: 0=exact, -1=next smaller, 1=next larger, 2=wildcard search_mode: 1=first to last, -1=last to first (reverse search)Example: XLOOKUP Examples=XLOOKUP("E002", A2:A5, D2:D5, "Not Found") -> ₹ 60,000=XLOOKUP("E003", A2:A5, B2:D5) -> Returns entire row (Carol, Finance, ₹ 52,000)=XLOOKUP("IT", C2:C5, B2:B5, "None", 0, -1) -> Finds LAST person in IT (reverse search)Syntax: =XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])lookup_value: What to search forlookup_array: The column/row to search in (can be any column — not restricted to first!)return_array: The column/row to return values fromif_not_found: Optional — what to show if not found (e.g., 'Not Found') match_mode: 0=exact, -1=next smaller, 1=next larger, 2=wildcard search_mode: 1=first to last, -1=last to first (reverse search)Example: XLOOKUP Examples=XLOOKUP("E002", A2:A5, D2:D5, "Not Found") -> ₹ 60,000=XLOOKUP("E003", A2:A5, B2:D5) -> Returns entire row (Carol, Finance, ₹ 52,000)=XLOOKUP("IT", C2:C5, B2:B5, "None", 0, -1) -> Finds LAST person in IT (reverse search)Example: VLOOKUP Examples on the table above=VLOOKUP("E002", A1:D5, 2, FALSE) -> Bob (returns column 2 = Name)=VLOOKUP("E003", A1:D5, 3, FALSE) -> Finance (returns column 3 = Dept)=VLOOKUP("E004", A1:D5, 4, FALSE) -> 58,000 (returns column 4 = Salary)Common Error: #N/A means the lookup value was not found in the first column.Note: VLOOKUP can only look RIGHT — the lookup column must be the LEFTMOST column of your table_array. For looking left, use INDEX+MATCH or XLOOKUP.9.2 HLOOKUP — Horizontal LookupExample: VLOOKUP Examples on the table above=VLOOKUP("E002", A1:D5, 2, FALSE) -> Bob (returns column 2 = Name)=VLOOKUP("E003", A1:D5, 3, FALSE) -> Finance (returns column 3 = Dept)=VLOOKUP("E004", A1:D5, 4, FALSE) -> 58,000 (returns column 4 = Salary)Common Error: #N/A means the lookup value was not found in the first column.Note: VLOOKUP can only look RIGHT — the lookup column must be the LEFTMOST column of your table_array. For looking left, use INDEX+MATCH or XLOOKUP.9.2 HLOOKUP — Horizontal Lookup
-Syntax: =HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])Same as VLOOKUP but searches horizontally (across rows instead of columns). Use when your data is arranged in rows instead of columns. Less common than VLOOKUP.9.3 XLOOKUP — The Modern, Best Lookup Function
+Syntax: `=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])`
+- `lookup_value` — The value to search for (e.g., employee ID)
+- `table_array` — The table range (e.g., A:D or $A$2:$D$100)
+- `col_index_num` — Which column to return (1=first col, 2=second col…)
+- `range_lookup` — FALSE = exact match (use this always)
+
+:::scenario
+**Example: VLOOKUP on the table above**
+- `=VLOOKUP("E002", A1:D5, 2, FALSE)` → Bob (column 2 = Name)
+- `=VLOOKUP("E003", A1:D5, 3, FALSE)` → Finance (column 3 = Dept)
+- `=VLOOKUP("E004", A1:D5, 4, FALSE)` → 58,000 (column 4 = Salary)
+:::
+
+**Common Error:** #N/A means the lookup value was not found in the first column.
+**Note:** VLOOKUP can only look RIGHT — the lookup column must be the LEFTMOST column. For looking left, use INDEX+MATCH or XLOOKUP.
+
+## 9.2 HLOOKUP — Horizontal Lookup
+Syntax: `=HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])`
+Same as VLOOKUP but searches horizontally (across rows instead of columns). Use when your data is arranged in rows instead of columns. Less common than VLOOKUP.
+
+## 9.3 XLOOKUP — The Modern, Best Lookup Function
+
+Syntax: `=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])`
+- `lookup_array` — Can be any column (not restricted to first!)
+- `if_not_found` — Optional: what to show if not found (e.g., 'Not Found')
+- `match_mode` — 0=exact, -1=next smaller, 1=next larger, 2=wildcard
+- `search_mode` — 1=first to last, -1=last to first (reverse search)
+
+:::scenario
+**Example: XLOOKUP**
+- `=XLOOKUP("E002", A2:A5, D2:D5, "Not Found")` → ₹ 60,000
+- `=XLOOKUP("E003", A2:A5, B2:D5)` → Returns entire row (Carol, Finance, ₹ 52,000)
+- `=XLOOKUP("IT", C2:C5, B2:B5, "None", 0, -1)` → Finds LAST person in IT (reverse search)
+:::
 
 | Feature | VLOOKUP | XLOOKUP |
 | --- | --- | --- |
@@ -588,12 +770,31 @@ Syntax: =HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])Same a
 
 ## 9.4 INDEX and MATCH — The Power Combination
 
-INDEX Function
-Syntax: =INDEX(array, row_num, [col_num])Returns the value at a specific row and column position in a range.=INDEX(A1:D10, 3, 2) -> Returns the value in row 3, column 2 of the range A1:D10
-MATCH Function
-Syntax: =MATCH(lookup_value, lookup_array, [match_type])Returns the POSITION (row number) of a value within a range. match_type: 0 = exact match (use this always for lookup purposes)=MATCH("E002", A1:A10, 0) -> Returns 2 (E002 is in position 2 of the array)
-INDEX + MATCH Combined
-Syntax: =INDEX(return_range, MATCH(lookup_value, lookup_range, 0))MATCH finds the ROW NUMBER, INDEX uses that row number to get the VALUE. This is more flexible than VLOOKUP — can look in any direction.Example: INDEX+MATCH ExampleGoal: Find salary for 'E003'=INDEX(D2:D5, MATCH("E003", A2:A5, 0))MATCH finds E003 is at position 3 in A2:A5.INDEX returns D2:D5[3] = ₹ 52,000Advanced — Two-way lookup (row AND column):=INDEX(B2:D5, MATCH("E003",A2:A5,0), MATCH("Salary",B1:D1,0))Finds the intersection of row E003 and column Salary.9.5 LOOKUP FunctionSyntax: =INDEX(return_range, MATCH(lookup_value, lookup_range, 0))MATCH finds the ROW NUMBER, INDEX uses that row number to get the VALUE. This is more flexible than VLOOKUP — can look in any direction.Example: INDEX+MATCH ExampleGoal: Find salary for 'E003'=INDEX(D2:D5, MATCH("E003", A2:A5, 0))MATCH finds E003 is at position 3 in A2:A5.INDEX returns D2:D5[3] = ₹ 52,000Advanced — Two-way lookup (row AND column):=INDEX(B2:D5, MATCH("E003",A2:A5,0), MATCH("Salary",B1:D1,0))Finds the intersection of row E003 and column Salary.9.5 LOOKUP FunctionSyntax: =LOOKUP(lookup_value, lookup_vector, [result_vector])An older, simpler lookup function. Searches a single row or column and returns a value. Assumes data is sorted in ascending order. Use XLOOKUP instead for new work.Syntax: =LOOKUP(lookup_value, lookup_vector, [result_vector])An older, simpler lookup function. Searches a single row or column and returns a value. Assumes data is sorted in ascending order. Use XLOOKUP instead for new work.`,
+**INDEX Function**
+Syntax: `=INDEX(array, row_num, [col_num])` — Returns the value at a specific position in a range.
+`=INDEX(A1:D10, 3, 2)` → Returns the value in row 3, column 2
+
+**MATCH Function**
+Syntax: `=MATCH(lookup_value, lookup_array, [match_type])` — Returns the POSITION of a value within a range. Use match_type=0 for exact match.
+`=MATCH("E002", A1:A10, 0)` → Returns 2 (E002 is in position 2)
+
+**INDEX + MATCH Combined**
+Syntax: `=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`
+MATCH finds the row number; INDEX uses it to return the value. More flexible than VLOOKUP — can look in any direction.
+
+:::scenario
+**Example: INDEX+MATCH — Find salary for 'E003'**
+`=INDEX(D2:D5, MATCH("E003", A2:A5, 0))` → ₹ 52,000
+MATCH finds E003 at position 3; INDEX returns D2:D5[3].
+
+**Advanced — Two-way lookup:**
+`=INDEX(B2:D5, MATCH("E003",A2:A5,0), MATCH("Salary",B1:D1,0))`
+Finds the intersection of row E003 and column Salary.
+:::
+
+## 9.5 LOOKUP Function
+Syntax: `=LOOKUP(lookup_value, lookup_vector, [result_vector])`
+An older, simpler lookup function. Searches a single row or column. Assumes data is sorted in ascending order. Use XLOOKUP instead for new work.`,
 
 11: `# Date & Time Functions
 
@@ -613,8 +814,23 @@ Excel stores dates as serial numbers (e.g., January 1, 2024 = 45292) and times a
 | NETWORKDAYS | =NETWORKDAYS(start, end) | Working days between two dates | =NETWORKDAYS(A1,B1) -> excludes weekends |
 | WORKDAY | =WORKDAY(start, days) | Date N working days from start | =WORKDAY(TODAY(),10) -> 10 working days later |
 
-DATEDIF — The Hidden Age/Duration CalculatorDATEDIF — The Hidden Age/Duration CalculatorSyntax: =DATEDIF(start_date, end_date, unit)unit options:"Y" = complete years between dates "M" = complete months between dates "D" = days between dates"YM" = months remaining after years "MD" = days remaining after monthsSyntax: =DATEDIF(start_date, end_date, unit)unit options:"Y" = complete years between dates "M" = complete months between dates "D" = days between dates"YM" = months remaining after years "MD" = days remaining after months
-Example: Calculate Employee Age and ExperienceA2 = Date of Birth: 15-Jun-1990  B2 = Date of Joining: 01-Mar-2015Age: =DATEDIF(A2, TODAY(), "Y")  -> 35 yearsExperience: =DATEDIF(B2, TODAY(), "Y") -> 11 yearsFull age: =DATEDIF(A2,TODAY(),"Y")&" yrs "&DATEDIF;(A2,TODAY(),"YM")&" months"
+### DATEDIF — The Hidden Age/Duration Calculator
+
+Syntax: `=DATEDIF(start_date, end_date, unit)`
+
+Unit options:
+- `"Y"` = complete years between dates
+- `"M"` = complete months between dates
+- `"D"` = days between dates
+- `"YM"` = months remaining after years
+- `"MD"` = days remaining after months
+:::scenario
+**Example: Calculate Employee Age and Experience**
+- A2 = Date of Birth: 15-Jun-1990 | B2 = Date of Joining: 01-Mar-2015
+- Age: `=DATEDIF(A2, TODAY(), "Y")` → 35 years
+- Experience: `=DATEDIF(B2, TODAY(), "Y")` → 11 years
+- Full age: `=DATEDIF(A2,TODAY(),"Y")&" yrs "&DATEDIF(A2,TODAY(),"YM")&" months"`
+:::
 Dynamic Date & Time Functions
 
 | TODAY | =TODAY() |  |
@@ -745,7 +961,7 @@ Date Component Extraction Functions
 
 ## 11.1. WHAT IS A PIVOT TABLE?
 
-DefinitionA Pivot Table is an interactive Excel tool that lets you automatically sort, count, total, or average data stored in a table or spreadsheet — and display the summarized results in a new table. It allows you to 'pivot' (rotate) the data to view it from different perspectives without writing any formulas.
+**Definition:** A Pivot Table is an interactive Excel tool that lets you automatically sort, count, total, or average data stored in a table or spreadsheet — and display the summarized results in a new table. It allows you to 'pivot' (rotate) the data to view it from different perspectives without writing any formulas.
 
 ![PivotTable creation](/Excel_images/eimg15.png)
 
@@ -769,11 +985,13 @@ DefinitionA Pivot Table is an interactive Excel tool that lets you automatically
 | VALUES | Performs calculations — Sum, Count, Average, Max, Min, etc. |
 | FILTERS | Acts as a page-level filter — filters the entire pivot at once. |
 
-Understand why Pivot Tables are the #1 analyst toolKnow the 4 areas: Rows, Columns, Values, FiltersRecognise when to use a Pivot Table vs a formula✔ OUTCOMES / WHAT YOU WILL SEE
+- Understand why Pivot Tables are the #1 analyst tool
+- Know the 4 areas: Rows, Columns, Values, Filters
+- Recognise when to use a Pivot Table vs a formula
 
 ## 11.2. THE SAMPLE DATASET
 
-About the DatasetAll examples in this module use a Sales Transactions dataset — 20 representative rows shown below (full dataset = 50 rows). It covers 4 regions, 4 products, 4 salespeople, and 12 months of data.
+**About the Dataset:** All examples in this module use a Sales Transactions dataset — 20 representative rows shown below (full dataset = 50 rows). It covers 4 regions, 4 products, 4 salespeople, and 12 months of data.
 
 ## Column Descriptions
 
@@ -822,7 +1040,7 @@ About the DatasetAll examples in this module use a Sales Transactions dataset �
 
 ## 11.3. CREATING YOUR FIRST PIVOT TABLE
 
-What You Will BuildBy the end of this section you will create a pivot table that shows Total Revenue by Region and Product — a classic analyst view.
+**What You Will Build:** By the end of this section you will create a pivot table that shows Total Revenue by Region and Product — a classic analyst view.
 
 ## Step-by-Step: Insert a Pivot Table
 
@@ -1196,11 +1414,20 @@ Green = high score, Yellow = midrange, Red = low — visible without reading num
 | Maximum | Highest value — gets Max colour | Number, Percent, Percentile, Formula, Automatic |
 | Type | How thresholds are calculated | Number=exact value, Percent=range%, Percentile=rank |
 
-Green-Yellow-Red gradient applied across the score column instantlyTop scores glow green, failing scores glow red — no reading requiredPercentile mode handles outliers — gradient remains evenly distributedOUTCOMES — What you will see in ExcelGreen-Yellow-Red gradient applied across the score column instantlyTop scores glow green, failing scores glow red — no reading requiredPercentile mode handles outliers — gradient remains evenly distributedOUTCOMES — What you will see in ExcelPro Tip — Percentile vs PercentPercent is based on the numeric spread (max - min). Percentile is rank-based — 50th percentile = median value. Use Percentile when data has outliers that would compress the gradient.Pro Tip — Percentile vs PercentPercent is based on the numeric spread (max - min). Percentile is rank-based — 50th percentile = median value. Use Percentile when data has outliers that would compress the gradient.Color Scale Settings (More Rules
+**Outcomes — What you will see in Excel:**
+- Green-Yellow-Red gradient applied across the score column instantly
+- Top scores glow green, failing scores glow red — no reading required
+- Percentile mode handles outliers — gradient remains evenly distributed
+
+:::tip
+**Percentile vs Percent:** Percent is based on the numeric spread (max - min). Percentile is rank-based — 50th percentile = median value. Use Percentile when data has outliers that would compress the gradient.
+:::
+
+**Color Scale Settings (More Rules)**
 
 ## 12.3. DATA BARS
 
-DefinitionData Bars draw a horizontal bar inside each cell, proportional to the cell's value relative to the range. The longest bar = highest value. The cell number remains visible alongside the bar — giving exact value and visual comparison simultaneously.
+**Definition:** Data Bars draw a horizontal bar inside each cell, proportional to the cell's value relative to the range. The longest bar = highest value. The cell number remains visible alongside the bar — giving exact value and visual comparison simultaneously.
 Gradient Fill vs Solid Fill
 
 | Type | Appearance | Best For |
@@ -1404,11 +1631,16 @@ Worked Example: AND Condition — Full Row Highlight
 | ORD005 | Alice | Tablet | Rs.1,10,000 | No match |
 
 Only Laptop rows where Revenue < 2L get red fill. Both conditions must be TRUE.
-Entire rows highlighted by multi-column AND/OR conditionsCOUNTIF formula detects duplicates — no helper column neededMOD(ROW(),2) creates zebra stripes — clean alternating row coloursTODAY() in formula makes overdue date highlighting update dailyLARGE() and PERCENTILE() enable dynamic top/bottom N highlightingOUTCOMES — What you will see in Excel
+**Outcomes — What you will see in Excel:**
+- Entire rows highlighted by multi-column AND/OR conditions
+- COUNTIF formula detects duplicates — no helper column needed
+- MOD(ROW(),2) creates zebra stripes — clean alternating row colours
+- TODAY() in formula makes overdue date highlighting update daily
+- LARGE() and PERCENTILE() enable dynamic top/bottom N highlighting
 
 ## 12.8. MANAGING RULES
 
-Why Rules Management MattersA single cell can have multiple CF rules. Excel evaluates them in priority order (top of list = highest priority). Understanding how to view, edit, reorder, and delete rules is essential for maintaining correct, clean formatting — especially in shared workbooks.
+**Why Rules Management Matters:** A single cell can have multiple CF rules. Excel evaluates them in priority order (top of list = highest priority). Understanding how to view, edit, reorder, and delete rules is essential for maintaining correct, clean formatting — especially in shared workbooks.
 Manage Rules Actions
 
 | Action | Purpose | Key Note |
