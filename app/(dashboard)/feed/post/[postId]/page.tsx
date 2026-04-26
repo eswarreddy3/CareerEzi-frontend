@@ -6,7 +6,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { UserAvatar } from "@/components/user-avatar"
 import {
   ArrowLeft, MessageCircle, Clock, BookOpen,
   PenLine, Send, Loader2, Trash2, Globe, Share2,
@@ -18,7 +18,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-interface Author { id: number; name: string; role: string; branch: string | null }
+interface Author { id: number; name: string; role: string; branch: string | null; avatar?: string | null; points?: number }
 interface Comment {
   id: number; content: string; like_count: number; liked_by_me: boolean
   parent_id: number | null; replies: Comment[]; author: Author; created_at: string
@@ -181,11 +181,12 @@ function CommentItem({ comment, currentUserId, depth = 0, onDelete, onLike, onRe
   return (
     <div className={cn(depth > 0 && "ml-11 border-l-2 border-border/30 pl-4")}>
       <div className="flex gap-3">
-        <Avatar className="h-8 w-8 flex-shrink-0 ring-1 ring-border">
-          <AvatarFallback className="bg-primary/20 text-primary text-[11px] font-bold">
-            {initials(comment.author.name)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          name={comment.author.name}
+          photoUrl={comment.author.avatar}
+          size="sm"
+          points={comment.author.points}
+        />
 
         <div className="flex-1 min-w-0">
           {/* Bubble */}
@@ -242,9 +243,7 @@ function CommentItem({ comment, currentUserId, depth = 0, onDelete, onLike, onRe
           {/* Inline reply input */}
           {showReply && (
             <div className="flex items-center gap-2 mt-3">
-              <Avatar className="h-7 w-7 flex-shrink-0">
-                <AvatarFallback className="bg-primary/20 text-primary text-[10px] font-bold">Me</AvatarFallback>
-              </Avatar>
+              <UserAvatar name="Me" size="xs" />
               <div className="flex-1 relative">
                 <input
                   type="text"
@@ -472,17 +471,13 @@ export default function PostDetailPage() {
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
-              <Avatar className={cn(
-                "h-12 w-12 ring-2 ring-offset-2 ring-offset-card",
-                isOfficial ? "ring-warning/50" : "ring-primary/30"
-              )}>
-                <AvatarFallback className={cn(
-                  "font-bold text-sm",
-                  isOfficial ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary"
-                )}>
-                  {initials(post.author.name)}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                name={post.author.name}
+                photoUrl={post.author.avatar}
+                size="lg"
+                points={post.author.points}
+                fallbackClassName={cn(isOfficial ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary")}
+              />
               {isOfficial && (
                 <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-warning ring-2 ring-card">
                   <ShieldCheck className="w-2.5 h-2.5 text-white" />
@@ -638,11 +633,12 @@ export default function PostDetailPage() {
       {/* ── Sticky comment input bar (Instagram-style) ── */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <Avatar className="h-8 w-8 flex-shrink-0 ring-1 ring-border">
-            <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
-              {initials(user?.name ?? "U")}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={user?.name ?? "U"}
+            photoUrl={user?.avatar}
+            size="sm"
+            points={user?.points}
+          />
 
           <div className="flex-1 relative">
             <input

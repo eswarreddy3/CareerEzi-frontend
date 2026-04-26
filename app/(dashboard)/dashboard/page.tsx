@@ -18,6 +18,7 @@ import {
 import { getDailyQuote } from "@/lib/quotes"
 import { getLevelProgress } from "@/lib/levels"
 import { getShield } from "@/lib/shields"
+import { UserAvatar } from "@/components/user-avatar"
 import type { LucideIcon } from "lucide-react"
 
 interface DashboardData {
@@ -473,43 +474,6 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
     return ""
   }
 
-  const initials = (name: string) => name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()
-
-  const Avatar = ({ student, size, ringClass, bgClass, textClass }: {
-    student: LeaderboardEntry
-    size: "sm" | "md"
-    ringClass: string
-    bgClass: string
-    textClass: string
-  }) => {
-    const wh = size === "md" ? "w-10 h-10" : "w-7 h-7"
-    const textSize = size === "md" ? "text-xs" : "text-[9px]"
-    if (student.is_current_user) {
-      return (
-        <div className={`${wh} rounded-full flex items-center justify-center font-bold flex-shrink-0 ${ringClass} ${bgClass} ${textClass} ${textSize}`}>
-          You
-        </div>
-      )
-    }
-    const avatarUrl = resolveAvatarUrl(student.avatar)
-    if (avatarUrl) {
-      return (
-        <img src={avatarUrl} alt={student.name}
-          className={`${wh} rounded-full object-cover flex-shrink-0 ${ringClass}`}
-          onError={(e) => {
-            const el = e.target as HTMLImageElement
-            el.style.display = "none"
-            el.nextElementSibling?.removeAttribute("style")
-          }}
-        />
-      )
-    }
-    return (
-      <div className={`${wh} rounded-full flex items-center justify-center font-bold flex-shrink-0 ${ringClass} ${bgClass} ${textClass} ${textSize}`}>
-        {initials(student.name)}
-      </div>
-    )
-  }
 
   return (
     <GlassCard className="h-full">
@@ -525,10 +489,12 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
           {podiumOrder.map((s, i) => (
             <div key={s.rank} className="flex flex-col items-center gap-1">
               <span className="text-base">{podiumMedal[i]}</span>
-              <Avatar student={s} size="md"
-                ringClass={s.is_current_user ? "ring-2 ring-primary shadow-lg shadow-primary/25" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("ring")).join(" ")}
-                bgClass={s.is_current_user ? "bg-primary/20" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("bg")).join(" ")}
-                textClass={s.is_current_user ? "text-primary" : podiumAvatarStyle[i].split(" ").filter(c => c.startsWith("text")).join(" ")}
+              <UserAvatar
+                name={s.name}
+                photoUrl={s.avatar}
+                size="md"
+                points={s.points}
+                className={s.is_current_user ? "ring-2 ring-primary/60 shadow-lg shadow-primary/25" : ""}
               />
               <p className="text-[10px] text-muted-foreground font-medium truncate max-w-[60px] text-center">{s.is_current_user ? "You" : s.name.split(" ")[0]}</p>
               <div className={`w-14 rounded-t flex items-end justify-center pb-1 bg-gradient-to-t border-x border-t ${podiumH[i]} ${podiumGrad[i]}`}>
@@ -548,10 +514,11 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
               className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${s.is_current_user ? "bg-primary/10 border border-primary/25" : `bg-secondary/20 hover:bg-secondary/40 ${rankBorderColor(s.rank)}`} transition-colors`}
               initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 * i }}>
               <span className={`text-xs font-bold w-6 text-center flex-shrink-0 ${s.rank === 1 ? "text-warning" : s.rank === 2 ? "text-muted-foreground" : s.rank === 3 ? "text-streak" : "text-muted-foreground/60"}`}>#{s.rank}</span>
-              <Avatar student={s} size="sm"
-                ringClass={s.is_current_user ? "ring-1 ring-primary" : "ring-1 ring-border"}
-                bgClass={s.is_current_user ? "bg-primary/20" : "bg-secondary"}
-                textClass={s.is_current_user ? "text-primary" : "text-foreground"}
+              <UserAvatar
+                name={s.name}
+                photoUrl={s.avatar}
+                size="sm"
+                points={s.points}
               />
               <span className={`flex-1 text-xs font-medium truncate ${s.is_current_user ? "text-primary" : "text-foreground"}`}>
                 {s.is_current_user ? "You" : s.name}

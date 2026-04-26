@@ -24,7 +24,7 @@ import { useAuthStore } from "@/store/authStore"
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Author {
   id: number; name: string; role: string; branch: string | null
-  passout_year: number | null; avatar?: string | null
+  passout_year: number | null; avatar?: string | null; points?: number
 }
 interface Post {
   id: number; type: "post" | "blog"; title: string | null; content: string
@@ -281,7 +281,7 @@ function FeaturedAnnouncementCard({
               name={post.author.name}
               photoUrl={post.author.avatar}
               size="md"
-              className="ring-2 ring-primary/40 ring-offset-1 ring-offset-card"
+              points={post.author.points}
               fallbackClassName="bg-primary/20 text-primary"
             />
             <span className="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-4 h-4 rounded-full bg-primary ring-2 ring-card">
@@ -676,12 +676,7 @@ function PostCard({
                 name={post.author.name}
                 photoUrl={post.author.avatar}
                 size="md"
-                className={cn(
-                  "ring-2 ring-offset-1 ring-offset-card transition-all",
-                  isOfficial
-                    ? "ring-warning/40 group-hover:ring-warning/60"
-                    : "ring-border group-hover:ring-primary/30"
-                )}
+                points={post.author.points}
                 fallbackClassName={cn(isOfficial ? "bg-warning/20 text-warning" : "bg-primary/20 text-primary")}
               />
               {isOfficial && (

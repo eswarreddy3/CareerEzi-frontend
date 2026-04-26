@@ -594,7 +594,7 @@ export default function AdminDashboardPage() {
                 {analytics?.inactive_students.slice(0, 8).map((student) => (
                   <div key={student.id} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
                     <div className="flex items-center gap-2 min-w-0">
-                      <UserAvatar name={student.name} photoUrl={(student as any).avatar} size="xs" fallbackClassName="bg-danger/20 text-danger" />
+                      <UserAvatar name={student.name} photoUrl={(student as any).avatar} size="xs" points={(student as any).points} fallbackClassName="bg-danger/20 text-danger" />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{student.name}</p>
                         <p className="text-xs text-muted-foreground">Last: {formatLastActive(student.last_active)}</p>
