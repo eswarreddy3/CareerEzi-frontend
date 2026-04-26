@@ -318,9 +318,16 @@ function LevelModal({ initial, onSave, onClose }: {
     <Modal title={initial ? "Edit Level" : "Add Level"} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Level Name *">
-          <Input placeholder="Basics / Intermediate / Advanced"
-            className="bg-secondary/50" value={form.name}
-            onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required />
+          <Select value={form.name} onValueChange={v => setForm(p => ({ ...p, name: v }))}>
+            <SelectTrigger className="bg-secondary/50">
+              <SelectValue placeholder="Select level name" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Basics">Basics</SelectItem>
+              <SelectItem value="Intermediate">Intermediate</SelectItem>
+              <SelectItem value="Advanced">Advanced</SelectItem>
+            </SelectContent>
+          </Select>
         </Field>
         <Field label="Description">
           <Input placeholder="Optional description"
