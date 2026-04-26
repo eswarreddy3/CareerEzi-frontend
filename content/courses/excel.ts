@@ -67,7 +67,7 @@ A Worksheet is one page inside the workbook. Think of it as a single chapter in 
 
 :::scenario
 **Example: Workbook vs Worksheet**
-`Company_Finance_2024.xlsx` is the Workbook. Inside it you might have worksheets: Jan_Sales, Feb_Sales, Expenses, Summary. Each worksheet holds its own data but can reference data from other sheets.
+\`Company_Finance_2024.xlsx\` is the Workbook. Inside it you might have worksheets: Jan_Sales, Feb_Sales, Expenses, Summary. Each worksheet holds its own data but can reference data from other sheets.
 :::
 
 ## 1.2 Rows, Columns, and Cells
@@ -154,7 +154,7 @@ Your header now looks like a professional table.
 ## 2.2 Cell Formatting — Currency, Date, Percent
 When you type a number like 1234.5, Excel stores it as a plain number. You can format it to display as $1,234.50 or 123,450% without changing the actual stored value.
 
-**Format Cells Shortcut:** `Ctrl + 1` (or right-click cell → Format Cells) — Opens the Format Cells dialog box where you can set Number, Alignment, Font, Border, Fill.
+**Format Cells Shortcut:** \`Ctrl + 1\` (or right-click cell → Format Cells) — Opens the Format Cells dialog box where you can set Number, Alignment, Font, Border, Fill.
 
 | Format Type | Example Input | Displayed As | How to Apply |
 | --- | --- | --- | --- |
@@ -231,7 +231,7 @@ Flash Fill is like magic — Excel detects a pattern from your example and fills
 :::scenario
 **Example: Flash Fill**
 - Column A (Full Name): Alice Johnson, Bob Smith, Carol White
-- Column B (First Name): Type `Alice` in B1, then press Ctrl+E.
+- Column B (First Name): Type \`Alice\` in B1, then press Ctrl+E.
 - Result: Excel automatically fills B2 = Bob, B3 = Carol.
 
 Also works for: extracting email domains, reformatting phone numbers, combining text.
@@ -331,41 +331,41 @@ Formulas are the heart of Excel. A formula tells Excel to perform a calculation.
 :::scenario
 **Example: Sales Calculation with Formulas**
 - A1: Price per unit = 250 | B1: Quantity = 40 | C1: Discount = 10%
-- `=A1*B1` → 10000 (Gross Sales)
-- `=D1*(1-C1)` → 9000 (After Discount)
-- `=E1*0.18` → 1620 (18% GST)
+- \`=A1*B1\` → 10000 (Gross Sales)
+- \`=D1*(1-C1)\` → 9000 (After Discount)
+- \`=E1*0.18\` → 1620 (18% GST)
 :::
 
 ## 4.2 Essential Functions: SUM, AVERAGE, MAX, MIN, COUNT
 ### SUM
-Syntax: `=SUM(number1, number2, …)` or `=SUM(A1:A10)`
+Syntax: \`=SUM(number1, number2, …)\` or \`=SUM(A1:A10)\`
 Adds all numbers in the given range. The most used function in Excel.
-`=SUM(B2:B13)` → Adds all monthly sales values from B2 to B13
+\`=SUM(B2:B13)\` → Adds all monthly sales values from B2 to B13
 
 ### AVERAGE
-Syntax: `=AVERAGE(number1, number2, …)` or `=AVERAGE(A1:A10)`
+Syntax: \`=AVERAGE(number1, number2, …)\` or \`=AVERAGE(A1:A10)\`
 Calculates the arithmetic mean (sum ÷ count) of the values in the range.
-`=AVERAGE(C2:C13)` → Finds average monthly expenses
+\`=AVERAGE(C2:C13)\` → Finds average monthly expenses
 
 ### MAX
-Syntax: `=MAX(number1, number2, …)` or `=MAX(A1:A10)`
+Syntax: \`=MAX(number1, number2, …)\` or \`=MAX(A1:A10)\`
 Returns the largest (highest) value in the range.
-`=MAX(D2:D13)` → Finds the highest sales month
+\`=MAX(D2:D13)\` → Finds the highest sales month
 
 ### MIN
-Syntax: `=MIN(number1, number2, …)` or `=MIN(A1:A10)`
+Syntax: \`=MIN(number1, number2, …)\` or \`=MIN(A1:A10)\`
 Returns the smallest (lowest) value in the range.
-`=MIN(D2:D13)` → Finds the lowest sales month
+\`=MIN(D2:D13)\` → Finds the lowest sales month
 
 ### COUNT
-Syntax: `=COUNT(value1, value2, …)` or `=COUNT(A1:A10)`
+Syntax: \`=COUNT(value1, value2, …)\` or \`=COUNT(A1:A10)\`
 Counts the number of cells that contain numbers. Ignores text and blank cells.
-`=COUNT(B2:B13)` → Counts how many months have sales data entered
+\`=COUNT(B2:B13)\` → Counts how many months have sales data entered
 
 ### COUNTA
-Syntax: `=COUNTA(value1, …)`
+Syntax: \`=COUNTA(value1, …)\`
 Counts cells that are NOT empty — including text, numbers, and formulas.
-`=COUNTA(A2:A100)` → Counts how many rows have any data (names, IDs, etc.)
+\`=COUNTA(A2:A100)\` → Counts how many rows have any data (names, IDs, etc.)
 
 ## 4.3 Absolute & Relative References
 
@@ -381,8 +381,8 @@ This is one of the MOST IMPORTANT concepts in Excel. When you copy a formula to 
 :::scenario
 **Example: Tax Calculation with Absolute Reference**
 - Setup: B1 = Tax Rate (18%) | A4:A10 = Item prices
-- Formula in B4: `=A4*$B$1`
-- When you copy B4 down to B5, B6… the formula becomes `=A5*$B$1`, `=A6*$B$1`
+- Formula in B4: \`=A4*$B$1\`
+- When you copy B4 down to B5, B6… the formula becomes \`=A5*$B$1\`, \`=A6*$B$1\`
 - A4 changes (relative) but $B$1 stays fixed (absolute) — always pointing to the tax rate.
 :::
 Tip: Press F4 after typing a cell reference to cycle through: A1 -> $A$1 -> A$1 -> $A1 -> A1
@@ -567,62 +567,62 @@ Text functions help you manipulate, clean, and extract parts of text strings. Th
 | A5 | "hello world" | Proper case: Hello World |
 
 ### LEFT
-Syntax: `=LEFT(text, num_chars)` — Extracts the leftmost N characters.
-- `=LEFT("Alice Johnson", 5)` → Alice
-- `=LEFT(A1, 3)` where A1="EMP-2024" → EMP
+Syntax: \`=LEFT(text, num_chars)\` — Extracts the leftmost N characters.
+- \`=LEFT("Alice Johnson", 5)\` → Alice
+- \`=LEFT(A1, 3)\` where A1="EMP-2024" → EMP
 
 ### RIGHT
-Syntax: `=RIGHT(text, num_chars)` — Extracts the rightmost N characters.
-- `=RIGHT("EMP-2024-001", 3)` → 001
-- `=RIGHT(A3, 11)` where A3="company.com" → company.com
+Syntax: \`=RIGHT(text, num_chars)\` — Extracts the rightmost N characters.
+- \`=RIGHT("EMP-2024-001", 3)\` → 001
+- \`=RIGHT(A3, 11)\` where A3="company.com" → company.com
 
 ### MID
-Syntax: `=MID(text, start_num, num_chars)` — Extracts characters from the middle. start_num = where to start (1 = first character).
-- `=MID("EMP-2024-001", 5, 4)` → 2024 (start at position 5, take 4 characters)
+Syntax: \`=MID(text, start_num, num_chars)\` — Extracts characters from the middle. start_num = where to start (1 = first character).
+- \`=MID("EMP-2024-001", 5, 4)\` → 2024 (start at position 5, take 4 characters)
 
 ### LEN
-Syntax: `=LEN(text)` — Returns the number of characters (including spaces).
-- `=LEN("Hello World")` → 11 (5 + 1 space + 5)
-- `=LEN(A1)` → useful to check if data meets length requirements
+Syntax: \`=LEN(text)\` — Returns the number of characters (including spaces).
+- \`=LEN("Hello World")\` → 11 (5 + 1 space + 5)
+- \`=LEN(A1)\` → useful to check if data meets length requirements
 
 ### TRIM
-Syntax: `=TRIM(text)` — Removes leading, trailing, and double spaces. Keeps single spaces between words.
-- `=TRIM(" HR Manager ")` → HR Manager
+Syntax: \`=TRIM(text)\` — Removes leading, trailing, and double spaces. Keeps single spaces between words.
+- \`=TRIM(" HR Manager ")\` → HR Manager
 - Extremely useful after importing data from databases or CSV files.
 
 ### UPPER
-Syntax: `=UPPER(text)` — Converts all text to uppercase.
-- `=UPPER("alice johnson")` → ALICE JOHNSON
+Syntax: \`=UPPER(text)\` — Converts all text to uppercase.
+- \`=UPPER("alice johnson")\` → ALICE JOHNSON
 
 ### LOWER
-Syntax: `=LOWER(text)` — Converts all text to lowercase.
-- `=LOWER("ALICE JOHNSON")` → alice johnson
+Syntax: \`=LOWER(text)\` — Converts all text to lowercase.
+- \`=LOWER("ALICE JOHNSON")\` → alice johnson
 
 ### PROPER
-Syntax: `=PROPER(text)` — Capitalises the first letter of each word.
-- `=PROPER("ALICE johnson")` → Alice Johnson
+Syntax: \`=PROPER(text)\` — Capitalises the first letter of each word.
+- \`=PROPER("ALICE johnson")\` → Alice Johnson
 - Great for fixing name data entered with inconsistent capitalisation.
 
 ### CONCAT
-Syntax: `=CONCAT(text1, text2, …)` — Joins multiple text strings together. Modern replacement for & and CONCATENATE.
-- `=CONCAT(A1, " ", B1)` where A1="Alice", B1="Johnson" → Alice Johnson
+Syntax: \`=CONCAT(text1, text2, …)\` — Joins multiple text strings together. Modern replacement for & and CONCATENATE.
+- \`=CONCAT(A1, " ", B1)\` where A1="Alice", B1="Johnson" → Alice Johnson
 
 ### TEXTJOIN
-Syntax: `=TEXTJOIN(delimiter, ignore_empty, text1, text2, …)` — Joins values with a separator; ignore_empty=TRUE skips blank cells.
-- `=TEXTJOIN(", ", TRUE, A1:A5)` → Alice, Bob, Carol, Dave, Eve
+Syntax: \`=TEXTJOIN(delimiter, ignore_empty, text1, text2, …)\` — Joins values with a separator; ignore_empty=TRUE skips blank cells.
+- \`=TEXTJOIN(", ", TRUE, A1:A5)\` → Alice, Bob, Carol, Dave, Eve
 
 ### FIND
-Syntax: `=FIND(find_text, within_text, [start_num])` — Finds position of a character. Case-sensitive.
-- `=FIND("@", "alice@company.com")` → 6 (@ is at position 6)
+Syntax: \`=FIND(find_text, within_text, [start_num])\` — Finds position of a character. Case-sensitive.
+- \`=FIND("@", "alice@company.com")\` → 6 (@ is at position 6)
 - Combine with LEFT/MID to extract parts around a specific character.
 
 ### SEARCH
-Syntax: `=SEARCH(find_text, within_text, [start_num])` — Same as FIND but case-insensitive. Supports wildcards (* and ?).
-- `=SEARCH("manager", "HR Manager")` → 4 (found at position 4, case-insensitive)
+Syntax: \`=SEARCH(find_text, within_text, [start_num])\` — Same as FIND but case-insensitive. Supports wildcards (* and ?).
+- \`=SEARCH("manager", "HR Manager")\` → 4 (found at position 4, case-insensitive)
 
 ### CLEAN
-Syntax: `=CLEAN(text)` — Removes non-printable characters. Use with TRIM for thorough cleaning.
-- `=CLEAN(TRIM(A1))` → Removes invisible characters AND extra spaces in one step`,
+Syntax: \`=CLEAN(text)\` — Removes non-printable characters. Use with TRIM for thorough cleaning.
+- \`=CLEAN(TRIM(A1))\` → Removes invisible characters AND extra spaces in one step`,
 
 9: `# Logical Functions
 
@@ -631,10 +631,10 @@ Logical functions make decisions based on conditions. They are the 'if this then
 ## 8.1 IF Function
 
 ![IF function example](/Excel_images/eimg13.png)
-Syntax: `=IF(logical_test, value_if_true, value_if_false)`
-- `logical_test` — any expression that evaluates to TRUE or FALSE (e.g., A1>50)
-- `value_if_true` — what to return when the test is TRUE
-- `value_if_false` — what to return when the test is FALSE
+Syntax: \`=IF(logical_test, value_if_true, value_if_false)\`
+- \`logical_test\` — any expression that evaluates to TRUE or FALSE (e.g., A1>50)
+- \`value_if_true\` — what to return when the test is TRUE
+- \`value_if_false\` — what to return when the test is FALSE
 
 | Scenario | Formula | Result if TRUE | Result if FALSE |
 | --- | --- | --- | --- |
@@ -647,66 +647,66 @@ Syntax: `=IF(logical_test, value_if_true, value_if_false)`
 ## 8.2 Nested IF (Multiple Conditions)
 
 You can put one IF inside another IF to handle multiple conditions — like a decision tree.
-Syntax: `=IF(test1, result1, IF(test2, result2, IF(test3, result3, default)))`
+Syntax: \`=IF(test1, result1, IF(test2, result2, IF(test3, result3, default)))\`
 Each IF is evaluated in order. The first TRUE condition's result is returned.
 
 :::scenario
 **Example: Grade Calculation with Nested IF**
-`=IF(B2>=90, "A+", IF(B2>=80, "A", IF(B2>=70, "B", IF(B2>=60, "C", "Fail"))))`
+\`=IF(B2>=90, "A+", IF(B2>=80, "A", IF(B2>=70, "B", IF(B2>=60, "C", "Fail"))))\`
 If marks=85 → First test (>=90) is FALSE → Second test (>=80) is TRUE → Returns A
 :::
 
 Note: IFS function (Topic 8.8) is cleaner than Nested IF for multiple conditions.
 
 ## 8.3 AND Function
-Syntax: `=AND(condition1, condition2, condition3, …)`
+Syntax: \`=AND(condition1, condition2, condition3, …)\`
 Returns TRUE only if ALL conditions are TRUE. Returns FALSE if even one is FALSE.
 
-`=AND(B2>50, C2="Present", D2="Submitted")` → TRUE only if marks > 50 AND attendance is Present AND assignment is Submitted.
+\`=AND(B2>50, C2="Present", D2="Submitted")\` → TRUE only if marks > 50 AND attendance is Present AND assignment is Submitted.
 
-Use inside IF: `=IF(AND(B2>50, C2>80), "Eligible", "Not Eligible")`
+Use inside IF: \`=IF(AND(B2>50, C2>80), "Eligible", "Not Eligible")\`
 
 ## 8.4 OR Function
-Syntax: `=OR(condition1, condition2, condition3, …)`
+Syntax: \`=OR(condition1, condition2, condition3, …)\`
 Returns TRUE if AT LEAST ONE condition is TRUE. Returns FALSE only if ALL are FALSE.
 
-`=IF(OR(A2="Manager", A2="Director", A2="VP"), "Senior", "Junior")` → Returns 'Senior' if the person is a Manager OR Director OR VP.
+\`=IF(OR(A2="Manager", A2="Director", A2="VP"), "Senior", "Junior")\` → Returns 'Senior' if the person is a Manager OR Director OR VP.
 
 ## 8.5 NOT Function
-Syntax: `=NOT(logical)` — Reverses the logical value. NOT(TRUE) = FALSE, NOT(FALSE) = TRUE.
+Syntax: \`=NOT(logical)\` — Reverses the logical value. NOT(TRUE) = FALSE, NOT(FALSE) = TRUE.
 
-`=IF(NOT(ISBLANK(A2)), "Has Data", "Empty")` → Returns 'Has Data' if A2 is NOT blank.
+\`=IF(NOT(ISBLANK(A2)), "Has Data", "Empty")\` → Returns 'Has Data' if A2 is NOT blank.
 
 ## 8.6 IFERROR Function
-Syntax: `=IFERROR(value, value_if_error)`
+Syntax: \`=IFERROR(value, value_if_error)\`
 If the formula produces an error (like #N/A, #DIV/0!, #VALUE!), returns the fallback value instead.
-- `=IFERROR(VLOOKUP(A2, D:F, 2, FALSE), "Not Found")` → shows 'Not Found' instead of #N/A
-- `=IFERROR(B2/C2, 0)` → returns 0 instead of #DIV/0! when C2=0
+- \`=IFERROR(VLOOKUP(A2, D:F, 2, FALSE), "Not Found")\` → shows 'Not Found' instead of #N/A
+- \`=IFERROR(B2/C2, 0)\` → returns 0 instead of #DIV/0! when C2=0
 
 ## 8.7 XOR Function
-Syntax: `=XOR(condition1, condition2, …)`
+Syntax: \`=XOR(condition1, condition2, …)\`
 Returns TRUE if an ODD number of conditions are TRUE (exclusive OR). Returns FALSE if an even number of conditions are TRUE or all are FALSE.
 
 ## 8.8 IFS Function (Modern alternative to Nested IF)
-Syntax: `=IFS(condition1, result1, condition2, result2, condition3, result3, …)`
+Syntax: \`=IFS(condition1, result1, condition2, result2, condition3, result3, …)\`
 Tests multiple conditions in order and returns the result of the first TRUE condition. Much cleaner than nested IFs.
 
-`=IFS(B2>=90, "A+", B2>=80, "A", B2>=70, "B", B2>=60, "C", TRUE, "Fail")`
-The last `TRUE` acts as the 'else' — catches everything that didn't match above.
+\`=IFS(B2>=90, "A+", B2>=80, "A", B2>=70, "B", B2>=60, "C", TRUE, "Fail")\`
+The last \`TRUE\` acts as the 'else' — catches everything that didn't match above.
 
 ## 8.9 SWITCH Function
-Syntax: `=SWITCH(expression, value1, result1, value2, result2, …, [default])`
+Syntax: \`=SWITCH(expression, value1, result1, value2, result2, …, [default])\`
 Matches an expression against a list of values and returns the corresponding result.
 
 :::scenario
 **Example: SWITCH for Day Name**
-`=SWITCH(WEEKDAY(A2), 1, "Sunday", 2, "Monday", 3, "Tuesday", 4, "Wednesday", 5, "Thursday", 6, "Friday", 7, "Saturday", "Unknown")`
+\`=SWITCH(WEEKDAY(A2), 1, "Sunday", 2, "Monday", 3, "Tuesday", 4, "Wednesday", 5, "Thursday", 6, "Friday", 7, "Saturday", "Unknown")\`
 :::
-Syntax: `=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])`
-- `lookup_value` — The value you are searching for (e.g., employee ID)
-- `table_array` — The table range to search in (e.g., A:D or $A$2:$D$100)
-- `col_index_num` — Which column to return (1=first col, 2=second col…)
-- `range_lookup` — FALSE = exact match (use this always for IDs/names), TRUE = approximate`,
+Syntax: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`
+- \`lookup_value\` — The value you are searching for (e.g., employee ID)
+- \`table_array\` — The table range to search in (e.g., A:D or $A$2:$D$100)
+- \`col_index_num\` — Which column to return (1=first col, 2=second col…)
+- \`range_lookup\` — FALSE = exact match (use this always for IDs/names), TRUE = approximate`,
 
 10: `# Lookup Functions
 
@@ -723,39 +723,39 @@ Lookup functions find and retrieve data from tables. They are the backbone of da
 | E003 | Carol | Finance | 52,000 |
 | E004 | Dave | IT | 58,000 |
 
-Syntax: `=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])`
-- `lookup_value` — The value to search for (e.g., employee ID)
-- `table_array` — The table range (e.g., A:D or $A$2:$D$100)
-- `col_index_num` — Which column to return (1=first col, 2=second col…)
-- `range_lookup` — FALSE = exact match (use this always)
+Syntax: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`
+- \`lookup_value\` — The value to search for (e.g., employee ID)
+- \`table_array\` — The table range (e.g., A:D or $A$2:$D$100)
+- \`col_index_num\` — Which column to return (1=first col, 2=second col…)
+- \`range_lookup\` — FALSE = exact match (use this always)
 
 :::scenario
 **Example: VLOOKUP on the table above**
-- `=VLOOKUP("E002", A1:D5, 2, FALSE)` → Bob (column 2 = Name)
-- `=VLOOKUP("E003", A1:D5, 3, FALSE)` → Finance (column 3 = Dept)
-- `=VLOOKUP("E004", A1:D5, 4, FALSE)` → 58,000 (column 4 = Salary)
+- \`=VLOOKUP("E002", A1:D5, 2, FALSE)\` → Bob (column 2 = Name)
+- \`=VLOOKUP("E003", A1:D5, 3, FALSE)\` → Finance (column 3 = Dept)
+- \`=VLOOKUP("E004", A1:D5, 4, FALSE)\` → 58,000 (column 4 = Salary)
 :::
 
 **Common Error:** #N/A means the lookup value was not found in the first column.
 **Note:** VLOOKUP can only look RIGHT — the lookup column must be the LEFTMOST column. For looking left, use INDEX+MATCH or XLOOKUP.
 
 ## 9.2 HLOOKUP — Horizontal Lookup
-Syntax: `=HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])`
+Syntax: \`=HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])\`
 Same as VLOOKUP but searches horizontally (across rows instead of columns). Use when your data is arranged in rows instead of columns. Less common than VLOOKUP.
 
 ## 9.3 XLOOKUP — The Modern, Best Lookup Function
 
-Syntax: `=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])`
-- `lookup_array` — Can be any column (not restricted to first!)
-- `if_not_found` — Optional: what to show if not found (e.g., 'Not Found')
-- `match_mode` — 0=exact, -1=next smaller, 1=next larger, 2=wildcard
-- `search_mode` — 1=first to last, -1=last to first (reverse search)
+Syntax: \`=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])\`
+- \`lookup_array\` — Can be any column (not restricted to first!)
+- \`if_not_found\` — Optional: what to show if not found (e.g., 'Not Found')
+- \`match_mode\` — 0=exact, -1=next smaller, 1=next larger, 2=wildcard
+- \`search_mode\` — 1=first to last, -1=last to first (reverse search)
 
 :::scenario
 **Example: XLOOKUP**
-- `=XLOOKUP("E002", A2:A5, D2:D5, "Not Found")` → ₹ 60,000
-- `=XLOOKUP("E003", A2:A5, B2:D5)` → Returns entire row (Carol, Finance, ₹ 52,000)
-- `=XLOOKUP("IT", C2:C5, B2:B5, "None", 0, -1)` → Finds LAST person in IT (reverse search)
+- \`=XLOOKUP("E002", A2:A5, D2:D5, "Not Found")\` → ₹ 60,000
+- \`=XLOOKUP("E003", A2:A5, B2:D5)\` → Returns entire row (Carol, Finance, ₹ 52,000)
+- \`=XLOOKUP("IT", C2:C5, B2:B5, "None", 0, -1)\` → Finds LAST person in IT (reverse search)
 :::
 
 | Feature | VLOOKUP | XLOOKUP |
@@ -771,29 +771,29 @@ Syntax: `=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [mat
 ## 9.4 INDEX and MATCH — The Power Combination
 
 **INDEX Function**
-Syntax: `=INDEX(array, row_num, [col_num])` — Returns the value at a specific position in a range.
-`=INDEX(A1:D10, 3, 2)` → Returns the value in row 3, column 2
+Syntax: \`=INDEX(array, row_num, [col_num])\` — Returns the value at a specific position in a range.
+\`=INDEX(A1:D10, 3, 2)\` → Returns the value in row 3, column 2
 
 **MATCH Function**
-Syntax: `=MATCH(lookup_value, lookup_array, [match_type])` — Returns the POSITION of a value within a range. Use match_type=0 for exact match.
-`=MATCH("E002", A1:A10, 0)` → Returns 2 (E002 is in position 2)
+Syntax: \`=MATCH(lookup_value, lookup_array, [match_type])\` — Returns the POSITION of a value within a range. Use match_type=0 for exact match.
+\`=MATCH("E002", A1:A10, 0)\` → Returns 2 (E002 is in position 2)
 
 **INDEX + MATCH Combined**
-Syntax: `=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`
+Syntax: \`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))\`
 MATCH finds the row number; INDEX uses it to return the value. More flexible than VLOOKUP — can look in any direction.
 
 :::scenario
 **Example: INDEX+MATCH — Find salary for 'E003'**
-`=INDEX(D2:D5, MATCH("E003", A2:A5, 0))` → ₹ 52,000
+\`=INDEX(D2:D5, MATCH("E003", A2:A5, 0))\` → ₹ 52,000
 MATCH finds E003 at position 3; INDEX returns D2:D5[3].
 
 **Advanced — Two-way lookup:**
-`=INDEX(B2:D5, MATCH("E003",A2:A5,0), MATCH("Salary",B1:D1,0))`
+\`=INDEX(B2:D5, MATCH("E003",A2:A5,0), MATCH("Salary",B1:D1,0))\`
 Finds the intersection of row E003 and column Salary.
 :::
 
 ## 9.5 LOOKUP Function
-Syntax: `=LOOKUP(lookup_value, lookup_vector, [result_vector])`
+Syntax: \`=LOOKUP(lookup_value, lookup_vector, [result_vector])\`
 An older, simpler lookup function. Searches a single row or column. Assumes data is sorted in ascending order. Use XLOOKUP instead for new work.`,
 
 11: `# Date & Time Functions
@@ -816,20 +816,20 @@ Excel stores dates as serial numbers (e.g., January 1, 2024 = 45292) and times a
 
 ### DATEDIF — The Hidden Age/Duration Calculator
 
-Syntax: `=DATEDIF(start_date, end_date, unit)`
+Syntax: \`=DATEDIF(start_date, end_date, unit)\`
 
 Unit options:
-- `"Y"` = complete years between dates
-- `"M"` = complete months between dates
-- `"D"` = days between dates
-- `"YM"` = months remaining after years
-- `"MD"` = days remaining after months
+- \`"Y"\` = complete years between dates
+- \`"M"\` = complete months between dates
+- \`"D"\` = days between dates
+- \`"YM"\` = months remaining after years
+- \`"MD"\` = days remaining after months
 :::scenario
 **Example: Calculate Employee Age and Experience**
 - A2 = Date of Birth: 15-Jun-1990 | B2 = Date of Joining: 01-Mar-2015
-- Age: `=DATEDIF(A2, TODAY(), "Y")` → 35 years
-- Experience: `=DATEDIF(B2, TODAY(), "Y")` → 11 years
-- Full age: `=DATEDIF(A2,TODAY(),"Y")&" yrs "&DATEDIF(A2,TODAY(),"YM")&" months"`
+- Age: \`=DATEDIF(A2, TODAY(), "Y")\` → 35 years
+- Experience: \`=DATEDIF(B2, TODAY(), "Y")\` → 11 years
+- Full age: \`=DATEDIF(A2,TODAY(),"Y")&" yrs "&DATEDIF(A2,TODAY(),"YM")&" months"\`
 :::
 Dynamic Date & Time Functions
 
