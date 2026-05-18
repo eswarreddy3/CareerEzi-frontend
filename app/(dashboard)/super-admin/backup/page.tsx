@@ -91,7 +91,7 @@ export default function BackupPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-bold font-serif text-foreground">Data Backup</h1>
         <p className="text-muted-foreground mt-1">
@@ -153,19 +153,20 @@ export default function BackupPage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <GlassCard>
           <h3 className="text-sm font-semibold text-foreground mb-4">Tables included in the backup</h3>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {TABLE_GROUPS.map((group, i) => (
               <motion.div
                 key={group.label}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.12 + i * 0.04 }}
+                className="p-3 rounded-xl border border-border/60 bg-secondary/30"
               >
-                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium mb-2 ${group.color}`}>
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium mb-2.5 ${group.color}`}>
                   <group.icon className="h-3 w-3" />
                   {group.label}
                 </div>
-                <div className="flex flex-wrap gap-1.5 ml-1">
+                <div className="flex flex-wrap gap-1.5">
                   {group.tables.map(t => (
                     <span
                       key={t}
