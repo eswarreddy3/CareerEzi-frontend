@@ -32,6 +32,7 @@ import {
   MessageSquare,
   BarChart2,
   Calculator,
+  Database,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -123,7 +124,10 @@ const branchAdminNavItems = [
 ]
 
 const superAdminNav: SuperAdminNav = {
-  standalone: [{ href: "/super-admin", label: "Overview", icon: Globe }],
+  standalone: [
+    { href: "/super-admin",        label: "Overview",     icon: Globe     },
+    { href: "/super-admin/backup", label: "Data Backup",  icon: Database  },
+  ],
   groups: [
     {
       label: "People & Colleges", icon: Users,
