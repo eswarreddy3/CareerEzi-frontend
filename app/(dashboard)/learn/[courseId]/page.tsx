@@ -39,6 +39,9 @@ import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { getLessonContent } from "@/content"
+import { DiceRoller } from "@/components/dice-roller"
+import { LessonParticles } from "@/components/lesson-particles"
+import { COURSE_THEMES, getCourseTheme, type ThemeVariant } from "@/lib/course-themes"
 
 interface McqQState {
   selected: number | null
@@ -658,7 +661,7 @@ function renderContent(content: string): React.ReactNode[] {
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>()
   const router = useRouter()
-  const { updateUser } = useAuthStore()
+  const { user, updateUser } = useAuthStore()
 
   const contentPanelRef = useRef<HTMLDivElement>(null)
 
@@ -685,6 +688,10 @@ export default function CourseDetailPage() {
   const [moduleAssignments, setModuleAssignments] = useState<ModuleAssignment[]>([])
   const [panelOpen, setPanelOpen] = useState(true)
 
+  // ── Course world theme (dice roller) ────────────────────────────────────────
+  const [themeIndex, setThemeIndex] = useState(0)
+  const [themeFlash, setThemeFlash] = useState(false)
+
   const MCQ_LETTERS = ["A", "B", "C", "D", "E"]
 
   useEffect(() => {
@@ -693,6 +700,21 @@ export default function CourseDetailPage() {
       .then(res => setMcqLessonCounts(res.data))
       .catch(() => {})
   }, [activeTab, courseId])
+
+  // Load saved theme index from localStorage
+  useEffect(() => {
+    if (!courseId) return
+    try {
+      const saved = localStorage.getItem(`careerezi-theme-${courseId}`)
+      if (saved !== null) {
+        const idx = parseInt(saved, 10)
+        const variants = COURSE_THEMES[courseId]?.variants
+        if (!isNaN(idx) && variants && idx < variants.length) {
+          setThemeIndex(idx)
+        }
+      }
+    } catch {}
+  }, [courseId])
 
   function normalizeMcqQuestions(raw: any[]): ApiMcqQuestion[] {
     return raw.map(q => ({
@@ -867,6 +889,18 @@ export default function CourseDetailPage() {
     }
   }
 
+  function handleRoll(newIndex: number, variant: ThemeVariant) {
+    setThemeFlash(true)
+    setTimeout(() => setThemeFlash(false), 600)
+    setThemeIndex(newIndex)
+    try {
+      localStorage.setItem(`careerezi-theme-${courseId}`, String(newIndex))
+    } catch {}
+  }
+
+  const currentTheme = getCourseTheme(courseId, themeIndex)
+  const hasTheme = Boolean(currentTheme && COURSE_THEMES[courseId])
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -905,8 +939,39 @@ export default function CourseDetailPage() {
   const isModular = ACTIVE_MODULES.length > 0
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      style={hasTheme ? {
+        ...(currentTheme!.cssVars as React.CSSProperties),
+        backgroundImage: currentTheme!.bgRadial,
+      } : {}}
+    >
+      {/* Theme-change flash */}
+      <AnimatePresence>
+        {themeFlash && (
+          <motion.div
+            key="theme-flash"
+            className="fixed inset-0 z-[60] pointer-events-none"
+            style={{ background: currentTheme?.glow ?? 'transparent' }}
+            initial={{ opacity: 0.4 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        )}
+      </AnimatePresence>
+
       <PointsBurst points={earnedPoints} show={showPointsBurst} onDone={() => setShowPointsBurst(false)} />
+
+      {/* Dice roller (only for known course worlds) */}
+      {hasTheme && (
+        <DiceRoller
+          courseId={courseId}
+          currentIndex={themeIndex}
+          userPoints={user?.points ?? 0}
+          onRoll={handleRoll}
+        />
+      )}
 
       <AnimatePresence>
         {lessonCompleteAnim && (

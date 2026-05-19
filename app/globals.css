@@ -337,6 +337,13 @@
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Course world themes — dice-roller
+   Only --primary / --ring are overridden on the page wrapper.
+   A subtle radial-gradient backgroundImage is applied inline.
+   The keyframes below are kept for future use.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 /* ── Monaco editor ────────────────────────────────────────────────────────── */
 .monaco-editor { border-radius: 0.5rem; }
 
