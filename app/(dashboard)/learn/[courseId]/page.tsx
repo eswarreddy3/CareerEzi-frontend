@@ -963,6 +963,12 @@ export default function CourseDetailPage() {
 
       <PointsBurst points={earnedPoints} show={showPointsBurst} onDone={() => setShowPointsBurst(false)} />
 
+      {/* Floating particles — themed, mouse-reactive */}
+      <LessonParticles
+        color={currentTheme?.primary ?? "#0E7070"}
+        active={hasTheme}
+      />
+
       {/* Dice roller (only for known course worlds) */}
       {hasTheme && (
         <DiceRoller
@@ -1221,9 +1227,30 @@ export default function CourseDetailPage() {
                 <div className="px-6 py-6 max-w-none">
                   {(() => {
                     const content = activeLesson.content || getLessonContent(courseId, activeLesson.order)
-                    return content
-                      ? <div className="space-y-0.5">{renderContent(content)}</div>
-                      : <p className="text-muted-foreground text-sm italic">Content coming soon for this lesson.</p>
+                    if (!content) return (
+                      <p className="text-muted-foreground text-sm italic">Content coming soon for this lesson.</p>
+                    )
+                    const elements = renderContent(content) as React.ReactElement[]
+                    return (
+                      // key on outer div resets whileInView state on lesson change
+                      <div key={activeLesson.id} className="space-y-0.5">
+                        {elements.map((el, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 18 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, margin: "-12px" }}
+                            transition={{
+                              duration: 0.38,
+                              ease: [0.25, 0.46, 0.45, 0.94],
+                              delay: Math.min(i * 0.038, 0.22),
+                            }}
+                          >
+                            {el}
+                          </motion.div>
+                        ))}
+                      </div>
+                    )
                   })()}
                 </div>
 
