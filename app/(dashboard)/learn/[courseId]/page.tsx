@@ -992,16 +992,6 @@ export default function CourseDetailPage() {
         active={hasTheme}
       />
 
-      {/* Dice roller (only for known course worlds) */}
-      {hasTheme && (
-        <DiceRoller
-          courseId={courseId}
-          currentIndex={themeIndex}
-          userPoints={user?.points ?? 0}
-          onRoll={handleRoll}
-        />
-      )}
-
       {/* Course companion mascot — right panel, evolves with progress */}
       <CourseMascot
         courseId={courseId}
@@ -1009,6 +999,17 @@ export default function CourseDetailPage() {
         onCollapsedChange={setMascotCollapsed}
         themeColor={currentTheme?.primary}
       />
+
+      {/* Dice roller — fixed top-right, slides with mascot panel */}
+      {hasTheme && (
+        <DiceRoller
+          courseId={courseId}
+          currentIndex={themeIndex}
+          userPoints={user?.points ?? 0}
+          onRoll={handleRoll}
+          rightOffset={hasMascot ? (mascotCollapsed ? 36 : 140) : 24}
+        />
+      )}
 
       <AnimatePresence>
         {lessonCompleteAnim && (
@@ -1217,15 +1218,16 @@ export default function CourseDetailPage() {
               </motion.button>
             )}
             {activeLesson ? (
-              <GlassCard className="p-0 overflow-hidden" ref={lessonCardRef}>
-                {/* Lesson scroll progress bar */}
-                <div className="h-[3px] w-full bg-border/30 overflow-hidden">
+              <>
+                {/* Lesson scroll progress bar — ABOVE the card */}
+                <div className="h-1 w-full rounded-full overflow-hidden bg-border/30 mb-2">
                   <div
-                    className="h-full bg-primary transition-[width] duration-100 ease-linear"
+                    className="h-full rounded-full bg-primary transition-[width] duration-100 ease-linear"
                     style={{ width: `${lessonScrollPct}%` }}
                   />
                 </div>
 
+                <GlassCard className="p-0 overflow-hidden" ref={lessonCardRef}>
                 {/* Lesson header */}
                 <div className="relative px-6 pt-6 pb-4 border-b border-border bg-gradient-to-r from-primary/5 via-transparent to-transparent">
                   <div className="flex items-start justify-between gap-4">
@@ -1305,6 +1307,7 @@ export default function CourseDetailPage() {
                   </div>
                 </div>
               </GlassCard>
+              </>
             ) : (
               <GlassCard className="flex flex-col items-center justify-center h-64">
                 <BookOpen className="h-10 w-10 text-muted-foreground/30 mb-3" />

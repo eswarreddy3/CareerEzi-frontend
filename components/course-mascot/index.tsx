@@ -410,159 +410,89 @@ export function CourseMascot({
           {!collapsed && (
             <motion.div
               key="panel-content"
-              className="relative flex flex-col h-full pt-8 pb-4 px-2 items-center"
+              className="relative flex flex-col h-full pt-4 pb-3 px-2 items-center overflow-hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {/* Stage badge row — badge left, help button right */}
-              <div className="flex items-center justify-between w-full mb-3 px-0.5">
-                <motion.div
-                  className="flex items-center gap-1 rounded-full px-2.5 py-1"
-                  style={{
-                    background: `${color}20`,
-                    border: `1px solid ${color}55`,
-                    boxShadow: `0 0 12px ${color}33`,
-                  }}
-                  animate={evolved ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{ duration: 0.5 }}
-                >
-                  <motion.span
-                    className="text-[7px] font-black tracking-widest"
-                    style={{ color }}
-                    animate={{ opacity: [0.7, 1, 0.7] }}
-                    transition={{ repeat: Infinity, duration: 1.4 }}
+              {/* ── TOP INFO BLOCK: always visible, never pushed out ── */}
+              <div className="w-full flex-shrink-0 px-1 space-y-1.5 mb-3">
+
+                {/* Stage badge + ? */}
+                <div className="flex items-center justify-between">
+                  <motion.div
+                    className="flex items-center gap-1 rounded-full px-2 py-0.5"
+                    style={{ background: `${color}20`, border: `1px solid ${color}55`, boxShadow: `0 0 8px ${color}33` }}
+                    animate={evolved ? { scale: [1, 1.15, 1] } : {}}
+                    transition={{ duration: 0.4 }}
                   >
-                    STAGE {STAGE_ROMAN[stage]}
-                  </motion.span>
-                  <motion.div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: color }}
-                    animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.2, 0.8] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                  />
-                </motion.div>
-
-                {/* Help (?) button — inline with stage badge */}
-                <button
-                  onClick={() => setShowHelp(v => !v)}
-                  className="w-5 h-5 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 flex-shrink-0"
-                  style={{
-                    background: `${color}20`,
-                    border: `1px solid ${color}44`,
-                  }}
-                >
-                  <Info className="w-2.5 h-2.5" style={{ color: `${color}cc` }} />
-                </button>
-              </div>
-
-              {/* Character display */}
-              <div className="relative flex-1 flex items-center justify-center w-full">
-                <motion.div
-                  className="absolute inset-0 rounded-2xl"
-                  style={{
-                    background: `radial-gradient(ellipse 80% 70% at 50% 55%, ${color}25 0%, transparent 70%)`,
-                  }}
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                />
-
-                {[...Array(6)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute rounded-full pointer-events-none"
-                    style={{
-                      width: i % 2 === 0 ? 3 : 2,
-                      height: i % 2 === 0 ? 3 : 2,
-                      background: color,
-                      left: `${15 + i * 12}%`,
-                      top: `${20 + (i * 13) % 60}%`,
-                    }}
-                    animate={{ y: [0, -8, 0, 8, 0], opacity: [0.2, 0.8, 0.2] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 2 + i * 0.4,
-                      delay: i * 0.3,
-                      ease: "easeInOut",
-                    }}
-                  />
-                ))}
-
-                <motion.div
-                  className="relative z-10"
-                  style={{ width: 108, height: 108 }}
-                  animate={{
-                    y: [0, -6, 0],
-                    filter: [
-                      `drop-shadow(0 0 8px ${color}44)`,
-                      `drop-shadow(0 0 20px ${color}88)`,
-                      `drop-shadow(0 0 8px ${color}44)`,
-                    ],
-                  }}
-                  transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
-                >
-                  <Mascot stage={stage} />
-                </motion.div>
-              </div>
-
-              {/* Character name */}
-              <div className="w-full text-center mt-2 mb-2">
-                <p className="text-[9px] font-black tracking-widest leading-tight" style={{ color }}>
-                  {COURSE_NAMES[courseId]}
-                </p>
-                <motion.p
-                  className="text-[8px] font-semibold tracking-widest mt-0.5"
-                  style={{ color: `${color}99` }}
-                  animate={{ opacity: [0.6, 1, 0.6] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  {STAGE_LABELS[stage]}
-                </motion.p>
-              </div>
-
-              {/* XP bar — compact single block */}
-              <div className="w-full px-1 mb-2">
-                {/* Row: EXP label | progress% | to-next */}
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[7px] font-bold text-muted-foreground">EXP</span>
-                  <div className="flex items-baseline gap-1">
                     <motion.span
-                      className="text-[11px] font-black leading-none"
+                      className="text-[7px] font-black tracking-widest"
                       style={{ color }}
-                      animate={evolved ? { scale: [1, 1.2, 1] } : {}}
-                      transition={{ duration: 0.4 }}
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ repeat: Infinity, duration: 1.4 }}
                     >
-                      {progress}%
+                      STAGE {STAGE_ROMAN[stage]}
                     </motion.span>
-                    <span className="text-[6px] text-muted-foreground/70">
-                      {toNext !== null ? `· ${toNext}% left` : "· MAX"}
-                    </span>
-                  </div>
+                    <motion.div
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ background: color }}
+                      animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.2, 0.8] }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                    />
+                  </motion.div>
+                  <button
+                    onClick={() => setShowHelp(v => !v)}
+                    className="relative w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 hover:opacity-80"
+                    style={{ background: `${color}20`, border: `1px solid ${color}44` }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{ border: `1px solid ${color}` }}
+                      animate={{ opacity: [0, 0.7, 0], scale: [0.9, 1.6, 1.6] }}
+                      transition={{ repeat: Infinity, duration: 2, repeatDelay: 0.8 }}
+                    />
+                    <Info className="w-2.5 h-2.5 relative z-10" style={{ color: `${color}cc` }} />
+                  </button>
                 </div>
 
-                {/* Bar */}
+                {/* EXP row */}
+                <div className="flex items-center gap-1">
+                  <span className="text-[7px] font-bold text-muted-foreground">EXP</span>
+                  <motion.span
+                    className="text-[10px] font-black ml-auto"
+                    style={{ color }}
+                    animate={evolved ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {progress}%
+                  </motion.span>
+                  <span className="text-[6px] text-muted-foreground/60">
+                    {toNext !== null ? `· ${toNext}% left` : "· MAX"}
+                  </span>
+                </div>
+
+                {/* EXP fill bar */}
                 <div className="w-full rounded-full overflow-hidden bg-border/40" style={{ height: 4 }}>
                   <motion.div
                     className="h-full rounded-full relative overflow-hidden"
-                    style={{ background: `linear-gradient(90deg, ${color}77, ${color})` }}
+                    style={{ background: `linear-gradient(90deg, ${color}66, ${color})` }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     transition={{ duration: 1.2, ease: "easeOut" }}
                   >
                     <motion.div
                       className="absolute inset-0"
-                      style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)" }}
+                      style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)" }}
                       animate={{ x: ["-100%", "200%"] }}
                       transition={{ repeat: Infinity, duration: 2, ease: "linear", repeatDelay: 2 }}
                     />
                   </motion.div>
                 </div>
-              </div>
 
-              {/* Stage track — 5 dots + roman labels */}
-              <div className="w-full px-1">
-                <div className="flex gap-1 mb-0.5">
+                {/* Stage dots */}
+                <div className="flex gap-0.5">
                   {([0, 1, 2, 3, 4] as Stage[]).map(s => (
                     <motion.div
                       key={s}
@@ -570,23 +500,84 @@ export function CourseMascot({
                       style={{
                         height: 3,
                         background: s <= stage ? STAGE_COLORS[s] : undefined,
-                        boxShadow: s === stage ? `0 0 6px ${color}` : "none",
+                        boxShadow: s === stage ? `0 0 5px ${color}` : "none",
                       }}
                       animate={s === stage ? { opacity: [0.6, 1, 0.6] } : {}}
                       transition={{ repeat: Infinity, duration: 1.2 }}
                     />
                   ))}
                 </div>
+
+                {/* Stage roman labels */}
                 <div className="flex justify-between">
                   {([0, 1, 2, 3, 4] as Stage[]).map(s => (
                     <span
                       key={s}
-                      className={`text-[6px] font-bold text-center flex-1 ${s > stage ? "text-muted-foreground/50" : ""}`}
+                      className={`text-[6px] font-bold text-center flex-1 ${s > stage ? "text-muted-foreground/40" : ""}`}
                       style={{ color: s <= stage ? STAGE_COLORS[s] : undefined }}
                     >
                       {STAGE_ROMAN[s]}
                     </span>
                   ))}
+                </div>
+
+                {/* Divider */}
+                <div className="w-full h-px" style={{ background: `${color}22` }} />
+              </div>
+
+              {/* ── CHARACTER: flex-1 fills all remaining space ── */}
+              <div className="relative flex-1 min-h-0 flex items-center justify-center w-full">
+                {/* glow */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl"
+                  style={{ background: `radial-gradient(ellipse 80% 70% at 50% 50%, ${color}12 0%, transparent 70%)` }}
+                  animate={{ opacity: [0.4, 0.8, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                />
+
+                {/* particles */}
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute rounded-full pointer-events-none"
+                    style={{
+                      width: i % 2 === 0 ? 3 : 2,
+                      height: i % 2 === 0 ? 3 : 2,
+                      background: color,
+                      left: `${15 + i * 14}%`,
+                      top: `${20 + (i * 15) % 55}%`,
+                    }}
+                    animate={{ y: [0, -7, 0, 7, 0], opacity: [0.2, 0.7, 0.2] }}
+                    transition={{ repeat: Infinity, duration: 2 + i * 0.4, delay: i * 0.3, ease: "easeInOut" }}
+                  />
+                ))}
+
+                {/* mascot SVG */}
+                <motion.div
+                  className="relative z-10"
+                  style={{ width: 96, height: 96 }}
+                  animate={{
+                    y: [0, -5, 0],
+                    filter: [`drop-shadow(0 0 3px ${color}28)`, `drop-shadow(0 0 7px ${color}44)`, `drop-shadow(0 0 3px ${color}28)`],
+                  }}
+                  transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+                >
+                  <Mascot stage={stage} />
+                </motion.div>
+
+                {/* name + stage overlaid at bottom of character zone */}
+                <div className="absolute bottom-2 left-0 right-0 text-center z-20">
+                  <p className="text-[8px] font-black tracking-widest leading-tight" style={{ color }}>
+                    {COURSE_NAMES[courseId]}
+                  </p>
+                  <motion.p
+                    className="text-[7px] tracking-widest mt-0.5"
+                    style={{ color: `${color}88` }}
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    {STAGE_LABELS[stage]}
+                  </motion.p>
                 </div>
               </div>
             </motion.div>
