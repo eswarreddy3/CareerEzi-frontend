@@ -42,6 +42,7 @@ import { getLessonContent } from "@/content"
 import { DiceRoller } from "@/components/dice-roller"
 import { LessonParticles } from "@/components/lesson-particles"
 import { COURSE_THEMES, getCourseTheme, type ThemeVariant } from "@/lib/course-themes"
+import { CourseMascot } from "@/components/course-mascot"
 
 interface McqQState {
   selected: number | null
@@ -664,6 +665,8 @@ export default function CourseDetailPage() {
   const { user, updateUser } = useAuthStore()
 
   const contentPanelRef = useRef<HTMLDivElement>(null)
+  const lessonCardRef   = useRef<HTMLDivElement>(null)
+  const [lessonScrollPct, setLessonScrollPct] = useState(0)
 
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
@@ -676,6 +679,7 @@ export default function CourseDetailPage() {
 
   const [activeTab, setActiveTab] = useState<"lessons" | "practice" | "assignment">("lessons")
   const [mcqLessonCounts, setMcqLessonCounts] = useState<Record<string, number>>({})
+  const [mascotCollapsed, setMascotCollapsed] = useState(false)
 
   // Inline MCQ state
   const [mcqTopic, setMcqTopic] = useState<{ lessonId: number; lessonTitle: string } | null>(null)
@@ -832,6 +836,22 @@ export default function CourseDetailPage() {
     }
   }, [activeLesson?.id])
 
+  // Lesson scroll progress (drives the thin bar at the top of the lesson card)
+  useEffect(() => {
+    setLessonScrollPct(0)
+    function onScroll() {
+      const card = lessonCardRef.current
+      if (!card) return
+      const rect = card.getBoundingClientRect()
+      const scrollable = rect.height - window.innerHeight
+      if (scrollable <= 0) { setLessonScrollPct(100); return }
+      setLessonScrollPct(Math.round(Math.min(100, Math.max(0, (-rect.top / scrollable) * 100))))
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [activeLesson?.id])
+
   async function markComplete() {
     if (!activeLesson || activeLesson.is_completed) return
     setCompleting(true)
@@ -938,13 +958,16 @@ export default function CourseDetailPage() {
 
   const isModular = ACTIVE_MODULES.length > 0
 
+  const MASCOT_COURSE_IDS = ["python", "sql", "dsa", "excel"]
+  const hasMascot = MASCOT_COURSE_IDS.includes(courseId)
+
   return (
     <div
-      className="space-y-6"
-      style={hasTheme ? {
-        ...(currentTheme!.cssVars as React.CSSProperties),
-        backgroundImage: currentTheme!.bgRadial,
-      } : {}}
+      className="space-y-6 transition-[padding-right] duration-300"
+      style={{
+        ...(hasTheme ? { ...(currentTheme!.cssVars as React.CSSProperties), backgroundImage: currentTheme!.bgRadial } : {}),
+        ...(hasMascot ? { paddingRight: mascotCollapsed ? 28 : 132 } : {}),
+      }}
     >
       {/* Theme-change flash */}
       <AnimatePresence>
@@ -979,6 +1002,14 @@ export default function CourseDetailPage() {
         />
       )}
 
+      {/* Course companion mascot — right panel, evolves with progress */}
+      <CourseMascot
+        courseId={courseId}
+        progress={progress}
+        onCollapsedChange={setMascotCollapsed}
+        themeColor={currentTheme?.primary}
+      />
+
       <AnimatePresence>
         {lessonCompleteAnim && (
           <motion.div
@@ -1010,15 +1041,6 @@ export default function CourseDetailPage() {
           <FeedbackModal compact triggerClassName="text-muted-foreground hover:text-primary" />
           <ProgressRing progress={progress} size={52} strokeWidth={4} />
         </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="space-y-1">
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{course.lessons_completed} of {course.total_lessons} lessons completed</span>
-          <span>{progress}%</span>
-        </div>
-        <Progress value={progress} className="h-2" />
       </div>
 
       {/* ── Tiered courses: 3-tab nav bar ──────────────────────────────────── */}
@@ -1195,7 +1217,15 @@ export default function CourseDetailPage() {
               </motion.button>
             )}
             {activeLesson ? (
-              <GlassCard className="p-0 overflow-hidden">
+              <GlassCard className="p-0 overflow-hidden" ref={lessonCardRef}>
+                {/* Lesson scroll progress bar */}
+                <div className="h-[3px] w-full bg-border/30 overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-[width] duration-100 ease-linear"
+                    style={{ width: `${lessonScrollPct}%` }}
+                  />
+                </div>
+
                 {/* Lesson header */}
                 <div className="relative px-6 pt-6 pb-4 border-b border-border bg-gradient-to-r from-primary/5 via-transparent to-transparent">
                   <div className="flex items-start justify-between gap-4">

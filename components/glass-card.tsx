@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { forwardRef } from "react"
 import type { HTMLAttributes, ReactNode } from "react"
 
 interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -8,9 +9,10 @@ interface GlassCardProps extends HTMLAttributes<HTMLDivElement> {
   glow?: boolean
 }
 
-export function GlassCard({ children, className, hover = false, glow = false, ...props }: GlassCardProps) {
-  return (
+export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
+  ({ children, className, hover = false, glow = false, ...props }, ref) => (
     <div
+      ref={ref}
       {...props}
       className={cn(
         "bg-card border border-border rounded-xl p-6",
@@ -22,4 +24,6 @@ export function GlassCard({ children, className, hover = false, glow = false, ..
       {children}
     </div>
   )
-}
+)
+
+GlassCard.displayName = "GlassCard"
