@@ -15,6 +15,23 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 
+const LOCAL_LOGOS: Record<string, string> = {
+  tcs:       '/Company_logos/tcs_logo.png',
+  wipro:     '/Company_logos/wipro_logo.png',
+  accenture: '/Company_logos/accenture_logo.png',
+  infosys: '/Company_logos/infosys_logo.png',
+  amazon:    '/Company_logos/amazon_logo.png',
+}
+
+const COMPANY_COLORS: Record<string, string> = {
+  tcs:        'from-blue-700 to-blue-900',
+  wipro:      'from-teal-500 to-emerald-600',
+  accenture:  'from-purple-600 to-violet-700',
+  infosys:    'from-cyan-500 to-blue-500',
+  amazon:     'from-orange-400 to-orange-600',
+}
+const companyColor = (slug: string, fallback: string) => COMPANY_COLORS[slug] ?? fallback
+
 interface Company {
   id: number
   name: string
@@ -32,10 +49,11 @@ interface Company {
   packages_count: number
 }
 
-// ── Smart logo: DB logo_url → name-based Clearbit → website Clearbit → letter ─
+// ── Smart logo: local file → DB logo_url → name-based Clearbit → website Clearbit → letter ─
 
 function buildLogoSources(company: Company): string[] {
   const srcs: string[] = []
+  if (LOCAL_LOGOS[company.slug]) srcs.push(LOCAL_LOGOS[company.slug])
   if (company.logo_url) srcs.push(company.logo_url)
   // Derive domain from company name (most reliable for well-known brands)
   const nameDomain = company.name.toLowerCase()
@@ -65,7 +83,7 @@ function CompanyLogoBox({ company, size = 48 }: { company: Company; size?: numbe
   // The gradient outer is ALWAYS visible (never grey), logo floats inside as a smaller white inset
   return (
     <div
-      className={cn("rounded-xl bg-gradient-to-br flex-shrink-0 flex items-center justify-center", company.logo_color)}
+      className={cn("rounded-xl bg-gradient-to-br flex-shrink-0 flex items-center justify-center", companyColor(company.slug, company.logo_color))}
       style={{ width: size, height: size }}
     >
       {currentSrc && !allFailed ? (
@@ -296,7 +314,7 @@ export default function CompanyPrepPage() {
                   <div className="h-full flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 group-hover:border-primary/35 group-hover:shadow-lg group-hover:shadow-primary/8 group-hover:-translate-y-0.5">
 
                     {/* Top gradient accent bar */}
-                    <div className={cn("h-1 bg-gradient-to-r", company.logo_color)} />
+                    <div className={cn("h-1 bg-gradient-to-r", companyColor(company.slug, company.logo_color))} />
 
                     <div className="flex flex-col flex-1 p-4">
 

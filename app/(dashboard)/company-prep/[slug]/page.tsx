@@ -15,6 +15,23 @@ import {
   FileQuestion,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+const LOCAL_LOGOS: Record<string, string> = {
+  tcs:       '/Company_logos/tcs_logo.png',
+  wipro:     '/Company_logos/wipro_logo.png',
+  accenture: '/Company_logos/accenture_logo.png',
+  infosys:   '/Company_logos/infosys_logo.png',
+  amazon:    '/Company_logos/amazon_logo.png',
+}
+
+const COMPANY_COLORS: Record<string, string> = {
+  tcs:        'from-blue-700 to-blue-900',
+  wipro:      'from-teal-500 to-emerald-600',
+  accenture:  'from-purple-600 to-violet-700',
+  infosys:    'from-cyan-500 to-blue-500',
+  amazon:     'from-orange-400 to-orange-600',
+}
+const companyColor = (slug: string, fallback: string) => COMPANY_COLORS[slug] ?? fallback
 import { toast } from "sonner"
 import api from "@/lib/api"
 
@@ -84,8 +101,9 @@ function formatCTC(min: number | null, max: number | null) {
 
 // ─── Hero Banner (with real logo + clearbit fallback) ─────────────────────────
 
-function buildLogoSources(logoUrl: string | null, website: string, name: string): string[] {
+function buildLogoSources(logoUrl: string | null, website: string, name: string, slug: string): string[] {
   const srcs: string[] = []
+  if (LOCAL_LOGOS[slug]) srcs.push(LOCAL_LOGOS[slug])
   if (logoUrl) srcs.push(logoUrl)
   const nameDomain = name.toLowerCase()
     .replace(/\s+(limited|ltd|inc|llc|corp(?:oration)?|plc|pte|pvt)\.?\s*$/i, "")
@@ -103,7 +121,7 @@ function buildLogoSources(logoUrl: string | null, website: string, name: string)
 }
 
 function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () => void }) {
-  const sources = buildLogoSources(company.logo_url, company.website, company.name)
+  const sources = buildLogoSources(company.logo_url, company.website, company.name, company.slug)
   const [srcIndex, setSrcIndex] = useState(0)
   const [allFailed, setAllFailed] = useState(false)
 
@@ -119,14 +137,14 @@ function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () =>
   ].filter(s => s.show)
 
   return (
-    <div className={cn("relative rounded-3xl overflow-hidden bg-gradient-to-br", company.logo_color)}>
+    <div className={cn("relative rounded-3xl overflow-hidden bg-gradient-to-br", companyColor(company.slug, company.logo_color))}>
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.15),transparent_55%)]" />
 
       {/* Back button */}
       <button
         onClick={onBack}
-        className="absolute top-4 left-4 z-10 w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
+        className="absolute top-4 left-4 z-20 w-9 h-9 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center text-white hover:bg-white/25 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
       </button>
