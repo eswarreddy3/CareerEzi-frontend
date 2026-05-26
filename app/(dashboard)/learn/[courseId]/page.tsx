@@ -571,12 +571,7 @@ function renderContent(content: string): React.ReactNode[] {
         </h2>
       )
     } else if (line.startsWith('# ')) {
-      elements.push(
-        <div key={key++} className="mt-2 mb-5">
-          <h1 className="text-2xl font-bold font-serif gradient-text leading-tight">{line.slice(2)}</h1>
-          <div className="h-0.5 w-16 bg-gradient-to-r from-primary to-transparent rounded-full mt-2" />
-        </div>
-      )
+      // Skip h1 — the lesson header already renders the title from the DB
     }
     // Blockquote
     else if (line.startsWith('> ')) {
