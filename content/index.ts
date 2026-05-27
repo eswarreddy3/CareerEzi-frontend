@@ -9,7 +9,7 @@ import dsaContent from "./courses/dsa"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
-  sql: sqlContent,
+  "sql-for-all": sqlContent,
   excel: excelContent,
   dsa: dsaContent,
 }

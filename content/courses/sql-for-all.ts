@@ -90,7 +90,7 @@ mysql --version
 Login to MySQL CLI:
 
 \`\`\`bash
-mysql -u root –p
+mysql -u root -p
 -- Enter your password when prompted
 \`\`\`
 
