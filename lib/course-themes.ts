@@ -49,6 +49,14 @@ export const COURSE_THEMES: Record<string, CourseThemeConfig> = {
       mkTheme('scroll',   'Ancient Scroll', '📜', 'Wisdom of data',   0, '#D97706', 217, 119,   6),
     ],
   },
+  "sql-for-all": {
+    variants: [
+      mkTheme('vault',    'Golden Vault',   '🏆', 'Unlock the data',  0, '#F59E0B', 245, 158, 11),
+      mkTheme('ice',      'Ice Database',   '❄️',  'Freeze the query', 0, '#38BDF8',  56, 189, 248),
+      mkTheme('neongrid', 'Neon Grid',      '⚡', 'Query the grid',   0, '#2DD4BF',  45, 212, 191),
+      mkTheme('scroll',   'Ancient Scroll', '📜', 'Wisdom of data',   0, '#D97706', 217, 119,   6),
+    ],
+  },
   dsa: {
     variants: [
       mkTheme('starfield', 'Starfield',    '🌌', 'Explore the cosmos', 0, '#8B5CF6', 139,  92, 246),

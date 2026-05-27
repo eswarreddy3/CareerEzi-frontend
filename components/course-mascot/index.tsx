@@ -33,10 +33,11 @@ const STAGE_COLORS: Record<Stage, string> = {
 const STAGE_THRESHOLDS = [0, 25, 50, 75, 100] as const
 
 const COURSE_EMOJI: Record<string, string> = {
-  python: "🐍",
-  sql:    "🗄️",
-  dsa:    "🤖",
-  excel:  "📊",
+  python:       "🐍",
+  sql:          "🗄️",
+  "sql-for-all": "🗄️",
+  dsa:          "🤖",
+  excel:        "📊",
 }
 
 function getStage(progress: number): Stage {
@@ -48,17 +49,19 @@ function getStage(progress: number): Stage {
 }
 
 const MASCOTS: Record<string, React.ComponentType<{ stage: Stage }>> = {
-  python: PythonMascot,
-  sql:    SqlMascot,
-  dsa:    DsaMascot,
-  excel:  ExcelMascot,
+  python:        PythonMascot,
+  sql:           SqlMascot,
+  "sql-for-all": SqlMascot,
+  dsa:           DsaMascot,
+  excel:         ExcelMascot,
 }
 
 const COURSE_NAMES: Record<string, string> = {
-  python: "PYTHON SNAKE",
-  sql:    "SQL GOLEM",
-  dsa:    "DSA ROBOT",
-  excel:  "EXCEL WIZARD",
+  python:        "PYTHON SNAKE",
+  sql:           "SQL GOLEM",
+  "sql-for-all": "SQL GOLEM",
+  dsa:           "DSA ROBOT",
+  excel:         "EXCEL WIZARD",
 }
 
 export function CourseMascot({

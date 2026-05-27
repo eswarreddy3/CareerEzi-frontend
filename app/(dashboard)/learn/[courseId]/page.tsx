@@ -953,7 +953,7 @@ export default function CourseDetailPage() {
 
   const isModular = ACTIVE_MODULES.length > 0
 
-  const MASCOT_COURSE_IDS = ["python", "sql", "dsa", "excel"]
+  const MASCOT_COURSE_IDS = ["python", "sql", "sql-for-all", "dsa", "excel"]
   const hasMascot = MASCOT_COURSE_IDS.includes(courseId)
 
   return (
