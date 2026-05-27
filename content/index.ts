@@ -3,7 +3,7 @@
 // Content is keyed by lesson order (1-based).
 
 import pythonContent from "./courses/python"
-import sqlContent from "./courses/sql"
+import sqlContent from "./courses/sql-for-all"
 import excelContent from "./courses/excel"
 import dsaContent from "./courses/dsa"
 
