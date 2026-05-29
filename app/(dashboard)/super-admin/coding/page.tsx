@@ -42,6 +42,7 @@ interface CodingProblem {
   constraints: string | null
   starter_code: StarterCode
   test_cases: TestCase[]
+  hidden_test_cases: TestCase[]
   points: number
   is_active: boolean
   created_at: string | null
@@ -78,7 +79,9 @@ const EMPTY_FORM: FormData = {
   title: "", slug: "", description: "", difficulty: "Easy",
   tags: [], examples: [{ input: "", output: "", explanation: "" }],
   constraints: "", starter_code: { python: "", javascript: "", java: "", cpp: "" },
-  test_cases: [{ input: "", expected: "" }], points: 20, is_active: true,
+  test_cases: [{ input: "", expected: "" }],
+  hidden_test_cases: [],
+  points: 20, is_active: true,
 }
 
 const TEMPLATE_JSON = [
@@ -107,7 +110,10 @@ const TEMPLATE_JSON = [
     test_cases: [
       { input: "3\n1 2 3", expected: "6" },
       { input: "1\n42",    expected: "42" },
+    ],
+    hidden_test_cases: [
       { input: "5\n-1 0 1 2 3", expected: "5" },
+      { input: "4\n1000000000 1000000000 1000000000 1000000000", expected: "4000000000" },
     ],
   },
 ]
@@ -205,7 +211,8 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                 <p className="font-medium text-foreground">Required fields per problem:</p>
                 <p className="font-mono text-[11px]">title, test_cases (array of &#123;input, expected&#125;)</p>
                 <p className="font-medium text-foreground mt-2">Optional fields:</p>
-                <p className="font-mono text-[11px]">slug, difficulty, tags, description, examples, constraints, starter_code, points</p>
+                <p className="font-mono text-[11px]">slug, difficulty, tags, description, examples, constraints, starter_code, hidden_test_cases, points</p>
+                <p className="mt-1 text-muted-foreground/70 text-[11px]">hidden_test_cases: same format as test_cases — run on submit but input/expected never shown to students.</p>
                 <p className="mt-2 text-warning/80">Existing problems (matched by slug) are updated, not duplicated.</p>
               </div>
 
@@ -308,6 +315,7 @@ function ProblemFormModal({
       test_cases: initial.test_cases?.length
         ? initial.test_cases
         : [{ input: "", expected: "" }],
+      hidden_test_cases: initial.hidden_test_cases || [],
       points: initial.points,
       is_active: initial.is_active,
     }
@@ -351,6 +359,17 @@ function ProblemFormModal({
     setForm(f => ({
       ...f,
       test_cases: f.test_cases.map((tc, idx) => idx === i ? { ...tc, [key]: val } : tc),
+    }))
+
+  // Hidden test case helpers
+  const addHiddenTestCase = () =>
+    setForm(f => ({ ...f, hidden_test_cases: [...(f.hidden_test_cases || []), { input: "", expected: "" }] }))
+  const removeHiddenTestCase = (i: number) =>
+    setForm(f => ({ ...f, hidden_test_cases: (f.hidden_test_cases || []).filter((_, idx) => idx !== i) }))
+  const setHiddenTestCase = (i: number, key: keyof TestCase, val: string) =>
+    setForm(f => ({
+      ...f,
+      hidden_test_cases: (f.hidden_test_cases || []).map((tc, idx) => idx === i ? { ...tc, [key]: val } : tc),
     }))
 
   const handleSave = async () => {
@@ -603,22 +622,22 @@ function ProblemFormModal({
             />
           </div>
 
-          {/* ── Section 5: Test Cases ── */}
+          {/* ── Section 5: Sample Test Cases ── */}
           <div className={sectionCls}>
             <div className="flex items-center justify-between">
-              <p className={sectionHeadCls}>Test Cases *</p>
-              <Button variant="outline" size="sm" onClick={addTestCase} className="h-7 text-xs">
+              <div>
+                <p className={sectionHeadCls}>Sample Test Cases *</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Shown to students when they click Run. At least one required.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={addTestCase} className="h-7 text-xs shrink-0">
                 <Plus className="h-3 w-3 mr-1" />Add
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground -mt-1">
-              Use raw stdin format for input, exact stdout for expected output.
-            </p>
-            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
               {form.test_cases.map((tc, i) => (
                 <div key={i} className="rounded-xl border border-border bg-secondary/20 p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Test Case {i + 1}</span>
+                    <span className="text-xs font-medium text-muted-foreground">Case {i + 1}</span>
                     {form.test_cases.length > 1 && (
                       <button onClick={() => removeTestCase(i)} className="text-muted-foreground hover:text-danger transition-colors">
                         <X className="h-3.5 w-3.5" />
@@ -654,6 +673,61 @@ function ProblemFormModal({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* ── Section 6: Hidden Test Cases ── */}
+          <div className={sectionCls}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={sectionHeadCls}>Hidden Test Cases</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Run on Submit only — input and expected output are never shown to students.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={addHiddenTestCase} className="h-7 text-xs shrink-0">
+                <Plus className="h-3 w-3 mr-1" />Add
+              </Button>
+            </div>
+            {(form.hidden_test_cases || []).length === 0 ? (
+              <p className="text-xs text-muted-foreground/60 italic">No hidden test cases. Click Add to create one.</p>
+            ) : (
+              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                {(form.hidden_test_cases || []).map((tc, i) => (
+                  <div key={i} className="rounded-xl border border-warning/20 bg-warning/5 p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-warning/80">🔒 Hidden {i + 1}</span>
+                      <button onClick={() => removeHiddenTestCase(i)} className="text-muted-foreground hover:text-danger transition-colors">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className={labelCls}>Input (stdin)</label>
+                        <textarea
+                          className={cn(
+                            "w-full rounded-md border border-border bg-secondary/40 px-2 py-1.5 text-xs text-foreground",
+                            "placeholder:text-muted-foreground resize-y font-mono min-h-[60px] focus:outline-none focus:ring-1 focus:ring-warning/40"
+                          )}
+                          placeholder={"5\n-1 0 1 2 3"}
+                          value={tc.input}
+                          onChange={e => setHiddenTestCase(i, "input", e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Expected (stdout)</label>
+                        <textarea
+                          className={cn(
+                            "w-full rounded-md border border-border bg-secondary/40 px-2 py-1.5 text-xs text-foreground",
+                            "placeholder:text-muted-foreground resize-y font-mono min-h-[60px] focus:outline-none focus:ring-1 focus:ring-warning/40"
+                          )}
+                          placeholder="5"
+                          value={tc.expected}
+                          onChange={e => setHiddenTestCase(i, "expected", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

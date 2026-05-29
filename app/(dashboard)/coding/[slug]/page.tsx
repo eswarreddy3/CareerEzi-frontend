@@ -54,6 +54,9 @@ interface Problem {
   constraints: string | null
   starter_code: Record<string, string>
   points: number
+  is_solved?: boolean
+  submitted_code?: string | null
+  submitted_language?: string | null
 }
 
 interface ProblemListItem {
@@ -80,6 +83,7 @@ interface TestResult {
   expectedOutput: string
   actualOutput?: string
   status: "passed" | "failed" | "pending"
+  hidden?: boolean
 }
 
 type Language = "python" | "java" | "cpp" | "javascript"
@@ -223,7 +227,14 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       .then(res => {
         const p: Problem = res.data
         setCurrentProblem(p)
-        setCode(p.starter_code?.[language] || DEFAULT_CODE[language])
+        // Pre-load last accepted submission if solved, otherwise use starter code
+        if (p.submitted_code && p.submitted_language) {
+          const lang = p.submitted_language as Language
+          setLanguage(lang)
+          setCode(p.submitted_code)
+        } else {
+          setCode(p.starter_code?.[language] || DEFAULT_CODE[language])
+        }
         return api.get(`/coding/problems/${slug}/submissions`)
       })
       .then(res => setSubmissions(res.data))
@@ -323,6 +334,10 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
         toast.success("Solution Accepted!", { description: baseDesc })
         if (milestone_bonus > 0)
           setTimeout(() => toast.success(`Milestone! +${milestone_bonus} pts — 10 problems solved!`), 800)
+        // Mark problem as solved in the sidebar list
+        setProblemsList(prev => prev.map(p =>
+          p.slug === currentProblem.slug ? { ...p, is_solved: true } : p
+        ))
       } else {
         toast.error(
           status === "runtime_error" ? "Runtime Error"
@@ -334,10 +349,11 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       if (test_results) {
         setTestResults(test_results.map((r: any, i: number) => ({
           id: i + 1,
-          input: r.input,
-          expectedOutput: r.expected,
+          input: r.hidden ? "" : r.input,
+          expectedOutput: r.hidden ? "" : r.expected,
           actualOutput: r.got,
           status: r.passed ? "passed" : "failed",
+          hidden: r.hidden ?? false,
         })))
       }
       const subsRes = await api.get(`/coding/problems/${currentProblem.slug}/submissions`)
@@ -666,7 +682,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                     <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "#040810" }}>
 
                       {/* Case / custom-input tabs */}
-                      <div className="flex items-center border-b border-white/8 px-4 overflow-x-auto shrink-0">
+                      <div className="flex items-center border-b border-white/10 px-4 overflow-x-auto shrink-0">
                         {testResults.map((tc, i) => (
                           <button
                             key={i}
@@ -674,16 +690,16 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                             className={cn(
                               "flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium transition-colors border-b-2 whitespace-nowrap",
                               consoleTab === "testcases" && selectedCase === i
-                                ? "text-foreground border-foreground/60"
-                                : "text-muted-foreground border-transparent hover:text-foreground/80"
+                                ? "text-gray-100 border-gray-300/60"
+                                : "text-gray-500 border-transparent hover:text-gray-300"
                             )}
                           >
                             <span className={cn(
                               "w-2 h-2 rounded-full",
-                              tc.status === "passed"  ? "bg-success" :
-                              tc.status === "pending" ? "bg-muted-foreground/50" : "bg-danger"
+                              tc.status === "passed"  ? "bg-green-500" :
+                              tc.status === "pending" ? "bg-gray-500" : "bg-red-500"
                             )} />
-                            Case {i + 1}
+                            {tc.hidden ? `Hidden ${i + 1}` : `Case ${i + 1}`}
                           </button>
                         ))}
                         <button
@@ -691,8 +707,8 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                           className={cn(
                             "px-3 py-2.5 text-xs font-medium transition-colors border-b-2 whitespace-nowrap",
                             consoleTab === "custom"
-                              ? "text-foreground border-foreground/60"
-                              : "text-muted-foreground border-transparent hover:text-foreground/80"
+                              ? "text-gray-100 border-gray-300/60"
+                              : "text-gray-500 border-transparent hover:text-gray-300"
                           )}
                         >
                           Custom Input
@@ -704,25 +720,33 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
 
                         {consoleTab === "testcases" && (
                           testResults.length === 0 ? (
-                            <p className="text-xs text-muted-foreground/50 font-mono py-2">
-                              &gt; Click <span className="text-primary">Run</span> to execute against test cases...
+                            <p className="text-xs text-gray-500 font-mono py-2">
+                              &gt; Click <span className="text-cyan-400">Run</span> to execute against test cases...
                             </p>
                           ) : testResults[selectedCase] ? (
                             <div className="space-y-3">
+                              {testResults[selectedCase].hidden ? (
+                                <p className="text-xs text-gray-500 font-mono py-1">
+                                  🔒 Hidden test case — input and expected output are not shown.
+                                </p>
+                              ) : (
+                                <>
+                                  <div>
+                                    <p className="text-xs text-gray-500 font-mono mb-1.5">Input =</p>
+                                    <pre className="bg-white/5 rounded-lg px-3 py-2.5 text-sm font-mono text-gray-300 whitespace-pre-wrap break-all">
+                                      {testResults[selectedCase].input}
+                                    </pre>
+                                  </div>
+                                  <div>
+                                    <p className="text-xs text-gray-500 font-mono mb-1.5">Expected Output =</p>
+                                    <pre className="bg-white/5 rounded-lg px-3 py-2.5 text-sm font-mono text-emerald-400 whitespace-pre-wrap break-all">
+                                      {testResults[selectedCase].expectedOutput}
+                                    </pre>
+                                  </div>
+                                </>
+                              )}
                               <div>
-                                <p className="text-xs text-muted-foreground/50 font-mono mb-1.5">Input =</p>
-                                <pre className="bg-white/5 rounded-lg px-3 py-2.5 text-sm font-mono text-foreground/80 whitespace-pre-wrap break-all">
-                                  {testResults[selectedCase].input}
-                                </pre>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground/50 font-mono mb-1.5">Expected Output =</p>
-                                <pre className="bg-white/5 rounded-lg px-3 py-2.5 text-sm font-mono text-emerald-400 whitespace-pre-wrap break-all">
-                                  {testResults[selectedCase].expectedOutput}
-                                </pre>
-                              </div>
-                              <div>
-                                <p className="text-xs text-muted-foreground/50 font-mono mb-1.5">Output =</p>
+                                <p className="text-xs text-gray-500 font-mono mb-1.5">Output =</p>
                                 <pre className={cn(
                                   "bg-white/5 rounded-lg px-3 py-2.5 text-sm font-mono whitespace-pre-wrap break-all",
                                   testResults[selectedCase].status === "passed" ? "text-emerald-400" : "text-red-400"
@@ -737,19 +761,19 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                         {consoleTab === "custom" && (
                           <div className="space-y-3">
                             <div>
-                              <label className="text-xs text-muted-foreground/50 font-mono mb-1.5 block">
+                              <label className="text-xs text-gray-500 font-mono mb-1.5 block">
                                 &gt; stdin
                               </label>
                               <textarea
                                 value={customInput}
                                 onChange={e => setCustomInput(e.target.value)}
                                 placeholder={"Enter input here...\n(leave empty to run against test cases)"}
-                                className="w-full h-20 bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm font-mono text-foreground placeholder:text-muted-foreground/30 resize-none focus:outline-none focus:border-primary/40 transition-colors"
+                                className="w-full h-20 bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm font-mono text-gray-200 placeholder:text-gray-600 resize-none focus:outline-none focus:border-cyan-400/40 transition-colors"
                               />
                             </div>
                             {customOutput && (
                               <div>
-                                <label className="text-xs text-muted-foreground/50 font-mono mb-1.5 block">
+                                <label className="text-xs text-gray-500 font-mono mb-1.5 block">
                                   &gt; stdout
                                 </label>
                                 <pre className="w-full min-h-10 overflow-auto bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm font-mono text-emerald-400">
