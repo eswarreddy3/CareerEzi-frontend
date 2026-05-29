@@ -338,6 +338,8 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
         setProblemsList(prev => prev.map(p =>
           p.slug === currentProblem.slug ? { ...p, is_solved: true } : p
         ))
+        // Invalidate Next.js router cache so /coding list re-fetches on navigate
+        router.refresh()
       } else {
         toast.error(
           status === "runtime_error" ? "Runtime Error"
