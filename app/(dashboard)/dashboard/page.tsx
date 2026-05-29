@@ -446,10 +446,13 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
 
   const listStudents = useMemo(() => {
     if (!leaderboard.length) return []
-    const idx = leaderboard.findIndex(s => s.is_current_user)
-    if (idx === -1) return leaderboard.slice(0, 6)
-    const start = Math.max(0, Math.min(idx - 2, leaderboard.length - 6))
-    return leaderboard.slice(start, start + 6)
+    // When podium shows top-3, exclude them from the row list to avoid duplication
+    const base = leaderboard.length >= 3 ? leaderboard.slice(3) : leaderboard
+    if (!base.length) return []
+    const idx = base.findIndex(s => s.is_current_user)
+    if (idx === -1) return base.slice(0, 6)
+    const start = Math.max(0, Math.min(idx - 2, base.length - 6))
+    return base.slice(start, start + 6)
   }, [leaderboard])
 
   const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3
@@ -508,7 +511,7 @@ function CollegeLeaderboardCard({ leaderboard }: { leaderboard: LeaderboardEntry
       {leaderboard.length === 0 ? (
         <p className="text-xs text-muted-foreground text-center py-4">No leaderboard data yet</p>
       ) : (
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-0.5">
           {listStudents.map((s, i) => (
             <motion.div key={s.rank}
               className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${s.is_current_user ? "bg-primary/10 border border-primary/25" : `bg-secondary/20 hover:bg-secondary/40 ${rankBorderColor(s.rank)}`} transition-colors`}
