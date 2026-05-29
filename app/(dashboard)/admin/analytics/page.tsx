@@ -19,6 +19,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /* ─── interfaces ─────────────────────────────────────────────────────────── */
 interface ReadinessBucket { range: string; label: string; count: number }
@@ -143,6 +145,17 @@ function SectionHead({
 }
 
 /* ─── styled select ──────────────────────────────────────────────────────── */
+const SELECT_ACTIVE_CLS: Record<string, string> = {
+  primary: "border-primary/50 bg-primary/5",
+  coding:  "border-coding/50 bg-coding/5",
+  success: "border-success/50 bg-success/5",
+}
+const SELECT_ICON_CLS: Record<string, string> = {
+  primary: "text-primary",
+  coding:  "text-coding",
+  success: "text-success",
+}
+
 function StyledSelect({ label, value, onChange, options, icon: Icon, activeColor = "primary" }: {
   label: string; value: string; onChange: (v: string) => void
   options: { label: string; value: string }[]
@@ -150,22 +163,29 @@ function StyledSelect({ label, value, onChange, options, icon: Icon, activeColor
   activeColor?: string
 }) {
   const isActive = value !== ""
-  const activeCls = isActive
-    ? `border-${activeColor}/50 bg-${activeColor}/5 text-foreground`
-    : "border-border bg-background text-foreground"
   return (
     <div className="flex flex-col gap-1.5 min-w-0">
       <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-        {Icon && <Icon className={`h-3 w-3 ${isActive ? `text-${activeColor}` : ""}`} />}
+        {Icon && <Icon className={`h-3 w-3 ${isActive ? (SELECT_ICON_CLS[activeColor] ?? SELECT_ICON_CLS.primary) : ""}`} />}
         {label}
       </span>
-      <div className="relative">
-        <select value={value} onChange={e => onChange(e.target.value)}
-          className={`w-full h-10 rounded-xl border pl-3 pr-8 text-sm appearance-none cursor-pointer outline-none transition-all hover:border-primary/50 focus:border-primary focus:ring-2 focus:ring-primary/15 ${activeCls}`}>
-          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <ChevronDown className="absolute right-2.5 top-3 h-4 w-4 text-muted-foreground pointer-events-none" />
-      </div>
+      <Select value={value || "__all__"} onValueChange={v => onChange(v === "__all__" ? "" : v)}>
+        <SelectTrigger className={cn(
+          "w-full h-10 rounded-xl border text-sm cursor-pointer transition-all hover:border-primary/50 focus-visible:ring-primary/20",
+          isActive
+            ? `${SELECT_ACTIVE_CLS[activeColor] ?? SELECT_ACTIVE_CLS.primary} text-foreground`
+            : "border-border bg-background text-foreground"
+        )}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(o => (
+            <SelectItem key={o.value || "__all__"} value={o.value || "__all__"}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
