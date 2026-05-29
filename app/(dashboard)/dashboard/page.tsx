@@ -270,7 +270,7 @@ function PlacementReadinessCard({ data }: { data: DashboardData }) {
     : Math.round(basePct * 0.80))
   const overall    = Math.round(modulePct * 0.25 + mcqPct * 0.25 + codingPct * 0.20 + assignPct * 0.15 + streakPct * 0.15)
 
-  const R = 52
+  const R = 62
   const circ = 2 * Math.PI * R
   const scoreGlow = overall >= 80 ? "#22c55e" : overall >= 60 ? "#f59e0b" : "#ef4444"
   const scoreClass = overall >= 80 ? "text-success" : overall >= 60 ? "text-warning" : "text-danger"
@@ -286,53 +286,60 @@ function PlacementReadinessCard({ data }: { data: DashboardData }) {
   ]
 
   return (
-    <GlassCard className="h-full relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none opacity-10" style={{ background: scoreGlow }} />
+    <GlassCard className="h-full flex flex-col relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl pointer-events-none opacity-10" style={{ background: scoreGlow }} />
+
+      {/* header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold font-serif text-foreground flex items-center gap-2">
           <Target className="h-4 w-4 text-primary" /> Placement Readiness
         </h3>
         <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${badgeClass}`}>{label}</span>
       </div>
-      <div className="flex items-center gap-4 mb-4">
-        <div className="relative flex-shrink-0">
-          <svg width="110" height="110" className="-rotate-90">
-            <circle cx="55" cy="55" r={R} fill="none" stroke="currentColor" className="text-secondary/60" strokeWidth="10" />
-            <motion.circle cx="55" cy="55" r={R} fill="none" stroke={scoreGlow} strokeWidth="10" strokeLinecap="round"
+
+      {/* big centred donut */}
+      <div className="flex justify-center mb-5">
+        <div className="relative">
+          <svg width="148" height="148" className="-rotate-90">
+            <circle cx="74" cy="74" r={R} fill="none" stroke="currentColor" className="text-secondary/60" strokeWidth="12" />
+            <motion.circle cx="74" cy="74" r={R} fill="none" stroke={scoreGlow} strokeWidth="12" strokeLinecap="round"
               strokeDasharray={circ}
               initial={{ strokeDashoffset: circ }}
               animate={{ strokeDashoffset: circ - (overall / 100) * circ }}
               transition={{ duration: 1.5, ease: "easeOut", delay: 0.4 }}
-              style={{ filter: `drop-shadow(0 0 10px ${scoreGlow}aa)` }}
+              style={{ filter: `drop-shadow(0 0 12px ${scoreGlow}aa)` }}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`text-3xl font-bold font-serif ${scoreClass}`}>{overall}</span>
-            <span className="text-[10px] text-muted-foreground">/ 100</span>
+            <span className={`text-4xl font-bold font-serif ${scoreClass}`}>{overall}</span>
+            <span className="text-[11px] text-muted-foreground">/ 100</span>
           </div>
         </div>
-        <div className="flex-1 space-y-2">
-          {cats.map((c, i) => (
-            <div key={c.label}>
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="text-[11px] text-muted-foreground">{c.icon} {c.label}</span>
-                <span className="text-[11px] font-semibold text-foreground">{c.pct}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-secondary/50 overflow-hidden">
-                <motion.div
-                  className={`h-full rounded-full ${c.barClass}`}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${c.pct}%` }}
-                  transition={{ duration: 1, ease: "easeOut", delay: 0.3 + i * 0.08 }}
-                  style={{ boxShadow: `0 0 6px ${c.barGlow}60` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
+
+      {/* category bars */}
+      <div className="space-y-2.5">
+        {cats.map((c, i) => (
+          <div key={c.label}>
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[11px] text-muted-foreground">{c.icon} {c.label}</span>
+              <span className="text-[11px] font-semibold text-foreground">{c.pct}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${c.barClass}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${c.pct}%` }}
+                transition={{ duration: 1, ease: "easeOut", delay: 0.3 + i * 0.08 }}
+                style={{ boxShadow: `0 0 6px ${c.barGlow}60` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
       {overall < 80 && (
-        <div className="text-xs text-muted-foreground bg-primary/8 border border-primary/15 rounded-lg px-3 py-2">
+        <div className="mt-auto pt-3 text-xs text-muted-foreground bg-primary/8 border border-primary/15 rounded-lg px-3 py-2">
           💡 <span className="text-primary font-semibold">+{80 - overall} pts</span> this week can get you to <span className="text-primary font-semibold">Elite</span> badge
         </div>
       )}
@@ -631,13 +638,13 @@ function UpcomingDrivesCard({ jobs, data }: { jobs: Job[]; data: DashboardData }
     <GlassCard className="h-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold font-serif text-foreground flex items-center gap-2">
-          <BriefcaseBusiness className="h-4 w-4 text-success" /> Upcoming Drives
+          <BriefcaseBusiness className="h-4 w-4 text-success" /> Available Jobs
         </h3>
-        <span className="text-xs bg-warning/15 text-warning px-2 py-0.5 rounded-full font-semibold border border-warning/25">{drives.length} upcoming</span>
+        <span className="text-xs bg-warning/15 text-warning px-2 py-0.5 rounded-full font-semibold border border-warning/25">{drives.length} available</span>
       </div>
       {drives.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 gap-3">
-          <p className="text-sm text-muted-foreground">No upcoming drives posted yet</p>
+          <p className="text-sm text-muted-foreground">No available jobs to apply</p>
           <Link href="/jobs">
             <button className="text-xs text-primary border border-primary/30 px-3 py-1.5 rounded-lg hover:bg-primary/10 transition-colors">
               View Jobs →
