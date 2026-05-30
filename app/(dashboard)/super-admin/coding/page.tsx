@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import {
   Upload, Trash2, Download, CheckCircle2, AlertCircle, SkipForward,
   X, Search, Code2, Loader2, RefreshCw, Plus, Pencil, RefreshCcw,
-  Terminal,
+  Terminal, Layers, GripVertical,
 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -27,12 +27,24 @@ import api from "@/lib/api"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
+interface CodingModule {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  icon: string | null
+  order: number
+  is_active: boolean
+  total_problems: number
+}
+
 interface TestCase { input: string; expected: string }
 interface Example { input: string; output: string; explanation: string }
 interface StarterCode { python: string; javascript: string; java: string; cpp: string }
 
 interface CodingProblem {
   id: number
+  module_id: number | null
   title: string
   slug: string
   description: string
@@ -55,6 +67,7 @@ interface BulkResult {
   updated: number
   skipped: number
   errors: number
+  module_id: number | null
   skipped_problems: { index: number; slug: string; reason: string }[]
   error_details: { index: number; slug: string; reason: string }[]
 }
@@ -81,7 +94,7 @@ const EMPTY_FORM: FormData = {
   constraints: "", starter_code: { python: "", javascript: "", java: "", cpp: "" },
   test_cases: [{ input: "", expected: "" }],
   hidden_test_cases: [],
-  points: 20, is_active: true,
+  points: 20, is_active: true, module_id: null,
 }
 
 const TEMPLATE_JSON = [
@@ -139,18 +152,30 @@ function downloadTemplate() {
 
 // ── Import Modal ──────────────────────────────────────────────────────────────
 
-function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function ImportModal({
+  modules,
+  onClose,
+  onSuccess,
+}: {
+  modules: CodingModule[]
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [selectedModuleId, setSelectedModuleId] = useState<string>("")
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<BulkResult | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const canUpload = !!selectedModuleId && !!file
+
   const handleUpload = async () => {
-    if (!file) return
+    if (!file || !selectedModuleId) return
     setUploading(true)
     try {
       const fd = new FormData()
       fd.append("file", file)
+      fd.append("module_id", selectedModuleId)
       const { data } = await api.post<BulkResult>("/super-admin/coding-problems/bulk", fd)
       setResult(data)
       if (data.imported > 0 || data.updated > 0) onSuccess()
@@ -160,6 +185,8 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
       setUploading(false)
     }
   }
+
+  const selectedModule = modules.find(m => String(m.id) === selectedModuleId)
 
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 overflow-y-auto">
@@ -180,31 +207,70 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
         <div className="px-4 sm:px-6 py-5 space-y-4 overflow-y-auto">
           {!result ? (
             <>
-              <div
-                onClick={() => fileRef.current?.click()}
-                className={cn(
-                  "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors",
-                  file
-                    ? "border-primary/60 bg-primary/5"
-                    : "border-border hover:border-primary/40 hover:bg-secondary/30"
+              {/* Step 1 — Module selection */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-muted-foreground">
+                  Step 1 — Select Module <span className="text-danger">*</span>
+                </label>
+                <Select value={selectedModuleId} onValueChange={setSelectedModuleId}>
+                  <SelectTrigger className={cn(
+                    "bg-secondary/40 border-border text-sm",
+                    !selectedModuleId && "text-muted-foreground"
+                  )}>
+                    <SelectValue placeholder="Choose a module for these problems…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modules.length === 0 ? (
+                      <SelectItem value="__none__" disabled>
+                        No modules — create one first
+                      </SelectItem>
+                    ) : (
+                      modules.map(m => (
+                        <SelectItem key={m.id} value={String(m.id)}>
+                          {m.icon ? `${m.icon} ` : ""}{m.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {selectedModule && (
+                  <p className="text-xs text-primary">
+                    All uploaded problems will be assigned to <strong>{selectedModule.name}</strong>.
+                  </p>
                 )}
-              >
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".json"
-                  className="hidden"
-                  onChange={e => setFile(e.target.files?.[0] ?? null)}
-                />
-                <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                {file ? (
-                  <p className="text-sm font-medium text-primary">{file.name}</p>
-                ) : (
-                  <>
-                    <p className="text-sm text-foreground font-medium">Click to select JSON file</p>
-                    <p className="text-xs text-muted-foreground mt-1">Array of problem objects (.json)</p>
-                  </>
-                )}
+              </div>
+
+              {/* Step 2 — File picker */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-muted-foreground">
+                  Step 2 — Select JSON File <span className="text-danger">*</span>
+                </label>
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  className={cn(
+                    "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors",
+                    file
+                      ? "border-primary/60 bg-primary/5"
+                      : "border-border hover:border-primary/40 hover:bg-secondary/30"
+                  )}
+                >
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={e => setFile(e.target.files?.[0] ?? null)}
+                  />
+                  <Upload className="h-7 w-7 text-muted-foreground mx-auto mb-2" />
+                  {file ? (
+                    <p className="text-sm font-medium text-primary">{file.name}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-foreground font-medium">Click to select JSON file</p>
+                      <p className="text-xs text-muted-foreground mt-1">Array of problem objects (.json)</p>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="rounded-lg bg-secondary/40 border border-border p-3 text-xs text-muted-foreground space-y-1">
@@ -212,8 +278,7 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                 <p className="font-mono text-[11px]">title, test_cases (array of &#123;input, expected&#125;)</p>
                 <p className="font-medium text-foreground mt-2">Optional fields:</p>
                 <p className="font-mono text-[11px]">slug, difficulty, tags, description, examples, constraints, starter_code, hidden_test_cases, points</p>
-                <p className="mt-1 text-muted-foreground/70 text-[11px]">hidden_test_cases: same format as test_cases — run on submit but input/expected never shown to students.</p>
-                <p className="mt-2 text-warning/80">Existing problems (matched by slug) are updated, not duplicated.</p>
+                <p className="mt-2 text-warning/80">Existing problems (matched by slug) are updated and reassigned to the selected module.</p>
               </div>
 
               <div className="flex gap-2 justify-between">
@@ -223,7 +288,7 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
-                  <Button size="sm" onClick={handleUpload} disabled={!file || uploading}>
+                  <Button size="sm" onClick={handleUpload} disabled={!canUpload || uploading}>
                     {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Upload className="h-4 w-4 mr-1.5" />}
                     Import
                   </Button>
@@ -232,6 +297,22 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
             </>
           ) : (
             <>
+              {/* Module assignment confirmation */}
+              {(() => {
+                const mod = modules.find(m => m.id === result.module_id)
+                return mod ? (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-sm text-primary">
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Assigned to <strong>{mod.icon ? `${mod.icon} ` : ""}{mod.name}</strong></span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-warning/10 border border-warning/20 text-sm text-warning">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>No module assigned — module_id was not received by the server</span>
+                  </div>
+                )
+              })()}
+
               <div className="grid grid-cols-4 gap-2">
                 <div className="info-box info-box-success p-3 text-center">
                   <CheckCircle2 className="h-4 w-4 text-success mx-auto mb-1" />
@@ -286,10 +367,12 @@ function ImportModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
 
 function ProblemFormModal({
   initial,
+  modules,
   onClose,
   onSaved,
 }: {
   initial: CodingProblem | null
+  modules: CodingModule[]
   onClose: () => void
   onSaved: () => void
 }) {
@@ -297,6 +380,7 @@ function ProblemFormModal({
   const [form, setForm] = useState<FormData>(() => {
     if (!initial) return EMPTY_FORM
     return {
+      module_id: initial.module_id ?? null,
       title: initial.title,
       slug: initial.slug,
       description: initial.description,
@@ -486,14 +570,35 @@ function ProblemFormModal({
                 />
               </div>
             </div>
-            <div>
-              <label className={labelCls}>Tags (comma-separated)</label>
-              <Input
-                className={inputCls}
-                placeholder="Array, Hash Table, Two Pointers"
-                value={tagsInput}
-                onChange={e => setTagsInput(e.target.value)}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Tags (comma-separated)</label>
+                <Input
+                  className={inputCls}
+                  placeholder="Array, Hash Table, Two Pointers"
+                  value={tagsInput}
+                  onChange={e => setTagsInput(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Module</label>
+                <Select
+                  value={form.module_id != null ? String(form.module_id) : "none"}
+                  onValueChange={v => setField("module_id", v === "none" ? null : Number(v))}
+                >
+                  <SelectTrigger className={inputCls}>
+                    <SelectValue placeholder="No module" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No module</SelectItem>
+                    {modules.map(m => (
+                      <SelectItem key={m.id} value={String(m.id)}>
+                        {m.icon ? `${m.icon} ` : ""}{m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Switch
@@ -748,15 +853,19 @@ function ProblemFormModal({
 
 function ProblemRow({
   problem,
+  modules,
   onEdit,
   onDelete,
   onToggleActive,
 }: {
   problem: CodingProblem
+  modules: CodingModule[]
   onEdit: () => void
   onDelete: () => void
   onToggleActive: () => void
 }) {
+  const assignedModule = modules.find(m => m.id === problem.module_id)
+
   return (
     <motion.div
       layout
@@ -774,7 +883,16 @@ function ProblemRow({
       {/* Title + slug */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{problem.title}</p>
-        <p className="text-xs text-muted-foreground font-mono truncate">{problem.slug}</p>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <p className="text-xs text-muted-foreground font-mono truncate">{problem.slug}</p>
+          {assignedModule ? (
+            <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded-md shrink-0 font-medium">
+              {assignedModule.icon ? `${assignedModule.icon} ` : ""}{assignedModule.name}
+            </span>
+          ) : (
+            <span className="text-[10px] text-muted-foreground/50 italic shrink-0">no module</span>
+          )}
+        </div>
       </div>
 
       {/* Difficulty */}
@@ -820,9 +938,212 @@ function ProblemRow({
   )
 }
 
+// ── Module Form Modal ─────────────────────────────────────────────────────────
+
+const EMPTY_MODULE = { name: "", slug: "", description: "", icon: "", order: 0, is_active: true }
+
+function ModuleFormModal({
+  initial,
+  onClose,
+  onSaved,
+}: {
+  initial: CodingModule | null
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const isEdit = !!initial
+  const [form, setForm] = useState(
+    initial
+      ? { name: initial.name, slug: initial.slug, description: initial.description ?? "", icon: initial.icon ?? "", order: initial.order, is_active: initial.is_active }
+      : EMPTY_MODULE
+  )
+  const [saving, setSaving] = useState(false)
+  const [slugManual, setSlugManual] = useState(isEdit)
+
+  function slugify(s: string) {
+    return s.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "")
+  }
+
+  const labelCls = "block text-xs font-medium text-muted-foreground mb-1"
+  const inputCls = "bg-secondary/40 border-border text-sm"
+
+  const handleSave = async () => {
+    if (!form.name.trim()) { toast.error("Name is required"); return }
+    if (!form.slug.trim()) { toast.error("Slug is required"); return }
+    setSaving(true)
+    try {
+      if (isEdit) {
+        await api.patch(`/super-admin/coding-modules/${initial!.id}`, form)
+        toast.success("Module updated")
+      } else {
+        await api.post("/super-admin/coding-modules", form)
+        toast.success("Module created")
+      }
+      onSaved()
+      onClose()
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error ?? "Save failed")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/70 overflow-y-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.18 }}
+        className="w-full max-w-md bg-popover border border-border rounded-2xl shadow-2xl flex flex-col my-auto"
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+          <div className="flex items-center gap-2">
+            <Layers className="h-4 w-4 text-primary" />
+            <h3 className="text-base font-semibold text-foreground">
+              {isEdit ? `Edit: ${initial!.name}` : "New Module"}
+            </h3>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Name *</label>
+              <Input
+                className={inputCls}
+                placeholder="Basics"
+                value={form.name}
+                onChange={e => {
+                  const name = e.target.value
+                  setForm(f => ({ ...f, name, slug: slugManual ? f.slug : slugify(name) }))
+                }}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Slug *</label>
+              <Input
+                className={inputCls}
+                placeholder="basics"
+                value={form.slug}
+                onChange={e => { setSlugManual(true); setForm(f => ({ ...f, slug: e.target.value })) }}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Icon (emoji)</label>
+              <Input
+                className={inputCls}
+                placeholder="💻"
+                value={form.icon}
+                onChange={e => setForm(f => ({ ...f, icon: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className={labelCls}>Order</label>
+              <Input
+                className={inputCls}
+                type="number"
+                min={0}
+                value={form.order}
+                onChange={e => setForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
+          </div>
+          <div>
+            <label className={labelCls}>Description</label>
+            <textarea
+              className="w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-y min-h-[72px] focus:outline-none focus:ring-1 focus:ring-primary/50"
+              placeholder="What students will learn in this module…"
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              checked={form.is_active}
+              onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))}
+            />
+            <span className="text-sm text-muted-foreground">
+              {form.is_active ? "Active — visible to students" : "Inactive — hidden from students"}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-border shrink-0">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
+            {isEdit ? "Save Changes" : "Create Module"}
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// ── Module Row ────────────────────────────────────────────────────────────────
+
+function ModuleRow({
+  module,
+  onEdit,
+  onDelete,
+  onToggleActive,
+}: {
+  module: CodingModule
+  onEdit: () => void
+  onDelete: () => void
+  onToggleActive: () => void
+}) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-center gap-3 px-4 py-3 rounded-xl border border-border bg-secondary/10 hover:bg-secondary/20 transition-colors"
+    >
+      <GripVertical className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+      <div className="w-8 h-8 rounded-lg bg-secondary/60 flex items-center justify-center text-lg shrink-0">
+        {module.icon || "💻"}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground truncate">{module.name}</p>
+        <p className="text-xs text-muted-foreground font-mono">{module.slug}</p>
+      </div>
+      {module.description && (
+        <p className="hidden md:block text-xs text-muted-foreground truncate max-w-[200px]">
+          {module.description}
+        </p>
+      )}
+      <span className="text-xs text-muted-foreground shrink-0">
+        {module.total_problems} problems
+      </span>
+      <span className="text-xs text-muted-foreground shrink-0">
+        Order {module.order}
+      </span>
+      <Switch checked={module.is_active} onCheckedChange={onToggleActive} className="shrink-0" />
+      <div className="flex gap-1 shrink-0">
+        <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 w-8 p-0">
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={onDelete} className="h-8 w-8 p-0 hover:text-danger">
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </motion.div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function CodingProblemsAdminPage() {
+  const [activeTab, setActiveTab] = useState<"problems" | "modules">("problems")
+
+  // ── Problems state ──────────────────────────────────────────────────────────
   const [problems, setProblems] = useState<CodingProblem[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -834,6 +1155,51 @@ export default function CodingProblemsAdminPage() {
   const [deleteTarget, setDeleteTarget] = useState<CodingProblem | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+
+  // ── Modules state ───────────────────────────────────────────────────────────
+  const [modules, setModules] = useState<CodingModule[]>([])
+  const [modulesLoading, setModulesLoading] = useState(true)
+  const [editModule, setEditModule] = useState<CodingModule | null | "new">(null)
+  const [deleteModule, setDeleteModule] = useState<CodingModule | null>(null)
+  const [deletingModule, setDeletingModule] = useState(false)
+
+  const loadModules = useCallback(async () => {
+    setModulesLoading(true)
+    try {
+      const { data } = await api.get<CodingModule[]>("/super-admin/coding-modules")
+      setModules(data)
+    } catch {
+      toast.error("Failed to load modules")
+    } finally {
+      setModulesLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { loadModules() }, [loadModules])
+
+  const handleDeleteModule = async () => {
+    if (!deleteModule) return
+    setDeletingModule(true)
+    try {
+      await api.delete(`/super-admin/coding-modules/${deleteModule.id}`)
+      toast.success("Module deleted")
+      setModules(prev => prev.filter(m => m.id !== deleteModule.id))
+    } catch {
+      toast.error("Failed to delete module")
+    } finally {
+      setDeletingModule(false)
+      setDeleteModule(null)
+    }
+  }
+
+  const handleToggleModule = async (module: CodingModule) => {
+    try {
+      await api.patch(`/super-admin/coding-modules/${module.id}`, { is_active: !module.is_active })
+      setModules(prev => prev.map(m => m.id === module.id ? { ...m, is_active: !m.is_active } : m))
+    } catch {
+      toast.error("Failed to update module")
+    }
+  }
 
   const loadProblems = useCallback(async () => {
     setLoading(true)
@@ -904,33 +1270,72 @@ export default function CodingProblemsAdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground font-serif">Coding Problems</h1>
+          <h1 className="text-2xl font-bold text-foreground font-serif">Coding</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
             {counts.total} problems &mdash;{" "}
             <span className="text-success">{counts.easy} Easy</span>,{" "}
             <span className="text-warning">{counts.medium} Medium</span>,{" "}
             <span className="text-danger">{counts.hard} Hard</span>
+            {" "}&mdash; {modules.length} modules
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={loadProblems}>
-            <RefreshCw className="h-4 w-4 mr-1.5" />
-            Refresh
-          </Button>
-          <Button variant="outline" size="sm" onClick={downloadTemplate}>
-            <Download className="h-4 w-4 mr-1.5" />
-            Template
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
-            <Upload className="h-4 w-4 mr-1.5" />
-            Import JSON
-          </Button>
-          <Button size="sm" onClick={() => setEditTarget("new")}>
-            <Plus className="h-4 w-4 mr-1.5" />
-            Add Problem
-          </Button>
+          {activeTab === "problems" ? (
+            <>
+              <Button variant="outline" size="sm" onClick={loadProblems}>
+                <RefreshCw className="h-4 w-4 mr-1.5" />
+                Refresh
+              </Button>
+              <Button variant="outline" size="sm" onClick={downloadTemplate}>
+                <Download className="h-4 w-4 mr-1.5" />
+                Template
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowImport(true)}>
+                <Upload className="h-4 w-4 mr-1.5" />
+                Import JSON
+              </Button>
+              <Button size="sm" onClick={() => setEditTarget("new")}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                Add Problem
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" size="sm" onClick={loadModules}>
+                <RefreshCw className="h-4 w-4 mr-1.5" />
+                Refresh
+              </Button>
+              <Button size="sm" onClick={() => setEditModule("new")}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                Add Module
+              </Button>
+            </>
+          )}
+          {/* this dummy closes the original button row */}
         </div>
       </div>
+
+      {/* Tab switcher */}
+      <div className="flex gap-1 border-b border-border">
+        {([["problems", Code2, "Problems"], ["modules", Layers, "Modules"]] as const).map(([tab, Icon, label]) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === tab
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Problems Tab ── */}
+      {activeTab === "problems" && (<>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
@@ -1005,6 +1410,7 @@ export default function CodingProblemsAdminPage() {
               <ProblemRow
                 key={p.id}
                 problem={p}
+                modules={modules}
                 onEdit={() => setEditTarget(p)}
                 onDelete={() => setDeleteTarget(p)}
                 onToggleActive={() => handleToggleActive(p)}
@@ -1014,10 +1420,11 @@ export default function CodingProblemsAdminPage() {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Problem modals */}
       <AnimatePresence>
         {showImport && (
           <ImportModal
+            modules={modules}
             onClose={() => setShowImport(false)}
             onSuccess={loadProblems}
           />
@@ -1025,13 +1432,14 @@ export default function CodingProblemsAdminPage() {
         {editTarget !== null && (
           <ProblemFormModal
             initial={editTarget === "new" ? null : editTarget}
+            modules={modules}
             onClose={() => setEditTarget(null)}
             onSaved={loadProblems}
           />
         )}
       </AnimatePresence>
 
-      {/* Delete confirm */}
+      {/* Delete problem confirm */}
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
         <AlertDialogContent className="bg-popover border-border">
           <AlertDialogHeader>
@@ -1054,6 +1462,76 @@ export default function CodingProblemsAdminPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      </>)}
+
+      {/* ── Modules Tab ── */}
+      {activeTab === "modules" && (
+        <div className="space-y-3">
+          {modulesLoading ? (
+            <div className="space-y-2">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : modules.length === 0 ? (
+            <GlassCard className="p-12 text-center">
+              <Layers className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-foreground font-medium">No modules yet</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Click "Add Module" to create your first coding module.
+              </p>
+            </GlassCard>
+          ) : (
+            <AnimatePresence mode="popLayout">
+              {modules.map(m => (
+                <ModuleRow
+                  key={m.id}
+                  module={m}
+                  onEdit={() => setEditModule(m)}
+                  onDelete={() => setDeleteModule(m)}
+                  onToggleActive={() => handleToggleModule(m)}
+                />
+              ))}
+            </AnimatePresence>
+          )}
+
+          {/* Module modals */}
+          <AnimatePresence>
+            {editModule !== null && (
+              <ModuleFormModal
+                initial={editModule === "new" ? null : editModule}
+                onClose={() => setEditModule(null)}
+                onSaved={loadModules}
+              />
+            )}
+          </AnimatePresence>
+
+          {/* Delete module confirm */}
+          <AlertDialog open={!!deleteModule} onOpenChange={open => !open && setDeleteModule(null)}>
+            <AlertDialogContent className="bg-popover border-border">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Module?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will delete <strong>{deleteModule?.name}</strong>. Problems in this module
+                  will be unlinked (not deleted). This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteModule}
+                  disabled={deletingModule}
+                  className="bg-danger hover:bg-danger/90 text-white"
+                >
+                  {deletingModule ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : null}
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </div>
   )
 }

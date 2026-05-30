@@ -16,25 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
-  Play,
-  Send,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  XCircle,
-  Clock,
-  List,
-  RotateCcw,
-  Loader2,
-  Terminal,
-  ChevronDown,
-  ChevronUp,
-  Star,
-  Code2,
-  X,
-  FileText,
-  History,
-  ArrowLeft,
+  Play, Send, ChevronLeft, ChevronRight, CheckCircle,
+  XCircle, Clock, List, RotateCcw, Loader2, Terminal,
+  ChevronDown, ChevronUp, Star, Code2, X, FileText,
+  History, ArrowLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -135,41 +120,31 @@ function timeAgo(iso: string): string {
 const tabTriggerCls =
   "rounded-none h-10 px-4 text-xs font-medium data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none text-muted-foreground hover:text-foreground transition-colors gap-1.5"
 
-/* ── Drag handle: vertical bar between left and right panels ── */
 function HResizeHandle() {
   return (
     <PanelResizeHandle className="group relative flex items-center justify-center w-[5px] bg-border hover:bg-primary/50 data-[resize-handle-active]:bg-primary transition-colors cursor-col-resize z-10">
       <div className="flex flex-col gap-[4px] pointer-events-none">
-        {[0, 1, 2, 3, 4].map(i => (
-          <div
-            key={i}
-            className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40 group-hover:bg-primary/80 group-data-[resize-handle-active]:bg-white transition-colors"
-          />
+        {[0,1,2,3,4].map(i => (
+          <div key={i} className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40 group-hover:bg-primary/80 group-data-[resize-handle-active]:bg-white transition-colors" />
         ))}
       </div>
     </PanelResizeHandle>
   )
 }
 
-/* ── Drag handle: horizontal bar between editor and console ── */
 function VResizeHandle({ hidden }: { hidden: boolean }) {
   return (
     <PanelResizeHandle
       disabled={hidden}
       className={cn(
         "group relative flex items-center justify-center h-[5px] transition-colors",
-        hidden
-          ? "bg-transparent cursor-default"
-          : "bg-border hover:bg-primary/50 data-[resize-handle-active]:bg-primary cursor-row-resize"
+        hidden ? "bg-transparent cursor-default" : "bg-border hover:bg-primary/50 data-[resize-handle-active]:bg-primary cursor-row-resize"
       )}
     >
       {!hidden && (
         <div className="flex flex-row gap-[4px] pointer-events-none">
-          {[0, 1, 2, 3, 4].map(i => (
-            <div
-              key={i}
-              className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40 group-hover:bg-primary/80 group-data-[resize-handle-active]:bg-white transition-colors"
-            />
+          {[0,1,2,3,4].map(i => (
+            <div key={i} className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40 group-hover:bg-primary/80 group-data-[resize-handle-active]:bg-white transition-colors" />
           ))}
         </div>
       )}
@@ -177,9 +152,9 @@ function VResizeHandle({ hidden }: { hidden: boolean }) {
   )
 }
 
-export default function CodingIDEPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
-  const router   = useRouter()
+export default function CodingIDEPage({ params }: { params: Promise<{ module: string; slug: string }> }) {
+  const { module: moduleSlug, slug } = use(params)
+  const router = useRouter()
 
   const [problemsList, setProblemsList]     = useState<ProblemListItem[]>([])
   const [currentProblem, setCurrentProblem] = useState<Problem | null>(null)
@@ -197,7 +172,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
   const [consoleTab, setConsoleTab]     = useState<"testcases" | "custom">("testcases")
   const [selectedCase, setSelectedCase] = useState(0)
 
-  /* console panel state driven by react-resizable-panels */
   const [consoleCollapsed, setConsoleCollapsed] = useState(true)
   const consolePanelRef = useRef<ImperativePanelHandle>(null)
 
@@ -206,12 +180,12 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
     [problemsList, slug]
   )
 
-  /* load problem list once for drawer + prev/next */
+  /* load problems in this module for drawer + prev/next */
   useEffect(() => {
-    api.get("/coding/problems")
-      .then(res => setProblemsList(res.data))
+    api.get(`/coding/modules/${moduleSlug}/problems`)
+      .then(res => setProblemsList(res.data.problems ?? []))
       .catch(() => {})
-  }, [])
+  }, [moduleSlug])
 
   /* reload when slug changes */
   useEffect(() => {
@@ -227,7 +201,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       .then(res => {
         const p: Problem = res.data
         setCurrentProblem(p)
-        // Pre-load last accepted submission if solved, otherwise use starter code
         if (p.submitted_code && p.submitted_language) {
           const lang = p.submitted_language as Language
           setLanguage(lang)
@@ -244,9 +217,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
 
   useEffect(() => { setSelectedCase(0) }, [testResults])
 
-  function openConsole() {
-    consolePanelRef.current?.expand()
-  }
+  function openConsole() { consolePanelRef.current?.expand() }
 
   function handleLanguageChange(newLang: Language) {
     setLanguage(newLang)
@@ -261,12 +232,13 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
   }
 
   function handlePrev() {
-    if (currentIndex > 0) router.push(`/coding/${problemsList[currentIndex - 1].slug}`)
+    if (currentIndex > 0)
+      router.push(`/coding/${moduleSlug}/${problemsList[currentIndex - 1].slug}`)
   }
 
   function handleNext() {
     if (currentIndex < problemsList.length - 1)
-      router.push(`/coding/${problemsList[currentIndex + 1].slug}`)
+      router.push(`/coding/${moduleSlug}/${problemsList[currentIndex + 1].slug}`)
   }
 
   async function handleRunCode() {
@@ -279,9 +251,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       setCustomOutput("Running...")
       try {
         const res = await api.post("/coding/run", {
-          problem_slug: currentProblem.slug,
-          language,
-          code,
+          problem_slug: currentProblem.slug, language, code,
           custom_input: customInput,
         })
         setCustomOutput(res.data.output || res.data.error || "(no output)")
@@ -294,9 +264,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       setConsoleTab("testcases")
       try {
         const res = await api.post("/coding/run", {
-          problem_slug: currentProblem.slug,
-          language,
-          code,
+          problem_slug: currentProblem.slug, language, code,
         })
         const results = res.data.test_results ?? []
         setTestResults(results.map((r: any, i: number) => ({
@@ -324,9 +292,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
     setConsoleTab("testcases")
     try {
       const res = await api.post("/coding/submit", {
-        problem_slug: currentProblem.slug,
-        language,
-        code,
+        problem_slug: currentProblem.slug, language, code,
       })
       const { status, message, test_results, points_awarded, milestone_bonus } = res.data
       if (status === "accepted") {
@@ -334,11 +300,9 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
         toast.success("Solution Accepted!", { description: baseDesc })
         if (milestone_bonus > 0)
           setTimeout(() => toast.success(`Milestone! +${milestone_bonus} pts — 10 problems solved!`), 800)
-        // Mark problem as solved in the sidebar list
         setProblemsList(prev => prev.map(p =>
           p.slug === currentProblem.slug ? { ...p, is_solved: true } : p
         ))
-        // Invalidate Next.js router cache so /coding list re-fetches on navigate
         router.refresh()
       } else {
         toast.error(
@@ -379,11 +343,10 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
       {/* ── Top Bar ── */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-card/60 backdrop-blur-sm shrink-0 gap-2">
 
-        {/* Left: back + list + prev/next */}
         <div className="flex items-center gap-1 shrink-0">
           <Button
             variant="ghost" size="sm"
-            onClick={() => router.push("/coding")}
+            onClick={() => router.push(`/coding/${moduleSlug}`)}
             className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -420,7 +383,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
           </Button>
         </div>
 
-        {/* Center: title + difficulty */}
         <div className="hidden sm:flex items-center gap-2 flex-1 justify-center min-w-0 px-4">
           {currentProblem && (
             <>
@@ -436,7 +398,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
           )}
         </div>
 
-        {/* Right: language, reset, feedback, run, submit */}
         <div className="flex items-center gap-1.5 shrink-0">
           <Select value={language} onValueChange={v => handleLanguageChange(v as Language)}>
             <SelectTrigger className="h-8 w-32 bg-secondary/50 border-border text-foreground text-xs">
@@ -486,46 +447,35 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
 
       {/* ── Resizable Panels ── */}
       <div className="flex-1 min-h-0">
-        <PanelGroup
-          direction="horizontal"
-          autoSaveId="coding-ide-h"
-          style={{ height: "100%" }}
-        >
+        <PanelGroup direction="horizontal" autoSaveId="coding-ide-h" style={{ height: "100%" }}>
 
-          {/* ── Left Panel: Problem description ── */}
           <Panel defaultSize={42} minSize={18} maxSize={70}>
             <div className="flex flex-col h-full border-r border-border">
               {loadingProblem ? (
                 <div className="flex flex-col items-center justify-center flex-1 gap-3">
                   <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                  <p className="text-sm text-muted-foreground">Loading problem...</p>
+                  <p className="text-sm text-muted-foreground">Loading problem…</p>
                 </div>
               ) : currentProblem ? (
                 <>
-                  {/* Problem header */}
                   <div className="px-5 pt-5 pb-4 border-b border-border shrink-0">
                     <h2 className="text-base font-bold text-foreground leading-snug mb-3">
                       {currentIndex + 1}. {currentProblem.title}
                     </h2>
                     <div className="flex items-center gap-2 flex-wrap">
                       {diff && (
-                        <span className={cn("chip text-xs", difficultyConfig[diff].cls)}>
-                          {diff}
-                        </span>
+                        <span className={cn("chip text-xs", difficultyConfig[diff].cls)}>{diff}</span>
                       )}
                       <span className="flex items-center gap-1 text-xs text-warning font-semibold">
                         <Star className="h-3 w-3 fill-warning" />
                         {currentProblem.points} pts
                       </span>
                       {currentProblem.tags.map(t => (
-                        <span key={t} className="text-xs text-muted-foreground bg-secondary/60 px-2 py-0.5 rounded-md font-medium">
-                          {t}
-                        </span>
+                        <span key={t} className="text-xs text-muted-foreground bg-secondary/60 px-2 py-0.5 rounded-md font-medium">{t}</span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Tabs: Description (merged) | Submissions */}
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
                     <TabsList className="shrink-0 bg-transparent border-b border-border rounded-none px-2 h-10 gap-0 justify-start">
                       <TabsTrigger value="description" className={tabTriggerCls}>
@@ -539,8 +489,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                     </TabsList>
 
                     <div className="flex-1 overflow-y-auto">
-
-                      {/* Merged description: text + examples + constraints */}
                       <TabsContent value="description" className="m-0 p-5 space-y-6">
                         <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
                           {currentProblem.description}
@@ -578,9 +526,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
 
                         {currentProblem.constraints && (
                           <div>
-                            <p className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">
-                              Constraints
-                            </p>
+                            <p className="text-xs font-semibold text-foreground mb-3 uppercase tracking-wide">Constraints</p>
                             <ul className="space-y-2">
                               {currentProblem.constraints.split("\n").filter(Boolean).map((c, i) => (
                                 <li key={i} className="flex items-start gap-2.5">
@@ -598,15 +544,11 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                           <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
                             <History className="h-8 w-8 text-muted-foreground/30" />
                             <p className="text-sm text-muted-foreground">No submissions yet</p>
-                            <p className="text-xs text-muted-foreground/60">Submit your solution to see results here</p>
                           </div>
                         ) : (
                           <div className="space-y-2">
                             {submissions.map(s => (
-                              <div
-                                key={s.id}
-                                className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors"
-                              >
+                              <div key={s.id} className="flex items-center justify-between p-3 rounded-xl border border-border bg-secondary/30 hover:bg-secondary/50 transition-colors">
                                 <span className={cn("flex items-center gap-1.5 font-semibold capitalize text-xs", statusColors[s.status] ?? "text-foreground")}>
                                   {statusIcons[s.status]}
                                   {s.status.replace("_", " ")}
@@ -621,7 +563,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                           </div>
                         )}
                       </TabsContent>
-
                     </div>
                   </Tabs>
                 </>
@@ -629,18 +570,13 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
             </div>
           </Panel>
 
-          {/* Horizontal drag handle */}
           <HResizeHandle />
 
-          {/* ── Right Panel: Editor + Console ── */}
           <Panel defaultSize={58} minSize={25}>
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-
-              {/* Vertical split: editor (top) / console content (bottom) */}
               <div style={{ flex: 1, minHeight: 0 }}>
                 <PanelGroup direction="vertical" style={{ height: "100%" }}>
 
-                  {/* Editor */}
                   <Panel defaultSize={100} minSize={25}>
                     <div style={{ height: "100%" }}>
                       <MonacoEditor
@@ -667,10 +603,8 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                     </div>
                   </Panel>
 
-                  {/* Vertical drag handle — only interactive when console is open */}
                   <VResizeHandle hidden={consoleCollapsed} />
 
-                  {/* Console content panel — collapsible */}
                   <Panel
                     ref={consolePanelRef}
                     collapsible
@@ -682,8 +616,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                     onExpand={() => setConsoleCollapsed(false)}
                   >
                     <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "#040810" }}>
-
-                      {/* Case / custom-input tabs */}
                       <div className="flex items-center border-b border-white/10 px-4 overflow-x-auto shrink-0">
                         {testResults.map((tc, i) => (
                           <button
@@ -717,9 +649,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                         </button>
                       </div>
 
-                      {/* Console body */}
                       <div className="flex-1 overflow-y-auto p-4">
-
                         {consoleTab === "testcases" && (
                           testResults.length === 0 ? (
                             <p className="text-xs text-gray-500 font-mono py-2">
@@ -763,9 +693,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                         {consoleTab === "custom" && (
                           <div className="space-y-3">
                             <div>
-                              <label className="text-xs text-gray-500 font-mono mb-1.5 block">
-                                &gt; stdin
-                              </label>
+                              <label className="text-xs text-gray-500 font-mono mb-1.5 block">&gt; stdin</label>
                               <textarea
                                 value={customInput}
                                 onChange={e => setCustomInput(e.target.value)}
@@ -775,9 +703,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                             </div>
                             {customOutput && (
                               <div>
-                                <label className="text-xs text-gray-500 font-mono mb-1.5 block">
-                                  &gt; stdout
-                                </label>
+                                <label className="text-xs text-gray-500 font-mono mb-1.5 block">&gt; stdout</label>
                                 <pre className="w-full min-h-10 overflow-auto bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm font-mono text-emerald-400">
                                   {customOutput}
                                 </pre>
@@ -785,15 +711,12 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                             )}
                           </div>
                         )}
-
                       </div>
                     </div>
                   </Panel>
-
                 </PanelGroup>
               </div>
 
-              {/* Console toggle bar — always pinned at the bottom */}
               <button
                 onClick={() => {
                   consoleCollapsed
@@ -818,18 +741,16 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                   )}
                 </div>
                 {consoleCollapsed
-                  ? <ChevronUp   className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                   : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 }
               </button>
-
             </div>
           </Panel>
-
         </PanelGroup>
       </div>
 
-      {/* ── Problem List Drawer ── */}
+      {/* Problem List Drawer */}
       <AnimatePresence>
         {showProblemList && (
           <>
@@ -868,7 +789,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                 {problemsList.map((problem, idx) => (
                   <button
                     key={problem.id}
-                    onClick={() => { router.push(`/coding/${problem.slug}`); setShowProblemList(false) }}
+                    onClick={() => { router.push(`/coding/${moduleSlug}/${problem.slug}`); setShowProblemList(false) }}
                     className={cn(
                       "w-full p-3 rounded-xl text-left transition-all hover:bg-secondary/60 group",
                       problem.slug === slug
@@ -898,9 +819,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
                         {problem.difficulty}
                       </span>
                       {problem.tags.slice(0, 1).map(t => (
-                        <span key={t} className="text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded-md">
-                          {t}
-                        </span>
+                        <span key={t} className="text-xs text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded-md">{t}</span>
                       ))}
                     </div>
                   </button>
@@ -910,7 +829,6 @@ export default function CodingIDEPage({ params }: { params: Promise<{ slug: stri
           </>
         )}
       </AnimatePresence>
-
     </div>
   )
 }

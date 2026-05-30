@@ -47,6 +47,7 @@ interface College {
   plan_type: string | null
   allowed_domain_ids: string[] | null
   allowed_course_ids: string[] | null
+  allowed_coding_module_ids: number[] | null
   student_count: number
   is_active: boolean
   activated_at: string | null
@@ -56,6 +57,14 @@ interface College {
   instagram_url: string | null
   instagram_post_embeds: string[]
   logo_url: string | null
+}
+
+interface CodingModule {
+  id: number
+  name: string
+  slug: string
+  icon: string | null
+  is_active: boolean
 }
 
 interface Package {
@@ -145,6 +154,7 @@ export default function CollegesPage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [domains, setDomains] = useState<Domain[]>([])
   const [courses, setCourses] = useState<CourseOption[]>([])
+  const [codingModules, setCodingModules] = useState<CodingModule[]>([])
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [loading, setLoading] = useState(true)
@@ -155,10 +165,11 @@ export default function CollegesPage() {
   const [selectedPackageId, setSelectedPackageId] = useState("")
   const [selectedDomainIds, setSelectedDomainIds] = useState<string[]>([])
 
-  // Edit domains + courses modal
+  // Edit domains + courses + coding modules modal
   const [editDomainCollege, setEditDomainCollege] = useState<College | null>(null)
   const [editDomainIds, setEditDomainIds] = useState<string[]>([])
   const [editCourseIds, setEditCourseIds] = useState<string[]>([])
+  const [editCodingModuleIds, setEditCodingModuleIds] = useState<number[]>([])
   const [isSavingDomains, setIsSavingDomains] = useState(false)
 
   // Social links modal
@@ -210,6 +221,7 @@ export default function CollegesPage() {
     api.get("/super-admin/packages").then((r) => setPackages(r.data)).catch(() => {})
     api.get("/domain-programs/").then((r) => setDomains(r.data)).catch(() => {})
     api.get("/super-admin/courses").then((r) => setCourses(r.data)).catch(() => {})
+    api.get("/super-admin/coding-modules").then((r) => setCodingModules(r.data)).catch(() => {})
   }, [])
 
   // ── Create college ──────────────────────────────────────────────────────────
@@ -252,6 +264,7 @@ export default function CollegesPage() {
     setEditDomainCollege(college)
     setEditDomainIds(college.allowed_domain_ids ?? [])
     setEditCourseIds(college.allowed_course_ids ?? [])
+    setEditCodingModuleIds(college.allowed_coding_module_ids ?? [])
   }
 
   const toggleEditDomain = (id: string) =>
@@ -260,6 +273,9 @@ export default function CollegesPage() {
   const toggleEditCourse = (id: string) =>
     setEditCourseIds((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id])
 
+  const toggleEditCodingModule = (id: number) =>
+    setEditCodingModuleIds((prev) => prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id])
+
   const handleSaveDomains = async () => {
     if (!editDomainCollege) return
     setIsSavingDomains(true)
@@ -267,9 +283,10 @@ export default function CollegesPage() {
       await api.patch(`/super-admin/colleges/${editDomainCollege.id}`, {
         allowed_domain_ids: editDomainIds,
         allowed_course_ids: editCourseIds,
+        allowed_coding_module_ids: editCodingModuleIds,
       })
       toast.success("Access updated", {
-        description: `${editDomainIds.length} domain(s) and ${editCourseIds.length} course(s) unlocked.`,
+        description: `${editDomainIds.length} domain(s), ${editCourseIds.length} course(s), ${editCodingModuleIds.length} module(s) unlocked.`,
       })
       setEditDomainCollege(null)
       fetchColleges()
@@ -728,7 +745,7 @@ export default function CollegesPage() {
       {/* Edit Access Modal */}
       <ModalForm
         title={`Manage Access — ${editDomainCollege?.name}`}
-        description="Control which domains and courses students in this college can access."
+        description="Control which domains, courses, and coding modules students in this college can access."
         isOpen={!!editDomainCollege}
         onClose={() => setEditDomainCollege(null)}
         onSubmit={(e) => { e.preventDefault(); handleSaveDomains() }}
@@ -770,6 +787,42 @@ export default function CollegesPage() {
               : <p className="text-xs text-warning">No courses selected — all courses will be locked.</p>
             }
           </div>
+
+          {/* Coding modules access */}
+          {codingModules.length > 0 && (
+            <div className="border-t border-border pt-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-primary" />
+                <Label className="text-foreground">Available Coding Modules</Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Select which coding modules students can access. Unchecked modules will be locked.
+              </p>
+              <div className="grid grid-cols-1 gap-2 mt-2 max-h-52 overflow-y-auto pr-1">
+                {codingModules.map((mod) => (
+                  <label
+                    key={mod.id}
+                    className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30 border border-border hover:border-primary/40 cursor-pointer transition-colors"
+                  >
+                    <Checkbox
+                      checked={editCodingModuleIds.includes(mod.id)}
+                      onCheckedChange={() => toggleEditCodingModule(mod.id)}
+                      className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <span className="text-sm">{mod.icon}</span>
+                    <span className="text-sm font-medium text-foreground">{mod.name}</span>
+                    {!mod.is_active && (
+                      <span className="text-xs text-muted-foreground ml-auto">(inactive)</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+              {editCodingModuleIds.length > 0
+                ? <p className="text-xs text-primary">{editCodingModuleIds.length} of {codingModules.length} modules selected</p>
+                : <p className="text-xs text-warning">No modules selected — all coding modules will be locked.</p>
+              }
+            </div>
+          )}
         </div>
       </ModalForm>
 
