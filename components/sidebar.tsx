@@ -33,6 +33,8 @@ import {
   BarChart2,
   Calculator,
   Database,
+  GraduationCap,
+  ClipboardCheck,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -90,8 +92,9 @@ const studentNavBlocks: StudentNavBlock[] = [
   },
   { type: "item", item: { href: "/domain-programs", label: "Domain Programs", icon: Layers         }, color: "teal",    highlight: true },
   { type: "item", item: { href: "/company-prep",    label: "Company Prep",    icon: Building2      }, color: "orange"  },
+  { type: "item", item: { href: "/placements",       label: "Placements",      icon: GraduationCap  }, color: "emerald", highlight: true },
   { type: "item", item: { href: "/feed",            label: "College Feed",    icon: Newspaper      }, color: "rose"    },
-  { type: "item", item: { href: "/jobs",            label: "Jobs",            icon: BriefcaseBusiness }, color: "emerald" },
+  { type: "item", item: { href: "/jobs",            label: "Jobs",            icon: BriefcaseBusiness }, color: "amber" },
   { type: "item", item: { href: "/leaderboard",     label: "Leaderboard",     icon: Trophy         }, color: "amber"   },
   {
     type: "section", id: "personal", label: "Personal", icon: User, color: "slate",
@@ -109,11 +112,13 @@ const studentNavItems = studentNavBlocks.flatMap((b) =>
 
 /* ── Admin / super-admin nav ─────────────────────────────────────────────── */
 const collegeAdminNavItems = [
-  { href: "/admin",          label: "Dashboard",    icon: LayoutDashboard  },
-  { href: "/admin/students", label: "Students",     icon: Users            },
-  { href: "/admin/analytics",label: "Analytics",    icon: BarChart3        },
-  { href: "/admin/jobs",     label: "Job Postings", icon: BriefcaseBusiness },
-  { href: "/feed",           label: "College Feed", icon: Newspaper        },
+  { href: "/admin",                             label: "Dashboard",       icon: LayoutDashboard  },
+  { href: "/admin/students",                    label: "Students",        icon: Users            },
+  { href: "/admin/analytics",                   label: "Analytics",       icon: BarChart3        },
+  { href: "/admin/placements",                  label: "Placements",      icon: GraduationCap    },
+  { href: "/admin/placements/corrections",      label: "Corrections",     icon: ClipboardCheck   },
+  { href: "/admin/jobs",                        label: "Job Postings",    icon: BriefcaseBusiness },
+  { href: "/feed",                              label: "College Feed",    icon: Newspaper        },
 ]
 
 const branchAdminNavItems = [
