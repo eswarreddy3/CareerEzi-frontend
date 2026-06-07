@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield } from "lucide-react"
+import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield, GraduationCap, AlertCircle, Clock, CheckCircle2, XCircle } from "lucide-react"
 import { AvatarPicker } from "@/components/avatar-picker"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { FeedbackModal } from "@/components/feedback-modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
@@ -293,17 +293,236 @@ function ShieldSection({ points }: { points: number }) {
   )
 }
 
+interface AcademicData {
+  tenth_percent: number | null
+  twelfth_percent: number | null
+  cgpa: number | null
+  active_backlogs: number
+  backlog_history: number
+  gap_years: number
+  placement_status: string
+  emergency_contact: string | null
+  category: string | null
+  skills: string | null
+  updated_at: string | null
+}
+
+const ACADEMIC_FIELDS: { key: keyof AcademicData; label: string; step?: string }[] = [
+  { key: "tenth_percent",   label: "10th %",          step: "0.01" },
+  { key: "twelfth_percent", label: "12th %",          step: "0.01" },
+  { key: "cgpa",            label: "CGPA",            step: "0.01" },
+  { key: "active_backlogs", label: "Active Backlogs" },
+  { key: "backlog_history", label: "Backlog History" },
+  { key: "gap_years",       label: "Gap Years" },
+]
+
+const placementStatusChip: Record<string, string> = {
+  not_placed: "chip",
+  selected: "chip chip-warning",
+  joined: "chip chip-success",
+}
+
+function AcademicSection() {
+  const [loading, setLoading] = useState(true)
+  const [academic, setAcademic] = useState<AcademicData | null>(null)
+  const [hasPending, setHasPending] = useState(false)
+  const [lastRequest, setLastRequest] = useState<any>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [form, setForm] = useState<Record<string, string>>({})
+  const [reason, setReason] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+
+  const fetchData = () => {
+    setLoading(true)
+    api.get("/student/profile/academic")
+      .then((res) => {
+        setAcademic(res.data.academic)
+        setHasPending(res.data.has_pending_request)
+        setLastRequest(res.data.last_request)
+      })
+      .catch(() => toast.error("Failed to load academic details"))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { fetchData() }, [])
+
+  const openForm = () => {
+    setForm({
+      tenth_percent: academic?.tenth_percent?.toString() ?? "",
+      twelfth_percent: academic?.twelfth_percent?.toString() ?? "",
+      cgpa: academic?.cgpa?.toString() ?? "",
+      active_backlogs: academic?.active_backlogs?.toString() ?? "",
+      backlog_history: academic?.backlog_history?.toString() ?? "",
+      gap_years: academic?.gap_years?.toString() ?? "",
+    })
+    setReason("")
+    setFormOpen(true)
+  }
+
+  const submit = async () => {
+    if (!reason.trim()) { toast.error("Please give a reason for the correction"); return }
+    setSubmitting(true)
+    try {
+      const payload: Record<string, any> = { reason: reason.trim() }
+      ACADEMIC_FIELDS.forEach(({ key }) => {
+        const v = form[key]
+        if (v !== undefined && v !== "") payload[key] = v
+      })
+      await api.post("/student/profile/academic/request-edit", payload)
+      toast.success("Correction request submitted")
+      setFormOpen(false)
+      fetchData()
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to submit request")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return <div className="space-y-3">{[1, 2, 3].map((i) => <div key={i} className="h-12 bg-secondary/40 rounded-lg animate-pulse" />)}</div>
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 className="font-semibold font-serif text-foreground flex items-center gap-2">
+            <GraduationCap className="h-4 w-4 text-primary" /> Academic Details
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Used to check your eligibility for placement drives</p>
+        </div>
+        {academic?.placement_status && (
+          <span className={placementStatusChip[academic.placement_status] ?? "chip"}>
+            {academic.placement_status.replace("_", " ")}
+          </span>
+        )}
+      </div>
+
+      {!academic ? (
+        <div className="p-4 rounded-xl bg-warning/10 border border-warning/20 flex items-start gap-2">
+          <AlertCircle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">No academic data yet</p>
+            <p className="text-xs text-muted-foreground">Your placement cell hasn't uploaded your academic record. Contact your admin.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {ACADEMIC_FIELDS.map(({ key, label }) => (
+              <div key={key} className="p-3 rounded-xl bg-secondary/30 border border-border">
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="text-lg font-bold text-foreground">{academic[key] ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-xl bg-secondary/30 border border-border">
+              <p className="text-xs text-muted-foreground">Category</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">{academic.category || "—"}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-secondary/30 border border-border">
+              <p className="text-xs text-muted-foreground">Emergency Contact</p>
+              <p className="text-sm font-medium text-foreground mt-0.5">{academic.emergency_contact || "—"}</p>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-secondary/30 border border-border">
+            <p className="text-xs text-muted-foreground">Skills</p>
+            <p className="text-sm font-medium text-foreground mt-0.5">{academic.skills || "—"}</p>
+          </div>
+        </div>
+      )}
+
+      {academic?.updated_at && (
+        <p className="text-xs text-muted-foreground">Last updated {timeAgo(academic.updated_at)}</p>
+      )}
+
+      {/* Request correction */}
+      <div className="pt-4 border-t border-border/50">
+        {hasPending ? (
+          <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 flex items-start gap-2">
+            <Clock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Correction request pending</p>
+              <p className="text-xs text-muted-foreground">Your placement cell is reviewing your request. You can submit a new one once it's resolved.</p>
+            </div>
+          </div>
+        ) : !formOpen ? (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">Something incorrect?</p>
+              <p className="text-xs text-muted-foreground">Request a correction and your admin will review it.</p>
+            </div>
+            <Button onClick={openForm} className="bg-primary hover:brightness-110 text-primary-foreground">
+              Request Correction
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-foreground">Request a Correction</h4>
+            <p className="text-xs text-muted-foreground">Edit the values that are wrong, then tell us why. Your admin reviews every request before any change is applied.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {ACADEMIC_FIELDS.map(({ key, label, step }) => (
+                <div key={key} className="space-y-1">
+                  <Label className="text-xs text-foreground">{label}</Label>
+                  <Input
+                    type="number"
+                    step={step}
+                    value={form[key] ?? ""}
+                    onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-1">
+              <Label className="text-foreground">Reason *</Label>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+                placeholder="Explain what's wrong and mention any proof you can provide..."
+                className="bg-secondary/50 border-border text-foreground"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={submit} disabled={submitting} className="bg-primary hover:brightness-110 text-primary-foreground">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                Submit Request
+              </Button>
+              <Button variant="outline" onClick={() => setFormOpen(false)}>Cancel</Button>
+            </div>
+          </div>
+        )}
+
+        {/* Last resolved request */}
+        {!hasPending && lastRequest && lastRequest.status !== "pending" && (
+          <div className="mt-4 p-3 rounded-xl bg-secondary/30 border border-border">
+            <div className="flex items-center gap-2">
+              {lastRequest.status === "approved"
+                ? <CheckCircle2 className="h-4 w-4 text-success" />
+                : <XCircle className="h-4 w-4 text-danger" />}
+              <p className="text-sm font-medium text-foreground capitalize">Last request {lastRequest.status}</p>
+            </div>
+            {lastRequest.admin_note && (
+              <p className="text-xs text-muted-foreground mt-1">Note: {lastRequest.admin_note}</p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const { user, updateUser } = useAuthStore()
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [activities, setActivities] = useState<Activity[]>([])
-  const [notifications, setNotifications] = useState({
-    email_notifications: user?.email_notifications ?? true,
-    assignment_reminders: user?.assignment_reminders ?? true,
-    leaderboard_updates: user?.leaderboard_updates ?? false,
-  })
 
   useEffect(() => {
     api.get("/student/dashboard")
@@ -336,15 +555,6 @@ export default function ProfilePage() {
       toast.error("Failed to update password", {
         description: err?.response?.data?.message || "Please try again",
       })
-    }
-  }
-
-  const onNotificationSave = async () => {
-    try {
-      await api.patch("/student/profile", notifications)
-      toast.success("Notification settings saved")
-    } catch {
-      toast.error("Failed to save notification settings")
     }
   }
 
@@ -464,10 +674,10 @@ export default function ProfilePage() {
                   Account
                 </TabsTrigger>
                 <TabsTrigger
-                  value="notifications"
+                  value="academic"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
-                  Notifications
+                  Academic
                 </TabsTrigger>
                 <TabsTrigger
                   value="activity"
@@ -569,54 +779,9 @@ export default function ProfilePage() {
                 </div>
               </TabsContent>
 
-              {/* Notifications tab */}
-              <TabsContent value="notifications">
-                <h3 className="font-semibold font-serif text-foreground mb-4">
-                  Notification Preferences
-                </h3>
-                <div className="space-y-4 max-w-sm">
-                  {[
-                    {
-                      key: "email_notifications" as const,
-                      label: "Email Notifications",
-                      desc: "Get daily learning reminders via email",
-                    },
-                    {
-                      key: "assignment_reminders" as const,
-                      label: "Assignment Reminders",
-                      desc: "Reminders for upcoming assignment deadlines",
-                    },
-                    {
-                      key: "leaderboard_updates" as const,
-                      label: "Leaderboard Updates",
-                      desc: "Get notified when your rank changes",
-                    },
-                  ].map(({ key, label, desc }) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{label}</p>
-                        <p className="text-xs text-muted-foreground">{desc}</p>
-                      </div>
-                      <Switch
-                        checked={notifications[key]}
-                        onCheckedChange={(checked) =>
-                          setNotifications((prev) => ({ ...prev, [key]: checked }))
-                        }
-                        className="data-[state=checked]:bg-primary"
-                      />
-                    </div>
-                  ))}
-
-                  <Button
-                    onClick={onNotificationSave}
-                    className="bg-primary hover:brightness-110 text-primary-foreground"
-                  >
-                    Save Preferences
-                  </Button>
-                </div>
+              {/* Academic tab */}
+              <TabsContent value="academic">
+                <AcademicSection />
               </TabsContent>
 
               {/* Activity tab */}

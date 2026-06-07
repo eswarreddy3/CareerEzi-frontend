@@ -12,13 +12,22 @@ import {
 import {
   ArrowLeft, Bell, Building2, Calendar, MapPin,
   Users, Loader2, CheckCircle, XCircle, BookOpen,
+  Download, FileText, FileSpreadsheet, ChevronDown,
 } from "lucide-react"
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { motion } from "framer-motion"
+import {
+  exportDriveCSV, exportEligibleCSV, generateDrivePDF, generateEligiblePDF,
+} from "@/lib/drive-report"
 
 interface Drive {
   id: number
+  drive_code: string | null
   company_name: string
   job_role: string
   industry_type: string
@@ -33,6 +42,9 @@ interface Drive {
   eligible_branches: string[] | null
   required_skills: string | null
   description: string | null
+  hr_name: string | null
+  hr_email: string | null
+  hr_phone: string | null
   is_active: boolean
   registered_count: number
 }
@@ -134,10 +146,35 @@ export default function DriveDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={() => router.push("/admin/placements")}>
+      <div className="flex items-center justify-between gap-3">
+        <Button variant="ghost" size="sm" onClick={() => router.push("/admin/placements/drives")}>
           <ArrowLeft className="w-4 h-4 mr-1" /> Back
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" /> Download Report
+              <ChevronDown className="w-3.5 h-3.5 ml-1.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Drive Details</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => generateDrivePDF(drive)}>
+              <FileText className="w-4 h-4 mr-2 text-danger" /> PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportDriveCSV(drive)}>
+              <FileSpreadsheet className="w-4 h-4 mr-2 text-success" /> CSV
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Eligible Students ({students.length})</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => generateEligiblePDF(drive, students)}>
+              <FileText className="w-4 h-4 mr-2 text-danger" /> PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportEligibleCSV(drive, students)}>
+              <FileSpreadsheet className="w-4 h-4 mr-2 text-success" /> CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Drive info card */}
@@ -147,6 +184,7 @@ export default function DriveDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-bold">{drive.company_name}</h1>
               <span className="chip chip-primary">{drive.industry_type}</span>
+              {drive.drive_code && <span className="chip">Code: {drive.drive_code}</span>}
               {!drive.is_active && <span className="chip chip-danger">Inactive</span>}
             </div>
             <p className="text-muted-foreground mt-1">{drive.job_role}</p>
@@ -203,6 +241,33 @@ export default function DriveDetailPage() {
             <p className="text-sm mt-0.5">{drive.required_skills}</p>
           </div>
         )}
+
+        {(drive.hr_name || drive.hr_email || drive.hr_phone) && (
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground mb-2">HR / Recruiter Contact</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+              {drive.hr_name && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Name</p>
+                  <p className="font-medium mt-0.5">{drive.hr_name}</p>
+                </div>
+              )}
+              {drive.hr_email && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <a href={`mailto:${drive.hr_email}`} className="font-medium mt-0.5 text-primary hover:underline break-all">{drive.hr_email}</a>
+                </div>
+              )}
+              {drive.hr_phone && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Phone</p>
+                  <a href={`tel:${drive.hr_phone}`} className="font-medium mt-0.5 text-primary hover:underline">{drive.hr_phone}</a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {drive.description && (
           <div className="mt-4 p-3 bg-muted/30 rounded-xl text-sm">
             {drive.description}

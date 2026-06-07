@@ -62,7 +62,7 @@ const C = {
 type NavColor = keyof typeof C
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
-type NavItem = { href: string; label: string; icon: React.ElementType }
+type NavItem = { href: string; label: string; icon: React.ElementType; exact?: boolean }
 type NavGroup = { label: string; icon: React.ElementType; items: NavItem[] }
 type SuperAdminNav = { standalone: NavItem[]; groups: NavGroup[] }
 type StudentNavSection = {
@@ -92,9 +92,14 @@ const studentNavBlocks: StudentNavBlock[] = [
   },
   { type: "item", item: { href: "/domain-programs", label: "Domain Programs", icon: Layers         }, color: "teal",    highlight: true },
   { type: "item", item: { href: "/company-prep",    label: "Company Prep",    icon: Building2      }, color: "orange"  },
-  { type: "item", item: { href: "/placements",       label: "Placements",      icon: GraduationCap  }, color: "emerald", highlight: true },
+  {
+    type: "section", id: "placement", label: "Placement Cell", icon: GraduationCap, color: "emerald", highlight: true,
+    items: [
+      { href: "/placements", label: "Placement Drives", icon: GraduationCap     },
+      { href: "/jobs",       label: "Jobs",             icon: BriefcaseBusiness },
+    ],
+  },
   { type: "item", item: { href: "/feed",            label: "College Feed",    icon: Newspaper      }, color: "rose"    },
-  { type: "item", item: { href: "/jobs",            label: "Jobs",            icon: BriefcaseBusiness }, color: "amber" },
   { type: "item", item: { href: "/leaderboard",     label: "Leaderboard",     icon: Trophy         }, color: "amber"   },
   {
     type: "section", id: "personal", label: "Personal", icon: User, color: "slate",
@@ -111,18 +116,31 @@ const studentNavItems = studentNavBlocks.flatMap((b) =>
 )
 
 /* ── Admin / super-admin nav ─────────────────────────────────────────────── */
-const collegeAdminNavItems = [
-  { href: "/admin",                             label: "Dashboard",       icon: LayoutDashboard  },
-  { href: "/admin/students",                    label: "Students",        icon: Users            },
-  { href: "/admin/analytics",                   label: "Analytics",       icon: BarChart3        },
-  { href: "/admin/placements",                  label: "Placements",      icon: GraduationCap    },
-  { href: "/admin/placements/corrections",      label: "Corrections",     icon: ClipboardCheck   },
-  { href: "/admin/jobs",                        label: "Job Postings",    icon: BriefcaseBusiness },
-  { href: "/feed",                              label: "College Feed",    icon: Newspaper        },
+/* College-admin nav: top standalone items + a "Placement Cell" group + bottom items */
+const collegeAdminTop: NavItem[] = [
+  { href: "/admin",           label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/students",  label: "Students",  icon: Users            },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3        },
+]
+const collegeAdminGroups: NavGroup[] = [
+  {
+    label: "Placement Cell", icon: GraduationCap,
+    items: [
+      { href: "/admin/placements",             label: "Overview",            icon: LayoutDashboard,  exact: true },
+      { href: "/admin/placements/drives",      label: "Drives",              icon: Building2         },
+      { href: "/admin/placements/analytics",   label: "Reports & Analysis",  icon: BarChart3         },
+      { href: "/admin/placements/academic",    label: "Academic Records",    icon: ClipboardList     },
+      { href: "/admin/placements/corrections", label: "Correction Requests", icon: ClipboardCheck    },
+      { href: "/admin/jobs",                   label: "Job Postings",        icon: BriefcaseBusiness },
+    ],
+  },
+]
+const collegeAdminBottom: NavItem[] = [
+  { href: "/feed", label: "College Feed", icon: Newspaper },
 ]
 
-const branchAdminNavItems = [
-  { href: "/branch-admin",          label: "Dashboard",    icon: LayoutDashboard  },
+const branchAdminNavItems: NavItem[] = [
+  { href: "/branch-admin",          label: "Dashboard",    icon: LayoutDashboard, exact: true },
   { href: "/branch-admin/students", label: "Students",     icon: Users            },
   { href: "/branch-admin/jobs",     label: "Job Postings", icon: BriefcaseBusiness },
   { href: "/feed",                  label: "College Feed", icon: Newspaper        },
@@ -199,13 +217,12 @@ export function Sidebar() {
 
   const role = user?.role ?? "student"
   const navItems =
-    role === "college_admin" ? collegeAdminNavItems
-    : role === "branch_admin" ? branchAdminNavItems
+    role === "branch_admin" ? branchAdminNavItems
     : studentNavItems
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const s: Record<string, boolean> = {}
-    superAdminNav.groups.forEach((g) => {
+    ;[...superAdminNav.groups, ...collegeAdminGroups].forEach((g) => {
       s[g.label] = g.items.some((i) => pathname === i.href || pathname.startsWith(i.href + "/"))
     })
     return s
@@ -229,6 +246,24 @@ export function Sidebar() {
   const handleLogout = () => {
     clearAuth()
     window.location.href = "/login"
+  }
+
+  /* Standalone indigo nav item — shared by college-admin (top/bottom) & branch-admin */
+  const renderAdminItem = (item: NavItem) => {
+    const isActive = item.exact
+      ? pathname === item.href
+      : pathname === item.href || pathname.startsWith(item.href + "/")
+    return (
+      <li key={item.href}>
+        <Link href={item.href} onClick={() => setIsMobileOpen(false)}
+          title={isCollapsed ? item.label : undefined}
+          className={navItemCls(isActive, isCollapsed, C.indigo)}>
+          {isActive && !isCollapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-r-full" />}
+          <item.icon className={cn("h-4 w-4 flex-shrink-0 transition-colors", isActive ? C.indigo.icon : cn("text-muted-foreground", C.indigo.ghIcon))} />
+          {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+        </Link>
+      </li>
+    )
   }
 
   return (
@@ -458,25 +493,63 @@ export function Sidebar() {
               })}
             </ul>
 
-          /* College / branch admin nav */
-          ) : (
+          /* College admin nav — grouped (Placement Cell) */
+          ) : role === "college_admin" ? (
             <ul className="space-y-0.5">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href ||
-                  (item.href !== "/admin" && item.href !== "/branch-admin" &&
-                   pathname.startsWith(item.href + "/"))
+              {collegeAdminTop.map(renderAdminItem)}
+
+              {collegeAdminGroups.map((group) => {
+                const isGroupOpen = openGroups[group.label] ?? false
+                const hasActiveChild = group.items.some((i) =>
+                  i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(i.href + "/"))
                 return (
-                  <li key={item.href}>
-                    <Link href={item.href} onClick={() => setIsMobileOpen(false)}
-                      title={isCollapsed ? item.label : undefined}
-                      className={navItemCls(isActive, isCollapsed, C.indigo)}>
-                      {isActive && !isCollapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-500 rounded-r-full" />}
-                      <item.icon className={cn("h-4 w-4 flex-shrink-0 transition-colors", isActive ? C.indigo.icon : cn("text-muted-foreground", C.indigo.ghIcon))} />
-                      {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-                    </Link>
+                  <li key={group.label}>
+                    <button onClick={() => !isCollapsed && toggleGroup(group.label)}
+                      title={isCollapsed ? group.label : undefined}
+                      className={cn(
+                        "w-full flex items-center gap-3 rounded-xl transition-all duration-200",
+                        isCollapsed ? "justify-center w-10 h-10 mx-auto" : "px-3 py-2.5",
+                        hasActiveChild ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60"
+                      )}>
+                      <group.icon className={cn("h-4 w-4 flex-shrink-0", hasActiveChild && "text-primary")} />
+                      {!isCollapsed && (
+                        <>
+                          <span className="text-sm font-medium flex-1 text-left">{group.label}</span>
+                          <ChevronDown className={cn("h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200", isGroupOpen && "rotate-180")} />
+                        </>
+                      )}
+                    </button>
+                    {(isCollapsed || isGroupOpen) && (
+                      <ul className={cn("space-y-0.5", !isCollapsed && "mt-0.5 ml-3 pl-3 border-l border-sidebar-border")}>
+                        {group.items.map((item) => {
+                          const isActive = item.exact
+                            ? pathname === item.href
+                            : pathname === item.href || pathname.startsWith(item.href + "/")
+                          return (
+                            <li key={item.href}>
+                              <Link href={item.href} onClick={() => setIsMobileOpen(false)}
+                                title={isCollapsed ? item.label : undefined}
+                                className={navItemCls(isActive, isCollapsed, C.indigo)}>
+                                {isActive && !isCollapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-indigo-500 rounded-r-full" />}
+                                <item.icon className={cn("h-4 w-4 flex-shrink-0 transition-colors", isActive ? C.indigo.icon : cn("text-muted-foreground", C.indigo.ghIcon))} />
+                                {!isCollapsed && <span className="text-sm">{item.label}</span>}
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
                   </li>
                 )
               })}
+
+              {collegeAdminBottom.map(renderAdminItem)}
+            </ul>
+
+          /* Branch admin nav — flat */
+          ) : (
+            <ul className="space-y-0.5">
+              {navItems.map(renderAdminItem)}
             </ul>
           )}
         </nav>
