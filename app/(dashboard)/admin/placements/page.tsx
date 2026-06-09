@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Building2, Calendar, Users, ClipboardCheck, ClipboardList,
-  BriefcaseBusiness, ChevronRight, ArrowRight, MapPin, BarChart3,
+  BriefcaseBusiness, ChevronRight, ArrowRight, MapPin, BarChart3, GraduationCap,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
@@ -39,6 +39,7 @@ const quickLinks = [
   { href: "/admin/placements/analytics",   label: "Reports & Analysis",  desc: "Placements, CTC & branch insights",   icon: BarChart3,        color: "text-emerald-500" },
   { href: "/admin/placements/academic",    label: "Academic Records",    desc: "Bulk upload CGPA & backlogs",        icon: ClipboardList,    color: "text-teal-500" },
   { href: "/admin/placements/corrections", label: "Correction Requests", desc: "Review student data corrections",     icon: ClipboardCheck,   color: "text-amber-500" },
+  { href: "/admin/placements/off-campus",  label: "Off-Campus Offers",   desc: "Approve student-reported placements", icon: GraduationCap,    color: "text-pink-500" },
   { href: "/admin/jobs",                   label: "Job Postings",        desc: "Post off-campus job openings",        icon: BriefcaseBusiness, color: "text-violet-500" },
 ]
 
@@ -56,16 +57,19 @@ export default function PlacementOverviewPage() {
   const [drives, setDrives] = useState<Drive[]>([])
   const [corrections, setCorrections] = useState<Correction[]>([])
   const [pendingCount, setPendingCount] = useState(0)
+  const [offCampusPending, setOffCampusPending] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     Promise.all([
       api.get("/admin/drives"),
       api.get("/admin/profile-corrections?status=pending"),
-    ]).then(([drivesRes, corrRes]) => {
+      api.get("/admin/off-campus?status=pending"),
+    ]).then(([drivesRes, corrRes, ocRes]) => {
       setDrives(drivesRes.data.drives || [])
       setCorrections(corrRes.data.requests || [])
       setPendingCount(corrRes.data.pending_count || 0)
+      setOffCampusPending(ocRes.data.pending_count || 0)
     }).catch(() => {
       toast.error("Failed to load placement overview")
     }).finally(() => setLoading(false))
@@ -81,6 +85,7 @@ export default function PlacementOverviewPage() {
     { label: "Upcoming",         value: upcoming.length,   icon: Calendar,       href: "/admin/placements/drives" },
     { label: "Total Registered", value: totalRegistered,   icon: Users,          href: "/admin/placements/drives" },
     { label: "Pending Requests", value: pendingCount,      icon: ClipboardCheck, href: "/admin/placements/corrections" },
+    { label: "Off-Campus Pending", value: offCampusPending, icon: GraduationCap, href: "/admin/placements/off-campus" },
   ]
 
   return (
@@ -91,7 +96,7 @@ export default function PlacementOverviewPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map(s => (
           <Link key={s.label} href={s.href}>
             <GlassCard className="p-4 flex items-center gap-3 hover:border-primary/30 transition-colors">

@@ -4,14 +4,142 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Building2, Calendar, MapPin, Users, Clock,
-  CheckCircle, XCircle, ChevronRight, GraduationCap,
+  CheckCircle, XCircle, ChevronRight, GraduationCap, Plus, Loader2,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { motion } from "framer-motion"
+
+interface OffCampusSubmission {
+  id: number
+  company_name: string
+  job_role: string
+  industry_type: string
+  ctc: number | null
+  job_location: string | null
+  offer_type: string
+  offer_date: string
+  status: "pending" | "approved" | "rejected"
+  admin_note: string | null
+  submitted_at: string
+}
+
+const INDUSTRY_TYPES = ["IT", "Core", "Services", "Consulting", "Manufacturing", "Other"]
+const OFFER_TYPES = [
+  { value: "full_time", label: "Full-time" },
+  { value: "internship", label: "Internship" },
+  { value: "internship_ppo", label: "Internship + PPO" },
+]
+
+function OffCampusModal({
+  open, onClose, onCreated,
+}: { open: boolean; onClose: () => void; onCreated: (s: OffCampusSubmission) => void }) {
+  const [form, setForm] = useState({
+    company_name: "", job_role: "", industry_type: "IT", ctc: "",
+    job_location: "", offer_type: "full_time", offer_date: "", description: "",
+  })
+  const [loading, setLoading] = useState(false)
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+
+  async function submit() {
+    if (!form.company_name.trim() || !form.job_role.trim() || !form.offer_date) {
+      toast.error("Company, job role and offer date are required")
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await api.post("/student/off-campus", form)
+      toast.success("Submitted for your college admin's approval")
+      onCreated(res.data.submission)
+      setForm({
+        company_name: "", job_role: "", industry_type: "IT", ctc: "",
+        job_location: "", offer_type: "full_time", offer_date: "", description: "",
+      })
+      onClose()
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || "Failed to submit")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!open) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+      <div className="w-full max-w-lg bg-popover border border-border rounded-2xl shadow-2xl my-auto flex flex-col max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh]">
+        <div className="p-5 border-b border-border flex-shrink-0">
+          <h2 className="font-semibold">Report Off-Campus Offer</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Submit a placement you got outside college drives. Your admin will verify and approve it.
+          </p>
+        </div>
+        <div className="p-5 space-y-4 overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Company *</Label>
+              <Input value={form.company_name} onChange={e => set("company_name", e.target.value)} placeholder="e.g. Google" />
+            </div>
+            <div className="space-y-1">
+              <Label>Job Role *</Label>
+              <Input value={form.job_role} onChange={e => set("job_role", e.target.value)} placeholder="e.g. SDE-1" />
+            </div>
+            <div className="space-y-1">
+              <Label>Industry</Label>
+              <Select value={form.industry_type} onValueChange={v => set("industry_type", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {INDUSTRY_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Offer Type</Label>
+              <Select value={form.offer_type} onValueChange={v => set("offer_type", v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {OFFER_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>CTC (LPA)</Label>
+              <Input type="number" step="0.1" value={form.ctc} onChange={e => set("ctc", e.target.value)} placeholder="e.g. 12" />
+            </div>
+            <div className="space-y-1">
+              <Label>Offer Date *</Label>
+              <Input type="date" value={form.offer_date} onChange={e => set("offer_date", e.target.value)} />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <Label>Location</Label>
+              <Input value={form.job_location} onChange={e => set("job_location", e.target.value)} placeholder="e.g. Bengaluru" />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <Label>Notes (optional)</Label>
+              <Textarea rows={2} value={form.description} onChange={e => set("description", e.target.value)} placeholder="Any details for your admin" />
+            </div>
+          </div>
+        </div>
+        <div className="p-5 border-t border-border flex gap-2 justify-end flex-shrink-0">
+          <Button variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button onClick={submit} disabled={loading}>
+            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Submit for Approval
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const offerTypeLabel = (v: string) => OFFER_TYPES.find(t => t.value === v)?.label ?? v
 
 interface Drive {
   id: number
@@ -72,14 +200,18 @@ export default function PlacementsPage() {
   const [drives, setDrives] = useState<Drive[]>([])
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<any>(null)
+  const [offCampus, setOffCampus] = useState<OffCampusSubmission[]>([])
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     Promise.all([
       api.get("/student/drives"),
       api.get("/student/profile/academic"),
-    ]).then(([drivesRes, profileRes]) => {
+      api.get("/student/off-campus"),
+    ]).then(([drivesRes, profileRes, ocRes]) => {
       setDrives(drivesRes.data.drives)
       setProfile(profileRes.data)
+      setOffCampus(ocRes.data.submissions || [])
     }).catch(() => {
       toast.error("Failed to load placements")
     }).finally(() => setLoading(false))
@@ -91,9 +223,14 @@ export default function PlacementsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Placement Drives</h1>
-        <p className="text-muted-foreground text-sm mt-1">Recruitment drives announced for your college</p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Placement Drives</h1>
+          <p className="text-muted-foreground text-sm mt-1">Recruitment drives announced for your college</p>
+        </div>
+        <Button onClick={() => setShowModal(true)}>
+          <Plus className="w-4 h-4 mr-1.5" /> Report Off-Campus Offer
+        </Button>
       </div>
 
       {/* Academic profile summary */}
@@ -221,6 +358,52 @@ export default function PlacementsPage() {
           ))}
         </div>
       )}
+
+      {/* My off-campus submissions */}
+      {!loading && offCampus.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="font-semibold">My Off-Campus Submissions</h2>
+          {offCampus.map(s => (
+            <GlassCard key={s.id} className="p-4">
+              <div className="flex items-start justify-between flex-wrap gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-semibold">{s.company_name}</p>
+                    <span className={
+                      s.status === "approved" ? "chip chip-success" :
+                      s.status === "rejected" ? "chip chip-danger" : "chip chip-warning"
+                    }>{s.status}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{s.job_role} · {offerTypeLabel(s.offer_type)}</p>
+                  <div className="flex flex-wrap gap-4 mt-2 text-sm">
+                    {s.ctc != null && <span className="text-warning font-medium">₹{s.ctc} LPA</span>}
+                    {s.job_location && (
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="w-3 h-3" />{s.job_location}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Calendar className="w-3 h-3" />Offer: {new Date(s.offer_date).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {s.status === "rejected" && s.admin_note && (
+                    <div className="mt-2 bg-danger/10 border border-danger/20 rounded-lg p-2 text-xs text-danger">
+                      <span className="font-medium">Admin note: </span>{s.admin_note}
+                    </div>
+                  )}
+                </div>
+                <span className={industryChip[s.industry_type] ?? "chip"}>{s.industry_type}</span>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      <OffCampusModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onCreated={s => setOffCampus(prev => [s, ...prev])}
+      />
     </div>
   )
 }

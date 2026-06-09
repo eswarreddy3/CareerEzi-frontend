@@ -131,6 +131,7 @@ export default function PlacementAnalyticsPage() {
 
   const [year, setYear] = useState("all")
   const [status, setStatus] = useState("selected")
+  const [source, setSource] = useState("all")
   const [passoutYear, setPassoutYear] = useState("all")
   const [branch, setBranch] = useState("all")
   const [industry, setIndustry] = useState("all")
@@ -140,7 +141,7 @@ export default function PlacementAnalyticsPage() {
 
   useEffect(() => {
     setLoading(true)
-    const params: Record<string, string> = { granularity, status }
+    const params: Record<string, string> = { granularity, status, source }
     if (year !== "all") params.year = year
     if (passoutYear !== "all") params.passout_year = passoutYear
     if (branch !== "all") params.branch = branch
@@ -152,14 +153,14 @@ export default function PlacementAnalyticsPage() {
       .then(res => setData(res.data))
       .catch(() => toast.error("Failed to load placement analytics"))
       .finally(() => setLoading(false))
-  }, [year, status, passoutYear, branch, industry, company, driveId, granularity])
+  }, [year, status, source, passoutYear, branch, industry, company, driveId, granularity])
 
   const opts = data?.filter_options ?? { branches: [], passout_years: [], industries: [], years: [], companies: [], drives: [] }
   const s = data?.summary
   const statusLabel = STATUS_LABELS[status] ?? "Placed"
 
   const resetFilters = () => {
-    setYear("all"); setStatus("selected"); setPassoutYear("all"); setBranch("all")
+    setYear("all"); setStatus("selected"); setSource("all"); setPassoutYear("all"); setBranch("all")
     setIndustry("all"); setCompany("all"); setDriveId("all"); setGranularity("month")
   }
 
@@ -198,6 +199,16 @@ export default function PlacementAnalyticsPage() {
                 <SelectItem value="registered">Registered</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
                 <SelectItem value="all">All Statuses</SelectItem>
+              </SelectContent>
+            </Select>
+          </Filter>
+          <Filter label="Source">
+            <Select value={source} onValueChange={setSource}>
+              <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">On + Off Campus</SelectItem>
+                <SelectItem value="on_campus">On-Campus (Drives)</SelectItem>
+                <SelectItem value="off_campus">Off-Campus</SelectItem>
               </SelectContent>
             </Select>
           </Filter>
