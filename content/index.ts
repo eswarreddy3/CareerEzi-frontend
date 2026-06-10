@@ -7,6 +7,7 @@ import sqlContent from "./courses/sql-for-all"
 import excelContent from "./courses/excel"
 import dsaContent from "./courses/dsa"
 import pandasContent from "./courses/pandas"
+import numpyContent from "./courses/numpy"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -14,6 +15,7 @@ const courseContent: Record<string, Record<number, string>> = {
   excel: excelContent,
   dsa: dsaContent,
   pandas: pandasContent,
+  numpy: numpyContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
