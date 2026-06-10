@@ -51,6 +51,15 @@ interface Student {
   streak: number
   last_active: string | null
   is_inactive: boolean
+  // Academic profile (separate table — may be null if never filled)
+  cgpa: number | null
+  tenth_percent: number | null
+  twelfth_percent: number | null
+  active_backlogs: number | null
+  backlog_history: number | null
+  gap_years: number | null
+  placement_status: "not_placed" | "selected" | "joined" | null
+  category: string | null
 }
 
 interface ExportStudent {
@@ -68,13 +77,21 @@ type SortKey = "name" | "points" | "streak" | "last_active"
 type SortDir = "asc" | "desc"
 
 const OPTIONAL_COLUMNS = [
-  { key: "roll_no",    label: "Roll No" },
-  { key: "branch_sec", label: "Branch / Sec" },
-  { key: "year",       label: "Year" },
-  { key: "status",     label: "Status" },
-  { key: "points",     label: "Points" },
-  { key: "streak",     label: "Streak" },
-  { key: "last_active", label: "Last Active" },
+  { key: "roll_no",         label: "Roll No" },
+  { key: "branch_sec",      label: "Branch / Sec" },
+  { key: "year",            label: "Year" },
+  { key: "cgpa",            label: "CGPA" },
+  { key: "tenth_percent",   label: "10th %" },
+  { key: "twelfth_percent", label: "12th %" },
+  { key: "active_backlogs", label: "Backlogs" },
+  { key: "backlog_history", label: "Backlog History" },
+  { key: "gap_years",       label: "Gap Years" },
+  { key: "category",        label: "Category" },
+  { key: "placement_status", label: "Placement" },
+  { key: "status",          label: "Status" },
+  { key: "points",          label: "Points" },
+  { key: "streak",          label: "Streak" },
+  { key: "last_active",     label: "Last Active" },
 ] as const
 
 type ColKey = typeof OPTIONAL_COLUMNS[number]["key"]
@@ -83,10 +100,30 @@ const DEFAULT_VISIBLE: Record<ColKey, boolean> = {
   roll_no: true,
   branch_sec: true,
   year: false,
+  cgpa: true,
+  tenth_percent: false,
+  twelfth_percent: false,
+  active_backlogs: false,
+  backlog_history: false,
+  gap_years: false,
+  category: false,
+  placement_status: false,
   status: true,
   points: true,
   streak: true,
   last_active: true,
+}
+
+const PLACEMENT_META: Record<string, { label: string; chip: string }> = {
+  not_placed: { label: "Not Placed", chip: "chip chip-warning" },
+  selected:   { label: "Selected",   chip: "chip chip-primary" },
+  joined:     { label: "Joined",     chip: "chip chip-success" },
+}
+
+function fmtNum(v: number | null | undefined): ReactNode {
+  return (v === null || v === undefined)
+    ? <span className="text-muted-foreground/40">—</span>
+    : v
 }
 
 function formatLastActive(iso: string | null): string {
@@ -143,17 +180,31 @@ export default function AdminStudentsPage() {
   const [colPopoverOpen, setColPopoverOpen] = useState(false)
 
   const [editStudent, setEditStudent] = useState<Student | null>(null)
-  const [editForm, setEditForm] = useState({ name: "", branch: "", section: "", roll_number: "", passout_year: "" })
+  const [editForm, setEditForm] = useState({
+    name: "", branch: "", section: "", roll_number: "", passout_year: "",
+    cgpa: "", tenth_percent: "", twelfth_percent: "",
+    active_backlogs: "", backlog_history: "", gap_years: "",
+    category: "", placement_status: "not_placed",
+  })
   const [editSaving, setEditSaving] = useState(false)
 
   function openEdit(student: Student) {
     setEditStudent(student)
+    const str = (v: number | null | undefined) => (v === null || v === undefined ? "" : String(v))
     setEditForm({
       name: student.name,
       branch: student.branch || "",
       section: student.section || "",
       roll_number: student.roll_number || "",
       passout_year: student.passout_year ? String(student.passout_year) : "",
+      cgpa: str(student.cgpa),
+      tenth_percent: str(student.tenth_percent),
+      twelfth_percent: str(student.twelfth_percent),
+      active_backlogs: str(student.active_backlogs),
+      backlog_history: str(student.backlog_history),
+      gap_years: str(student.gap_years),
+      category: student.category || "",
+      placement_status: student.placement_status || "not_placed",
     })
   }
 
@@ -167,6 +218,14 @@ export default function AdminStudentsPage() {
         section: editForm.section.trim(),
         roll_number: editForm.roll_number.trim(),
         passout_year: editForm.passout_year ? parseInt(editForm.passout_year) : null,
+        cgpa: editForm.cgpa.trim() === "" ? null : parseFloat(editForm.cgpa),
+        tenth_percent: editForm.tenth_percent.trim() === "" ? null : parseFloat(editForm.tenth_percent),
+        twelfth_percent: editForm.twelfth_percent.trim() === "" ? null : parseFloat(editForm.twelfth_percent),
+        active_backlogs: editForm.active_backlogs.trim() === "" ? 0 : parseInt(editForm.active_backlogs),
+        backlog_history: editForm.backlog_history.trim() === "" ? 0 : parseInt(editForm.backlog_history),
+        gap_years: editForm.gap_years.trim() === "" ? 0 : parseInt(editForm.gap_years),
+        category: editForm.category.trim(),
+        placement_status: editForm.placement_status,
       })
       setStudents(prev => prev.map(s => s.id === editStudent.id ? { ...s, ...res.data } : s))
       toast.success("Student updated")
@@ -653,6 +712,46 @@ export default function AdminStudentsPage() {
                         Batch
                       </th>
                     )}
+                    {show("cgpa") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        CGPA
+                      </th>
+                    )}
+                    {show("tenth_percent") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        10th %
+                      </th>
+                    )}
+                    {show("twelfth_percent") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        12th %
+                      </th>
+                    )}
+                    {show("active_backlogs") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Backlogs
+                      </th>
+                    )}
+                    {show("backlog_history") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Backlog Hist.
+                      </th>
+                    )}
+                    {show("gap_years") && (
+                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Gap Yrs
+                      </th>
+                    )}
+                    {show("category") && (
+                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Category
+                      </th>
+                    )}
+                    {show("placement_status") && (
+                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Placement
+                      </th>
+                    )}
                     {show("status") && (
                       <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Status
@@ -749,6 +848,56 @@ export default function AdminStudentsPage() {
                         {show("year") && (
                           <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
                             {student.passout_year || <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("cgpa") && (
+                          <td className="py-3 px-3 text-right text-sm font-medium text-foreground tabular-nums whitespace-nowrap">
+                            {student.cgpa != null
+                              ? student.cgpa.toFixed(2)
+                              : <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("tenth_percent") && (
+                          <td className="py-3 px-3 text-right text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+                            {student.tenth_percent != null ? `${student.tenth_percent}%` : <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("twelfth_percent") && (
+                          <td className="py-3 px-3 text-right text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+                            {student.twelfth_percent != null ? `${student.twelfth_percent}%` : <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("active_backlogs") && (
+                          <td className="py-3 px-3 text-right text-sm tabular-nums whitespace-nowrap">
+                            {student.active_backlogs != null ? (
+                              <span className={cn(student.active_backlogs > 0 ? "text-danger font-medium" : "text-muted-foreground")}>
+                                {student.active_backlogs}
+                              </span>
+                            ) : <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("backlog_history") && (
+                          <td className="py-3 px-3 text-right text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+                            {fmtNum(student.backlog_history)}
+                          </td>
+                        )}
+                        {show("gap_years") && (
+                          <td className="py-3 px-3 text-right text-sm text-muted-foreground tabular-nums whitespace-nowrap">
+                            {fmtNum(student.gap_years)}
+                          </td>
+                        )}
+                        {show("category") && (
+                          <td className="py-3 px-3 text-sm text-muted-foreground whitespace-nowrap">
+                            {student.category || <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("placement_status") && (
+                          <td className="py-3 px-3 whitespace-nowrap">
+                            {student.placement_status ? (
+                              <span className={PLACEMENT_META[student.placement_status]?.chip ?? "chip"}>
+                                {PLACEMENT_META[student.placement_status]?.label ?? student.placement_status}
+                              </span>
+                            ) : <span className="text-muted-foreground/40">—</span>}
                           </td>
                         )}
                         {show("status") && (
@@ -874,7 +1023,7 @@ export default function AdminStudentsPage() {
 
       {/* Edit dialog */}
       <Dialog open={!!editStudent} onOpenChange={(open) => { if (!open) setEditStudent(null) }}>
-        <DialogContent className="bg-popover border-border max-w-md">
+        <DialogContent className="bg-popover border-border max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-foreground">Edit Student</DialogTitle>
           </DialogHeader>
@@ -934,6 +1083,103 @@ export default function AdminStudentsPage() {
                 className="bg-secondary/50 border-border text-foreground"
                 placeholder="e.g. 2026"
               />
+            </div>
+
+            {/* Academic details */}
+            <div className="pt-2 mt-1 border-t border-border">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                <GraduationCap className="h-3.5 w-3.5" />
+                Academic Details
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">CGPA</Label>
+                  <Input
+                    type="number" step="0.01" min="0" max="10"
+                    value={editForm.cgpa}
+                    onChange={(e) => setEditForm(f => ({ ...f, cgpa: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="8.5"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">10th %</Label>
+                  <Input
+                    type="number" step="0.01" min="0" max="100"
+                    value={editForm.tenth_percent}
+                    onChange={(e) => setEditForm(f => ({ ...f, tenth_percent: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="90"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">12th %</Label>
+                  <Input
+                    type="number" step="0.01" min="0" max="100"
+                    value={editForm.twelfth_percent}
+                    onChange={(e) => setEditForm(f => ({ ...f, twelfth_percent: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="92"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">Backlogs</Label>
+                  <Input
+                    type="number" min="0"
+                    value={editForm.active_backlogs}
+                    onChange={(e) => setEditForm(f => ({ ...f, active_backlogs: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">Backlog Hist.</Label>
+                  <Input
+                    type="number" min="0"
+                    value={editForm.backlog_history}
+                    onChange={(e) => setEditForm(f => ({ ...f, backlog_history: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">Gap Years</Label>
+                  <Input
+                    type="number" min="0"
+                    value={editForm.gap_years}
+                    onChange={(e) => setEditForm(f => ({ ...f, gap_years: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">Category</Label>
+                  <Input
+                    value={editForm.category}
+                    onChange={(e) => setEditForm(f => ({ ...f, category: e.target.value }))}
+                    className="bg-secondary/50 border-border text-foreground"
+                    placeholder="e.g. General"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-muted-foreground text-sm">Placement Status</Label>
+                  <Select
+                    value={editForm.placement_status}
+                    onValueChange={(v) => setEditForm(f => ({ ...f, placement_status: v }))}
+                  >
+                    <SelectTrigger className="bg-secondary/50 border-border text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_placed">Not Placed</SelectItem>
+                      <SelectItem value="selected">Selected</SelectItem>
+                      <SelectItem value="joined">Joined</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
           <DialogFooter>
