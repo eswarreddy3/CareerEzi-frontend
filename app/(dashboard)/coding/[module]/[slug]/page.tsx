@@ -303,6 +303,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
         setProblemsList(prev => prev.map(p =>
           p.slug === currentProblem.slug ? { ...p, is_solved: true } : p
         ))
+        setCurrentProblem(prev => prev ? { ...prev, is_solved: true } : prev)
         router.refresh()
       } else {
         toast.error(
@@ -394,6 +395,9 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
                   {diff}
                 </span>
               )}
+              {currentProblem.is_solved && (
+                <CheckCircle className="h-4 w-4 text-success shrink-0" />
+              )}
             </>
           )}
         </div>
@@ -465,6 +469,12 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
                     <div className="flex items-center gap-2 flex-wrap">
                       {diff && (
                         <span className={cn("chip text-xs", difficultyConfig[diff].cls)}>{diff}</span>
+                      )}
+                      {currentProblem.is_solved && (
+                        <span className="flex items-center gap-1 text-xs font-semibold text-success bg-success/10 border border-success/20 px-2 py-0.5 rounded-md">
+                          <CheckCircle className="h-3 w-3" />
+                          Solved
+                        </span>
                       )}
                       <span className="flex items-center gap-1 text-xs text-warning font-semibold">
                         <Star className="h-3 w-3 fill-warning" />

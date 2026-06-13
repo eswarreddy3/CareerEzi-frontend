@@ -1149,6 +1149,7 @@ export default function CodingProblemsAdminPage() {
   const [search, setSearch] = useState("")
   const [diffFilter, setDiffFilter] = useState("all")
   const [activeFilter, setActiveFilter] = useState("all")
+  const [moduleFilter, setModuleFilter] = useState("all")
 
   const [showImport, setShowImport] = useState(false)
   const [editTarget, setEditTarget] = useState<CodingProblem | null | "new">(null)
@@ -1255,7 +1256,11 @@ export default function CodingProblemsAdminPage() {
       activeFilter === "all" ||
       (activeFilter === "active" && p.is_active) ||
       (activeFilter === "inactive" && !p.is_active)
-    return matchSearch && matchDiff && matchActive
+    const matchModule =
+      moduleFilter === "all" ||
+      (moduleFilter === "none" && p.module_id == null) ||
+      String(p.module_id) === moduleFilter
+    return matchSearch && matchDiff && matchActive && matchModule
   })
 
   const counts = {
@@ -1367,6 +1372,20 @@ export default function CodingProblemsAdminPage() {
             <SelectItem value="all">All status</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={moduleFilter} onValueChange={setModuleFilter}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Module" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All modules</SelectItem>
+            <SelectItem value="none">No module</SelectItem>
+            {modules.map(m => (
+              <SelectItem key={m.id} value={String(m.id)}>
+                {m.icon ? `${m.icon} ` : ""}{m.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
