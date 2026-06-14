@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -541,36 +542,20 @@ export default function AdminAnalyticsPage() {
       {/* ── STAT CARDS ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {([
-          { label: "Total Students",   value: a.total_students,   suffix: "",  icon: Users,         gradient: "from-primary/20 to-primary/5",  accent: "from-primary to-coding",          iconClass: "bg-primary/20 text-primary", live: false },
-          { label: `Active (${a.days}d)`, value: a.active_this_week, suffix: "",  icon: Activity,      gradient: "from-success/20 to-success/5",  accent: "from-success to-primary",         iconClass: "bg-success/20 text-success", live: true  },
-          { label: "Avg Streak",       value: a.avg_streak,       suffix: "d", icon: Flame,         gradient: "from-streak/20 to-streak/5",    accent: "from-streak to-warning",          iconClass: "bg-streak/20 text-streak",   live: false },
-          { label: "At-Risk (14d)",    value: a.at_risk_count,    suffix: "",  icon: AlertTriangle, gradient: a.at_risk_count > 0 ? "from-danger/20 to-danger/5" : "from-success/20 to-success/5", accent: a.at_risk_count > 0 ? "from-danger to-warning" : "from-success to-primary", iconClass: a.at_risk_count > 0 ? "bg-danger/20 text-danger" : "bg-success/20 text-success", live: false },
-          { label: "Avg Course Done",  value: avgCoursePct,       suffix: "%", icon: BookOpen,      gradient: "from-coding/20 to-coding/5",    accent: "from-coding to-primary",          iconClass: "bg-coding/20 text-coding",   live: false },
+          { label: "Total Students",      value: a.total_students,   suffix: "",  icon: Users },
+          { label: `Active (${a.days}d)`, value: a.active_this_week, suffix: "",  icon: Activity },
+          { label: "Avg Streak",          value: a.avg_streak,       suffix: "d", icon: Flame },
+          { label: "At-Risk (14d)",       value: a.at_risk_count,    suffix: "",  icon: AlertTriangle },
+          { label: "Avg Course Done",     value: avgCoursePct,       suffix: "%", icon: BookOpen },
         ] as const).map((s, i) => (
-          <motion.div key={s.label}
-            initial={{ opacity: 0, y: 24, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: i * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ y: -4, scale: 1.02, transition: { duration: 0.15 } }}
-          >
-            <GlassCard className={`p-4 h-full relative overflow-hidden border-border/60 bg-gradient-to-br ${s.gradient}`}>
-              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${s.accent}`} />
-              <div className="mb-3">
-                <div className={`inline-flex p-2.5 rounded-xl ${s.iconClass} relative`}>
-                  <s.icon className="h-4 w-4" />
-                  {s.live && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success">
-                      <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
-                    </span>
-                  )}
-                </div>
-              </div>
-              <p className="text-2xl font-bold font-serif text-foreground tabular-nums">
-                <Num value={s.value} suffix={s.suffix} />
-              </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-tight">{s.label}</p>
-            </GlassCard>
-          </motion.div>
+          <AdminStatCard
+            key={s.label}
+            index={i}
+            icon={s.icon}
+            label={s.label}
+            value={<Num value={s.value} suffix={s.suffix} />}
+            delay={i * 0.08}
+          />
         ))}
       </div>
 
@@ -581,49 +566,31 @@ export default function AdminAnalyticsPage() {
             label: "Weakest MCQ Signal", icon: Target,
             value: weakestTopic ? `${weakestTopic.accuracy}%` : "—",
             sub: weakestTopic ? `${weakestTopic.topic} · ${weakestTopic.total} attempts` : "No MCQ attempts yet",
-            tone: "text-danger", bg: "from-danger/15 to-danger/5", border: "border-danger/25",
-            accent: "from-danger via-warning to-transparent", bar: weakestTopic?.accuracy ?? 0, barVar: "var(--danger)",
+            bar: weakestTopic?.accuracy ?? 0,
           },
           {
             label: "Assignment Bottleneck", icon: ClipboardCheck,
             value: weakestAssignment ? `${weakestAssignment.pass_rate}%` : "—",
             sub: weakestAssignment ? `${weakestAssignment.module} · ${weakestAssignment.attempts} attempts` : "No attempts yet",
-            tone: "text-warning", bg: "from-warning/15 to-warning/5", border: "border-warning/25",
-            accent: "from-warning via-streak to-transparent", bar: weakestAssignment?.pass_rate ?? 0, barVar: "var(--warning)",
+            bar: weakestAssignment?.pass_rate ?? 0,
           },
           {
             label: "Top Branch", icon: GitBranch,
             value: strongestBranch ? strongestBranch.branch : "—",
             sub: strongestBranch ? `${strongestBranch.avgPoints.toLocaleString()} avg pts · ${strongestBranch.count} students` : "No branch data yet",
-            tone: "text-success", bg: "from-success/15 to-success/5", border: "border-success/25",
-            accent: "from-success via-primary to-transparent", bar: 100, barVar: "var(--success)",
+            bar: 100,
           },
         ].map((item, i) => (
-          <motion.div key={item.label}
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.08 }}
-            whileHover={{ y: -3, scale: 1.01 }}
-          >
-            <GlassCard className={`relative h-full overflow-hidden border ${item.border} bg-gradient-to-br ${item.bg}`}>
-              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${item.accent}`} />
-              <div className="flex items-start gap-3">
-                <div className={`rounded-xl p-2.5 border ${item.border} bg-card/40 flex-shrink-0`}>
-                  <item.icon className={`h-5 w-5 ${item.tone}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground">{item.label}</p>
-                  <p className={`mt-1 text-2xl font-bold font-serif truncate ${item.tone}`}>{item.value}</p>
-                  <p className="mt-1 text-xs text-muted-foreground truncate">{item.sub}</p>
-                  <div className="mt-3 h-1.5 rounded-full bg-secondary/50 overflow-hidden">
-                    <motion.div className="h-full rounded-full" style={{ background: item.barVar }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.max(3, Math.min(100, item.bar))}%` }}
-                      transition={{ delay: 0.3 + i * 0.1, duration: 0.9, ease: "easeOut" }} />
-                  </div>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
+          <AdminStatCard
+            key={item.label}
+            index={i + 5}
+            icon={item.icon}
+            label={item.label}
+            value={item.value}
+            sub={item.sub}
+            bar={item.bar}
+            delay={0.1 + i * 0.08}
+          />
         ))}
       </div>
 

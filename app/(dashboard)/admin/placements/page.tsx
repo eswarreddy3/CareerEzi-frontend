@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Building2, Calendar, Users, ClipboardCheck, ClipboardList,
@@ -97,18 +98,16 @@ export default function PlacementOverviewPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map(s => (
-          <Link key={s.label} href={s.href}>
-            <GlassCard className="p-4 flex items-center gap-3 hover:border-primary/30 transition-colors">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <s.icon className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-                {loading ? <Skeleton className="h-7 w-10 mt-1" /> : <p className="text-2xl font-bold">{s.value}</p>}
-              </div>
-            </GlassCard>
-          </Link>
+        {stats.map((s, i) => (
+          <AdminStatCard
+            key={s.label}
+            index={i}
+            icon={s.icon}
+            label={s.label}
+            value={loading ? "—" : s.value}
+            href={s.href}
+            delay={i * 0.06}
+          />
         ))}
       </div>
 

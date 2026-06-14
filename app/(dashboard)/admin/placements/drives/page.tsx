@@ -3,6 +3,7 @@
 import { useEffect, useState, type KeyboardEvent } from "react"
 import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -474,16 +475,8 @@ export default function PlacementDrivesPage() {
           { label: "Total Drives", value: drives.length, icon: Building2 },
           { label: "Upcoming", value: upcoming, icon: Calendar },
           { label: "Total Registered", value: totalRegistered, icon: Users },
-        ].map(s => (
-          <GlassCard key={s.label} className="p-4 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <s.icon className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-              <p className="text-2xl font-bold">{s.value}</p>
-            </div>
-          </GlassCard>
+        ].map((s, i) => (
+          <AdminStatCard key={s.label} index={i} icon={s.icon} label={s.label} value={s.value} delay={i * 0.06} />
         ))}
       </div>
 

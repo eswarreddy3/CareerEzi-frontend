@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -54,23 +55,10 @@ const TOOLTIP_STYLE = { background: "var(--popover)", border: "1px solid var(--b
 const ctc = (v: number | null | undefined) => (v != null ? `₹${v} LPA` : "—")
 
 /* ── KPI card ───────────────────────────────────────────────────────────── */
-function Kpi({ icon: Icon, label, value, sub, color }: {
+function Kpi({ icon, label, value, sub, color }: {
   icon: any; label: string; value: string | number; sub?: string; color: string
 }) {
-  return (
-    <GlassCard className="p-4">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg" style={{ background: `${color}1A` }}>
-          <Icon className="w-5 h-5" style={{ color }} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p className="text-2xl font-bold truncate">{value}</p>
-          {sub && <p className="text-[11px] text-muted-foreground">{sub}</p>}
-        </div>
-      </div>
-    </GlassCard>
-  )
+  return <AdminStatCard index={0} icon={icon} label={label} value={value} sub={sub} color={color} />
 }
 
 function ChartCard({ title, subtitle, children, empty }: {

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, type ReactNode } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UserAvatar } from "@/components/user-avatar"
@@ -387,42 +388,10 @@ export default function AdminStudentsPage() {
   const show = useCallback((key: ColKey) => visibleCols[key], [visibleCols])
 
   const statCards = [
-    {
-      label: "Total Students", value: total,
-      icon: GraduationCap,
-      gradient: "from-primary/20 to-primary/5",
-      border: "border-primary/20",
-      iconBg: "bg-primary/15",
-      iconColor: "text-primary",
-      valueColor: "text-primary",
-    },
-    {
-      label: "Active", value: activeCount,
-      icon: CheckCircle,
-      gradient: "from-success/20 to-success/5",
-      border: "border-success/20",
-      iconBg: "bg-success/15",
-      iconColor: "text-success",
-      valueColor: "text-success",
-    },
-    {
-      label: "Inactive", value: inactiveCount,
-      icon: AlertTriangle,
-      gradient: "from-danger/20 to-danger/5",
-      border: "border-danger/20",
-      iconBg: "bg-danger/15",
-      iconColor: "text-danger",
-      valueColor: "text-danger",
-    },
-    {
-      label: "Selected", value: selectedIds.size,
-      icon: Activity,
-      gradient: "from-coding/20 to-coding/5",
-      border: "border-coding/20",
-      iconBg: "bg-coding/15",
-      iconColor: "text-coding",
-      valueColor: "text-coding",
-    },
+    { label: "Total Students", value: total,            icon: GraduationCap },
+    { label: "Active",         value: activeCount,       icon: CheckCircle },
+    { label: "Inactive",       value: inactiveCount,     icon: AlertTriangle },
+    { label: "Selected",       value: selectedIds.size,  icon: Activity },
   ]
 
   return (
@@ -473,26 +442,14 @@ export default function AdminStudentsPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {statCards.map((s, i) => (
-          <motion.div
+          <AdminStatCard
             key={s.label}
-            initial={{ opacity: 0, y: 16, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: i * 0.07, duration: 0.35, type: "spring", stiffness: 260, damping: 22 }}
-            className={cn(
-              "relative overflow-hidden rounded-xl border p-4 bg-gradient-to-br",
-              s.gradient, s.border,
-            )}
-          >
-            <div className={cn("inline-flex p-2 rounded-lg mb-2.5", s.iconBg)}>
-              <s.icon className={cn("h-4 w-4", s.iconColor)} />
-            </div>
-            <p className={cn("text-2xl font-bold leading-none tabular-nums", s.valueColor)}>
-              {loading ? "—" : s.value.toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</p>
-            {/* Decorative circle */}
-            <div className={cn("absolute -right-4 -top-4 h-16 w-16 rounded-full opacity-20", s.iconBg)} />
-          </motion.div>
+            index={i}
+            icon={s.icon}
+            label={s.label}
+            value={loading ? "—" : s.value.toLocaleString()}
+            delay={i * 0.07}
+          />
         ))}
       </div>
 

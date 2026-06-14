@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
+import { AdminStatCard } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/user-avatar"
 import { Badge } from "@/components/ui/badge"
@@ -93,11 +94,6 @@ function metricStatus(value: number, good: number, warn: number) {
 
 const MEDALS = ["🥇", "🥈", "🥉"]
 const READINESS_COLORS = ["var(--danger)", "var(--warning)", "var(--primary)", "var(--success)"]
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4 } }),
-}
 
 function readinessColor(i: number) {
   return READINESS_COLORS[i % READINESS_COLORS.length]
@@ -355,31 +351,16 @@ export default function AdminDashboardPage() {
             trend: null as number | null,
           },
         ] as const).map((stat, i) => (
-          <motion.div key={stat.label} custom={i} variants={cardVariants} initial="hidden" animate="visible" whileHover={{ y: -4, scale: 1.01 }}>
-            <GlassCard className="h-full relative overflow-hidden border-border/80 hover:border-primary/30 transition-colors">
-              <motion.div
-                className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent ${stat.accent} to-transparent`}
-                initial={{ x: "-100%" }}
-                animate={{ x: "100%" }}
-                transition={{ delay: i * 0.2, duration: 2.4, repeat: Infinity, repeatDelay: 5 }}
-              />
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold font-serif text-foreground leading-tight">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">{stat.sub}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  <div className={`p-2.5 rounded-xl ${stat.iconBg} flex-shrink-0`}>
-                    <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
-                  </div>
-                  {stat.trend !== null && stat.trend !== undefined && (
-                    <TrendIndicator delta={stat.trend} />
-                  )}
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
+          <AdminStatCard
+            key={stat.label}
+            index={i}
+            icon={stat.icon}
+            label={stat.label}
+            value={stat.value}
+            sub={stat.sub}
+            trend={stat.trend}
+            delay={i * 0.07}
+          />
         ))}
       </div>
 
@@ -443,33 +424,18 @@ export default function AdminDashboardPage() {
               hasBar: false,
             },
           ] as const).map((item, i) => (
-            <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.07 }} whileHover={{ y: -3 }}>
-              <Link href={item.href}>
-                <GlassCard className={`p-4 h-full relative overflow-hidden border transition-all cursor-pointer hover:shadow-md ${item.status.border}`}>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className={`rounded-xl p-2.5 ${item.status.bg}`}>
-                      <item.icon className={`h-5 w-5 ${item.status.text}`} />
-                    </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${item.status.bg} ${item.status.text}`}>
-                      {item.status.label}
-                    </span>
-                  </div>
-                  <p className={`text-3xl font-bold font-serif ${item.status.text}`}>{item.display}</p>
-                  <p className="text-xs font-medium text-foreground mt-0.5">{item.label}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.sub}</p>
-                  {item.hasBar && (
-                    <div className="mt-3 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <motion.div
-                        className={`h-full rounded-full ${item.status.bar}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(item.value as number, 100)}%` }}
-                        transition={{ delay: 0.4 + i * 0.08, duration: 0.9, ease: "easeOut" }}
-                      />
-                    </div>
-                  )}
-                </GlassCard>
-              </Link>
-            </motion.div>
+            <AdminStatCard
+              key={item.label}
+              index={i + 4}
+              icon={item.icon}
+              label={item.label}
+              value={item.display}
+              sub={item.sub}
+              badge={item.status.label}
+              bar={item.hasBar ? (item.value as number) : undefined}
+              href={item.href}
+              delay={0.3 + i * 0.07}
+            />
           ))}
         </div>
       </div>
