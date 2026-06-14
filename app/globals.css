@@ -571,7 +571,7 @@
 
 /* ── Sidebar text — stronger contrast so labels don't look dull ─────────────
    Darken muted text inside the rail only (per theme); rest of app unchanged. */
-html:not(.dark) .app-sidebar { --muted-foreground: #52525B; }
+html:not(.dark) .app-sidebar { --muted-foreground: #3F3F46; }
 .dark .app-sidebar        { --muted-foreground: #B6B6C0; }
 
 /* Active sidebar item — bolder label so the highlight reads clearly */
