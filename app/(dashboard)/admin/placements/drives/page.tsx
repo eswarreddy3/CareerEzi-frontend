@@ -3,7 +3,7 @@
 import { useEffect, useState, type KeyboardEvent } from "react"
 import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, AdminHero } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -459,15 +459,17 @@ export default function PlacementDrivesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Placement Drives</h1>
-          <p className="text-muted-foreground text-sm">Manage recruitment drives for your college</p>
-        </div>
-        <Button size="sm" onClick={() => { setEditing(null); setModalOpen(true) }}>
-          <Plus className="w-4 h-4 mr-2" /> New Drive
-        </Button>
-      </div>
+      <AdminHero
+        icon={Building2}
+        eyebrow="Placement Cell"
+        title="Placement Drives"
+        subtitle="Manage recruitment drives for your college"
+        right={
+          <Button size="sm" onClick={() => { setEditing(null); setModalOpen(true) }} className="bg-white/15 hover:bg-white/25 text-white border-0">
+            <Plus className="w-4 h-4 mr-2" /> New Drive
+          </Button>
+        }
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">

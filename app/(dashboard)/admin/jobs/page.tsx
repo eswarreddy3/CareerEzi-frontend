@@ -18,6 +18,7 @@ import {
   Briefcase, Building2, Calendar, ExternalLink, Loader2,
   Pencil, Plus, Trash2, Clock, Bell,
 } from "lucide-react"
+import { AdminHero } from "@/components/admin-stat-card"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
@@ -268,19 +269,21 @@ export default function AdminJobsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-serif text-foreground">Job Postings</h1>
-          <p className="text-muted-foreground mt-1">Post opportunities visible only to your college students</p>
-        </div>
-        <Button
-          className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
-          onClick={() => { setEditing(null); setDialogOpen(true) }}
-        >
-          <Plus className="h-4 w-4" />
-          Post Job
-        </Button>
-      </div>
+      <AdminHero
+        icon={Briefcase}
+        eyebrow="Placement Cell"
+        title="Job Postings"
+        subtitle="Post opportunities visible only to your college students"
+        right={
+          <Button
+            className="bg-white/15 hover:bg-white/25 text-white border-0 gap-2"
+            onClick={() => { setEditing(null); setDialogOpen(true) }}
+          >
+            <Plus className="h-4 w-4" />
+            Post Job
+          </Button>
+        }
+      />
 
       {/* Summary */}
       {!loading && (

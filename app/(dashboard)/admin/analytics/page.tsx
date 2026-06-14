@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, AdminHero, IconTile, adminCardColor } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -303,39 +303,23 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-8">
 
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/12 via-card to-coding/10 px-6 py-5 shadow-2xl"
-      >
-        <motion.div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"
-          initial={{ x: "-100%" }} animate={{ x: "100%" }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }} />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.04),transparent)] pointer-events-none" />
-        <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
-        <div className="absolute -left-6 -bottom-6 w-36 h-36 rounded-full bg-coding/8 blur-3xl pointer-events-none" />
-
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-widest text-primary">Deep Analytics</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-serif text-foreground">College Analytics</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Engagement · Learning · Assessments · Coding · Students</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold
-              ${a.engagement_delta >= 0 ? "border-success/25 bg-success/10 text-success" : "border-danger/25 bg-danger/10 text-danger"}`}>
+      <AdminHero
+        icon={Activity}
+        eyebrow="Deep Analytics"
+        title="College Analytics"
+        subtitle="Engagement · Learning · Assessments · Coding · Students"
+        right={
+          <>
+            <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold bg-white/15 text-white">
               {a.engagement_delta >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
               {a.engagement_delta >= 0 ? "+" : ""}{a.engagement_delta}% vs prev {a.days}d
             </span>
-            <Button variant="outline" size="sm" onClick={exportCSV} className="h-8 gap-1.5 border-border/60 text-muted-foreground hover:text-foreground">
+            <Button variant="outline" size="sm" onClick={exportCSV} className="h-8 gap-1.5 bg-white/15 hover:bg-white/25 text-white border-0">
               <Download className="h-3.5 w-3.5" /> Export
             </Button>
-          </div>
-        </div>
-      </motion.div>
+          </>
+        }
+      />
 
       {/* ── FILTER PANEL ──────────────────────────────────────────────────── */}
       <motion.div
@@ -581,16 +565,25 @@ export default function AdminAnalyticsPage() {
             bar: 100,
           },
         ].map((item, i) => (
-          <AdminStatCard
-            key={item.label}
-            index={i + 5}
-            icon={item.icon}
-            label={item.label}
-            value={item.value}
-            sub={item.sub}
-            bar={item.bar}
-            delay={0.1 + i * 0.08}
-          />
+          <motion.div key={item.label}
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08 }} whileHover={{ y: -3 }}>
+            <GlassCard className="p-4 h-full card-hover">
+              <div className="flex items-start gap-3">
+                <IconTile icon={item.icon} color={adminCardColor(i + 5)} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className="mt-0.5 text-2xl font-bold font-serif text-foreground truncate">{item.value}</p>
+                  <p className="text-xs text-muted-foreground truncate">{item.sub}</p>
+                  <div className="mt-2.5 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <motion.div className="h-full rounded-full" style={{ background: adminCardColor(i + 5) }}
+                      initial={{ width: 0 }} animate={{ width: `${Math.max(3, Math.min(100, item.bar))}%` }}
+                      transition={{ delay: 0.3 + i * 0.1, duration: 0.9, ease: "easeOut" }} />
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
         ))}
       </div>
 

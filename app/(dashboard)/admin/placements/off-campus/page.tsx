@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import {
   ArrowLeft, CheckCircle, XCircle, Loader2, MapPin, Calendar, IndianRupee,
 } from "lucide-react"
+import { AdminHero } from "@/components/admin-stat-card"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { motion } from "framer-motion"
@@ -145,26 +146,26 @@ export default function OffCampusReviewPage() {
         </Button>
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Off-Campus Placements</h1>
-          <p className="text-sm text-muted-foreground">
-            Student-reported offers. Approved ones count towards your placement reports.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {(["pending", "all"] as const).map(t => (
-            <Button
-              key={t}
-              variant={tab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTab(t)}
-            >
-              {t === "pending" ? `Pending${pendingCount > 0 ? ` (${pendingCount})` : ""}` : "All"}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <AdminHero
+        icon={MapPin}
+        eyebrow="Placement Cell"
+        title="Off-Campus Placements"
+        subtitle="Student-reported offers. Approved ones count towards your placement reports."
+        right={
+          <div className="flex gap-2">
+            {(["pending", "all"] as const).map(t => (
+              <Button
+                key={t}
+                size="sm"
+                onClick={() => setTab(t)}
+                className={`border-0 text-white ${tab === t ? "bg-white/25 hover:bg-white/30" : "bg-white/10 hover:bg-white/20"}`}
+              >
+                {t === "pending" ? `Pending${pendingCount > 0 ? ` (${pendingCount})` : ""}` : "All"}
+              </Button>
+            ))}
+          </div>
+        }
+      />
 
       {loading ? (
         <div className="space-y-3">

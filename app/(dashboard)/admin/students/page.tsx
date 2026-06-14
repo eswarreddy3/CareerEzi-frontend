@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, type ReactNode } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, AdminHero } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UserAvatar } from "@/components/user-avatar"
@@ -397,47 +397,38 @@ export default function AdminStudentsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3"
-      >
-        <div>
-          <h1 className="text-3xl font-bold font-serif text-foreground">Students</h1>
-          <p className="text-muted-foreground mt-1 text-sm">Manage and monitor your college students</p>
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedIds.size > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-            >
+      <AdminHero
+        icon={GraduationCap}
+        eyebrow="College"
+        title="Students"
+        subtitle="Manage and monitor your college students"
+        right={
+          <>
+            {selectedIds.size > 0 && (
               <Button
                 size="sm"
                 variant="outline"
-                className="border-danger/40 text-danger hover:bg-danger/10 gap-1.5 h-8"
+                className="bg-white/15 hover:bg-white/25 text-white border-0 gap-1.5 h-8"
                 onClick={handleRemindSelected}
                 disabled={remindingSelected}
               >
                 {remindingSelected ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
                 Remind ({selectedIds.size})
               </Button>
-            </motion.div>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-primary/30 text-primary hover:bg-primary/10 gap-1.5 h-8"
-            onClick={exportCSV}
-            disabled={exportingCSV}
-          >
-            {exportingCSV ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-            Export CSV
-          </Button>
-        </div>
-      </motion.div>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="bg-white/15 hover:bg-white/25 text-white border-0 gap-1.5 h-8"
+              onClick={exportCSV}
+              disabled={exportingCSV}
+            >
+              {exportingCSV ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+              Export CSV
+            </Button>
+          </>
+        }
+      />
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

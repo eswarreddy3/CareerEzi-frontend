@@ -4,15 +4,14 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, AdminHero } from "@/components/admin-stat-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Building2, Calendar, Users, ClipboardCheck, ClipboardList,
-  BriefcaseBusiness, ChevronRight, ArrowRight, MapPin, BarChart3, GraduationCap,
+  Building2, Calendar, Users, ClipboardCheck,
+  ChevronRight, MapPin, GraduationCap,
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { motion } from "framer-motion"
 
 interface Drive {
   id: number
@@ -34,15 +33,6 @@ interface Correction {
   branch: string | null
   requested_at: string | null
 }
-
-const quickLinks = [
-  { href: "/admin/placements/drives",      label: "Drives",              desc: "Create & manage recruitment drives", icon: Building2,        color: "text-primary" },
-  { href: "/admin/placements/analytics",   label: "Reports & Analysis",  desc: "Placements, CTC & branch insights",   icon: BarChart3,        color: "text-emerald-500" },
-  { href: "/admin/placements/academic",    label: "Academic Records",    desc: "Bulk upload CGPA & backlogs",        icon: ClipboardList,    color: "text-teal-500" },
-  { href: "/admin/placements/corrections", label: "Correction Requests", desc: "Review student data corrections",     icon: ClipboardCheck,   color: "text-amber-500" },
-  { href: "/admin/placements/off-campus",  label: "Off-Campus Offers",   desc: "Approve student-reported placements", icon: GraduationCap,    color: "text-pink-500" },
-  { href: "/admin/jobs",                   label: "Job Postings",        desc: "Post off-campus job openings",        icon: BriefcaseBusiness, color: "text-violet-500" },
-]
 
 const industryChip: Record<string, string> = {
   IT: "chip chip-primary",
@@ -91,10 +81,11 @@ export default function PlacementOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Placement Cell</h1>
-        <p className="text-muted-foreground text-sm">Drives, academic records, corrections and job postings in one place</p>
-      </div>
+      <AdminHero
+        icon={GraduationCap}
+        title="Placement Cell"
+        subtitle="Drives, academic records, corrections and job postings in one place"
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
@@ -108,24 +99,6 @@ export default function PlacementOverviewPage() {
             href={s.href}
             delay={i * 0.06}
           />
-        ))}
-      </div>
-
-      {/* Quick links */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {quickLinks.map((q, i) => (
-          <motion.div key={q.href} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Link href={q.href}>
-              <GlassCard className="p-5 h-full hover:border-primary/30 transition-colors group">
-                <q.icon className={`w-6 h-6 ${q.color}`} />
-                <p className="font-semibold mt-3 flex items-center gap-1">
-                  {q.label}
-                  <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{q.desc}</p>
-              </GlassCard>
-            </Link>
-          </motion.div>
         ))}
       </div>
 

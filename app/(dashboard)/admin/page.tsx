@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard, IconTile, SectionHeading, SurfaceTexture } from "@/components/admin-stat-card"
+import { AdminStatCard, IconTile, SectionHeading, SurfaceTexture, adminCardColor } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/user-avatar"
 import { Badge } from "@/components/ui/badge"
@@ -406,18 +406,26 @@ export default function AdminDashboardPage() {
               hasBar: false,
             },
           ] as const).map((item, i) => (
-            <AdminStatCard
-              key={item.label}
-              index={i + 4}
-              icon={item.icon}
-              label={item.label}
-              value={item.display}
-              sub={item.sub}
-              badge={item.status.label}
-              bar={item.hasBar ? (item.value as number) : undefined}
-              href={item.href}
-              delay={0.3 + i * 0.07}
-            />
+            <motion.div key={item.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.07 }} whileHover={{ y: -3 }}>
+              <Link href={item.href}>
+                <GlassCard className="p-4 h-full card-hover cursor-pointer">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <IconTile icon={item.icon} color={adminCardColor(i + 4)} size="sm" />
+                    <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{item.status.label}</span>
+                  </div>
+                  <p className="text-2xl font-bold font-serif text-foreground leading-none">{item.display}</p>
+                  <p className="text-[11px] font-medium text-foreground/80 mt-1">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{item.sub}</p>
+                  {item.hasBar && (
+                    <div className="mt-2.5 h-1.5 rounded-full bg-secondary overflow-hidden">
+                      <motion.div className="h-full rounded-full" style={{ background: adminCardColor(i + 4) }}
+                        initial={{ width: 0 }} animate={{ width: `${Math.min(item.value as number, 100)}%` }}
+                        transition={{ delay: 0.4 + i * 0.08, duration: 0.9, ease: "easeOut" }} />
+                    </div>
+                  )}
+                </GlassCard>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -129,6 +129,44 @@ export function AdminStatCard({
   return href ? <Link href={href} className="block h-full">{card}</Link> : card
 }
 
+/** Premium page hero — deep indigo→violet banner used across all admin pages. */
+export function AdminHero({
+  eyebrow, title, subtitle, icon: Icon, right,
+}: {
+  eyebrow?: string
+  title: string
+  subtitle?: string
+  icon?: LucideIcon
+  right?: ReactNode
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative overflow-hidden rounded-2xl px-6 py-5 text-white shadow-lg shadow-black/15 ring-1 ring-inset ring-white/10"
+      style={{ background: "linear-gradient(120deg, #312E81 0%, #1E1B4B 55%, #3B2C6B 100%)" }}
+    >
+      <SurfaceTexture />
+      <div className="absolute -right-10 -top-12 w-52 h-52 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+      <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          {Icon && (
+            <div className="w-12 h-12 rounded-2xl bg-white/15 ring-1 ring-inset ring-white/20 flex items-center justify-center flex-shrink-0">
+              <Icon className="h-6 w-6 text-white" />
+            </div>
+          )}
+          <div className="min-w-0">
+            {eyebrow && <span className="text-xs font-semibold uppercase tracking-widest text-white/70">{eyebrow}</span>}
+            <h1 className="text-2xl sm:text-3xl font-bold font-serif text-white leading-tight">{title}</h1>
+            {subtitle && <p className="text-sm text-white/75 mt-0.5">{subtitle}</p>}
+          </div>
+        </div>
+        {right && <div className="flex items-center gap-2 flex-wrap">{right}</div>}
+      </div>
+    </motion.div>
+  )
+}
+
 /** Solid-colour rounded icon tile with a white glyph — ties panels back to the cards. */
 export function IconTile({
   icon: Icon, color, size = "md", className = "",

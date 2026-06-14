@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react"
+import { AdminHero } from "@/components/admin-stat-card"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { motion } from "framer-motion"
@@ -144,24 +145,26 @@ export default function CorrectionsPage() {
         </Button>
       </div>
 
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Profile Correction Requests</h1>
-          <p className="text-sm text-muted-foreground">Students requesting changes to their academic data</p>
-        </div>
-        <div className="flex gap-2">
-          {(["pending", "all"] as const).map(t => (
-            <Button
-              key={t}
-              variant={tab === t ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTab(t)}
-            >
-              {t === "pending" ? `Pending${pendingCount > 0 ? ` (${pendingCount})` : ""}` : "All"}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <AdminHero
+        icon={CheckCircle}
+        eyebrow="Placement Cell"
+        title="Profile Correction Requests"
+        subtitle="Students requesting changes to their academic data"
+        right={
+          <div className="flex gap-2">
+            {(["pending", "all"] as const).map(t => (
+              <Button
+                key={t}
+                size="sm"
+                onClick={() => setTab(t)}
+                className={`border-0 text-white ${tab === t ? "bg-white/25 hover:bg-white/30" : "bg-white/10 hover:bg-white/20"}`}
+              >
+                {t === "pending" ? `Pending${pendingCount > 0 ? ` (${pendingCount})` : ""}` : "All"}
+              </Button>
+            ))}
+          </div>
+        }
+      />
 
       {loading ? (
         <div className="space-y-3">

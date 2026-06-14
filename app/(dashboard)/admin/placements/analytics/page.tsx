@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, AdminHero } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -156,15 +156,17 @@ export default function PlacementAnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Reports &amp; Analysis</h1>
-          <p className="text-muted-foreground text-sm">Placement insights for your college</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => data && exportCSV(data)} disabled={!data}>
-          <Download className="w-4 h-4 mr-2" /> Export CSV
-        </Button>
-      </div>
+      <AdminHero
+        icon={TrendingUp}
+        eyebrow="Placement Cell"
+        title="Reports & Analysis"
+        subtitle="Placement insights for your college"
+        right={
+          <Button variant="outline" size="sm" onClick={() => data && exportCSV(data)} disabled={!data} className="bg-white/15 hover:bg-white/25 text-white border-0">
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+        }
+      />
 
       {/* Filter bar */}
       <GlassCard className="p-4 sticky top-2 z-10">

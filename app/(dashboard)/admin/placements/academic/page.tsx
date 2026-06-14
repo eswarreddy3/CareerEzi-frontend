@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import {
   Upload, Download, AlertCircle, XCircle, Loader2, GraduationCap,
 } from "lucide-react"
+import { AdminHero } from "@/components/admin-stat-card"
 import { toast } from "sonner"
 import api from "@/lib/api"
 
@@ -50,12 +51,12 @@ export default function AcademicRecordsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Academic Records</h1>
-        <p className="text-muted-foreground text-sm">
-          Upload student academic data (CGPA, backlogs, percentages) used for drive eligibility
-        </p>
-      </div>
+      <AdminHero
+        icon={GraduationCap}
+        eyebrow="Placement Cell"
+        title="Academic Records"
+        subtitle="Upload student academic data (CGPA, backlogs, percentages) used for drive eligibility"
+      />
 
       <GlassCard className="p-6 max-w-2xl space-y-5">
         <div className="flex items-start gap-3">
