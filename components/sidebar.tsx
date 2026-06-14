@@ -201,7 +201,7 @@ function navItemCls(isActive: boolean, isCollapsed: boolean, c: (typeof C)[NavCo
     "group relative flex items-center gap-3 rounded-xl transition-all duration-200 cursor-pointer",
     isCollapsed ? "justify-center w-10 h-10 mx-auto" : "px-3 py-2.5",
     isActive
-      ? cn(c.bg, c.text)
+      ? cn(c.bg, c.text, "nav-active font-semibold")
       : cn("text-muted-foreground", c.hover, "hover:text-foreground"),
     extra
   )
@@ -285,7 +285,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
+          "app-sidebar fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col",
           isCollapsed ? "w-[68px]" : "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
-import { AdminStatCard } from "@/components/admin-stat-card"
+import { AdminStatCard, IconTile, SectionHeading, SurfaceTexture } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { UserAvatar } from "@/components/user-avatar"
 import { Badge } from "@/components/ui/badge"
@@ -97,24 +97,6 @@ const READINESS_COLORS = ["var(--danger)", "var(--warning)", "var(--primary)", "
 
 function readinessColor(i: number) {
   return READINESS_COLORS[i % READINESS_COLORS.length]
-}
-
-function TrendIndicator({ delta }: { delta: number }) {
-  if (delta > 0) return (
-    <span className="inline-flex items-center gap-0.5 text-success text-xs font-semibold">
-      <ArrowUpRight className="h-3.5 w-3.5" />+{delta}%
-    </span>
-  )
-  if (delta < 0) return (
-    <span className="inline-flex items-center gap-0.5 text-danger text-xs font-semibold">
-      <ArrowDownRight className="h-3.5 w-3.5" />{delta}%
-    </span>
-  )
-  return (
-    <span className="inline-flex items-center gap-0.5 text-muted-foreground text-xs">
-      <Minus className="h-3 w-3" />0%
-    </span>
-  )
 }
 
 export default function AdminDashboardPage() {
@@ -242,37 +224,32 @@ export default function AdminDashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-coding/10 p-6 shadow-2xl shadow-primary/5"
+        className="relative overflow-hidden rounded-2xl p-6 text-white shadow-lg shadow-black/15 ring-1 ring-inset ring-white/10"
+        style={{ background: "linear-gradient(120deg, #312E81 0%, #1E1B4B 55%, #3B2C6B 100%)" }}
       >
-        <motion.div
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"
-          initial={{ x: "-100%" }}
-          animate={{ x: "100%" }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: "linear", repeatDelay: 1.5 }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.04),transparent)] pointer-events-none" />
+        <SurfaceTexture />
+        {/* soft corner glow */}
+        <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+        <div className="relative flex flex-col xl:flex-row xl:items-center justify-between gap-5">
           {/* College identity */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl border-2 border-primary/30 bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg">
+            <div className="w-14 h-14 rounded-2xl border border-white/30 bg-white/15 flex items-center justify-center overflow-hidden flex-shrink-0">
               {logoPreview ? (
                 <img src={resolveLogoUrl(logoPreview)!} alt="College" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-2xl font-bold text-primary">
+                <span className="text-2xl font-bold text-white">
                   {user?.college_name?.[0]?.toUpperCase() ?? "C"}
                 </span>
               )}
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-warning/20 text-warning border-warning/30 text-xs">
-                  <Crown className="h-3 w-3 mr-1" />
-                  {user?.college_name || "Your College"}
-                </Badge>
-              </div>
-              <h1 className="text-2xl font-bold font-serif text-foreground">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/20 text-white mb-1.5">
+                <Crown className="h-3 w-3" />
+                {user?.college_name || "Your College"}
+              </span>
+              <h1 className="text-2xl font-bold font-serif text-white leading-tight">Admin Dashboard</h1>
+              <p className="text-sm text-white/80">
                 Welcome back, {user?.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1).toLowerCase() : ""}
               </p>
             </div>
@@ -280,25 +257,28 @@ export default function AdminDashboardPage() {
 
           {/* Engagement widget + nav buttons */}
           <div className="flex items-center gap-4 flex-wrap">
-            <div className={`flex items-center gap-3 rounded-xl px-4 py-3 border ${engagementStatus.border} ${engagementStatus.bg}`}>
+            <div className="flex items-center gap-3 rounded-xl px-4 py-3 border border-white/20 bg-white/15">
               <div className="text-center">
-                <p className={`text-2xl font-bold font-serif ${engagementStatus.text}`}>{engagementRate}%</p>
-                <p className="text-xs text-muted-foreground">Engagement</p>
+                <p className="text-2xl font-bold font-serif text-white">{engagementRate}%</p>
+                <p className="text-xs text-white/70">Engagement</p>
               </div>
-              <div className="h-8 w-px bg-border/60" />
+              <div className="h-8 w-px bg-white/25" />
               <div>
-                <TrendIndicator delta={data.engagement_delta} />
-                <p className="text-xs text-muted-foreground">vs last {data.days}d</p>
+                <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-white">
+                  {data.engagement_delta > 0 ? <ArrowUpRight className="h-3.5 w-3.5" /> : data.engagement_delta < 0 ? <ArrowDownRight className="h-3.5 w-3.5" /> : <Minus className="h-3 w-3" />}
+                  {data.engagement_delta > 0 ? "+" : ""}{data.engagement_delta}%
+                </span>
+                <p className="text-xs text-white/70">vs last {data.days}d</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Link href="/admin/analytics">
-                <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-1.5">
+                <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0 gap-1.5">
                   <TrendingUp className="h-3.5 w-3.5" /> Analytics
                 </Button>
               </Link>
               <Link href="/admin/students">
-                <Button size="sm" variant="outline" className="border-border text-muted-foreground hover:text-foreground gap-1.5">
+                <Button size="sm" className="bg-white/10 hover:bg-white/20 text-white border-0 gap-1.5">
                   <Users className="h-3.5 w-3.5" /> Students
                 </Button>
               </Link>
@@ -366,17 +346,19 @@ export default function AdminDashboardPage() {
 
       {/* ── Learning Health ─────────────────────────────────── */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">Learning Health</p>
-            <h2 className="text-lg font-bold font-serif text-foreground">Performance across all modules</h2>
-          </div>
-          <Link href="/admin/analytics">
-            <Button variant="outline" size="sm" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
-              Deep Dive <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
-        </div>
+        <SectionHeading
+          icon={Activity}
+          color="#4F46E5"
+          title="Learning Health"
+          subtitle="Performance across all modules"
+          right={
+            <Link href="/admin/analytics">
+              <Button variant="outline" size="sm" className="gap-2 border-primary/30 text-primary hover:bg-primary/10">
+                Deep Dive <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          }
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {([
@@ -443,12 +425,15 @@ export default function AdminDashboardPage() {
       {/* ── Charts ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="lg:col-span-3">
-          <GlassCard className="relative h-full overflow-hidden border-primary/20">
+          <GlassCard className="relative h-full overflow-hidden border-primary/20 card-hover">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-coding to-success" />
             <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-semibold font-serif text-foreground">Engagement Pulse</h3>
-                <p className="text-xs text-muted-foreground">Weekly active students — last 8 weeks</p>
+              <div className="flex items-center gap-2.5">
+                <IconTile icon={TrendingUp} color="#3D55C8" />
+                <div>
+                  <h3 className="font-semibold font-serif text-foreground">Engagement Pulse</h3>
+                  <p className="text-xs text-muted-foreground">Weekly active students — last 8 weeks</p>
+                </div>
               </div>
               <Badge variant="outline" className={`${engagementStatus.border} ${engagementStatus.text}`}>
                 {engagementRate}% this week
@@ -473,12 +458,15 @@ export default function AdminDashboardPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }} className="lg:col-span-2">
-          <GlassCard className="relative h-full overflow-hidden border-coding/20">
+          <GlassCard className="relative h-full overflow-hidden border-coding/20 card-hover">
             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-danger via-warning to-success" />
             <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-semibold font-serif text-foreground">Readiness Distribution</h3>
-                <p className="text-xs text-muted-foreground">Placement bands for this cohort</p>
+              <div className="flex items-center gap-2.5">
+                <IconTile icon={Target} color="#7B45C9" />
+                <div>
+                  <h3 className="font-semibold font-serif text-foreground">Readiness Distribution</h3>
+                  <p className="text-xs text-muted-foreground">Placement bands for this cohort</p>
+                </div>
               </div>
               <Badge variant="outline" className="border-primary/30 text-primary">{readinessTotal} students</Badge>
             </div>
@@ -535,9 +523,7 @@ export default function AdminDashboardPage() {
           <GlassCard className="h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-warning/15">
-                  <Trophy className="h-4 w-4 text-warning" />
-                </div>
+                <IconTile icon={Trophy} color="#C77E33" />
                 <div>
                   <h3 className="font-semibold font-serif text-foreground">Top Students</h3>
                   <p className="text-xs text-muted-foreground">Ranked by total points</p>
@@ -595,12 +581,10 @@ export default function AdminDashboardPage() {
           <GlassCard className={`h-full transition-colors ${inactiveCount > 0 ? "border-danger/30" : "border-success/20"}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className={`p-1.5 rounded-lg ${inactiveCount > 0 ? "bg-danger/15" : "bg-success/15"}`}>
-                  {inactiveCount === 0
-                    ? <CheckCircle className="h-4 w-4 text-success" />
-                    : <AlertTriangle className="h-4 w-4 text-danger" />
-                  }
-                </div>
+                <IconTile
+                  icon={inactiveCount === 0 ? CheckCircle : AlertTriangle}
+                  color={inactiveCount > 0 ? "#C0476F" : "#1E9D6B"}
+                />
                 <div>
                   <h3 className="font-semibold font-serif text-foreground">Inactive Students</h3>
                   <p className="text-xs text-muted-foreground">3+ days without activity</p>
@@ -672,9 +656,7 @@ export default function AdminDashboardPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
         <GlassCard>
           <div className="flex items-center gap-3 mb-5">
-            <div className="p-1.5 rounded-lg bg-primary/15">
-              <Upload className="h-4 w-4 text-primary" />
-            </div>
+            <IconTile icon={Upload} color="#1C8B8F" />
             <div>
               <h3 className="font-semibold font-serif text-foreground">College Logo</h3>
               <p className="text-xs text-muted-foreground">Shown as your college profile picture</p>
