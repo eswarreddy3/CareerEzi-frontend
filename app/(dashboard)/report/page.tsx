@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { AdminHero } from "@/components/admin-stat-card"
+import { AdminHero, AdminStatCard } from "@/components/admin-stat-card"
 import { generateStudentPDF, type StudentPerformance as Performance } from "@/lib/student-report"
 
 interface ActivityEvent {
@@ -242,23 +242,15 @@ export default function MyReportPage() {
 
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {[
-          { label: "Points", value: student.points.toLocaleString(), icon: Star, color: "text-warning", bg: "bg-warning/15" },
-          { label: "Streak", value: `${student.streak}d`, icon: Flame, color: "text-streak", bg: "bg-streak/15" },
-          { label: "MCQ Accuracy", value: `${mcq.accuracy}%`, icon: Brain, color: "text-coding", bg: "bg-coding/15" },
-          { label: "Lessons Done", value: lessons.completed, icon: BookOpen, color: "text-primary", bg: "bg-primary/15" },
-          { label: "Problems Solved", value: coding.problems_solved, icon: Code2, color: "text-success", bg: "bg-success/15" },
-          { label: "Assignments", value: assignments.total, icon: FileText, color: "text-coral", bg: "bg-coral/15" },
-        ].map((s, i) => (
-          <motion.div key={s.label} initial={{ opacity: 0, scale: 0.93 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
-            <GlassCard className="p-4">
-              <div className={`p-2 rounded-lg ${s.bg} w-fit mb-2`}>
-                <s.icon className={`h-4 w-4 ${s.color}`} />
-              </div>
-              <p className={`text-xl font-bold font-serif ${s.color}`}>{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-            </GlassCard>
-          </motion.div>
+        {([
+          { label: "Points", value: student.points.toLocaleString(), icon: Star },
+          { label: "Streak", value: `${student.streak}d`, icon: Flame },
+          { label: "MCQ Accuracy", value: `${mcq.accuracy}%`, icon: Brain },
+          { label: "Lessons Done", value: lessons.completed, icon: BookOpen },
+          { label: "Problems Solved", value: coding.problems_solved, icon: Code2 },
+          { label: "Assignments", value: assignments.total, icon: FileText },
+        ] as const).map((s, i) => (
+          <AdminStatCard key={s.label} index={i} icon={s.icon} label={s.label} value={s.value} delay={i * 0.05} />
         ))}
       </div>
 

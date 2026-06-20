@@ -17,7 +17,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { AdminHero } from "@/components/admin-stat-card"
+import { AdminHero, AdminStatCard } from "@/components/admin-stat-card"
 import { motion } from "framer-motion"
 
 interface OffCampusSubmission {
@@ -266,15 +266,12 @@ export default function PlacementsPage() {
       {/* Stats */}
       {!loading && (
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Total Drives", value: drives.length },
-            { label: "Eligible", value: eligible.length },
-            { label: "Registered", value: registered.length },
-          ].map(s => (
-            <GlassCard key={s.label} className="p-4 text-center">
-              <p className="text-2xl font-bold">{s.value}</p>
-              <p className="text-xs text-muted-foreground">{s.label}</p>
-            </GlassCard>
+          {([
+            { label: "Total Drives", value: drives.length, icon: Building2 },
+            { label: "Eligible", value: eligible.length, icon: CheckCircle },
+            { label: "Registered", value: registered.length, icon: Users },
+          ] as const).map((s, i) => (
+            <AdminStatCard key={s.label} index={i} icon={s.icon} label={s.label} value={s.value} />
           ))}
         </div>
       )}

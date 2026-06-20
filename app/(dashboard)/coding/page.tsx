@@ -6,7 +6,7 @@ import { Loader2, Code2, ChevronRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
-import { AdminHero } from "@/components/admin-stat-card"
+import { AdminHero, adminCardGradient, SurfaceTexture } from "@/components/admin-stat-card"
 import { motion } from "framer-motion"
 
 interface CodingModule {
@@ -19,39 +19,6 @@ interface CodingModule {
   total_problems: number
   solved_count: number
 }
-
-const MODULE_COLORS = [
-  "from-violet-500/20 to-violet-600/10 border-violet-500/20 hover:border-violet-500/40",
-  "from-blue-500/20 to-blue-600/10 border-blue-500/20 hover:border-blue-500/40",
-  "from-emerald-500/20 to-emerald-600/10 border-emerald-500/20 hover:border-emerald-500/40",
-  "from-amber-500/20 to-amber-600/10 border-amber-500/20 hover:border-amber-500/40",
-  "from-rose-500/20 to-rose-600/10 border-rose-500/20 hover:border-rose-500/40",
-  "from-cyan-500/20 to-cyan-600/10 border-cyan-500/20 hover:border-cyan-500/40",
-  "from-orange-500/20 to-orange-600/10 border-orange-500/20 hover:border-orange-500/40",
-  "from-pink-500/20 to-pink-600/10 border-pink-500/20 hover:border-pink-500/40",
-]
-
-const MODULE_ICON_BG = [
-  "bg-violet-500/15 text-violet-400",
-  "bg-blue-500/15 text-blue-400",
-  "bg-emerald-500/15 text-emerald-400",
-  "bg-amber-500/15 text-amber-400",
-  "bg-rose-500/15 text-rose-400",
-  "bg-cyan-500/15 text-cyan-400",
-  "bg-orange-500/15 text-orange-400",
-  "bg-pink-500/15 text-pink-400",
-]
-
-const MODULE_BAR = [
-  "bg-violet-500",
-  "bg-blue-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-orange-500",
-  "bg-pink-500",
-]
 
 export default function CodingPage() {
   const router = useRouter()
@@ -69,7 +36,7 @@ export default function CodingPage() {
   const totalProblems = modules.reduce((s, m) => s + m.total_problems, 0)
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
 
       {/* Header */}
       <AdminHero
@@ -96,7 +63,6 @@ export default function CodingPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {modules.map((mod, idx) => {
-            const colorIdx = idx % MODULE_COLORS.length
             const pct = mod.total_problems > 0
               ? Math.round((mod.solved_count / mod.total_problems) * 100)
               : 0
@@ -108,47 +74,44 @@ export default function CodingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04, duration: 0.2 }}
                 onClick={() => router.push(`/coding/${mod.slug}`)}
-                className={cn(
-                  "relative text-left rounded-2xl border bg-gradient-to-br p-5 transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.99] hover:shadow-lg group",
-                  MODULE_COLORS[colorIdx]
-                )}
+                className="relative overflow-hidden text-left rounded-2xl p-5 text-white ring-1 ring-inset ring-white/10 shadow-lg shadow-black/10 transition-all duration-200 hover:scale-[1.02] active:scale-[0.99] hover:shadow-xl group"
+                style={{ background: adminCardGradient(idx) }}
               >
-                {/* Icon */}
-                <div className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 shrink-0",
-                  MODULE_ICON_BG[colorIdx]
-                )}>
-                  {mod.icon || "💻"}
+                <SurfaceTexture />
+                <div className="relative">
+                  {/* Icon */}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 shrink-0 bg-white/20 ring-1 ring-inset ring-white/15">
+                    {mod.icon || "💻"}
+                  </div>
+
+                  {/* Name + description */}
+                  <h3 className="font-bold text-white text-base leading-snug mb-1">
+                    {mod.name}
+                  </h3>
+                  {mod.description && (
+                    <p className="text-xs text-white/70 leading-relaxed mb-4 line-clamp-2">
+                      {mod.description}
+                    </p>
+                  )}
+
+                  {/* Progress */}
+                  <div className="mt-auto space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-white/70">
+                        {mod.solved_count} / {mod.total_problems} solved
+                      </span>
+                      <span className="font-semibold text-white">{pct}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-white transition-all duration-700"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Name + description */}
-                <h3 className="font-bold text-foreground text-base leading-snug mb-1">
-                  {mod.name}
-                </h3>
-                {mod.description && (
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-4 line-clamp-2">
-                    {mod.description}
-                  </p>
-                )}
-
-                {/* Progress */}
-                <div className="mt-auto space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">
-                      {mod.solved_count} / {mod.total_problems} solved
-                    </span>
-                    <span className="font-semibold text-foreground">{pct}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-border overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-700", MODULE_BAR[colorIdx])}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-
-                <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                <ChevronRight className="absolute top-5 right-5 h-4 w-4 text-white/50 group-hover:text-white transition-colors" />
               </motion.button>
             )
           })}

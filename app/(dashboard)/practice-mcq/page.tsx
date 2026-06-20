@@ -33,7 +33,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { motion, AnimatePresence } from "framer-motion"
 import { fireStars } from "@/lib/effects"
-import { AdminHero } from "@/components/admin-stat-card"
+import { AdminHero, adminCardColor, adminCardGradient, SurfaceTexture } from "@/components/admin-stat-card"
 
 // ── Programming MCQ types ─────────────────────────────────────────────────────
 
@@ -373,91 +373,101 @@ function PracticeMCQContent() {
   // ── Render: Home ───────────────────────────────────────────────────────────
   if (view === "home") {
     return (
-      <motion.div
-        className="flex flex-col gap-10 max-w-4xl mx-auto py-6"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
+      <div className="space-y-8">
         {/* Page header */}
         <AdminHero icon={Brain} title="Practice MCQ" subtitle="Sharpen your skills across two categories" />
 
-        {/* Two cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Programming card */}
-          <motion.button
-            onClick={() => setView("programming")}
-            className="text-left"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <div className="glass-card rounded-2xl p-8 h-full flex flex-col gap-5 cursor-pointer border border-border hover:border-primary/50 teal-glow transition-all duration-200">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Code2 className="w-7 h-7 text-primary" />
-              </div>
-              <div className="flex-1 space-y-2">
-                <h2 className="text-xl font-bold font-serif text-foreground">Programming MCQ</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Topic-based questions on DSA, Python, Java, DBMS, OS, Networks, and more. Perfect for technical interview prep.
-                </p>
-              </div>
-              <div className="flex items-center justify-end">
-                <span className="text-sm font-medium text-primary flex items-center gap-1.5">
-                  Start Practice
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Aptitude card */}
-          <motion.button
-            onClick={() => setView("aptitude")}
-            className="text-left"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <div className="glass-card rounded-2xl p-8 h-full flex flex-col gap-5 cursor-pointer border border-border hover:border-primary/50 transition-all duration-200"
-              style={{ boxShadow: "none" }}
+        <motion.div
+          className="flex flex-col gap-10 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          {/* Two cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Programming card */}
+            <motion.button
+              onClick={() => setView("programming")}
+              className="text-left"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Brain className="w-7 h-7 text-primary" />
+              <div className="relative overflow-hidden rounded-2xl p-8 h-full flex flex-col cursor-pointer text-white ring-1 ring-inset ring-white/10 shadow-lg shadow-black/10 transition-all duration-200 hover:shadow-xl"
+                style={{ background: adminCardGradient(0) }}
+              >
+                <SurfaceTexture />
+                <div className="relative flex flex-col gap-5 h-full">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 ring-1 ring-inset ring-white/15 flex items-center justify-center">
+                    <Code2 className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h2 className="text-xl font-bold font-serif text-white">Programming MCQ</h2>
+                    <p className="text-sm text-white/75 leading-relaxed">
+                      Topic-based questions on DSA, Python, Java, DBMS, OS, Networks, and more. Perfect for technical interview prep.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-end">
+                    <span className="text-sm font-medium text-white flex items-center gap-1.5">
+                      Start Practice
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 space-y-2">
-                <h2 className="text-xl font-bold font-serif text-foreground">Aptitude &amp; Reasoning</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Quantitative aptitude, logical reasoning, and data interpretation. Boost your placement test scores.
-                </p>
-              </div>
-              <div className="flex items-center justify-end">
-                <span className="text-sm font-medium text-primary flex items-center gap-1.5">
-                  Start Practice
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </div>
-            </div>
-          </motion.button>
-        </div>
+            </motion.button>
 
-        {/* Tip pills */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {[
-            { icon: "💡", label: "Instant feedback" },
-            { icon: "📊", label: "Progress tracking" },
-            { icon: "🏆", label: "Earn points" },
-          ].map((tip) => (
-            <div
-              key={tip.label}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card text-sm text-muted-foreground"
+            {/* Aptitude card */}
+            <motion.button
+              onClick={() => setView("aptitude")}
+              className="text-left"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
-              <span>{tip.icon}</span>
-              <span>{tip.label}</span>
-            </div>
-          ))}
-        </div>
-      </motion.div>
+              <div className="relative overflow-hidden rounded-2xl p-8 h-full flex flex-col cursor-pointer text-white ring-1 ring-inset ring-white/10 shadow-lg shadow-black/10 transition-all duration-200 hover:shadow-xl"
+                style={{ background: adminCardGradient(1) }}
+              >
+                <SurfaceTexture />
+                <div className="relative flex flex-col gap-5 h-full">
+                  <div className="w-14 h-14 rounded-2xl bg-white/20 ring-1 ring-inset ring-white/15 flex items-center justify-center">
+                    <Brain className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h2 className="text-xl font-bold font-serif text-white">Aptitude &amp; Reasoning</h2>
+                    <p className="text-sm text-white/75 leading-relaxed">
+                      Quantitative aptitude, logical reasoning, and data interpretation. Boost your placement test scores.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-end">
+                    <span className="text-sm font-medium text-white flex items-center gap-1.5">
+                      Start Practice
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.button>
+          </div>
+
+          {/* Tip pills */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {[
+              { icon: "💡", label: "Instant feedback" },
+              { icon: "📊", label: "Progress tracking" },
+              { icon: "🏆", label: "Earn points" },
+            ].map((tip) => (
+              <div
+                key={tip.label}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card text-sm text-muted-foreground"
+              >
+                <span>{tip.icon}</span>
+                <span>{tip.label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
     )
   }
 
@@ -552,8 +562,8 @@ function PracticeMCQContent() {
                         <div className="glass-card rounded-2xl p-5 flex flex-col gap-4 h-full border border-border hover:border-primary/40 transition-all duration-200">
                           {/* Top row: icon + chevron */}
                           <div className="flex items-start justify-between">
-                            <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center">
-                              <Icon className="h-6 w-6 text-primary" />
+                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center ring-1 ring-inset ring-white/15 shadow-sm" style={{ background: adminCardColor(i) }}>
+                              <Icon className="h-6 w-6 text-white" />
                             </div>
                             <ChevronRight className="h-4 w-4 mt-1 text-muted-foreground group-hover:text-primary transition-colors group-hover:translate-x-0.5" />
                           </div>
@@ -568,8 +578,8 @@ function PracticeMCQContent() {
                           <div className="space-y-1.5">
                             <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
                               <div
-                                className="h-full rounded-full bg-primary transition-all duration-500"
-                                style={{ width: `${pct}%` }}
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{ width: `${pct}%`, background: adminCardColor(i) }}
                               />
                             </div>
                             <div className="flex items-center justify-between text-xs">

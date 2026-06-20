@@ -11,7 +11,7 @@
   --card-foreground:         #09090B;
   --popover:                 #FFFFFF;
   --popover-foreground:      #09090B;
-  --primary:                 #0E7070;
+  --primary:                 #4F46E5;
   --primary-foreground:      #FFFFFF;
   --secondary:               #F4F4F5;
   --secondary-foreground:    #71717A;
@@ -23,7 +23,7 @@
   --destructive-foreground:  #FFFFFF;
   --border:                  #E4E4E7;
   --input:                   #E4E4E7;
-  --ring:                    #0E7070;
+  --ring:                    #4F46E5;
 
   /* ── Semantic tokens — edit these to retheme the whole app ── */
   --success:   #059669;   /* correct, easy, pass     */
@@ -33,7 +33,7 @@
   --streak:    #C2410C;   /* streak, flame           */
   --coral:     #C0502E;   /* brand accent (logo Ezi) */
 
-  --chart-1:                 #0E7070;
+  --chart-1:                 #4F46E5;
   --chart-2:                 #22C55E;
   --chart-3:                 #F59E0B;
   --chart-4:                 #C0502E;
@@ -43,12 +43,12 @@
 
   --sidebar:                 #FAFAFA;
   --sidebar-foreground:      #09090B;
-  --sidebar-primary:         #0E7070;
+  --sidebar-primary:         #4F46E5;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent:          #F0F0F1;
   --sidebar-accent-foreground: #18181B;
   --sidebar-border:          #E4E4E7;
-  --sidebar-ring:            #0E7070;
+  --sidebar-ring:            #4F46E5;
 
   --scrollbar-track:         #F4F4F5;
   --scrollbar-thumb:         #D4D4D8;
@@ -65,8 +65,8 @@
   --card-foreground:         #EDEDED;
   --popover:                 #1C1C1C;
   --popover-foreground:      #EDEDED;
-  --primary:                 #2BBDBD;
-  --primary-foreground:      #0C0C0C;
+  --primary:                 #6366F1;
+  --primary-foreground:      #FFFFFF;
   --secondary:               #1C1C1C;
   --secondary-foreground:    #A1A1AA;
   --muted:                   #1A1A1A;
@@ -77,7 +77,7 @@
   --destructive-foreground:  #FFFFFF;
   --border:                  #2A2A2A;
   --input:                   #2A2A2A;
-  --ring:                    #2BBDBD;
+  --ring:                    #6366F1;
 
   /* ── Semantic tokens (dark — lighter values for contrast on dark bg) ── */
   --success:   #34D399;
@@ -87,7 +87,7 @@
   --streak:    #FB923C;
   --coral:     #E8825A;
 
-  --chart-1:                 #2BBDBD;
+  --chart-1:                 #6366F1;
   --chart-2:                 #4ADE80;
   --chart-3:                 #FBBF24;
   --chart-4:                 var(--coral);
@@ -95,12 +95,12 @@
 
   --sidebar:                 #111111;
   --sidebar-foreground:      #EDEDED;
-  --sidebar-primary:         #2BBDBD;
+  --sidebar-primary:         #6366F1;
   --sidebar-primary-foreground: #0C0C0C;
   --sidebar-accent:          #1E1E1E;
   --sidebar-accent-foreground: #EDEDED;
   --sidebar-border:          #1E1E1E;
-  --sidebar-ring:            #2BBDBD;
+  --sidebar-ring:            #6366F1;
 
   --scrollbar-track:         #161616;
   --scrollbar-thumb:         #3F3F46;
@@ -233,7 +233,7 @@
 
 /* Dark mode: use brighter stops so the gradient is clearly visible */
 .dark .gradient-text {
-  background: linear-gradient(135deg, #2BBDBD 0%, #E8825A 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #E8825A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
