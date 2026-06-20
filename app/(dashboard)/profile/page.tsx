@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
 import api from "@/lib/api"
 import { AdminHero } from "@/components/admin-stat-card"
+import { CodingProfilesCard } from "@/components/coding-profiles-card"
 import { SHIELDS, getShieldProgress } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
 import { cn } from "@/lib/utils"
@@ -562,6 +563,8 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6">
       <AdminHero icon={GraduationCap} title="Profile & Settings" subtitle="Manage your account and preferences" />
+
+      <CodingProfilesCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT: Profile Info ─────────────────────────────────────────── */}
