@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { JobAggregatorPanel } from "@/components/job-aggregator-panel"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -281,6 +282,9 @@ export default function AdminJobsPage() {
           Post Job
         </Button>
       </div>
+
+      {/* External job aggregator control panel */}
+      <JobAggregatorPanel />
 
       {/* Summary */}
       {!loading && (

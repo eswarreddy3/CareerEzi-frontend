@@ -9,16 +9,20 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import {
   Briefcase, Building2, Clock, ExternalLink, Calendar,
-  Search, Filter, Flame
+  Search, Filter, Flame, MapPin, Wifi, ChevronLeft, ChevronRight, ArrowDownUp,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { AdminHero } from "@/components/admin-stat-card"
 
 interface Job {
-  id: number
+  id: number | string
+  external_db_id?: number
   title: string
   company: string
   type: "internship" | "full-time" | "part-time" | "contract"
@@ -27,6 +31,10 @@ interface Job {
   deadline: string | null
   description: string | null
   scope: "global" | "college"
+  location?: string | null
+  is_remote?: boolean
+  source?: string          // "admin" | "adzuna" | "jsearch" | ...
+  source_label?: string    // "CareerEzi" | "LinkedIn" | "Adzuna" | ...
   created_at: string
 }
 
@@ -58,11 +66,44 @@ function DeadlineBadge({ deadline }: { deadline: string | null }) {
 const ALL_TYPES = ["all", "internship", "full-time", "part-time", "contract"] as const
 type Filter = typeof ALL_TYPES[number]
 
+const PAGE_SIZE = 12
+
+function postedAgo(iso: string | null | undefined): string {
+  if (!iso) return ""
+  const diff = Date.now() - new Date(iso).getTime()
+  const days = Math.floor(diff / 86400000)
+  if (days <= 0) {
+    const hrs = Math.floor(diff / 3600000)
+    return hrs <= 1 ? "just now" : `${hrs}h ago`
+  }
+  if (days === 1) return "1 day ago"
+  if (days < 30) return `${days} days ago`
+  const months = Math.floor(days / 30)
+  return months === 1 ? "1 month ago" : `${months} months ago`
+}
+
+// Windowed pager: 1 … (cur-1) cur (cur+1) … last
+function getPageWindow(current: number, total: number): (number | "…")[] {
+  const out: (number | "…")[] = []
+  const range: number[] = []
+  for (let i = Math.max(1, current - 1); i <= Math.min(total, current + 1); i++) range.push(i)
+  if (range[0] > 1) { out.push(1); if (range[0] > 2) out.push("…") }
+  out.push(...range)
+  const last = range[range.length - 1]
+  if (last < total) { if (last < total - 1) out.push("…"); out.push(total) }
+  return out
+}
+
 export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
+  const [sourceFilter, setSourceFilter] = useState<string>("all")
+  const [locationFilter, setLocationFilter] = useState<string>("all")
+  const [remoteOnly, setRemoteOnly] = useState(false)
+  const [sort, setSort] = useState<"newest" | "deadline">("newest")
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     api.get("/jobs/")
@@ -71,12 +112,44 @@ export default function JobsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const visible = jobs.filter((j) => {
-    const matchType = filter === "all" || j.type === filter
-    const q = search.toLowerCase()
-    const matchSearch = !q || j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q)
-    return matchType && matchSearch
-  })
+  // Reset to first page whenever any filter/sort changes.
+  useEffect(() => { setPage(1) }, [search, filter, sourceFilter, locationFilter, remoteOnly, sort])
+
+  // Distinct sources + locations present in the feed, for the filter controls.
+  const sources = Array.from(new Set(jobs.map((j) => j.source || "admin")))
+  const sourceLabelOf = (s: string) =>
+    s === "admin" ? "CareerEzi" : (jobs.find((j) => (j.source || "admin") === s)?.source_label || s)
+  const locations = Array.from(new Set(jobs.map((j) => j.location).filter(Boolean) as string[])).sort()
+
+  const filtered = jobs
+    .filter((j) => {
+      const matchType = filter === "all" || j.type === filter
+      const matchSource = sourceFilter === "all" || (j.source || "admin") === sourceFilter
+      const matchLocation = locationFilter === "all" || j.location === locationFilter
+      const matchRemote = !remoteOnly || j.is_remote
+      const q = search.toLowerCase()
+      const matchSearch = !q
+        || j.title.toLowerCase().includes(q)
+        || j.company.toLowerCase().includes(q)
+        || (j.location || "").toLowerCase().includes(q)
+      return matchType && matchSource && matchLocation && matchRemote && matchSearch
+    })
+    .sort((a, b) => {
+      if (sort === "deadline") {
+        // jobs with a real deadline first (soonest), then the rest by recency
+        const ad = a.deadline ? new Date(a.deadline).getTime() : Infinity
+        const bd = b.deadline ? new Date(b.deadline).getTime() : Infinity
+        if (ad !== bd) return ad - bd
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  const hasActiveFilters = search !== "" || filter !== "all" || sourceFilter !== "all"
+    || locationFilter !== "all" || remoteOnly
 
   return (
     <div className="space-y-8">
@@ -85,16 +158,55 @@ export default function JobsPage() {
         right={<FeedbackModal compact triggerClassName="text-white/80 hover:text-white flex-shrink-0" />} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search title or company..."
-            className="pl-9 bg-secondary/50"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      <GlassCard className="space-y-3">
+        <div className="flex flex-col lg:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search title, company or location…"
+              className="pl-9 bg-secondary/50"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {locations.length > 0 && (
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger className="w-[170px] bg-secondary/50">
+                  <MapPin className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="Location" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All locations</SelectItem>
+                  {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            )}
+            <Select value={sort} onValueChange={(v) => setSort(v as "newest" | "deadline")}>
+              <SelectTrigger className="w-[160px] bg-secondary/50">
+                <ArrowDownUp className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="deadline">Deadline soon</SelectItem>
+              </SelectContent>
+            </Select>
+            <button
+              onClick={() => setRemoteOnly((v) => !v)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-1.5",
+                remoteOnly
+                  ? "bg-success/15 border-success/40 text-success"
+                  : "bg-secondary/30 border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
+              )}
+            >
+              <Wifi className="h-3.5 w-3.5" /> Remote
+            </button>
+          </div>
         </div>
+
+        {/* Type chips */}
         <div className="flex gap-2 flex-wrap">
           {ALL_TYPES.map((t) => (
             <button
@@ -111,13 +223,44 @@ export default function JobsPage() {
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Stats */}
+        {/* Source chips — only when aggregated sources are present */}
+        {sources.length > 1 && (
+          <div className="flex gap-2 flex-wrap">
+            {["all", ...sources].map((s) => (
+              <button
+                key={s}
+                onClick={() => setSourceFilter(s)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+                  sourceFilter === s
+                    ? "bg-coding/15 border-coding/40 text-coding"
+                    : "bg-secondary/30 border-white/10 text-muted-foreground hover:border-white/20 hover:text-foreground"
+                )}
+              >
+                {s === "all" ? "All Sources" : sourceLabelOf(s)}
+              </button>
+            ))}
+          </div>
+        )}
+      </GlassCard>
+
+      {/* Results summary */}
       {!loading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Filter className="h-4 w-4" />
-          <span>{visible.length} {visible.length === 1 ? "job" : "jobs"} found</span>
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            {filtered.length} {filtered.length === 1 ? "job" : "jobs"} found
+            {hasActiveFilters && (
+              <button
+                onClick={() => { setSearch(""); setFilter("all"); setSourceFilter("all"); setLocationFilter("all"); setRemoteOnly(false) }}
+                className="text-primary hover:underline text-xs"
+              >
+                Clear filters
+              </button>
+            )}
+          </span>
+          {totalPages > 1 && <span className="text-xs">Page {currentPage} of {totalPages}</span>}
         </div>
       )}
 
@@ -150,10 +293,15 @@ export default function JobsPage() {
                       <div className="p-2.5 rounded-xl bg-primary/10 flex-shrink-0">
                         <Building2 className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-2 ml-auto">
+                      <div className="flex items-center gap-2 ml-auto flex-wrap justify-end">
                         {job.scope === "college" && (
                           <Badge variant="outline" className="text-xs border border-primary/40 text-primary bg-primary/10">
                             Your College
+                          </Badge>
+                        )}
+                        {job.source && job.source !== "admin" && (
+                          <Badge variant="outline" className="text-xs border border-coding/30 text-coding bg-coding/10">
+                            via {job.source_label}
                           </Badge>
                         )}
                         <Badge variant="outline" className={cn("text-xs border", tc.color)}>
@@ -172,17 +320,38 @@ export default function JobsPage() {
                     </div>
 
                     {/* Meta row */}
-                    <div className="flex flex-wrap gap-3 text-xs">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs">
+                      {job.location && (
+                        <span className="flex items-center gap-1 text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {job.location}
+                        </span>
+                      )}
+                      {job.is_remote && (
+                        <span className="flex items-center gap-1 text-success font-medium">
+                          <Wifi className="h-3.5 w-3.5" /> Remote
+                        </span>
+                      )}
                       {job.experience && (
                         <span className="flex items-center gap-1 text-muted-foreground">
                           <Briefcase className="h-3.5 w-3.5" />
                           {job.experience}
                         </span>
                       )}
-                      {job.deadline && (
-                        <span className="flex items-center gap-1">
+                    </div>
+
+                    {/* Apply-by / posted line */}
+                    <div className="flex items-center gap-1 text-xs">
+                      {job.deadline ? (
+                        <>
                           <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-muted-foreground">Apply by:</span>
                           <DeadlineBadge deadline={job.deadline} />
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5" />
+                          Posted {postedAgo(job.created_at)}
                         </span>
                       )}
                     </div>
@@ -199,7 +368,11 @@ export default function JobsPage() {
                       <Button
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                         onClick={() => {
-                          api.post(`/jobs/${job.id}/apply`).catch(() => {})
+                          if (job.source && job.source !== "admin") {
+                            api.post(`/jobs/external/${job.external_db_id}/apply`).catch(() => {})
+                          } else {
+                            api.post(`/jobs/${job.id}/apply`).catch(() => {})
+                          }
                           window.open(job.apply_link, "_blank", "noopener,noreferrer")
                         }}
                       >
@@ -213,12 +386,52 @@ export default function JobsPage() {
             })}
       </motion.div>
 
-      {!loading && visible.length === 0 && (
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1.5 pt-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-white/10 bg-secondary/30 text-muted-foreground hover:text-foreground hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          {getPageWindow(currentPage, totalPages).map((p, i) =>
+            p === "…" ? (
+              <span key={`e${i}`} className="px-2 text-muted-foreground">…</span>
+            ) : (
+              <button
+                key={p}
+                onClick={() => setPage(p as number)}
+                className={cn(
+                  "h-9 min-w-9 px-3 flex items-center justify-center rounded-lg border text-sm font-medium transition-all",
+                  currentPage === p
+                    ? "bg-primary/20 border-primary/40 text-primary"
+                    : "bg-secondary/30 border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20"
+                )}
+              >
+                {p}
+              </button>
+            )
+          )}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-white/10 bg-secondary/30 text-muted-foreground hover:text-foreground hover:border-white/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {!loading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Briefcase className="h-12 w-12 text-muted-foreground/30 mb-4" />
           <p className="text-lg font-medium text-foreground">No jobs found</p>
           <p className="text-sm text-muted-foreground mt-1">
-            {search || filter !== "all" ? "Try adjusting your filters" : "Your college hasn't posted any jobs yet"}
+            {hasActiveFilters ? "Try adjusting your filters" : "No jobs available right now — check back soon"}
           </p>
         </div>
       )}
