@@ -7,6 +7,7 @@ import { Lock, Star, ArrowRight, Code, Database, Globe, Terminal, Braces, Server
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import type { LucideIcon } from "lucide-react"
 
 interface Course {
@@ -118,10 +119,7 @@ export default function LearnPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold font-serif text-foreground">Course Library</h1>
-        <p className="text-muted-foreground mt-2">Master programming, and domain skills</p>
-      </div>
+      <AdminHero icon={BookOpen} title="Course Library" subtitle="Master programming, and domain skills" />
 
       {/* <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-secondary/50 p-1">

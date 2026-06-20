@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import { SHIELDS, getShieldProgress } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
 import { cn } from "@/lib/utils"
@@ -560,10 +561,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold font-serif text-foreground">Profile & Settings</h1>
-        <p className="text-muted-foreground mt-1">Manage your account and preferences</p>
-      </div>
+      <AdminHero icon={GraduationCap} title="Profile & Settings" subtitle="Manage your account and preferences" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT: Profile Info ─────────────────────────────────────────── */}

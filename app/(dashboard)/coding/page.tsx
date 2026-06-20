@@ -6,6 +6,7 @@ import { Loader2, Code2, ChevronRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import { motion } from "framer-motion"
 
 interface CodingModule {
@@ -71,18 +72,17 @@ export default function CodingPage() {
     <div className="max-w-5xl mx-auto space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">Coding Practice</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Choose a topic to start practising</p>
-        </div>
-        {!loading && totalProblems > 0 && (
-          <div className="flex items-center gap-2 text-sm font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-xl">
+      <AdminHero
+        icon={Code2}
+        title="Coding Practice"
+        subtitle="Choose a topic to start practising"
+        right={!loading && totalProblems > 0 ? (
+          <span className="flex items-center gap-2 text-sm font-semibold text-white bg-white/15 border border-white/25 px-3 py-1.5 rounded-xl">
             <Code2 className="h-4 w-4" />
             {totalSolved} / {totalProblems} Solved
-          </div>
-        )}
-      </div>
+          </span>
+        ) : undefined}
+      />
 
       {loading ? (
         <div className="flex items-center justify-center py-24">

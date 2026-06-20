@@ -6,7 +6,7 @@ import { FeedbackModal } from "@/components/feedback-modal"
 import {
   Trophy, Star, Flame, Code2, Loader2, Quote, Zap,
   BookOpen, ClipboardList, BriefcaseBusiness, Newspaper, MessageSquare,
-  ChevronRight, Target, Activity, CheckSquare, Square,
+  ChevronRight, Target, Activity, CheckSquare, Square, Rocket, Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -19,6 +19,7 @@ import { getDailyQuote } from "@/lib/quotes"
 import { getLevelProgress } from "@/lib/levels"
 import { getShield } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
+import { AdminStatCard, SectionHeading, SurfaceTexture, adminCardColor } from "@/components/admin-stat-card"
 import type { LucideIcon } from "lucide-react"
 
 interface DashboardData {
@@ -106,38 +107,46 @@ function AnimatedNumber({ value }: { value: number }) {
 // ── Combined Hero + XP Level card ────────────────────────────────────────────
 function HeroLevelCard({ firstName, collegeName, data, rank }: { firstName: string; collegeName?: string; data: DashboardData; rank: number }) {
   const { current, next, progressPct, pointsNeeded } = getLevelProgress(data.points)
-  const R = 38
+  const R = 34
   const circumference = 2 * Math.PI * R
   const shield = getShield(data.points)
+  const greeting = (() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening" })()
 
   return (
-    <GlassCard className="h-full p-5 flex flex-col justify-between border-l-4 border-l-primary">
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative h-full overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-black/15 ring-1 ring-inset ring-white/10 flex flex-col justify-between"
+      style={{ background: "linear-gradient(120deg, #312E81 0%, #1E1B4B 55%, #3B2C6B 100%)" }}
+    >
+      <SurfaceTexture />
+      <div className="absolute -top-16 -right-10 w-56 h-56 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
       {/* ── Top: greeting + badges ── */}
-      <div>
-        <motion.h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground leading-tight"
+      <div className="relative">
+        <motion.h1 className="text-2xl sm:text-3xl font-bold font-serif leading-tight"
           initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
-          {(() => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening" })()},{" "}
-          <span className="gradient-text">{firstName}</span> 👋
+          {greeting}, {firstName} 👋
         </motion.h1>
 
         {/* ── Single row: college + rank + active days ── */}
         <motion.div className="flex items-center gap-2 flex-wrap mt-3"
           initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           {collegeName && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-full bg-primary/20 text-primary border-2 border-primary/40">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/25">
               🏫 {collegeName}
             </span>
           )}
           {rank > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-warning/15 text-warning border border-warning/30">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/25">
               🏆 Rank #{rank}
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-success/15 text-success border border-success/30">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/25">
             📅 {data.active_days?.length ?? 0} active days
           </span>
           {data.solved_count > 0 && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full bg-coding/15 text-coding border border-coding/30">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/15 text-white border border-white/25">
               💻 {data.solved_count} solved
             </span>
           )}
@@ -145,12 +154,12 @@ function HeroLevelCard({ firstName, collegeName, data, rank }: { firstName: stri
       </div>
 
       {/* ── Bottom: XP ring + level ── */}
-      <motion.div className="flex items-center gap-4 mt-4 pt-4 border-t border-border"
+      <motion.div className="relative flex items-center gap-4 mt-4 pt-4 border-t border-white/15"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
         <div className="relative flex-shrink-0">
-          <svg width="96" height="96" className="-rotate-90">
-            <circle cx="48" cy="48" r={R} fill="none" stroke="currentColor" className="text-secondary/80" strokeWidth="7" />
-            <motion.circle cx="48" cy="48" r={R} fill="none" stroke={current.barColor} strokeWidth="7" strokeLinecap="round"
+          <svg width="88" height="88" className="-rotate-90">
+            <circle cx="44" cy="44" r={R} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="7" />
+            <motion.circle cx="44" cy="44" r={R} fill="none" stroke={current.barColor} strokeWidth="7" strokeLinecap="round"
               strokeDasharray={circumference}
               initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: circumference - (progressPct / 100) * circumference }}
@@ -162,44 +171,44 @@ function HeroLevelCard({ firstName, collegeName, data, rank }: { firstName: stri
             <motion.span className="text-2xl leading-none" animate={{ rotate: [0, -12, 12, -6, 6, 0] }} transition={{ delay: 0.7, duration: 0.7 }}>
               {current.emoji}
             </motion.span>
-            <span className="text-[9px] text-muted-foreground mt-0.5">Lv.{current.level}</span>
+            <span className="text-[9px] text-white/60 mt-0.5">Lv.{current.level}</span>
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Your Level</p>
+          <p className="text-[10px] text-white/60 uppercase tracking-widest">Your Level</p>
           <div className="flex items-center gap-2 flex-wrap mt-0.5">
-            <p className={`text-2xl font-bold font-serif ${current.color}`}>{current.name}</p>
+            <p className="text-2xl font-bold font-serif text-white">{current.name}</p>
             {shield.tier > 0 && (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border"
-                style={{ borderColor: `${shield.gradientFrom}50`, color: shield.gradientFrom, background: `${shield.gradientFrom}18` }}>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border text-white"
+                style={{ borderColor: `${shield.gradientFrom}80`, background: `${shield.gradientFrom}30` }}>
                 {shield.emoji} {shield.name}
               </span>
             )}
           </div>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-xl font-bold font-serif text-foreground"><AnimatedNumber value={data.points} /></span>
-            <span className="text-sm text-muted-foreground">XP</span>
+            <span className="text-xl font-bold font-serif text-white"><AnimatedNumber value={data.points} /></span>
+            <span className="text-sm text-white/70">XP</span>
           </div>
           {next ? (
             <div className="mt-2 space-y-1">
-              <div className="h-1.5 rounded-full bg-secondary/60 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-white/20 overflow-hidden">
                 <motion.div className="h-full rounded-full" style={{ background: current.barColor }}
                   initial={{ width: 0 }} animate={{ width: `${progressPct}%` }} transition={{ duration: 1.2, ease: "easeOut", delay: 0.45 }} />
               </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-white/70">
                 <span>{progressPct}%</span>
-                <span style={{ color: next.barColor }}>{next.emoji} {next.name} · {pointsNeeded} pts</span>
+                <span>{next.emoji} {next.name} · {pointsNeeded} pts</span>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 mt-1">
               <motion.span animate={{ scale: [1, 1.25, 1] }} transition={{ repeat: Infinity, duration: 2.5 }}>👑</motion.span>
-              <p className="text-sm font-semibold text-warning">Legend.</p>
+              <p className="text-sm font-semibold text-amber-300">Legend.</p>
             </div>
           )}
         </div>
       </motion.div>
-    </GlassCard>
+    </motion.div>
   )
 }
 
@@ -765,8 +774,8 @@ function InsightsRow({ data }: { data: DashboardData }) {
   const badgeGap = Math.max(0, 5000 - data.points)
 
   return (
-    <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3 font-semibold">Intelligence &amp; Insights</p>
+    <div className="space-y-3">
+      <SectionHeading icon={Sparkles} color={adminCardColor(1)} title="Intelligence & Insights" subtitle="Points to earn, weak spots & achievements" />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
         {/* Points Available Today */}
@@ -929,26 +938,10 @@ export default function DashboardPage() {
     : 0
 
   const STAT_CARDS = [
-    {
-      title: "Readiness Score", value: readinessScore, prefix: "", suffix: "",
-      icon: Target, color: "text-primary", iconBg: "bg-primary/25",
-      cardBg: "bg-primary/[0.12]", border: "border-primary/30", glow: "hover:shadow-lg hover:shadow-primary/20",
-    },
-    {
-      title: "Total Points", value: data?.points ?? 0, prefix: "", suffix: "",
-      icon: Star, color: "text-warning", iconBg: "bg-warning/25",
-      cardBg: "bg-warning/[0.12]", border: "border-warning/30", glow: "hover:shadow-lg hover:shadow-warning/20",
-    },
-    {
-      title: "Day Streak", value: data?.streak ?? 0, prefix: "", suffix: " days",
-      icon: Flame, color: "text-streak", iconBg: "bg-streak/25",
-      cardBg: "bg-streak/[0.12]", border: "border-streak/30", glow: "hover:shadow-lg hover:shadow-streak/20",
-    },
-    {
-      title: "Problems Solved", value: data?.solved_count ?? 0, prefix: "", suffix: "",
-      icon: Code2, color: "text-coding", iconBg: "bg-coding/25",
-      cardBg: "bg-coding/[0.12]", border: "border-coding/30", glow: "hover:shadow-lg hover:shadow-coding/20",
-    },
+    { title: "Readiness Score", value: readinessScore, suffix: "", icon: Target, bar: readinessScore },
+    { title: "Total Points", value: data?.points ?? 0, suffix: "", icon: Star, bar: undefined as number | undefined },
+    { title: "Day Streak", value: data?.streak ?? 0, suffix: "d", icon: Flame, bar: undefined as number | undefined },
+    { title: "Problems Solved", value: data?.solved_count ?? 0, suffix: "", icon: Code2, bar: undefined as number | undefined },
   ]
 
   return (
@@ -963,17 +956,15 @@ export default function DashboardPage() {
           </div>
           <div className="lg:col-span-2 grid grid-cols-2 gap-3">
             {STAT_CARDS.map((s, i) => (
-              <motion.div key={s.title} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * i + 0.15 }}>
-                <GlassCard className={`h-full p-4 ${s.cardBg} border ${s.border} transition-all ${s.glow} group cursor-pointer`}>
-                  <div className={`w-9 h-9 rounded-lg ${s.iconBg} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
-                    <s.icon className={`h-4 w-4 ${s.color}`} />
-                  </div>
-                  <p className="text-[11px] text-muted-foreground font-medium leading-tight">{s.title}</p>
-                  <p className={`text-xl font-bold font-serif mt-0.5 ${s.color}`}>
-                    {s.prefix}<AnimatedNumber value={s.value} />{s.suffix}
-                  </p>
-                </GlassCard>
-              </motion.div>
+              <AdminStatCard
+                key={s.title}
+                index={i}
+                icon={s.icon}
+                label={s.title}
+                value={<><AnimatedNumber value={s.value} />{s.suffix}</>}
+                bar={s.bar}
+                delay={0.08 * i + 0.15}
+              />
             ))}
           </div>
         </motion.div>
@@ -1012,20 +1003,26 @@ export default function DashboardPage() {
 
       {/* ── 3-col: Placement Readiness | Heatmap | Leaderboard ── */}
       {data && (
-        <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+        <motion.div className="space-y-3"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-          <PlacementReadinessCard data={data} />
-          <ActivityHeatmapCard data={data} />
-          <CollegeLeaderboardCard leaderboard={leaderboard} />
+          <SectionHeading icon={Target} color={adminCardColor(0)} title="Placement Snapshot" subtitle="Your readiness, activity & college standing" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <PlacementReadinessCard data={data} />
+            <ActivityHeatmapCard data={data} />
+            <CollegeLeaderboardCard leaderboard={leaderboard} />
+          </div>
         </motion.div>
       )}
 
       {/* ── 2-col: Active Courses | Upcoming Drives ── */}
       {data && (
-        <motion.div className="grid grid-cols-1 lg:grid-cols-2 gap-5"
+        <motion.div className="space-y-3"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <ActiveCoursesCard courses={data.course_progress} />
-          <UpcomingDrivesCard jobs={jobs} data={data} />
+          <SectionHeading icon={Rocket} color={adminCardColor(2)} title="Keep Learning" subtitle="Courses in progress & jobs to apply for" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <ActiveCoursesCard courses={data.course_progress} />
+            <UpcomingDrivesCard jobs={jobs} data={data} />
+          </div>
         </motion.div>
       )}
 

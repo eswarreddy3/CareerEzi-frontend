@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import { generateStudentPDF, type StudentPerformance as Performance } from "@/lib/student-report"
 
 interface ActivityEvent {
@@ -163,20 +164,21 @@ export default function MyReportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold font-serif text-foreground">My Performance Report</h1>
-          <p className="text-muted-foreground mt-1">Your full placement preparation stats</p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2 border-primary/30 text-primary hover:bg-primary/10"
-          onClick={() => generateStudentPDF(perf)}
-        >
-          <Download className="h-4 w-4" /> Download PDF
-        </Button>
-      </div>
+      <AdminHero
+        icon={Activity}
+        title="My Performance Report"
+        subtitle="Your full placement preparation stats"
+        right={
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 bg-white/15 hover:bg-white/25 text-white border-white/30"
+            onClick={() => generateStudentPDF(perf)}
+          >
+            <Download className="h-4 w-4" /> Download PDF
+          </Button>
+        }
+      />
 
       {/* Profile Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>

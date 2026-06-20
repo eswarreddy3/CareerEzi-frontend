@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 
 interface Job {
   id: number
@@ -80,13 +81,8 @@ export default function JobsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-serif text-foreground">Job Postings</h1>
-          <p className="text-muted-foreground mt-2">Opportunities shared by your college — apply before the deadline</p>
-        </div>
-        <FeedbackModal compact triggerClassName="text-muted-foreground hover:text-primary mt-1 flex-shrink-0" />
-      </motion.div>
+      <AdminHero icon={Briefcase} title="Job Postings" subtitle="Opportunities shared by your college — apply before the deadline"
+        right={<FeedbackModal compact triggerClassName="text-white/80 hover:text-white flex-shrink-0" />} />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">

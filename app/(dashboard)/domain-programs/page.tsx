@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import type { LucideIcon } from "lucide-react"
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -770,10 +771,7 @@ export default function DomainProgramsPage() {
   return (
     <AnimatePresence mode="wait">
       <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold font-serif">Domain Programs</h1>
-          <p className="text-muted-foreground mt-1.5">Specialized learning paths for in-demand skills</p>
-        </div>
+        <AdminHero icon={Sparkles} title="Domain Programs" subtitle="Specialized learning paths for in-demand skills" />
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

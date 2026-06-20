@@ -33,6 +33,7 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { motion, AnimatePresence } from "framer-motion"
 import { fireStars } from "@/lib/effects"
+import { AdminHero } from "@/components/admin-stat-card"
 
 // ── Programming MCQ types ─────────────────────────────────────────────────────
 
@@ -379,10 +380,7 @@ function PracticeMCQContent() {
         transition={{ duration: 0.4 }}
       >
         {/* Page header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold font-serif gradient-text">Practice MCQ</h1>
-          <p className="text-muted-foreground text-sm">Sharpen your skills across two categories</p>
-        </div>
+        <AdminHero icon={Brain} title="Practice MCQ" subtitle="Sharpen your skills across two categories" />
 
         {/* Two cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

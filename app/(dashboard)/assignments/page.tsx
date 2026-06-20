@@ -20,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero, AdminStatCard } from "@/components/admin-stat-card"
 
 interface ApiAssignment {
   id: number
@@ -190,42 +191,13 @@ export default function AssignmentsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold font-serif text-foreground">Assignments</h1>
-        <p className="text-muted-foreground mt-2">
-          Complete timed level assessments to earn points and prove your skills
-        </p>
-      </div>
+      <AdminHero icon={FileText} title="Assignments" subtitle="Complete timed level assessments to earn points and prove your skills" />
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg icon-box-warning">
-            <Clock className="h-5 w-5 text-warning" />
-          </div>
-          <div>
-            <p className="text-xl font-bold font-serif text-foreground">{pendingCount}</p>
-            <p className="text-xs text-muted-foreground">Pending</p>
-          </div>
-        </GlassCard>
-        <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg icon-box-success">
-            <CheckCircle className="h-5 w-5 text-success" />
-          </div>
-          <div>
-            <p className="text-xl font-bold font-serif text-foreground">{completedCount}</p>
-            <p className="text-xs text-muted-foreground">Completed</p>
-          </div>
-        </GlassCard>
-        <GlassCard className="flex items-center gap-3 p-4">
-          <div className="p-2 rounded-lg bg-primary/20">
-            <Star className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xl font-bold font-serif text-foreground">{totalPoints}</p>
-            <p className="text-xs text-muted-foreground">Points Earned</p>
-          </div>
-        </GlassCard>
+        <AdminStatCard index={0} icon={Clock} label="Pending" value={pendingCount} />
+        <AdminStatCard index={1} icon={CheckCircle} label="Completed" value={completedCount} />
+        <AdminStatCard index={2} icon={Star} label="Points Earned" value={totalPoints} />
       </div>
 
       {/* Course sections */}

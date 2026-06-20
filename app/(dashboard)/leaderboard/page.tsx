@@ -9,6 +9,7 @@ import { Search, Trophy, Flame, Medal, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 
 interface LeaderboardEntry {
   rank: number
@@ -57,10 +58,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold font-serif text-foreground">Leaderboard</h1>
-        <p className="text-muted-foreground mt-2">Compete with your peers and climb the ranks</p>
-      </div>
+      <AdminHero icon={Trophy} title="Leaderboard" subtitle="Compete with your peers and climb the ranks" />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">

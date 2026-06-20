@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { SurfaceTexture } from "@/components/admin-stat-card"
 
 const LOCAL_LOGOS: Record<string, string> = {
   tcs:       '/Company_logos/tcs_logo.png',
@@ -143,36 +144,38 @@ export default function CompanyPrepPage() {
     <div className="space-y-6">
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
-      <div className="relative rounded-3xl overflow-hidden border border-border p-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-coding/5" />
-        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-primary/6 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full bg-coding/6 blur-3xl pointer-events-none" />
+      <div
+        className="relative rounded-2xl overflow-hidden p-8 text-white shadow-lg shadow-black/15 ring-1 ring-inset ring-white/10"
+        style={{ background: "linear-gradient(120deg, #312E81 0%, #1E1B4B 55%, #3B2C6B 100%)" }}
+      >
+        <SurfaceTexture />
+        <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row sm:items-start gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center">
-                <Building2 className="h-4 w-4 text-primary" />
+              <div className="w-8 h-8 rounded-xl bg-white/15 ring-1 ring-inset ring-white/20 flex items-center justify-center">
+                <Building2 className="h-4 w-4 text-white" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">
+              <span className="text-xs font-bold uppercase tracking-widest text-white/70">
                 Company Prep Hub
               </span>
             </div>
-            <h1 className="text-3xl font-bold font-serif text-foreground leading-tight">
+            <h1 className="text-3xl font-bold font-serif text-white leading-tight">
               Crack Top Company<br className="hidden sm:block" /> Interviews
             </h1>
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-md">
+            <p className="text-sm text-white/75 mt-2 leading-relaxed max-w-md">
               Curated hiring patterns, aptitude questions, coding problems & expert tips — all in one place.
             </p>
             {!loading && (
               <div className="flex flex-wrap gap-5 mt-4">
                 {[
-                  { icon: Building2,    label: `${companies.length} Companies`,   color: "text-primary"  },
-                  { icon: FileQuestion, label: `${totalAptitude} Aptitude Qs`,    color: "text-coding"   },
-                  { icon: Code,         label: `${totalCoding} Coding Problems`,  color: "text-success"  },
-                  { icon: Lightbulb,    label: `${totalTips} Interview Tips`,     color: "text-warning"  },
-                ].map(({ icon: Icon, label, color }) => (
-                  <span key={label} className={cn("flex items-center gap-1.5 text-xs font-semibold", color)}>
+                  { icon: Building2,    label: `${companies.length} Companies`   },
+                  { icon: FileQuestion, label: `${totalAptitude} Aptitude Qs`    },
+                  { icon: Code,         label: `${totalCoding} Coding Problems`  },
+                  { icon: Lightbulb,    label: `${totalTips} Interview Tips`     },
+                ].map(({ icon: Icon, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 text-xs font-semibold text-white/85">
                     <Icon className="h-3.5 w-3.5" /> {label}
                   </span>
                 ))}
@@ -181,14 +184,14 @@ export default function CompanyPrepPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
-            <FeedbackModal compact triggerClassName="text-muted-foreground hover:text-primary" />
+            <FeedbackModal compact triggerClassName="text-white/80 hover:text-white" />
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search company or industry…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-9 bg-white/95"
               />
             </div>
           </div>

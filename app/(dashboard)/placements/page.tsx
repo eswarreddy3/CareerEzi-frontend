@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import { motion } from "framer-motion"
 
 interface OffCampusSubmission {
@@ -223,15 +224,16 @@ export default function PlacementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Placement Drives</h1>
-          <p className="text-muted-foreground text-sm mt-1">Recruitment drives announced for your college</p>
-        </div>
-        <Button onClick={() => setShowModal(true)}>
-          <Plus className="w-4 h-4 mr-1.5" /> Report Off-Campus Offer
-        </Button>
-      </div>
+      <AdminHero
+        icon={Building2}
+        title="Placement Drives"
+        subtitle="Recruitment drives announced for your college"
+        right={
+          <Button onClick={() => setShowModal(true)} className="bg-white/15 hover:bg-white/25 text-white border-0">
+            <Plus className="w-4 h-4 mr-1.5" /> Report Off-Campus Offer
+          </Button>
+        }
+      />
 
       {/* Academic profile summary */}
       {!loading && (

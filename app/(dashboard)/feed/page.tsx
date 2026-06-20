@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AdminHero } from "@/components/admin-stat-card"
 import { useAuthStore } from "@/store/authStore"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -1168,22 +1169,13 @@ export default function FeedPage() {
     <div className="w-full max-w-7xl mx-auto">
 
       {/* ── Page header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 280, damping: 24 }}
-        className="flex items-center justify-between mb-5"
-      >
-        <div>
-          <h1 className="text-2xl font-bold font-serif gradient-text">College Feed</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {collegeInfo?.name ?? "Your college"} — community &amp; updates
-          </p>
-        </div>
-        <div className="w-10 h-10 rounded-2xl gradient-bg flex items-center justify-center primary-glow-sm flex-shrink-0">
-          <Newspaper className="h-5 w-5 text-white" />
-        </div>
-      </motion.div>
+      <div className="mb-5">
+        <AdminHero
+          icon={Newspaper}
+          title="College Feed"
+          subtitle={`${collegeInfo?.name ?? "Your college"} — community & updates`}
+        />
+      </div>
 
       {/* ── Two-column layout ── */}
       <div className="flex flex-col lg:flex-row gap-5 items-start">
