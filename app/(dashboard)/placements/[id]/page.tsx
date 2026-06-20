@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { AddToCalendar, placementDriveEvent } from "@/components/add-to-calendar"
 
 interface Drive {
   id: number
@@ -190,6 +191,11 @@ export default function DriveDetailPage() {
             <p className="text-xs text-muted-foreground mt-0.5">
               Deadline: {new Date(drive.registration_deadline).toLocaleString()}
             </p>
+            {drive.drive_date && (
+              <div className="mt-2 flex justify-end">
+                <AddToCalendar event={placementDriveEvent(drive)} compact />
+              </div>
+            )}
           </div>
         </div>
 

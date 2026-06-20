@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { AdminHero, AdminStatCard } from "@/components/admin-stat-card"
+import { AddToCalendar, placementDriveEvent } from "@/components/add-to-calendar"
 import { motion } from "framer-motion"
 
 interface OffCampusSubmission {
@@ -349,6 +350,9 @@ export default function PlacementsPage() {
 
                   <div className="flex flex-col items-end gap-2">
                     <Countdown seconds={drive.seconds_to_deadline} />
+                    {drive.drive_date && (
+                      <AddToCalendar event={placementDriveEvent(drive)} compact label="Calendar" />
+                    )}
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
                 </div>
