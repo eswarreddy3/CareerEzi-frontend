@@ -31,6 +31,11 @@ interface CompanyRow { company: string; selections: number; students: number; hi
 interface TrendRow { period: string; drives: number; selections: number }
 interface AlumniRow { passout_year: number; placed: number; total: number; rate: number; highest_ctc: number | null }
 interface TpoRow { officer_id: number; officer_name: string; drives: number; registrations: number; placed: number; conversion_rate: number; avg_ctc: number | null }
+interface PlacedStudent {
+  name: string; roll_number: string | null; email: string | null; branch: string | null
+  gender: string | null; passout_year: number | null; company: string; industry: string | null
+  ctc: number | null; source: string; status: string; date: string | null
+}
 interface Analytics {
   summary: Summary
   branch_wise: BranchRow[]
@@ -39,8 +44,9 @@ interface Analytics {
   drives_trend: TrendRow[]
   alumni: AlumniRow[]
   tpo_metrics: TpoRow[]
+  placed_students: PlacedStudent[]
   filter_options: {
-    branches: string[]; passout_years: number[]; industries: string[]
+    branches: string[]; genders: string[]; passout_years: number[]; industries: string[]
     years: number[]; companies: string[]; drives: { id: number; label: string }[]
   }
 }
@@ -77,38 +83,183 @@ function ChartCard({ title, subtitle, children, empty }: {
   )
 }
 
-/* ── CSV export ─────────────────────────────────────────────────────────── */
-function exportCSV(data: Analytics) {
-  const lines: string[] = []
-  const cell = (v: any) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s }
-  const block = (title: string, header: string[], rows: any[][]) => {
-    lines.push(title); lines.push(header.map(cell).join(","))
-    rows.forEach(r => lines.push(r.map(cell).join(",")))
-    lines.push("")
-  }
-  const s = data.summary
-  block("Summary", ["Metric", "Value"], [
-    ["Total Placed", s.total_placed], ["Total Selections", s.total_selections],
-    ["Placement Rate %", s.placement_rate], ["Joined", s.joined_count],
-    ["Total Students", s.total_students], ["Drives Conducted", s.total_drives],
-    ["Companies Visited", s.companies_visited], ["Highest CTC", s.highest_ctc ?? ""],
-    ["Lowest CTC", s.lowest_ctc ?? ""], ["Avg CTC", s.avg_ctc ?? ""],
-  ])
-  block("Branch-wise", ["Branch", "Placed", "Total", "Rate %", "Avg CTC"],
-    data.branch_wise.map(b => [b.branch, b.placed, b.total, b.rate, b.avg_ctc ?? ""]))
-  block("Company-wise", ["Company", "Selections", "Students", "Highest CTC"],
-    data.company_wise.map(c => [c.company, c.selections, c.students, c.highest_ctc ?? ""]))
-  block("Drives Trend", ["Period", "Drives", "Selections"],
-    data.drives_trend.map(t => [t.period, t.drives, t.selections]))
-  block("Alumni (by batch)", ["Passout Year", "Placed", "Total", "Rate %", "Highest CTC"],
-    data.alumni.map(a => [a.passout_year, a.placed, a.total, a.rate, a.highest_ctc ?? ""]))
-  block("TPO Performance", ["Officer", "Drives", "Registrations", "Placed", "Conversion %", "Avg CTC"],
-    data.tpo_metrics.map(t => [t.officer_name, t.drives, t.registrations, t.placed, t.conversion_rate, t.avg_ctc ?? ""]))
+/* ── Excel export (multi-sheet, styled) ─────────────────────────────────── */
+interface ExportFilters {
+  year: string; status: string; source: string; passoutYear: string
+  branch: string; gender: string; industry: string; company: string; driveId: string
+  granularity: string; driveLabel: string
+}
 
-  const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" })
+const SOURCE_LABELS: Record<string, string> = {
+  all: "On + Off Campus", on_campus: "On-Campus (Drives)", off_campus: "Off-Campus",
+}
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "Male", female: "Female", other: "Other", prefer_not_to_say: "Prefer not to say",
+}
+
+// Each sheet gets its own header accent colour.
+const SHEET_THEMES: Record<string, string> = {
+  Filters: "475569", Summary: "4F46E5", "Branch-wise": "0D9488",
+  "Company-wise": "DB2777", "Drives Trend": "2563EB", Alumni: "D97706",
+  "TPO Performance": "7C3AED", "Placed Students": "059669",
+}
+
+async function exportXLSX(data: Analytics, filters: ExportFilters) {
+  const ExcelJS = (await import("exceljs")).default
+  const wb = new ExcelJS.Workbook()
+  wb.creator = "CareerEzi Placement Cell"
+  wb.created = new Date()
+
+  const headerFill = (hex: string) => ({
+    type: "pattern" as const, pattern: "solid" as const, fgColor: { argb: `FF${hex}` },
+  })
+
+  // Build a sheet: bold white header row on a coloured fill, zebra body, autofilter, frozen header.
+  const makeSheet = (
+    name: string, columns: { header: string; key: string; width: number }[], rows: any[],
+  ) => {
+    const ws = wb.addWorksheet(name, {
+      properties: { tabColor: { argb: `FF${SHEET_THEMES[name] ?? "4F46E5"}` } },
+      views: [{ state: "frozen", ySplit: 1 }],
+    })
+    ws.columns = columns.map(c => ({ header: c.header, key: c.key, width: c.width }))
+
+    const head = ws.getRow(1)
+    head.height = 22
+    head.eachCell(cell => {
+      cell.fill = headerFill(SHEET_THEMES[name] ?? "4F46E5")
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 11 }
+      cell.alignment = { vertical: "middle", horizontal: "left" }
+      cell.border = { bottom: { style: "thin", color: { argb: "FFFFFFFF" } } }
+    })
+
+    rows.forEach((r, i) => {
+      const row = ws.addRow(r)
+      if (i % 2 === 1) {
+        row.eachCell(cell => {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF1F5F9" } }
+        })
+      }
+    })
+    if (columns.length) {
+      ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: columns.length } }
+    }
+    return ws
+  }
+
+  const all = (v: string) => (v === "all" || v === "" ? "All" : v)
+
+  // ── Summary sheet ──
+  const s = data.summary
+  makeSheet("Summary",
+    [{ header: "Metric", key: "k", width: 28 }, { header: "Value", key: "v", width: 20 }],
+    [
+      { k: "Total Placed", v: s.total_placed }, { k: "Total Selections", v: s.total_selections },
+      { k: "Placement Rate %", v: s.placement_rate }, { k: "Joined", v: s.joined_count },
+      { k: "Total Students", v: s.total_students }, { k: "Drives Conducted", v: s.total_drives },
+      { k: "Companies Visited", v: s.companies_visited }, { k: "Highest CTC", v: s.highest_ctc ?? "" },
+      { k: "Lowest CTC", v: s.lowest_ctc ?? "" }, { k: "Avg CTC", v: s.avg_ctc ?? "" },
+    ])
+
+  // ── Branch-wise ──
+  makeSheet("Branch-wise",
+    [
+      { header: "Branch", key: "branch", width: 24 }, { header: "Placed", key: "placed", width: 10 },
+      { header: "Total", key: "total", width: 10 }, { header: "Rate %", key: "rate", width: 10 },
+      { header: "Avg CTC", key: "avg_ctc", width: 12 },
+    ],
+    data.branch_wise.map(b => ({ ...b, avg_ctc: b.avg_ctc ?? "" })))
+
+  // ── Company-wise ──
+  makeSheet("Company-wise",
+    [
+      { header: "Company", key: "company", width: 28 }, { header: "Selections", key: "selections", width: 12 },
+      { header: "Students", key: "students", width: 10 }, { header: "Highest CTC", key: "highest_ctc", width: 12 },
+    ],
+    data.company_wise.map(c => ({ ...c, highest_ctc: c.highest_ctc ?? "" })))
+
+  // ── Drives Trend ──
+  makeSheet("Drives Trend",
+    [
+      { header: "Period", key: "period", width: 14 }, { header: "Drives", key: "drives", width: 10 },
+      { header: "Selections", key: "selections", width: 12 },
+    ],
+    data.drives_trend)
+
+  // ── Alumni ──
+  makeSheet("Alumni",
+    [
+      { header: "Passout Year", key: "passout_year", width: 14 }, { header: "Placed", key: "placed", width: 10 },
+      { header: "Total", key: "total", width: 10 }, { header: "Rate %", key: "rate", width: 10 },
+      { header: "Highest CTC", key: "highest_ctc", width: 12 },
+    ],
+    data.alumni.map(a => ({ ...a, highest_ctc: a.highest_ctc ?? "" })))
+
+  // ── TPO Performance ──
+  makeSheet("TPO Performance",
+    [
+      { header: "Officer", key: "officer_name", width: 24 }, { header: "Drives", key: "drives", width: 10 },
+      { header: "Registrations", key: "registrations", width: 14 }, { header: "Placed", key: "placed", width: 10 },
+      { header: "Conversion %", key: "conversion_rate", width: 14 }, { header: "Avg CTC", key: "avg_ctc", width: 12 },
+    ],
+    data.tpo_metrics.map(t => ({ ...t, avg_ctc: t.avg_ctc ?? "" })))
+
+  // ── Placed Students ──
+  makeSheet("Placed Students",
+    [
+      { header: "Name", key: "name", width: 24 }, { header: "Roll No", key: "roll_number", width: 16 },
+      { header: "Email", key: "email", width: 30 }, { header: "Branch", key: "branch", width: 18 },
+      { header: "Gender", key: "gender", width: 12 }, { header: "Batch", key: "passout_year", width: 10 },
+      { header: "Company", key: "company", width: 24 }, { header: "Industry", key: "industry", width: 18 },
+      { header: "CTC (LPA)", key: "ctc", width: 12 }, { header: "Source", key: "source", width: 14 },
+      { header: "Status", key: "status", width: 14 }, { header: "Date", key: "date", width: 14 },
+    ],
+    (data.placed_students ?? []).map(p => ({
+      ...p,
+      roll_number: p.roll_number ?? "", email: p.email ?? "", branch: p.branch ?? "",
+      gender: p.gender ? (GENDER_LABELS[p.gender] ?? p.gender) : "",
+      passout_year: p.passout_year ?? "", industry: p.industry ?? "", ctc: p.ctc ?? "",
+      date: p.date ? p.date.slice(0, 10) : "",
+    })))
+
+  // ── Filters sheet (kept last) ──
+  makeSheet("Filters",
+    [{ header: "Filter", key: "k", width: 28 }, { header: "Value", key: "v", width: 40 }],
+    [
+      { k: "Generated", v: new Date().toLocaleString() },
+      { k: "Drive Year", v: all(filters.year) },
+      { k: "Status", v: STATUS_LABELS[filters.status] ?? "Placed" },
+      { k: "Source", v: SOURCE_LABELS[filters.source] ?? "On + Off Campus" },
+      { k: "Batch (Passout Year)", v: all(filters.passoutYear) },
+      { k: "Branch", v: all(filters.branch) },
+      { k: "Gender", v: filters.gender === "all" || filters.gender === "" ? "All" : (GENDER_LABELS[filters.gender] ?? filters.gender) },
+      { k: "Industry", v: all(filters.industry) },
+      { k: "Company", v: all(filters.company) },
+      { k: "Drive", v: filters.driveId === "all" ? "All" : (filters.driveLabel || filters.driveId) },
+      { k: "Trend Granularity", v: filters.granularity },
+    ])
+
+  // ── Filename reflects active filters ──
+  const slug = (v: string) => v.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "")
+  const parts = [
+    filters.status !== "selected" ? STATUS_LABELS[filters.status] : "",
+    filters.source !== "all" ? filters.source : "",
+    filters.branch !== "all" ? filters.branch : "",
+    filters.gender !== "all" ? filters.gender : "",
+    filters.passoutYear !== "all" ? filters.passoutYear : "",
+    filters.company !== "all" ? filters.company : "",
+    filters.year !== "all" ? filters.year : "",
+  ].filter(Boolean).map(slug)
+  const suffix = parts.length ? `_${parts.join("_")}` : ""
+
+  const buf = await wb.xlsx.writeBuffer()
+  const blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
-  a.href = url; a.download = `Placement_Analytics_${new Date().toISOString().slice(0, 10)}.csv`; a.click()
+  a.href = url
+  a.download = `Placement_Report${suffix}_${new Date().toISOString().slice(0, 10)}.xlsx`
+  a.click()
   URL.revokeObjectURL(url)
 }
 
@@ -122,6 +273,7 @@ export default function PlacementAnalyticsPage() {
   const [source, setSource] = useState("all")
   const [passoutYear, setPassoutYear] = useState("all")
   const [branch, setBranch] = useState("all")
+  const [gender, setGender] = useState("all")
   const [industry, setIndustry] = useState("all")
   const [company, setCompany] = useState("all")
   const [driveId, setDriveId] = useState("all")
@@ -133,6 +285,7 @@ export default function PlacementAnalyticsPage() {
     if (year !== "all") params.year = year
     if (passoutYear !== "all") params.passout_year = passoutYear
     if (branch !== "all") params.branch = branch
+    if (gender !== "all") params.gender = gender
     if (industry !== "all") params.industry = industry
     if (company !== "all") params.company = company
     if (driveId !== "all") params.drive_id = driveId
@@ -141,15 +294,31 @@ export default function PlacementAnalyticsPage() {
       .then(res => setData(res.data))
       .catch(() => toast.error("Failed to load placement analytics"))
       .finally(() => setLoading(false))
-  }, [year, status, source, passoutYear, branch, industry, company, driveId, granularity])
+  }, [year, status, source, passoutYear, branch, gender, industry, company, driveId, granularity])
 
-  const opts = data?.filter_options ?? { branches: [], passout_years: [], industries: [], years: [], companies: [], drives: [] }
+  const opts = data?.filter_options ?? { branches: [], genders: [], passout_years: [], industries: [], years: [], companies: [], drives: [] }
   const s = data?.summary
   const statusLabel = STATUS_LABELS[status] ?? "Placed"
 
   const resetFilters = () => {
     setYear("all"); setStatus("selected"); setSource("all"); setPassoutYear("all"); setBranch("all")
-    setIndustry("all"); setCompany("all"); setDriveId("all"); setGranularity("month")
+    setGender("all"); setIndustry("all"); setCompany("all"); setDriveId("all"); setGranularity("month")
+  }
+
+  const [exporting, setExporting] = useState(false)
+  const handleExport = async () => {
+    if (!data) return
+    setExporting(true)
+    try {
+      await exportXLSX(data, {
+        year, status, source, passoutYear, branch, gender, industry, company, driveId, granularity,
+        driveLabel: opts.drives.find(d => String(d.id) === driveId)?.label ?? "",
+      })
+    } catch {
+      toast.error("Failed to generate Excel report")
+    } finally {
+      setExporting(false)
+    }
   }
 
   const topCompanies = useMemo(() => (data?.company_wise ?? []).slice(0, 8), [data])
@@ -162,8 +331,8 @@ export default function PlacementAnalyticsPage() {
         title="Reports & Analysis"
         subtitle="Placement insights for your college"
         right={
-          <Button variant="outline" size="sm" onClick={() => data && exportCSV(data)} disabled={!data} className="bg-white/15 hover:bg-white/25 text-white border-0">
-            <Download className="w-4 h-4 mr-2" /> Export CSV
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!data || exporting} className="bg-white/15 hover:bg-white/25 text-white border-0">
+            <Download className="w-4 h-4 mr-2" /> {exporting ? "Exporting…" : "Export Excel"}
           </Button>
         }
       />
@@ -235,6 +404,15 @@ export default function PlacementAnalyticsPage() {
               <SelectContent>
                 <SelectItem value="all">All Branches</SelectItem>
                 {opts.branches.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </Filter>
+          <Filter label="Gender">
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger className="w-36"><SelectValue placeholder="All" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Genders</SelectItem>
+                {(opts.genders ?? []).map(g => <SelectItem key={g} value={g}>{GENDER_LABELS[g] ?? g}</SelectItem>)}
               </SelectContent>
             </Select>
           </Filter>
