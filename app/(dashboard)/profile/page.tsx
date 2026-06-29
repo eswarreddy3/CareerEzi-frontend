@@ -18,7 +18,8 @@ import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
 import api from "@/lib/api"
 import { AdminHero } from "@/components/admin-stat-card"
-import { CodingProfilesCard } from "@/components/coding-profiles-card"
+import { CodingProfilesConnect } from "@/components/coding-profiles-connect"
+import { CodingProfileStats } from "@/components/coding-profile-stats"
 import { SHIELDS, getShieldProgress } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
 import { cn } from "@/lib/utils"
@@ -564,8 +565,6 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <AdminHero icon={GraduationCap} title="Profile & Settings" subtitle="Manage your account and preferences" />
 
-      <CodingProfilesCard />
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT: Profile Info ─────────────────────────────────────────── */}
         <div className="lg:col-span-1">
@@ -681,6 +680,12 @@ export default function ProfilePage() {
                   Academic
                 </TabsTrigger>
                 <TabsTrigger
+                  value="social"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  Social Connections
+                </TabsTrigger>
+                <TabsTrigger
                   value="activity"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
@@ -783,6 +788,14 @@ export default function ProfilePage() {
               {/* Academic tab */}
               <TabsContent value="academic">
                 <AcademicSection />
+              </TabsContent>
+
+              {/* Social Connections tab — coding profiles */}
+              <TabsContent value="social">
+                <div className="space-y-6">
+                  <CodingProfilesConnect />
+                  <CodingProfileStats />
+                </div>
               </TabsContent>
 
               {/* Activity tab */}

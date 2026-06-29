@@ -20,6 +20,7 @@ import { getLevelProgress } from "@/lib/levels"
 import { getShield } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
 import { AdminStatCard, SectionHeading, SurfaceTexture, adminCardColor } from "@/components/admin-stat-card"
+import { CodingProfileStats } from "@/components/coding-profile-stats"
 import type { LucideIcon } from "lucide-react"
 
 interface DashboardData {
@@ -1026,9 +1027,14 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
+      {/* ── Coding Profiles (only renders when something is connected) ── */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+        <CodingProfileStats withHeading />
+      </motion.div>
+
       {/* ── Weekly Missions ── */}
       {data && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
           <WeeklyMissionsCard data={data} />
         </motion.div>
       )}
