@@ -26,11 +26,22 @@ export interface LeetcodeStats {
   contest_rating?: number | null
   contest_global_ranking?: number | null
 }
+export interface HackerrankStats {
+  name?: string | null
+  avatar_url?: string | null
+  country?: string | null
+  school?: string | null
+  level?: number | null
+  headline?: string | null
+  followers?: number
+  total_stars?: number
+  badges?: { name: string; stars: number; solved: number; total: number }[]
+}
 export interface CodingProfile {
   platform: string
   username: string
   profile_url: string | null
-  stats: (GithubStats & LeetcodeStats) | null
+  stats: (GithubStats & LeetcodeStats & HackerrankStats) | null
   sync_status: string | null
   sync_error: string | null
   last_synced_at: string | null

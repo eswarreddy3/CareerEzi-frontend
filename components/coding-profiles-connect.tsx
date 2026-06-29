@@ -5,7 +5,7 @@ import { GlassCard } from "@/components/glass-card"
 import { IconTile, adminCardColor } from "@/components/admin-stat-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Github, Code2, Loader2, RefreshCw, X, ExternalLink, Plus } from "lucide-react"
+import { Github, Code2, Terminal, Loader2, RefreshCw, X, ExternalLink, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCodingProfilesStore } from "@/store/codingProfilesStore"
 import type { LucideIcon } from "lucide-react"
@@ -13,6 +13,7 @@ import type { LucideIcon } from "lucide-react"
 const PLATFORM_ICONS: Record<string, LucideIcon> = {
   github: Github,
   leetcode: Code2,
+  hackerrank: Terminal,
 }
 
 export function CodingProfilesConnect() {

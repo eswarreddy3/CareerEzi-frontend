@@ -1029,7 +1029,7 @@ export default function DashboardPage() {
 
       {/* ── Coding Profiles (only renders when something is connected) ── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
-        <CodingProfileStats withHeading />
+        <CodingProfileStats withHeading singleRow />
       </motion.div>
 
       {/* ── Weekly Missions ── */}
