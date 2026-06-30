@@ -881,13 +881,21 @@ export default function CourseDetailPage() {
       if (course_completion_bonus > 0) {
         setTimeout(() => {
           fireSchoolPride()
-          toast.success(`Course complete! +${course_completion_bonus} bonus pts`)
+          toast.success(`Course complete! +${course_completion_bonus} bonus pts 🎓`, {
+            description: "Fynity is issuing your certificate — it'll be emailed to you shortly.",
+            duration: 8000,
+            action: { label: "View", onClick: () => router.push("/certificates") },
+          })
         }, 1200)
       }
       if (domain_completion_bonus > 0) {
         setTimeout(() => {
           fireSchoolPride()
-          toast.success(`Domain mastered! +${domain_completion_bonus} bonus pts 🎓`)
+          toast.success(`Domain mastered! +${domain_completion_bonus} bonus pts 🎓`, {
+            description: "Your Fynity domain certificate is on its way to your inbox.",
+            duration: 8000,
+            action: { label: "View", onClick: () => router.push("/certificates") },
+          })
         }, 2400)
       }
 

@@ -35,6 +35,7 @@ import {
   Database,
   GraduationCap,
   ClipboardCheck,
+  Award,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -104,9 +105,10 @@ const studentNavBlocks: StudentNavBlock[] = [
   {
     type: "section", id: "personal", label: "Personal", icon: User, color: "slate",
     items: [
-      { href: "/resume",  label: "Resume Builder", icon: FileText  },
-      { href: "/report",  label: "My Report",      icon: BarChart2 },
-      { href: "/profile", label: "Profile",        icon: User      },
+      { href: "/resume",       label: "Resume Builder", icon: FileText  },
+      { href: "/certificates", label: "Certificates",   icon: Award     },
+      { href: "/report",       label: "My Report",      icon: BarChart2 },
+      { href: "/profile",      label: "Profile",        icon: User      },
     ],
   },
 ]

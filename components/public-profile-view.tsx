@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { motion, useInView, animate, type Variants } from "framer-motion"
 import {
   Github, Linkedin, Code2, Terminal, ExternalLink, Star, Users, FolderGit2,
-  Trophy, Target, Award, Flame, GraduationCap, BadgeCheck, MapPin,
+  Trophy, Target, Award, Flame, GraduationCap, BadgeCheck, MapPin, ShieldCheck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { getLevel } from "@/lib/levels"
@@ -130,9 +130,9 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Domains Completed</p>
                 <div className="flex flex-wrap gap-2">
                   {p.completed_domains.map((d) => (
-                    <Chip key={d.title} className="bg-coding/10 border-coding/20">
+                    <AchievementChip key={d.title} uid={d.certificate_uid} className="bg-coding/10 border-coding/20">
                       <Trophy className="h-3.5 w-3.5 text-coding" /> {d.title}
-                    </Chip>
+                    </AchievementChip>
                   ))}
                 </div>
               </motion.div>
@@ -142,9 +142,9 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Courses Completed</p>
                 <div className="flex flex-wrap gap-2">
                   {p.completed_courses.map((c) => (
-                    <Chip key={c.title} className="bg-secondary/40 border-border">
+                    <AchievementChip key={c.title} uid={c.certificate_uid} className="bg-secondary/40 border-border">
                       <BadgeCheck className="h-3.5 w-3.5 text-success" /> {c.title}
-                    </Chip>
+                    </AchievementChip>
                   ))}
                 </div>
               </motion.div>
@@ -238,6 +238,27 @@ function Chip({ className, children }: { className?: string; children: ReactNode
       className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-medium text-foreground cursor-default", className)}>
       {children}
     </motion.span>
+  )
+}
+
+// Achievement chip — links to the public certificate verification page when a
+// Fynity certificate has been issued for the completion.
+function AchievementChip({ uid, className, children }: {
+  uid?: string | null; className?: string; children: ReactNode
+}) {
+  if (!uid) return <Chip className={className}>{children}</Chip>
+  return (
+    <motion.a
+      href={`/verify/${uid}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title="View verified Fynity certificate"
+      whileHover={{ scale: 1.06, y: -2 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-medium text-foreground", className)}>
+      {children}
+      <ShieldCheck className="h-3.5 w-3.5 text-success/80" />
+    </motion.a>
   )
 }
 

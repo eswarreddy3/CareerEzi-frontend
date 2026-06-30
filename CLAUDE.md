@@ -83,6 +83,9 @@ frontend/
 | /leaderboard | student | ✅ |
 | /profile | student | ✅ |
 | /resume | student | ✅ |
+| /certificates | student | ✅ Fynity certificates list + download |
+| /u/[username] | public | ✅ Public portfolio (cert chips link to /verify) |
+| /verify/[uid] | public | ✅ Certificate authenticity check (QR target) |
 | /admin | college_admin | ✅ |
 | /admin/students | college_admin | ✅ |
 | /admin/analytics | college_admin | ✅ |

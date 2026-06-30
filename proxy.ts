@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const PUBLIC_ROUTES = ["/", "/login", "/onboarding", "/activate", "/forgot-password", "/reset-password", "/u"]
+const PUBLIC_ROUTES = ["/", "/login", "/onboarding", "/activate", "/forgot-password", "/reset-password", "/u", "/verify"]
 
 const ROLE_HOME: Record<string, string> = {
   student: "/dashboard",

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import {
   Upload, Trash2, Download, CheckCircle2, AlertCircle, SkipForward,
   X, Search, Code2, Loader2, RefreshCw, Plus, Pencil, RefreshCcw,
-  Terminal, Layers, GripVertical,
+  Terminal, Layers, GripVertical, List,
 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
@@ -430,6 +430,32 @@ function ProblemFormModal({
     })
   }
 
+  // Toggle "- " bullet prefix on each line touched by the selection (or the
+  // current line if nothing is selected). Re-running removes the prefix.
+  const toggleDescBullets = () => {
+    const ta = descRef.current
+    if (!ta) return
+    const { selectionStart: s, selectionEnd: e, value } = ta
+    // Expand the selection to cover whole lines.
+    const lineStart = value.lastIndexOf("\n", s - 1) + 1
+    const lineEnd = value.indexOf("\n", e) === -1 ? value.length : value.indexOf("\n", e)
+    const block = value.slice(lineStart, lineEnd)
+    const lines = block.split("\n")
+    const allBulleted = lines.every(l => /^\s*-\s+/.test(l) || l.trim() === "")
+    const updated = lines
+      .map(l => {
+        if (l.trim() === "") return l
+        return allBulleted ? l.replace(/^(\s*)-\s+/, "$1") : `- ${l}`
+      })
+      .join("\n")
+    const next = value.slice(0, lineStart) + updated + value.slice(lineEnd)
+    setField("description", next)
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(lineStart, lineStart + updated.length)
+    })
+  }
+
   // Auto-generate slug from title (only when not manually set)
   const handleTitleChange = (title: string) => {
     setForm(f => ({
@@ -646,6 +672,9 @@ function ProblemFormModal({
                   <button type="button" onClick={() => wrapDescSelection("`")} title="Code (`text`)"
                     className="h-7 w-7 rounded-md border border-border bg-secondary/40 text-xs font-mono text-foreground hover:bg-secondary disabled:opacity-40"
                     disabled={descPreview}>{"<>"}</button>
+                  <button type="button" onClick={toggleDescBullets} title="Bullet list (- item)"
+                    className="h-7 w-7 rounded-md border border-border bg-secondary/40 text-foreground hover:bg-secondary disabled:opacity-40 flex items-center justify-center"
+                    disabled={descPreview}><List className="h-3.5 w-3.5" /></button>
                   <button type="button" onClick={() => setDescPreview(p => !p)}
                     className={cn("ml-1 h-7 px-2.5 rounded-md border text-xs font-medium transition-colors",
                       descPreview ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-secondary/40 text-muted-foreground hover:bg-secondary")}>
@@ -666,7 +695,7 @@ function ProblemFormModal({
                     "w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-foreground",
                     "placeholder:text-muted-foreground resize-y font-mono min-h-[140px] focus:outline-none focus:ring-1 focus:ring-primary/50"
                   )}
-                  placeholder="Problem description… Select text and use B / I / <> — **bold**, *italic*, `code`."
+                  placeholder="Problem description… Use the toolbar — **bold**, *italic*, `code`, or '- ' for bullet points."
                   value={form.description}
                   onChange={e => setField("description", e.target.value)}
                 />

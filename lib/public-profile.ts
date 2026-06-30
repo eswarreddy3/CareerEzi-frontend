@@ -17,7 +17,7 @@ export interface CodingStats {
 export interface CodingProfile {
   platform: string; username: string; profile_url: string | null; stats: CodingStats | null
 }
-export interface Achievement { title: string; icon_color: string | null; completed_at: string | null }
+export interface Achievement { title: string; icon_color: string | null; completed_at: string | null; certificate_uid?: string | null }
 export interface PublicProfile {
   username: string; name: string; avatar: string | null
   branch: string | null; passout_year: number | null
