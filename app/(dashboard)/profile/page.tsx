@@ -20,6 +20,7 @@ import api from "@/lib/api"
 import { AdminHero } from "@/components/admin-stat-card"
 import { CodingProfilesConnect } from "@/components/coding-profiles-connect"
 import { CodingProfileStats } from "@/components/coding-profile-stats"
+import { PublicProfileSettings } from "@/components/public-profile-settings"
 import { SHIELDS, getShieldProgress } from "@/lib/shields"
 import { UserAvatar } from "@/components/user-avatar"
 import { cn } from "@/lib/utils"
@@ -685,6 +686,14 @@ export default function ProfilePage() {
                 >
                   Social Connections
                 </TabsTrigger>
+                {user?.role === "student" && (
+                  <TabsTrigger
+                    value="public"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  >
+                    Public Profile
+                  </TabsTrigger>
+                )}
                 <TabsTrigger
                   value="activity"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -797,6 +806,13 @@ export default function ProfilePage() {
                   <CodingProfileStats />
                 </div>
               </TabsContent>
+
+              {/* Public Profile tab — username + visibility + share link */}
+              {user?.role === "student" && (
+                <TabsContent value="public">
+                  <PublicProfileSettings />
+                </TabsContent>
+              )}
 
               {/* Activity tab */}
               <TabsContent value="activity">

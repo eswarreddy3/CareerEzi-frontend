@@ -12,6 +12,8 @@ export interface User {
   college_name?: string
   college_logo_url?: string | null
   first_login: boolean
+  username?: string | null
+  is_public?: boolean
   branch?: string
   section?: string
   roll_number?: string

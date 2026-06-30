@@ -10,6 +10,7 @@ import {
   BookOpen, Trophy, Zap, Users, Code2, Target, Pencil,
 } from "lucide-react"
 import { AvatarPicker } from "@/components/avatar-picker"
+import { UsernameInput, type UsernameStatus } from "@/components/username-input"
 import { toast } from "sonner"
 import { Logo } from "@/components/logo"
 import { motion, AnimatePresence } from "framer-motion"
@@ -231,6 +232,8 @@ export default function OnboardingPage() {
   const [done, setDone] = useState(false)
   const [selectedAvatar, setSelectedAvatar] = useState<string>("")
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
+  const [username, setUsername] = useState("")
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle")
 
   useEffect(() => {
     if (!token || !user) { router.replace("/login"); return }
@@ -249,6 +252,10 @@ export default function OnboardingPage() {
   const form2 = useForm<Step2>({ resolver: zodResolver(step2Schema) })
 
   const handleStep1 = (data: Step1) => {
+    if (username && ["taken", "invalid", "checking"].includes(usernameStatus)) {
+      toast.error("Please choose an available username, or leave it blank for now")
+      return
+    }
     setFormData((prev) => ({ ...prev, ...data }))
     setStep(2)
   }
@@ -264,6 +271,7 @@ export default function OnboardingPage() {
         gender: formData.gender,
         new_password: data.new_password,
         avatar: selectedAvatar || undefined,
+        username: username.trim() || undefined,
       })
       updateUser({ first_login: false })
       toast.success("Setup complete! Welcome to CareerEzi 🎉")
@@ -488,6 +496,15 @@ export default function OnboardingPage() {
                       onSelect={setSelectedAvatar}
                       current={selectedAvatar}
                     />
+
+                    {/* Username — public profile handle */}
+                    <div className="space-y-1.5">
+                      <Label className="text-foreground text-sm flex items-center gap-1.5">
+                        Username
+                        <span className="text-muted-foreground text-[10px]">(optional — for your public profile)</span>
+                      </Label>
+                      <UsernameInput value={username} onChange={setUsername} onStatusChange={setUsernameStatus} />
+                    </div>
 
                     {/* Phone */}
                     <div className="space-y-1.5">
