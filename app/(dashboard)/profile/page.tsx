@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield, GraduationCap, AlertCircle, Clock, CheckCircle2, XCircle } from "lucide-react"
+import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield, GraduationCap, AlertCircle, Clock, CheckCircle2, XCircle, Phone, Calendar } from "lucide-react"
 import { AvatarPicker } from "@/components/avatar-picker"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
@@ -70,17 +70,45 @@ const personalSchema = z.object({
 })
 type PersonalForm = z.infer<typeof personalSchema>
 
+/** Read-only label/value row for view mode — shared pattern across profile sections. */
+export function ViewRow({ icon: Icon, label, value, isLink }: {
+  icon: any; label: string; value?: string | null; isLink?: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border/50 last:border-0">
+      <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" /> {label}
+      </span>
+      {value ? (
+        isLink ? (
+          <a href={value} target="_blank" rel="noopener noreferrer"
+            className="text-sm font-medium text-primary hover:underline truncate max-w-[55%] inline-flex items-center gap-1">
+            <span className="truncate">{value.replace(/^https?:\/\//, "")}</span>
+            <ExternalLink className="h-3 w-3 flex-shrink-0 opacity-60" />
+          </a>
+        ) : (
+          <span className="text-sm font-medium text-foreground truncate max-w-[55%]">{value}</span>
+        )
+      ) : (
+        <span className="text-sm text-muted-foreground/60">—</span>
+      )}
+    </div>
+  )
+}
+
 function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: Partial<any>) => void }) {
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<PersonalForm>({
+  const defaults = {
+    phone: user?.phone || "",
+    dob: user?.dob || "",
+    linkedin: user?.linkedin || "",
+    github: user?.github || "",
+  }
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<PersonalForm>({
     resolver: zodResolver(personalSchema),
-    defaultValues: {
-      phone: user?.phone || "",
-      dob: user?.dob || "",
-      linkedin: user?.linkedin || "",
-      github: user?.github || "",
-    },
+    defaultValues: defaults,
   })
 
   const handleAvatarSelect = async (url: string) => {
@@ -103,9 +131,15 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
       })
       updateUser({ phone: data.phone, dob: data.dob, linkedin: data.linkedin, github: data.github } as any)
       toast.success("Profile updated")
+      setEditing(false)
     } catch {
       toast.error("Failed to update profile")
     }
+  }
+
+  const cancelEdit = () => {
+    reset({ phone: user?.phone || "", dob: user?.dob || "", linkedin: user?.linkedin || "", github: user?.github || "" })
+    setEditing(false)
   }
 
   const photoUrl = user?.avatar
@@ -113,76 +147,101 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
 
   return (
     <div>
-      <h3 className="font-semibold font-serif text-foreground mb-4">Personal Info</h3>
-      <form onSubmit={handleSubmit(onSave)} className="space-y-4">
-        {/* Avatar */}
-        <div className="space-y-1.5">
-          <Label className="text-foreground">Avatar</Label>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => setAvatarPickerOpen(true)}
-              className="relative group"
-            >
-              <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary">
-                {photoUrl
-                  ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
-                  : <span className="text-xl font-bold text-primary font-serif">{initials}</span>
-                }
-              </div>
-              <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                <Pencil className="h-2.5 w-2.5 text-primary-foreground" />
-              </div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold font-serif text-foreground">Personal Info</h3>
+        {!editing && (
+          <button type="button" onClick={() => setEditing(true)}
+            className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors">
+            <Pencil className="h-3.5 w-3.5" /> Edit
+          </button>
+        )}
+      </div>
+
+      {/* Avatar */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="relative">
+          <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden">
+            {photoUrl
+              ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
+              : <span className="text-xl font-bold text-primary font-serif">{initials}</span>}
+          </div>
+          {editing && (
+            <button type="button" onClick={() => setAvatarPickerOpen(true)}
+              className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+              <Pencil className="h-2.5 w-2.5 text-primary-foreground" />
             </button>
-            <button type="button" onClick={() => setAvatarPickerOpen(true)} className="text-sm text-primary hover:underline">
+          )}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-foreground">{user?.name}</p>
+          {editing && (
+            <button type="button" onClick={() => setAvatarPickerOpen(true)} className="text-xs text-primary hover:underline mt-0.5">
               Change avatar
             </button>
+          )}
+        </div>
+      </div>
+      <AvatarPicker
+        open={avatarPickerOpen}
+        onClose={() => setAvatarPickerOpen(false)}
+        onSelect={handleAvatarSelect}
+        current={photoUrl}
+      />
+
+      {editing ? (
+        <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+          {/* Phone */}
+          <div className="space-y-1.5">
+            <Label className="text-foreground flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5 text-primary" /> Mobile Number
+            </Label>
+            <Input placeholder="9876543210" className="bg-secondary/50 border-border text-foreground" {...register("phone")} />
+            {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
           </div>
-          <AvatarPicker
-            open={avatarPickerOpen}
-            onClose={() => setAvatarPickerOpen(false)}
-            onSelect={handleAvatarSelect}
-            current={photoUrl}
-          />
-        </div>
 
-        {/* Phone */}
-        <div className="space-y-1.5">
-          <Label className="text-foreground">Mobile Number</Label>
-          <Input placeholder="9876543210" className="bg-secondary/50 border-border text-foreground" {...register("phone")} />
-          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
-        </div>
+          {/* DOB */}
+          <div className="space-y-1.5">
+            <Label className="text-foreground flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-primary" /> Date of Birth
+            </Label>
+            <Input type="date" className="bg-secondary/50 border-border text-foreground" max={new Date().toISOString().split("T")[0]} {...register("dob")} />
+            {errors.dob && <p className="text-xs text-destructive">{errors.dob.message}</p>}
+          </div>
 
-        {/* DOB */}
-        <div className="space-y-1.5">
-          <Label className="text-foreground">Date of Birth</Label>
-          <Input type="date" className="bg-secondary/50 border-border text-foreground" max={new Date().toISOString().split("T")[0]} {...register("dob")} />
-          {errors.dob && <p className="text-xs text-destructive">{errors.dob.message}</p>}
-        </div>
+          {/* LinkedIn */}
+          <div className="space-y-1.5">
+            <Label className="text-foreground flex items-center gap-1.5">
+              <Linkedin className="h-3.5 w-3.5 text-primary" /> LinkedIn URL
+            </Label>
+            <Input placeholder="https://linkedin.com/in/yourname" className="bg-secondary/50 border-border text-foreground" {...register("linkedin")} />
+            {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
+          </div>
 
-        {/* LinkedIn */}
-        <div className="space-y-1.5">
-          <Label className="text-foreground flex items-center gap-1.5">
-            <Linkedin className="h-3.5 w-3.5 text-primary" /> LinkedIn URL
-          </Label>
-          <Input placeholder="https://linkedin.com/in/yourname" className="bg-secondary/50 border-border text-foreground" {...register("linkedin")} />
-          {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
-        </div>
+          {/* GitHub */}
+          <div className="space-y-1.5">
+            <Label className="text-foreground flex items-center gap-1.5">
+              <Github className="h-3.5 w-3.5" /> GitHub URL
+            </Label>
+            <Input placeholder="https://github.com/yourusername" className="bg-secondary/50 border-border text-foreground" {...register("github")} />
+            {errors.github && <p className="text-xs text-destructive">{errors.github.message}</p>}
+          </div>
 
-        {/* GitHub */}
-        <div className="space-y-1.5">
-          <Label className="text-foreground flex items-center gap-1.5">
-            <Github className="h-3.5 w-3.5" /> GitHub URL
-          </Label>
-          <Input placeholder="https://github.com/yourusername" className="bg-secondary/50 border-border text-foreground" {...register("github")} />
-          {errors.github && <p className="text-xs text-destructive">{errors.github.message}</p>}
+          <div className="flex gap-2">
+            <Button type="submit" className="bg-primary hover:brightness-110 text-primary-foreground" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Save
+            </Button>
+            <Button type="button" variant="outline" onClick={cancelEdit}>Cancel</Button>
+          </div>
+        </form>
+      ) : (
+        <div>
+          <ViewRow icon={Phone} label="Mobile Number" value={user?.phone} />
+          <ViewRow icon={Calendar} label="Date of Birth" value={user?.dob} />
+          <ViewRow icon={Linkedin} label="LinkedIn" value={user?.linkedin} isLink />
+          <ViewRow icon={Github} label="GitHub" value={user?.github} isLink />
         </div>
-
-        <Button type="submit" className="bg-primary hover:brightness-110 text-primary-foreground" disabled={isSubmitting}>
-          {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-          Save
-        </Button>
-      </form>
+      )}
     </div>
   )
 }
@@ -686,14 +745,6 @@ export default function ProfilePage() {
                 >
                   Social Connections
                 </TabsTrigger>
-                {user?.role === "student" && (
-                  <TabsTrigger
-                    value="public"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                  >
-                    Public Profile
-                  </TabsTrigger>
-                )}
                 <TabsTrigger
                   value="activity"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -702,12 +753,17 @@ export default function ProfilePage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Account tab — personal info + change password */}
+              {/* Account tab — personal info, password, public profile */}
               <TabsContent value="account">
-                <div className="max-w-sm space-y-8">
-                  <PersonalInfoSection user={user} updateUser={updateUser} />
+                <div className="space-y-8">
+                  {/* Personal info + public profile side-by-side on wide screens */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <PersonalInfoSection user={user} updateUser={updateUser} />
+                    {user?.role === "student" && <PublicProfileSettings />}
+                  </div>
 
-                  <div>
+                  {/* Change Password */}
+                  <div className="max-w-md pt-8 border-t border-border/50">
                   <h3 className="font-semibold font-serif text-foreground mb-4">
                     Change Password
                   </h3>
@@ -806,13 +862,6 @@ export default function ProfilePage() {
                   <CodingProfileStats />
                 </div>
               </TabsContent>
-
-              {/* Public Profile tab — username + visibility + share link */}
-              {user?.role === "student" && (
-                <TabsContent value="public">
-                  <PublicProfileSettings />
-                </TabsContent>
-              )}
 
               {/* Activity tab */}
               <TabsContent value="activity">
