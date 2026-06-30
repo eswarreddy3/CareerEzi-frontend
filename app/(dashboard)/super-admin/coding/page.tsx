@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import api from "@/lib/api"
+import { RichText } from "@/components/rich-text"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -410,6 +411,24 @@ function ProblemFormModal({
   const [activeLang, setActiveLang] = useState<Lang>("python")
   const [saving, setSaving] = useState(false)
   const [slugManual, setSlugManual] = useState(isEdit)
+  const [descPreview, setDescPreview] = useState(false)
+  const descRef = useRef<HTMLTextAreaElement>(null)
+
+  // Wrap the current selection in the description with a markdown marker
+  // (e.g. ** for bold, * for italic). Toggles off if already wrapped.
+  const wrapDescSelection = (marker: string) => {
+    const ta = descRef.current
+    if (!ta) return
+    const { selectionStart: s, selectionEnd: e, value } = ta
+    const sel = value.slice(s, e) || "text"
+    const next = value.slice(0, s) + marker + sel + marker + value.slice(e)
+    setField("description", next)
+    // restore selection around the wrapped text after React re-renders
+    requestAnimationFrame(() => {
+      ta.focus()
+      ta.setSelectionRange(s + marker.length, s + marker.length + sel.length)
+    })
+  }
 
   // Auto-generate slug from title (only when not manually set)
   const handleTitleChange = (title: string) => {
@@ -615,16 +634,43 @@ function ProblemFormModal({
           <div className={sectionCls}>
             <p className={sectionHeadCls}>Problem Statement</p>
             <div>
-              <label className={labelCls}>Description *</label>
-              <textarea
-                className={cn(
-                  "w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-foreground",
-                  "placeholder:text-muted-foreground resize-y font-mono min-h-[140px] focus:outline-none focus:ring-1 focus:ring-primary/50"
-                )}
-                placeholder="Problem description with input/output format..."
-                value={form.description}
-                onChange={e => setField("description", e.target.value)}
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className={cn(labelCls, "mb-0")}>Description *</label>
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => wrapDescSelection("**")} title="Bold (**text**)"
+                    className="h-7 w-7 rounded-md border border-border bg-secondary/40 text-sm font-bold text-foreground hover:bg-secondary disabled:opacity-40"
+                    disabled={descPreview}>B</button>
+                  <button type="button" onClick={() => wrapDescSelection("*")} title="Italic (*text*)"
+                    className="h-7 w-7 rounded-md border border-border bg-secondary/40 text-sm italic text-foreground hover:bg-secondary disabled:opacity-40"
+                    disabled={descPreview}>I</button>
+                  <button type="button" onClick={() => wrapDescSelection("`")} title="Code (`text`)"
+                    className="h-7 w-7 rounded-md border border-border bg-secondary/40 text-xs font-mono text-foreground hover:bg-secondary disabled:opacity-40"
+                    disabled={descPreview}>{"<>"}</button>
+                  <button type="button" onClick={() => setDescPreview(p => !p)}
+                    className={cn("ml-1 h-7 px-2.5 rounded-md border text-xs font-medium transition-colors",
+                      descPreview ? "border-primary/40 bg-primary/10 text-primary" : "border-border bg-secondary/40 text-muted-foreground hover:bg-secondary")}>
+                    {descPreview ? "Edit" : "Preview"}
+                  </button>
+                </div>
+              </div>
+              {descPreview ? (
+                <div className="w-full rounded-md border border-border bg-secondary/20 px-3 py-2 text-sm text-foreground/80 leading-relaxed min-h-[140px]">
+                  {form.description
+                    ? <RichText text={form.description} />
+                    : <span className="text-muted-foreground">Nothing to preview yet.</span>}
+                </div>
+              ) : (
+                <textarea
+                  ref={descRef}
+                  className={cn(
+                    "w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm text-foreground",
+                    "placeholder:text-muted-foreground resize-y font-mono min-h-[140px] focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  )}
+                  placeholder="Problem description… Select text and use B / I / <> — **bold**, *italic*, `code`."
+                  value={form.description}
+                  onChange={e => setField("description", e.target.value)}
+                />
+              )}
             </div>
             <div>
               <label className={labelCls}>Constraints</label>

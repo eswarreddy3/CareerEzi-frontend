@@ -7,6 +7,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels"
 import type { ImperativePanelHandle } from "react-resizable-panels"
 import { Button } from "@/components/ui/button"
 import { FeedbackModal } from "@/components/feedback-modal"
+import { RichText } from "@/components/rich-text"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
@@ -500,9 +501,8 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
 
                     <div className="flex-1 overflow-y-auto">
                       <TabsContent value="description" className="m-0 p-5 space-y-6">
-                        <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-line">
-                          {currentProblem.description}
-                        </p>
+                        <RichText text={currentProblem.description}
+                          className="text-sm text-foreground/80 leading-relaxed" />
 
                         {currentProblem.examples.length > 0 && (
                           <div className="space-y-4">
