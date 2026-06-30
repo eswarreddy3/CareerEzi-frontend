@@ -150,22 +150,6 @@ export default async function PublicProfilePage(
       </div>
 
       <div className="max-w-4xl mx-auto px-5 sm:px-8 py-8 space-y-8">
-        {/* Coding profiles */}
-        {connected.length > 0 && (
-          <Section icon={Code2} title="Coding Profiles" subtitle="Synced from external platforms">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {connected.map((c) => (
-                <div key={c.platform}>
-                  {c.platform === "github" ? <GithubCard p={c} />
-                  : c.platform === "leetcode" ? <LeetcodeCard p={c} />
-                  : c.platform === "hackerrank" ? <HackerrankCard p={c} />
-                  : null}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
         {/* CareerEzi achievements */}
         {hasAchievements && (
           <Section icon={BadgeCheck} title="CareerEzi Achievements" subtitle="Verified learning milestones">
@@ -212,6 +196,22 @@ export default async function PublicProfilePage(
                   <Github className="h-4 w-4" /> GitHub <ExternalLink className="h-3 w-3 opacity-60" />
                 </a>
               )}
+            </div>
+          </Section>
+        )}
+
+        {/* Coding profiles — shown at the bottom */}
+        {connected.length > 0 && (
+          <Section icon={Code2} title="Coding Profiles" subtitle="Synced from external platforms">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {connected.map((c) => (
+                <div key={c.platform}>
+                  {c.platform === "github" ? <GithubCard p={c} />
+                  : c.platform === "leetcode" ? <LeetcodeCard p={c} />
+                  : c.platform === "hackerrank" ? <HackerrankCard p={c} />
+                  : null}
+                </div>
+              ))}
             </div>
           </Section>
         )}
