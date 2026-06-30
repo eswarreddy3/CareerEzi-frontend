@@ -11,10 +11,10 @@ import type { LucideIcon } from "lucide-react"
 
 // Per-platform brand identity — intentionally hardcoded brand colors (like the
 // lab's per-language colors), not semantic tokens. Used for the card header band.
-const PLATFORM_THEME: Record<string, { gradient: string; icon: LucideIcon }> = {
-  github:     { gradient: "linear-gradient(135deg, #2b3137 0%, #57606a 100%)", icon: Github },
-  leetcode:   { gradient: "linear-gradient(135deg, #ffa116 0%, #e8870b 100%)", icon: Code2 },
-  hackerrank: { gradient: "linear-gradient(135deg, #00b74a 0%, #00892f 100%)", icon: Terminal },
+const PLATFORM_THEME: Record<string, { gradient: string; icon: LucideIcon; label: string }> = {
+  github:     { gradient: "linear-gradient(135deg, #2b3137 0%, #57606a 100%)", icon: Github,   label: "GitHub" },
+  leetcode:   { gradient: "linear-gradient(135deg, #ffa116 0%, #e8870b 100%)", icon: Code2,    label: "LeetCode" },
+  hackerrank: { gradient: "linear-gradient(135deg, #00b74a 0%, #00892f 100%)", icon: Terminal, label: "HackerRank" },
 }
 
 /**
@@ -79,6 +79,9 @@ function StatCardShell({ platform, title, username, profileUrl, subtitle, avatar
             ? <img src={avatarUrl} alt="" className="w-11 h-11 rounded-full ring-2 ring-white/40 flex-shrink-0" />
             : <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0"><Icon className="h-5 w-5 text-white" /></div>}
           <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/75 leading-none mb-0.5">
+              {theme?.label ?? platform}
+            </p>
             <p className="font-semibold text-white truncate leading-tight">{title}</p>
             <a href={profileUrl} target="_blank" rel="noopener noreferrer"
               className="text-white/85 hover:text-white text-xs inline-flex items-center gap-0.5">
