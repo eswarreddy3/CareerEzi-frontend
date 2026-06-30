@@ -6,7 +6,8 @@ import {
 } from "lucide-react"
 import { getLevel } from "@/lib/levels"
 
-export const revalidate = 300
+// Always render fresh so profile edits / synced stats show instantly (no ISR cache).
+export const dynamic = "force-dynamic"
 
 // ─── Types (mirror /api/public/profile/<username>) ──────────────────────────
 interface CodingStats {
@@ -51,7 +52,7 @@ function media(url: string | null | undefined): string | undefined {
 async function getProfile(username: string): Promise<PublicProfile | null> {
   try {
     const res = await fetch(`${API}/public/profile/${encodeURIComponent(username)}`, {
-      next: { revalidate },
+      cache: "no-store",
     })
     if (!res.ok) return null
     return (await res.json()) as PublicProfile
