@@ -24,6 +24,7 @@ import {
   Copy,
   Check,
   ZoomIn,
+  X,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { fireStars, fireSchoolPride } from "@/lib/effects"
@@ -40,7 +41,6 @@ import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
 import { getLessonContent } from "@/content"
 import { DiceRoller } from "@/components/dice-roller"
-import { LessonParticles } from "@/components/lesson-particles"
 import { COURSE_THEMES, getCourseTheme, type ThemeVariant } from "@/lib/course-themes"
 import { CourseMascot } from "@/components/course-mascot"
 
@@ -172,32 +172,74 @@ function CopyCodeBlock({ code, lang, isOutput }: { code: string; lang: string; i
 }
 
 // ─── Zoomable image ───────────────────────────────────────────────────────────
+// Renders at natural size (never upscaled/cropped), centered, height-capped —
+// so the layout stays stable when the sidebar collapses and the column widens.
 function ZoomableImage({ src, alt }: { src: string; alt: string }) {
   const [zoomed, setZoomed] = useState(false)
+
+  // Lightbox: Esc closes, page scroll locked while open
+  useEffect(() => {
+    if (!zoomed) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setZoomed(false) }
+    document.addEventListener("keydown", onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [zoomed])
+
   return (
     <>
-      <div
-        className="relative my-5 rounded-2xl overflow-hidden border border-border cursor-zoom-in group/img shadow-lg"
-        onClick={() => setZoomed(true)}
-      >
-        <img src={src} alt={alt} className="w-full object-cover transition-transform duration-300 group-hover/img:scale-[1.02]" loading="lazy" />
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity bg-black/20">
-          <div className="bg-black/60 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5">
-            <ZoomIn className="h-3 w-3" /> Click to zoom
-          </div>
-        </div>
+      <figure className="my-6 mx-auto w-fit max-w-full">
+        <button
+          type="button"
+          onClick={() => setZoomed(true)}
+          title="Click to enlarge"
+          className="group/img relative block rounded-xl overflow-hidden border border-border bg-muted/30 cursor-zoom-in transition-[border-color,box-shadow] duration-200 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            className="block w-auto h-auto max-w-full max-h-[480px] object-contain"
+          />
+          <span className="pointer-events-none absolute top-2.5 right-2.5 flex items-center gap-1.5 rounded-full border border-border bg-background/90 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm opacity-0 group-hover/img:opacity-100 transition-opacity">
+            <ZoomIn className="h-3 w-3" /> Enlarge
+          </span>
+        </button>
         {alt && (
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-4 py-3">
-            <p className="text-white/80 text-xs">{alt}</p>
-          </div>
+          <figcaption className="mt-2 text-center text-xs text-muted-foreground">{alt}</figcaption>
         )}
-      </div>
+      </figure>
+
       {zoomed && (
         <div
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black/85 backdrop-blur-sm p-4 sm:p-8 cursor-zoom-out"
           onClick={() => setZoomed(false)}
         >
-          <img src={src} alt={alt} className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain" />
+          <button
+            type="button"
+            title="Close (Esc)"
+            onClick={() => setZoomed(false)}
+            className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={src}
+            alt={alt}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[85vh] max-w-[92vw] rounded-lg object-contain shadow-2xl cursor-default"
+          />
+          {alt && (
+            <p onClick={(e) => e.stopPropagation()} className="max-w-[80vw] text-center text-sm text-white/70 cursor-default">
+              {alt}
+            </p>
+          )}
         </div>
       )}
     </>
@@ -988,12 +1030,6 @@ export default function CourseDetailPage() {
       </AnimatePresence>
 
       <PointsBurst points={earnedPoints} show={showPointsBurst} onDone={() => setShowPointsBurst(false)} />
-
-      {/* Floating particles — themed, mouse-reactive */}
-      <LessonParticles
-        color={currentTheme?.primary ?? "#0E7070"}
-        active={hasTheme}
-      />
 
       {/* Course companion mascot — right panel, evolves with progress */}
       <CourseMascot
