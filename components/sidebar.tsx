@@ -48,7 +48,7 @@ import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { FeedbackModal } from "@/components/feedback-modal"
 
-/* ── Per-item accent colour tokens ─────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Per-item accent colour tokens Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const C = {
   indigo:  { icon: "text-indigo-500",  bg: "bg-indigo-500/10",  text: "text-indigo-500",  hover: "hover:bg-indigo-500/10",  ghIcon: "group-hover:text-indigo-500",  bar: "bg-indigo-500"  },
   blue:    { icon: "text-blue-500",    bg: "bg-blue-500/10",    text: "text-blue-500",    hover: "hover:bg-blue-500/10",    ghIcon: "group-hover:text-blue-500",    bar: "bg-blue-500"    },
@@ -62,7 +62,7 @@ const C = {
 } as const
 type NavColor = keyof typeof C
 
-/* ── Types ──────────────────────────────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Types Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 type NavItem = { href: string; label: string; icon: React.ElementType; exact?: boolean }
 type NavGroup = { label: string; icon: React.ElementType; items: NavItem[] }
 type SuperAdminNav = { standalone: NavItem[]; groups: NavGroup[] }
@@ -73,7 +73,7 @@ type StudentNavSection = {
 type StudentNavItemBlock = { type: "item"; item: NavItem; color: NavColor; highlight?: boolean }
 type StudentNavBlock = StudentNavItemBlock | StudentNavSection
 
-/* ── Student nav blocks ─────────────────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Student nav blocks Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const studentNavBlocks: StudentNavBlock[] = [
   { type: "item",    item: { href: "/dashboard",      label: "Dashboard",      icon: LayoutDashboard }, color: "indigo" },
   {
@@ -117,7 +117,7 @@ const studentNavItems = studentNavBlocks.flatMap((b) =>
   b.type === "item" ? [b.item] : b.items
 )
 
-/* ── Admin / super-admin nav ─────────────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Admin / super-admin nav Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 /* College-admin nav: top standalone items + a "Placement Cell" group + bottom items */
 const collegeAdminTop: NavItem[] = [
   { href: "/admin",           label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -181,7 +181,7 @@ const superAdminNav: SuperAdminNav = {
   ],
 }
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Helpers Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const BACKEND = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ?? "http://localhost:5000"
 
 function resolveLogoUrl(url: string | null | undefined): string | null {
@@ -197,19 +197,19 @@ const roleBadgeConfig: Record<string, { label: string; className: string }> = {
   super_admin:  { label: "Super Admin",  className: "bg-purple-500/20 text-purple-400 border-purple-500/30"    },
 }
 
-/* ── Shared nav link class builder ─────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Shared nav link class builder Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function navItemCls(isActive: boolean, isCollapsed: boolean, c: (typeof C)[NavColor], extra?: string) {
   return cn(
     "group relative flex items-center gap-3 rounded-xl transition-all duration-200 cursor-pointer",
     isCollapsed ? "justify-center w-10 h-10 mx-auto" : "px-3 py-2.5",
     isActive
       ? cn(c.bg, c.text, "nav-active font-semibold")
-      : cn("text-muted-foreground", c.hover, "hover:text-foreground"),
+      : cn("text-muted-foreground", c.hover, "hover:text-sidebar-foreground"),
     extra
   )
 }
 
-/* ── Component ───────────────────────────────────────────────────────────── */
+/* Ã¢â€â‚¬Ã¢â€â‚¬ Component Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 export function Sidebar() {
   const pathname = usePathname()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
@@ -250,7 +250,7 @@ export function Sidebar() {
     window.location.href = "/login"
   }
 
-  /* Standalone indigo nav item — shared by college-admin (top/bottom) & branch-admin */
+  /* Standalone indigo nav item Ã¢â‚¬â€ shared by college-admin (top/bottom) & branch-admin */
   const renderAdminItem = (item: NavItem) => {
     const isActive = item.exact
       ? pathname === item.href
@@ -292,7 +292,7 @@ export function Sidebar() {
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* ── Header ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Header Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <div className={cn(
           "flex items-center border-b border-sidebar-border flex-shrink-0",
           isCollapsed ? "flex-col justify-center gap-0.5 py-2 h-auto min-h-[4rem]" : "h-16 px-4 justify-between"
@@ -305,7 +305,7 @@ export function Sidebar() {
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 title="Expand sidebar"
-                className="hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60 w-7 h-7"
+                className="hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 w-7 h-7"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -324,7 +324,7 @@ export function Sidebar() {
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 title="Collapse sidebar"
-                className="hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60 w-8 h-8 flex-shrink-0"
+                className="hidden lg:flex items-center justify-center rounded-xl transition-all duration-200 text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60 w-8 h-8 flex-shrink-0"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -332,7 +332,7 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* ── Navigation ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ Navigation Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <nav className={cn("flex-1 overflow-y-auto py-3", isCollapsed ? "px-2" : "px-3")}>
 
           {/* Super-admin */}
@@ -362,7 +362,7 @@ export function Sidebar() {
                       className={cn(
                         "w-full flex items-center gap-3 rounded-xl transition-all duration-200",
                         isCollapsed ? "justify-center w-10 h-10 mx-auto" : "px-3 py-2.5",
-                        hasActiveChild ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60"
+                        hasActiveChild ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60"
                       )}>
                       <group.icon className={cn("h-4 w-4 flex-shrink-0", hasActiveChild && "text-primary")} />
                       {!isCollapsed && (
@@ -401,7 +401,7 @@ export function Sidebar() {
               {studentNavBlocks.map((block) => {
                 const c = C[block.color]
 
-                /* ── Standalone item ── */
+                /* Ã¢â€â‚¬Ã¢â€â‚¬ Standalone item Ã¢â€â‚¬Ã¢â€â‚¬ */
                 if (block.type === "item") {
                   const { item, highlight } = block
                   const isActive = pathname === item.href ||
@@ -431,7 +431,7 @@ export function Sidebar() {
                   )
                 }
 
-                /* ── Section block ── */
+                /* Ã¢â€â‚¬Ã¢â€â‚¬ Section block Ã¢â€â‚¬Ã¢â€â‚¬ */
                 const section = block
                 const isSectionOpen = openSections[section.id] ?? false
                 const hasActiveChild = section.items.some(
@@ -448,10 +448,10 @@ export function Sidebar() {
                           className={cn(
                             "group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
                             section.highlight
-                              ? cn("text-foreground", c.hover)
+                              ? cn("text-sidebar-foreground", c.hover)
                               : hasActiveChild
-                              ? "text-foreground"
-                              : cn("text-muted-foreground", c.hover, "hover:text-foreground")
+                              ? "text-sidebar-foreground"
+                              : cn("text-muted-foreground", c.hover, "hover:text-sidebar-foreground")
                           )}>
                           <section.icon className={cn(
                             "h-4 w-4 flex-shrink-0 transition-colors",
@@ -495,7 +495,7 @@ export function Sidebar() {
               })}
             </ul>
 
-          /* College admin nav — grouped (Placement Cell) */
+          /* College admin nav Ã¢â‚¬â€ grouped (Placement Cell) */
           ) : role === "college_admin" ? (
             <ul className="space-y-0.5">
               {collegeAdminTop.map(renderAdminItem)}
@@ -511,7 +511,7 @@ export function Sidebar() {
                       className={cn(
                         "w-full flex items-center gap-3 rounded-xl transition-all duration-200",
                         isCollapsed ? "justify-center w-10 h-10 mx-auto" : "px-3 py-2.5",
-                        hasActiveChild ? "text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/60"
+                        hasActiveChild ? "text-sidebar-foreground" : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/60"
                       )}>
                       <group.icon className={cn("h-4 w-4 flex-shrink-0", hasActiveChild && "text-primary")} />
                       {!isCollapsed && (
@@ -548,7 +548,7 @@ export function Sidebar() {
               {collegeAdminBottom.map(renderAdminItem)}
             </ul>
 
-          /* Branch admin nav — flat */
+          /* Branch admin nav Ã¢â‚¬â€ flat */
           ) : (
             <ul className="space-y-0.5">
               {navItems.map(renderAdminItem)}
@@ -556,10 +556,10 @@ export function Sidebar() {
           )}
         </nav>
 
-        {/* ── User / footer section ── */}
+        {/* Ã¢â€â‚¬Ã¢â€â‚¬ User / footer section Ã¢â€â‚¬Ã¢â€â‚¬ */}
         <div className="border-t border-sidebar-border p-2 flex-shrink-0">
           {isCollapsed ? (
-            /* Collapsed — avatar + theme + logout only */
+            /* Collapsed Ã¢â‚¬â€ avatar + theme + logout only */
             <div className="flex flex-col items-center gap-1.5 py-1">
               <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
               <ThemeToggle collapsed />
@@ -580,7 +580,7 @@ export function Sidebar() {
                 <div className="flex items-center gap-2.5">
                   <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate text-foreground leading-snug">
+                    <p className="text-sm font-semibold truncate text-sidebar-foreground leading-snug">
                       {user?.name || "User"}
                     </p>
                     <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 mt-0.5 h-4 font-medium", roleBadge.className)}>

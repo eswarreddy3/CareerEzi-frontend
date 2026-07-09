@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ── Light theme (:root) ──────────────────────────────────────────────────── */
+/* â”€â”€ Light theme (:root) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   --background:              #FFFFFF;
   --foreground:              #09090B;
@@ -25,7 +25,7 @@
   --input:                   #E4E4E7;
   --ring:                    #4F46E5;
 
-  /* ── Semantic tokens — edit these to retheme the whole app ── */
+  /* â”€â”€ Semantic tokens â€” edit these to retheme the whole app â”€â”€ */
   --success:   #059669;   /* correct, easy, pass     */
   --warning:   #B45309;   /* medium, caution, points */
   --danger:    #DC2626;   /* wrong, hard, error      */
@@ -41,14 +41,14 @@
 
   --radius:                  0.625rem;
 
-  --sidebar:                 #FAFAFA;
-  --sidebar-foreground:      #09090B;
-  --sidebar-primary:         #4F46E5;
+  --sidebar:                 #111111;
+  --sidebar-foreground:      #EDEDED;
+  --sidebar-primary:         #6366F1;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent:          #F0F0F1;
-  --sidebar-accent-foreground: #18181B;
-  --sidebar-border:          #E4E4E7;
-  --sidebar-ring:            #4F46E5;
+  --sidebar-accent:          #1E1E1E;
+  --sidebar-accent-foreground: #EDEDED;
+  --sidebar-border:          #1E1E1E;
+  --sidebar-ring:            #6366F1;
 
   --scrollbar-track:         #F4F4F5;
   --scrollbar-thumb:         #D4D4D8;
@@ -57,7 +57,7 @@
   --locked-overlay-bg:       rgba(255,255,255,0.92);
 }
 
-/* ── Dark theme (.dark) ───────────────────────────────────────────────────── */
+/* â”€â”€ Dark theme (.dark) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .dark {
   --background:              #0C0C0C;
   --foreground:              #EDEDED;
@@ -79,7 +79,7 @@
   --input:                   #2A2A2A;
   --ring:                    #6366F1;
 
-  /* ── Semantic tokens (dark — lighter values for contrast on dark bg) ── */
+  /* â”€â”€ Semantic tokens (dark â€” lighter values for contrast on dark bg) â”€â”€ */
   --success:   #34D399;
   --warning:   #FBBF24;
   --danger:    #F87171;
@@ -96,7 +96,7 @@
   --sidebar:                 #111111;
   --sidebar-foreground:      #EDEDED;
   --sidebar-primary:         #6366F1;
-  --sidebar-primary-foreground: #0C0C0C;
+  --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent:          #1E1E1E;
   --sidebar-accent-foreground: #EDEDED;
   --sidebar-border:          #1E1E1E;
@@ -109,7 +109,7 @@
   --locked-overlay-bg:       rgba(12,12,12,0.92);
 }
 
-/* ── Tailwind theme wiring ────────────────────────────────────────────────── */
+/* â”€â”€ Tailwind theme wiring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @theme inline {
   --font-sans:  'Plus Jakarta Sans', sans-serif;
   --font-serif: 'Outfit', sans-serif;
@@ -139,7 +139,7 @@
   --color-chart-3:                var(--chart-3);
   --color-chart-4:                var(--chart-4);
   --color-chart-5:                var(--chart-5);
-  /* ── Semantic tokens wired as Tailwind utilities ── */
+  /* â”€â”€ Semantic tokens wired as Tailwind utilities â”€â”€ */
   /* Generates: text-success, bg-success/10, border-success/30, etc. */
   --color-success:                var(--success);
   --color-warning:                var(--warning);
@@ -161,7 +161,7 @@
   --color-sidebar-ring:                 var(--sidebar-ring);
 }
 
-/* ── Base styles ──────────────────────────────────────────────────────────── */
+/* â”€â”€ Base styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -184,13 +184,13 @@
   }
 }
 
-/* ── Flat card (replaces glass-card — no blur, no transparency) ───────────── */
+/* â”€â”€ Flat card (replaces glass-card â€” no blur, no transparency) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .glass-card {
   background: var(--card);
   border: 1px solid var(--border);
 }
 
-/* ── Card hover lift ──────────────────────────────────────────────────────── */
+/* â”€â”€ Card hover lift â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .card-hover {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
@@ -204,7 +204,7 @@
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
 }
 
-/* ── Primary ring (replaces glow — clean border highlight) ───────────────── */
+/* â”€â”€ Primary ring (replaces glow â€” clean border highlight) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .primary-glow {
   box-shadow: 0 0 0 1px var(--primary);
 }
@@ -216,13 +216,13 @@
   transition: border-color 0.15s ease;
 }
 
-/* ── Backward compat aliases ──────────────────────────────────────────────── */
+/* â”€â”€ Backward compat aliases â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .teal-glow            { box-shadow: 0 0 0 1px var(--primary); }
 .teal-glow-hover:hover { border-color: color-mix(in srgb, var(--primary) 60%, var(--border)) !important; }
 .accent-glow          { box-shadow: 0 0 0 1px var(--primary); }
 .accent-glow-hover:hover { border-color: color-mix(in srgb, var(--primary) 60%, var(--border)) !important; }
 
-/* ── Gradient text (teal → coral, logo colours) ─────────────────────────── */
+/* â”€â”€ Gradient text (teal â†’ coral, logo colours) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .gradient-text {
   background: linear-gradient(135deg, var(--primary) 0%, var(--coral) 100%);
   -webkit-background-clip: text;
@@ -240,12 +240,12 @@
   color: transparent;
 }
 
-/* ── Solid primary bg (replaces gradient-bg) ─────────────────────────────── */
+/* â”€â”€ Solid primary bg (replaces gradient-bg) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .gradient-bg {
   background: var(--primary);
 }
 
-/* ── Subtle ambient bg for auth pages only ───────────────────────────────── */
+/* â”€â”€ Subtle ambient bg for auth pages only â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes gradient-shift {
   0%   { background-position: 0% 50%;   }
   50%  { background-position: 100% 50%; }
@@ -263,7 +263,7 @@
   animation: gradient-shift 16s ease infinite;
 }
 
-/* ── Gradient border ──────────────────────────────────────────────────────── */
+/* â”€â”€ Gradient border â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .gradient-border {
   position: relative;
   background: var(--card);
@@ -282,12 +282,12 @@
   pointer-events: none;
 }
 
-/* ── Locked overlay ───────────────────────────────────────────────────────── */
+/* â”€â”€ Locked overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .locked-overlay {
   background: var(--locked-overlay-bg);
 }
 
-/* ── Flame pulse ──────────────────────────────────────────────────────────── */
+/* â”€â”€ Flame pulse â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes flame-pulse {
   0%, 100% { transform: scale(1);   filter: brightness(1);   }
   50%       { transform: scale(1.1); filter: brightness(1.3); }
@@ -296,7 +296,7 @@
   animation: flame-pulse 1.5s ease-in-out infinite;
 }
 
-/* ── Marquee ticker ───────────────────────────────────────────────────────── */
+/* â”€â”€ Marquee ticker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes marquee-ltr {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -308,14 +308,14 @@
 .animate-marquee     { animation: marquee-ltr 35s linear infinite; }
 .animate-marquee-rev { animation: marquee-rtl 30s linear infinite; }
 
-/* ── Float animation ──────────────────────────────────────────────────────── */
+/* â”€â”€ Float animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes float {
   0%, 100% { transform: translateY(0px);  }
   50%       { transform: translateY(-6px); }
 }
 .float { animation: float 3s ease-in-out infinite; }
 
-/* ── Shimmer (skeleton loading) ───────────────────────────────────────────── */
+/* â”€â”€ Shimmer (skeleton loading) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }
@@ -331,23 +331,23 @@
   animation: shimmer 1.5s infinite;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+/* â”€â”€ Scrollbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 ::-webkit-scrollbar       { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Course world themes — dice-roller
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   Course world themes â€” dice-roller
    Only --primary / --ring are overridden on the page wrapper.
    A subtle radial-gradient backgroundImage is applied inline.
    The keyframes below are kept for future use.
-   ═══════════════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Monaco editor ────────────────────────────────────────────────────────── */
+/* â”€â”€ Monaco editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .monaco-editor { border-radius: 0.5rem; }
 
-/* ── Feed: reaction picker popup ─────────────────────────────────────────── */
+/* â”€â”€ Feed: reaction picker popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes reaction-pop {
   0%   { transform: scale(0.55) translateY(10px); opacity: 0; }
   70%  { transform: scale(1.04) translateY(-2px); opacity: 1; }
@@ -357,7 +357,7 @@
   animation: reaction-pop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
-/* ── Feed: rich notification toast slide-up ──────────────────────────────── */
+/* â”€â”€ Feed: rich notification toast slide-up â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes slide-up-toast {
   from { transform: translateY(18px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
@@ -366,7 +366,7 @@
   animation: slide-up-toast 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* ── Feed: emoji reaction bounce on hover ────────────────────────────────── */
+/* â”€â”€ Feed: emoji reaction bounce on hover â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes emoji-pop {
   0%   { transform: scale(1);    }
   40%  { transform: scale(1.35) translateY(-4px); }
@@ -376,7 +376,7 @@
   animation: emoji-pop 0.2s ease forwards;
 }
 
-/* ── Feed: heart ripple click ─────────────────────────────────────────────── */
+/* â”€â”€ Feed: heart ripple click â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes ripple-out {
   0%   { transform: scale(0.8); opacity: 0.4; }
   100% { transform: scale(2.2); opacity: 0;   }
@@ -385,20 +385,20 @@
   animation: ripple-out 0.55s ease-out forwards;
 }
 
-/* ── Hide scrollbar utility ───────────────────────────────────────────────── */
+/* â”€â”€ Hide scrollbar utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-/* ═══════════════════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SEMANTIC UTILITY CLASSES
-   All colours come from CSS variables above — change globals.css only to
+   All colours come from CSS variables above â€” change globals.css only to
    retheme the entire app.
-   ═══════════════════════════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Chip / badge pill  (bg + border + text, rounded-full) ──────────────── */
+/* â”€â”€ Chip / badge pill  (bg + border + text, rounded-full) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 /* Usage: className="chip chip-success" or "chip chip-warning" etc.         */
 .chip {
   display: inline-flex; align-items: center; gap: 0.25rem;
@@ -415,7 +415,7 @@
 .chip-streak  { background: color-mix(in srgb, var(--streak)  14%, transparent); color: var(--streak);  border-color: color-mix(in srgb, var(--streak)  28%, transparent); }
 .chip-coral   { background: color-mix(in srgb, var(--coral)   14%, transparent); color: var(--coral);   border-color: color-mix(in srgb, var(--coral)   28%, transparent); }
 
-/* ── Icon box  (coloured square container for icons) ───────────────────── */
+/* â”€â”€ Icon box  (coloured square container for icons) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 /* Usage: className="icon-box icon-box-success" + size class (p-2, etc.)   */
 .icon-box { display: flex; align-items: center; justify-content: center; }
 .icon-box-success { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); }
@@ -426,17 +426,17 @@
 .icon-box-streak  { color: var(--streak);  background: color-mix(in srgb, var(--streak)  14%, transparent); }
 .icon-box-coral   { color: var(--coral);   background: color-mix(in srgb, var(--coral)   14%, transparent); }
 
-/* ── Answer / option states  (MCQ, assignment, quick-check) ─────────────── */
+/* â”€â”€ Answer / option states  (MCQ, assignment, quick-check) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .opt-correct  { border-color: var(--success) !important; background: color-mix(in srgb, var(--success) 10%, transparent); color: var(--success); }
 .opt-wrong    { border-color: var(--danger)  !important; background: color-mix(in srgb, var(--danger)  10%, transparent); }
 .opt-selected { border-color: var(--primary) !important; background: color-mix(in srgb, var(--primary) 10%, transparent); }
-/* Filled variant — for the radio-bullet circle when answered */
+/* Filled variant â€” for the radio-bullet circle when answered */
 .opt-correct-fill { background: var(--success) !important; border-color: var(--success) !important; color: #fff !important; }
 .opt-wrong-fill   { background: var(--danger)  !important; border-color: var(--danger)  !important; color: #fff !important; }
 .opt-primary-fill { background: var(--primary) !important; border-color: var(--primary) !important; color: var(--primary-foreground) !important; }
 
-/* ── Info / callout box  (notice blocks inside cards) ───────────────────── */
-/* Usage: className="info-box info-box-warning" — includes rounded + border */
+/* â”€â”€ Info / callout box  (notice blocks inside cards) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* Usage: className="info-box info-box-warning" â€” includes rounded + border */
 .info-box         { border-radius: 0.75rem; padding: 0.75rem; border: 1px solid; }
 .info-box-success { background: color-mix(in srgb, var(--success) 8%, transparent); border-color: color-mix(in srgb, var(--success) 22%, transparent); }
 .info-box-warning { background: color-mix(in srgb, var(--warning) 8%, transparent); border-color: color-mix(in srgb, var(--warning) 22%, transparent); }
@@ -444,25 +444,25 @@
 .info-box-coding  { background: color-mix(in srgb, var(--coding)  8%, transparent); border-color: color-mix(in srgb, var(--coding)  22%, transparent); }
 .info-box-primary { background: color-mix(in srgb, var(--primary) 8%, transparent); border-color: color-mix(in srgb, var(--primary) 22%, transparent); }
 
-/* ── Answer feedback flash  (card bg tint after submitting MCQ answer) ──── */
+/* â”€â”€ Answer feedback flash  (card bg tint after submitting MCQ answer) â”€â”€â”€â”€ */
 .feedback-correct { background: color-mix(in srgb, var(--success) 8%, var(--card)); }
 .feedback-wrong   { background: color-mix(in srgb, var(--danger)  8%, var(--card)); }
 
-/* ── Content block headers  (lesson renderer: tip / insight / challenge) ── */
+/* â”€â”€ Content block headers  (lesson renderer: tip / insight / challenge) â”€â”€ */
 .block-tip       { background: color-mix(in srgb, var(--success) 12%, transparent); border-color: color-mix(in srgb, var(--success) 25%, transparent); color: var(--success); }
 .block-insight   { background: color-mix(in srgb, var(--warning) 10%, transparent); border-color: color-mix(in srgb, var(--warning) 22%, transparent); color: var(--warning); }
 .block-challenge { background: color-mix(in srgb, var(--coding)  10%, transparent); border-color: color-mix(in srgb, var(--coding)  22%, transparent); color: var(--coding);  }
 .block-scenario  { background: color-mix(in srgb, var(--primary) 10%, transparent); border-color: color-mix(in srgb, var(--primary) 22%, transparent); color: var(--primary); }
 .block-mistake   { background: color-mix(in srgb, var(--danger)  10%, transparent); border-color: color-mix(in srgb, var(--danger)  22%, transparent); color: var(--danger);  }
 
-/* ── Typewriter cursor blink ──────────────────────────────────────────────── */
+/* â”€â”€ Typewriter cursor blink â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
 .cursor-blink { animation: blink 0.9s step-start infinite; }
 
-/* ── Feature-tab progress bar ─────────────────────────────────────────────── */
+/* â”€â”€ Feature-tab progress bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes tab-fill {
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
@@ -472,16 +472,16 @@
   animation: tab-fill 5s linear forwards;
 }
 
-/* ── Outfit headings — tighter tracking ───────────────────────────────────── */
+/* â”€â”€ Outfit headings â€” tighter tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .font-serif {
   font-family: 'Outfit', sans-serif;
   letter-spacing: -0.025em;
   font-feature-settings: 'kern' 1;
 }
 
-/* ── Structured type scale ────────────────────────────────────────────────── */
+/* â”€â”€ Structured type scale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/* Display — hero section titles, landing banners */
+/* Display â€” hero section titles, landing banners */
 .type-display {
   font-family: 'Outfit', sans-serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
@@ -491,7 +491,7 @@
   font-feature-settings: 'kern' 1;
 }
 
-/* H1 — page-level headings */
+/* H1 â€” page-level headings */
 .type-h1 {
   font-family: 'Outfit', sans-serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
@@ -501,7 +501,7 @@
   font-feature-settings: 'kern' 1;
 }
 
-/* H2 — section headings inside a page */
+/* H2 â€” section headings inside a page */
 .type-h2 {
   font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
@@ -510,7 +510,7 @@
   letter-spacing: -0.02em;
 }
 
-/* H3 — card titles, sub-section labels */
+/* H3 â€” card titles, sub-section labels */
 .type-h3 {
   font-family: 'Outfit', sans-serif;
   font-size: 1rem;
@@ -519,7 +519,7 @@
   letter-spacing: -0.015em;
 }
 
-/* Body — default readable prose */
+/* Body â€” default readable prose */
 .type-body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9375rem;
@@ -528,7 +528,7 @@
   letter-spacing: 0;
 }
 
-/* Body Small — compact readable text */
+/* Body Small â€” compact readable text */
 .type-body-sm {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.8125rem;
@@ -537,7 +537,7 @@
   letter-spacing: 0;
 }
 
-/* Label — form labels, table headers, category tags */
+/* Label â€” form labels, table headers, category tags */
 .type-label {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.6875rem;
@@ -547,7 +547,7 @@
   text-transform: uppercase;
 }
 
-/* Number — stat cards, counters, metrics */
+/* Number â€” stat cards, counters, metrics */
 .type-number {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
@@ -556,7 +556,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Caption — helper text, timestamps, footnotes */
+/* Caption â€” helper text, timestamps, footnotes */
 .type-caption {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.75rem;
@@ -566,18 +566,38 @@
   color: var(--muted-foreground);
 }
 
-/* ── 3D card transform preserve ───────────────────────────────────────────── */
+/* â”€â”€ 3D card transform preserve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .preserve-3d { transform-style: preserve-3d; }
 
-/* ── Sidebar text — stronger contrast so labels don't look dull ─────────────
-   Darken muted text inside the rail only (per theme); rest of app unchanged. */
-html:not(.dark) .app-sidebar { /* darker nav text */ --muted-foreground: #3F3F46; }
-.dark .app-sidebar          { --muted-foreground: #B6B6C0; }
+/* â”€â”€ Sidebar â€” always dark, identical in light and dark themes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   The rail bg (--sidebar: #111111) is already theme-invariant; pin every
+   theme-varying token used inside it to the dark values so borders, chips,
+   badges and hovers render the same regardless of the page theme. */
+.app-sidebar {
+  color: var(--sidebar-foreground);
 
-/* Active sidebar item — bolder label so the highlight reads clearly */
+  --foreground:           #EDEDED;
+  --muted-foreground:     #B6B6C0;   /* brighter than dark-theme default for nav legibility */
+  --primary:              #6366F1;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #1C1C1C;
+  --secondary-foreground: #A1A1AA;
+  --muted:                #1A1A1A;
+  --accent:               #1C1C1C;
+  --accent-foreground:    #EDEDED;
+  --border:               #2A2A2A;
+  --input:                #2A2A2A;
+  --ring:                 #6366F1;
+
+  --scrollbar-track:      #111111;
+  --scrollbar-thumb:      #3F3F46;
+  --scrollbar-thumb-hover:#71717A;
+}
+
+/* Active sidebar item â€” bolder label so the highlight reads clearly */
 .nav-active span { font-weight: 600; }
 
-/* ── Resume builder: print styles ─────────────────────────────────────────── */
+/* â”€â”€ Resume builder: print styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media print {
   .resume-editor { display: none !important; }
 
