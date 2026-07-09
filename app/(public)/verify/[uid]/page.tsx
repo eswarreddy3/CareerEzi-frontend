@@ -17,8 +17,6 @@ interface VerifyResult {
   error?: string
 }
 
-const ORIGIN = API.replace(/\/api$/, "")
-
 async function verify(uid: string): Promise<VerifyResult | null> {
   try {
     const res = await fetch(`${API}/public/verify/${encodeURIComponent(uid)}`, { cache: "no-store" })
@@ -113,7 +111,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ uid: st
               </div>
 
               <a
-                href={`${ORIGIN}/static/uploads/certificates/${r.certificate_uid}.pdf`}
+                href={`${API}/public/certificates/${r.certificate_uid}.pdf`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
