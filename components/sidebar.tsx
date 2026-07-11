@@ -561,7 +561,13 @@ export function Sidebar() {
           {isCollapsed ? (
             /* Collapsed Ã¢â‚¬â€ avatar + theme + logout only */
             <div className="flex flex-col items-center gap-1.5 py-1">
-              <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
+              {role === "student" ? (
+                <Link href="/profile" title="Profile" onClick={() => setIsMobileOpen(false)} className="rounded-full hover:opacity-80 transition-opacity">
+                  <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
+                </Link>
+              ) : (
+                <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
+              )}
               <ThemeToggle collapsed />
               <button
                 onClick={handleLogout}
@@ -574,8 +580,13 @@ export function Sidebar() {
           ) : (
             /* Expanded */
             <div className="space-y-2">
-              {/* Profile card */}
-              <div className="rounded-xl bg-sidebar-accent/30 border border-border/60 p-3 space-y-2.5">
+              {/* Profile card — links to /profile for students only */}
+              {role === "student" ? (
+              <Link
+                href="/profile"
+                onClick={() => setIsMobileOpen(false)}
+                className="block rounded-xl bg-sidebar-accent/30 border border-border/60 p-3 space-y-2.5 hover:bg-sidebar-accent/50 hover:border-border transition-colors"
+              >
                 {/* Avatar + name + role */}
                 <div className="flex items-center gap-2.5">
                   <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
@@ -619,7 +630,22 @@ export function Sidebar() {
                     </div>
                   </div>
                 )}
-              </div>
+              </Link>
+              ) : (
+                <div className="rounded-xl bg-sidebar-accent/30 border border-border/60 p-3">
+                  <div className="flex items-center gap-2.5">
+                    <UserAvatar name={user?.name || "U"} photoUrl={user?.avatar} size="sm" points={user?.points} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold truncate text-sidebar-foreground leading-snug">
+                        {user?.name || "User"}
+                      </p>
+                      <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 mt-0.5 h-4 font-medium", roleBadge.className)}>
+                        {roleBadge.label}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Action row */}
               <div className="flex items-center gap-1 px-0.5">

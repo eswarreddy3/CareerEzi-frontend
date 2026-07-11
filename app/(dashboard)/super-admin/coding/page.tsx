@@ -534,6 +534,10 @@ function ProblemFormModal({
   const inputCls = "bg-secondary/40 border-border text-sm"
   const sectionCls = "space-y-3"
   const sectionHeadCls = "text-sm font-semibold text-foreground border-b border-border pb-2"
+  const exampleTextareaCls = cn(
+    "w-full rounded-md border border-border bg-secondary/40 px-3 py-2 text-xs text-foreground",
+    "placeholder:text-muted-foreground resize-y font-mono min-h-[60px] focus:outline-none focus:ring-1 focus:ring-primary/50"
+  )
 
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 bg-black/70 overflow-y-auto">
@@ -736,18 +740,18 @@ function ProblemFormModal({
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className={labelCls}>Input</label>
-                    <Input
-                      className={cn(inputCls, "font-mono text-xs")}
-                      placeholder="n=4, nums=[2,7,11,15], target=9"
+                    <textarea
+                      className={exampleTextareaCls}
+                      placeholder={"n=4, nums=[2,7,11,15], target=9\n(multiline supported — e.g. pattern rows)"}
                       value={ex.input}
                       onChange={e => setExample(i, "input", e.target.value)}
                     />
                   </div>
                   <div>
                     <label className={labelCls}>Output</label>
-                    <Input
-                      className={cn(inputCls, "font-mono text-xs")}
-                      placeholder="0 1"
+                    <textarea
+                      className={exampleTextareaCls}
+                      placeholder={"*\n**\n***"}
                       value={ex.output}
                       onChange={e => setExample(i, "output", e.target.value)}
                     />
@@ -755,8 +759,8 @@ function ProblemFormModal({
                 </div>
                 <div>
                   <label className={labelCls}>Explanation (optional)</label>
-                  <Input
-                    className={cn(inputCls, "text-xs")}
+                  <textarea
+                    className={cn(exampleTextareaCls, "font-sans")}
                     placeholder="nums[0]+nums[1]=9"
                     value={ex.explanation}
                     onChange={e => setExample(i, "explanation", e.target.value)}

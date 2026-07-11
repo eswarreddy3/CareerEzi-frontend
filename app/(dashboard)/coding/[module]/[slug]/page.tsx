@@ -515,16 +515,16 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
                                   <div className="px-4 py-3 space-y-2 font-mono text-sm">
                                     <div className="flex gap-3">
                                       <span className="text-muted-foreground font-sans text-xs font-semibold w-24 shrink-0 pt-0.5">Input:</span>
-                                      <code className="text-foreground/90 text-xs leading-relaxed">{ex.input}</code>
+                                      <code className="text-foreground/90 text-xs leading-relaxed whitespace-pre-wrap">{ex.input}</code>
                                     </div>
                                     <div className="flex gap-3">
                                       <span className="text-muted-foreground font-sans text-xs font-semibold w-24 shrink-0 pt-0.5">Output:</span>
-                                      <code className="text-foreground/90 text-xs leading-relaxed">{ex.output}</code>
+                                      <code className="text-foreground/90 text-xs leading-relaxed whitespace-pre-wrap">{ex.output}</code>
                                     </div>
                                     {ex.explanation && (
                                       <div className="flex gap-3 pt-2 mt-1 border-t border-border">
                                         <span className="text-muted-foreground font-sans text-xs font-semibold w-24 shrink-0 pt-0.5">Explanation:</span>
-                                        <span className="text-muted-foreground font-sans text-xs leading-relaxed">{ex.explanation}</span>
+                                        <span className="text-muted-foreground font-sans text-xs leading-relaxed whitespace-pre-wrap">{ex.explanation}</span>
                                       </div>
                                     )}
                                   </div>

@@ -33,8 +33,16 @@ interface Course {
   category: string; difficulty: "Beginner" | "Intermediate" | "Advanced"
   icon: string; icon_color: string; total_lessons: number
   lessons_completed: number; points_per_lesson: number
+  assessments_total: number; assessments_done: number
   prerequisite_id: string | null; is_locked: boolean; order_index: number
 }
+
+// True completion units = lessons + assignment levels with questions (the same
+// rule certificates use), so a course never shows 100% with a pending assessment.
+const courseUnits = (c: Course) => ({
+  total: c.total_lessons + (c.assessments_total ?? 0),
+  done: c.lessons_completed + (c.assessments_done ?? 0),
+})
 interface DomainDetail { domain: Domain; courses: Course[] }
 
 // ── Static maps ──────────────────────────────────────────────────────────────
@@ -268,17 +276,22 @@ function RoadmapStep({
   const inView = useInView(ref, { once: true, margin: "-40px" })
   const [hovered, setHovered] = useState(false)
 
-  const pct = course.total_lessons > 0
-    ? Math.round((course.lessons_completed / course.total_lessons) * 100) : 0
-  const isCompleted = pct === 100
-  const isActive    = !isCompleted && !course.is_locked && course.lessons_completed > 0
-  const isNext      = !isCompleted && !course.is_locked && course.lessons_completed === 0 && idx === 0
+  const units = courseUnits(course)
+  const pct = units.total > 0 ? Math.round((units.done / units.total) * 100) : 0
+  const isCompleted = units.total > 0 && units.done === units.total
+  const assessmentPending =
+    course.lessons_completed === course.total_lessons && course.total_lessons > 0 && !isCompleted
+  const isActive    = !isCompleted && !course.is_locked && units.done > 0
+  const isNext      = !isCompleted && !course.is_locked && units.done === 0 && idx === 0
 
   const status: "completed" | "active" | "next" | "locked" =
     isCompleted ? "completed" : isActive ? "active" : course.is_locked ? "locked" : "next"
 
   const isRight = idx % 2 === 1
-  const ctaLabel = isCompleted ? "Review" : isActive ? "Continue" : course.is_locked ? "Locked" : "Start"
+  const ctaLabel = isCompleted ? "Review"
+    : assessmentPending ? "Take Assessment"
+    : isActive ? "Continue"
+    : course.is_locked ? "Locked" : "Start"
 
   return (
     <motion.div
@@ -478,10 +491,13 @@ function DomainDetail({ data, onBack }: { data: DomainDetail; onBack: () => void
   const theme = DOMAIN_THEME[domain.id] ?? defaultTheme
   const meta  = DOMAIN_META[domain.id]
 
-  const totalLessons     = courses.reduce((s, c) => s + c.total_lessons, 0)
-  const completedLessons = courses.reduce((s, c) => s + c.lessons_completed, 0)
-  const overallPct       = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
-  const completedCourses = courses.filter(c => c.lessons_completed === c.total_lessons && c.total_lessons > 0).length
+  const totalUnits     = courses.reduce((s, c) => s + courseUnits(c).total, 0)
+  const completedUnits = courses.reduce((s, c) => s + courseUnits(c).done, 0)
+  const overallPct     = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0
+  const completedCourses = courses.filter(c => {
+    const u = courseUnits(c)
+    return u.total > 0 && u.done === u.total
+  }).length
 
   const roadmapRef = useRef(null)
   const roadmapInView = useInView(roadmapRef, { once: true, margin: "-100px" })
@@ -564,7 +580,7 @@ function DomainDetail({ data, onBack }: { data: DomainDetail; onBack: () => void
               className="mt-6 pt-5 border-t border-white/[0.06]">
               <div className="flex justify-between text-xs text-muted-foreground mb-2">
                 <span>Your progress</span>
-                <span className={theme.textCls}>{completedLessons}/{totalLessons} lessons · {overallPct}%</span>
+                <span className={theme.textCls}>{completedUnits}/{totalUnits} steps · {overallPct}%</span>
               </div>
               <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
                 <motion.div

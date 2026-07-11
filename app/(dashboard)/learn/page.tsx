@@ -20,6 +20,8 @@ interface Course {
   icon_color: string
   total_lessons: number
   lessons_completed: number
+  assessments_total: number
+  assessments_done: number
   points_per_lesson: number
   prerequisite_id: string | null
   is_locked: boolean
@@ -138,9 +140,16 @@ export default function LearnPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((course, idx) => {
           const Icon = iconMap[course.icon] ?? Code
-          const progress = course.total_lessons > 0
-            ? Math.round((course.lessons_completed / course.total_lessons) * 100)
-            : 0
+          // True completion = all lessons + all assignment levels attempted
+          // (same rule the certificate uses), so 100% is never shown while an
+          // assessment is still pending.
+          const totalUnits = course.total_lessons + (course.assessments_total ?? 0)
+          const doneUnits = course.lessons_completed + (course.assessments_done ?? 0)
+          const progress = totalUnits > 0 ? Math.round((doneUnits / totalUnits) * 100) : 0
+          const assessmentPending =
+            course.lessons_completed === course.total_lessons &&
+            course.total_lessons > 0 &&
+            (course.assessments_done ?? 0) < (course.assessments_total ?? 0)
           const palette = cardPalette[idx % cardPalette.length]
 
           return (
@@ -222,7 +231,9 @@ export default function LearnPage() {
                 <div className="mb-5">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs font-medium text-white drop-shadow">Progress</span>
-                    <span className="text-xs font-bold text-white drop-shadow">{progress}%</span>
+                    <span className="text-xs font-bold text-white drop-shadow">
+                      {assessmentPending ? "Assessment pending" : `${progress}%`}
+                    </span>
                   </div>
                   <div className="w-full h-2.5 rounded-full border border-white/40 bg-white/10">
                     <div
@@ -255,7 +266,7 @@ export default function LearnPage() {
                     palette.btn
                   )}
                 >
-                  {progress > 0 ? "Continue Learning" : "Start Course"}
+                  {assessmentPending ? "Take Assessment" : progress > 0 ? "Continue Learning" : "Start Course"}
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </div>

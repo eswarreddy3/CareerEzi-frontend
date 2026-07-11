@@ -106,6 +106,8 @@ interface Course {
   icon_color: string
   total_lessons: number
   lessons_completed: number
+  assessments_total: number
+  assessments_done: number
   lessons: Lesson[]
   levels: CourseLevel[]
 }
@@ -976,8 +978,12 @@ export default function CourseDetailPage() {
 
   if (!course) return null
 
-  const progress = course.total_lessons > 0
-    ? Math.round((course.lessons_completed / course.total_lessons) * 100)
+  // Progress counts lessons + assignment levels (the certificate criteria),
+  // so the page never claims 100% while an assessment is still pending.
+  const progressUnitsTotal = course.total_lessons + (course.assessments_total ?? 0)
+  const progressUnitsDone = course.lessons_completed + (course.assessments_done ?? 0)
+  const progress = progressUnitsTotal > 0
+    ? Math.round((progressUnitsDone / progressUnitsTotal) * 100)
     : 0
 
   const activeIdx = course.lessons.findIndex(l => l.id === activeLesson?.id)
