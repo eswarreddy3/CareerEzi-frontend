@@ -80,7 +80,7 @@ export function DiceRoller({ courseId, currentIndex, userPoints, onRoll, rightOf
 
   return (
     <div
-      className="fixed top-4 z-40 flex items-center gap-2"
+      className="fixed top-36 lg:top-28 z-40 flex items-center gap-2"
       style={{
         right: rightOffset,
         transition: 'right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',

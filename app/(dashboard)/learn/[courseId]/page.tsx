@@ -1045,7 +1045,7 @@ export default function CourseDetailPage() {
         themeColor={currentTheme?.primary}
       />
 
-      {/* Dice roller — fixed top-right, slides with mascot panel */}
+      {/* Dice roller — floats below the header controls, slides with mascot panel */}
       {hasTheme && (
         <DiceRoller
           courseId={courseId}
