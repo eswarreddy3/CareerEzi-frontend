@@ -18,6 +18,10 @@ export interface CodingProfile {
   platform: string; username: string; profile_url: string | null; stats: CodingStats | null
 }
 export interface Achievement { title: string; icon_color: string | null; completed_at: string | null; certificate_uid?: string | null }
+export interface PublicCertificate {
+  certificate_uid: string; kind: "course" | "domain"; title: string
+  issuer: string; issued_at: string | null; pdf_url: string | null
+}
 export interface PublicProfile {
   username: string; name: string; avatar: string | null
   branch: string | null; passout_year: number | null
@@ -25,6 +29,10 @@ export interface PublicProfile {
   points: number; streak: number; longest_streak: number
   linkedin: string | null; github: string | null
   coding_profiles: CodingProfile[]
+  /** CareerEzi coding-practice problems solved (distinct accepted). Optional for older API. */
+  problems_solved?: number
+  /** Issued (non-revoked) certificates, newest first. Optional for older API. */
+  certificates?: PublicCertificate[]
   completed_courses: Achievement[]
   completed_domains: Achievement[]
 }
