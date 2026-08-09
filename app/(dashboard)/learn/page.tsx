@@ -156,7 +156,7 @@ export default function LearnPage() {
             <div
               key={course.id}
               className={cn(
-                "relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br shadow-lg",
+                "relative flex h-full flex-col overflow-hidden rounded-2xl p-6 bg-gradient-to-br shadow-lg",
                 "transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl",
                 palette.gradient,
                 course.is_locked && "opacity-70"
@@ -189,7 +189,7 @@ export default function LearnPage() {
               )}
 
               {/* Content */}
-              <div className="relative z-10">
+              <div className="relative z-10 flex flex-1 flex-col">
                 {/* Header row */}
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shadow-inner">
@@ -203,16 +203,17 @@ export default function LearnPage() {
                   </span>
                 </div>
 
-                {/* Title & description */}
-                <h3 className="font-bold text-3xl font-serif text-white mb-1 leading-tight">
+                {/* Title & description — heights reserved for 2 lines each so every
+                    card's stats/progress/CTA block starts at the same offset */}
+                <h3 className="font-bold text-3xl font-serif text-white mb-1 leading-tight line-clamp-2 min-h-[2.5em] break-words">
                   {course.title}
                 </h3>
-                <p className="text-sm text-white/70 mb-4 line-clamp-2 leading-relaxed">
+                <p className="text-sm text-white/70 mb-4 line-clamp-2 leading-relaxed min-h-[3.25em]">
                   {course.description}
                 </p>
 
-                {/* Stats row */}
-                <div className="flex items-center justify-between mb-5">
+                {/* Stats row — mt-auto pins everything below to the card bottom */}
+                <div className="mt-auto flex items-center justify-between mb-5">
                   <div className="flex items-center gap-1.5">
                     <BookOpen className="h-4 w-4 text-white/80" />
                     <span className="text-sm text-white/80">
