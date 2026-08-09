@@ -31,8 +31,7 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
-import { motion, AnimatePresence } from "framer-motion"
-import { fireStars } from "@/lib/effects"
+import { motion } from "framer-motion"
 import { AdminHero, adminCardColor, adminCardGradient, SurfaceTexture } from "@/components/admin-stat-card"
 
 // ── Programming MCQ types ─────────────────────────────────────────────────────
@@ -135,7 +134,6 @@ function PracticeMCQContent() {
   const [progPage, setProgPage] = useState(1)
   const PROG_PAGE_SIZE = 5
   const [progStates, setProgStates] = useState<ProgQState[]>([])
-  const [answerFeedback, setAnswerFeedback] = useState<"correct" | "wrong" | null>(null)
 
   // ── Aptitude state ─────────────────────────────────────────────────────────
   const [aptTopics, setAptTopics] = useState<AptTopic[]>([])
@@ -243,14 +241,10 @@ function PracticeMCQContent() {
       ))
       updateUser({ points: result.total_points })
       if (result.correct) {
-        setAnswerFeedback("correct")
-        fireStars()
         toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
       } else {
-        setAnswerFeedback("wrong")
         toast.error("Incorrect — check the explanation below")
       }
-      setTimeout(() => setAnswerFeedback(null), 700)
       api.get("/mcq/topics").then((res) => setTopics(res.data)).catch(() => {})
     } catch {
       updateProgState(qIndex, { submitting: false, selected: null })
@@ -325,17 +319,11 @@ function PracticeMCQContent() {
       const result = res.data
       updateAptState(qIndex, { submitting: false, result, locked: result.correct })
       if (result.correct) {
-        fireStars()
-        setAnswerFeedback("correct")
-        setTimeout(() => setAnswerFeedback(null), 700)
         if (result.points_earned > 0) {
           updateUser({ points: result.total_points })
           toast.success(`+${result.points_earned} pt`)
         }
         loadAptTopics()
-      } else {
-        setAnswerFeedback("wrong")
-        setTimeout(() => setAnswerFeedback(null), 700)
       }
     } catch {
       updateAptState(qIndex, { submitting: false, selected: null })
@@ -480,22 +468,6 @@ function PracticeMCQContent() {
 
     return (
       <div className="flex flex-col gap-4 h-full">
-        {/* Answer feedback flash */}
-        <AnimatePresence>
-          {answerFeedback && (
-            <motion.div
-              className={cn(
-                "fixed inset-0 pointer-events-none z-40",
-                answerFeedback === "correct" ? "bg-success/10" : "bg-danger/10"
-              )}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            />
-          )}
-        </AnimatePresence>
-
         {/* Top bar */}
         <div className="flex items-center justify-between gap-3 flex-shrink-0">
           <button
@@ -700,15 +672,15 @@ function PracticeMCQContent() {
                       — Page {progPage}/{Math.ceil(questions.length / PROG_PAGE_SIZE)} ({questions.length} Qs)
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-success/20 bg-success/5">
-                      <div className="w-2 h-2 rounded-full bg-success" />
-                      <span className="text-success">Correct</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-danger/20 bg-danger/5">
-                      <div className="w-2 h-2 rounded-full bg-danger" />
-                      <span className="text-danger">Wrong</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="chip chip-success">
+                      <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                      Correct
+                    </span>
+                    <span className="chip chip-danger">
+                      <span className="w-1.5 h-1.5 rounded-full bg-danger" />
+                      Wrong
+                    </span>
                   </div>
                 </div>
 
@@ -724,19 +696,16 @@ function PracticeMCQContent() {
                     return (
                       <GlassCard
                         key={q.id}
-                        className={cn(
-                          "transition-all duration-200",
-                          isLocked && "border-success/30 bg-success/5"
-                        )}
+                        className="transition-colors duration-200"
                       >
                         {/* Question header */}
                         <div className="flex items-start gap-3 mb-4">
                           <span className={cn(
-                            "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border",
+                            "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border",
                             isLocked
-                              ? "bg-success border-success text-white"
+                              ? "opt-correct-fill"
                               : result && !result.correct
-                              ? "bg-danger/20 border-danger/50 text-danger"
+                              ? "opt-wrong"
                               : "bg-secondary border-border text-muted-foreground"
                           )}>
                             {qIndex + 1}
@@ -765,21 +734,21 @@ function PracticeMCQContent() {
                                 onClick={() => !isLocked && !result && !state.submitting && handleProgAnswer(qIndex, idx)}
                                 disabled={isLocked || !!result || state.submitting}
                                 className={cn(
-                                  "w-full p-3 rounded-xl text-left transition-all duration-150 border text-sm",
-                                  !result && !isLocked && isSelected && "border-primary bg-primary/10 text-foreground",
+                                  "w-full p-3 rounded-xl text-left transition-colors duration-150 border text-sm",
+                                  !result && !isLocked && isSelected && "opt-selected text-foreground",
                                   !result && !isLocked && !isSelected && "border-border hover:border-primary/40 hover:bg-primary/5 text-foreground",
-                                  isLockCorrect && "border-success bg-success/10 text-success",
-                                  result && isCorrectOpt && "border-success bg-success/10 text-success",
-                                  result && wasSelectedWrong && "border-danger bg-danger/10 text-danger",
-                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-40",
-                                  isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-40",
+                                  isLockCorrect && "opt-correct",
+                                  result && isCorrectOpt && "opt-correct",
+                                  result && wasSelectedWrong && "opt-wrong text-foreground",
+                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
+                                  isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-60",
                                 )}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className={cn(
-                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border flex-shrink-0",
-                                    (result && isCorrectOpt) || isLockCorrect ? "bg-success border-success text-white"
-                                    : result && wasSelectedWrong ? "bg-danger border-danger text-white"
+                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
+                                    (result && isCorrectOpt) || isLockCorrect ? "opt-correct-fill"
+                                    : result && wasSelectedWrong ? "opt-wrong-fill"
                                     : "border-border text-muted-foreground"
                                   )}>
                                     {String.fromCharCode(65 + idx)}
@@ -798,17 +767,17 @@ function PracticeMCQContent() {
                         {(result || isLocked) && (
                           <div className="mt-3 flex items-start justify-between gap-3">
                             <div className={cn(
-                              "flex-1 p-3 rounded-lg text-xs leading-relaxed",
-                              isLocked || result?.correct
-                                ? "bg-success/10 border border-success/20 text-success"
-                                : "bg-danger/10 border border-danger/20 text-danger"
+                              "info-box flex-1 text-xs leading-relaxed text-foreground",
+                              isLocked || result?.correct ? "info-box-success" : "info-box-danger"
                             )}>
-                              {isLocked && !result && <p className="font-medium mb-1">Already answered correctly!</p>}
+                              {isLocked && !result && (
+                                <p className="font-medium mb-1 text-success">Already answered correctly</p>
+                              )}
                               {result && (
-                                <p className="font-medium mb-1">
+                                <p className={cn("font-medium mb-1", result.correct ? "text-success" : "text-danger")}>
                                   {result.correct
-                                    ? `Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`
-                                    : `Wrong — correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
+                                    ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pts` : ""}`
+                                    : `Incorrect — the correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
                                 </p>
                               )}
                               {result?.explanation && <p className="text-muted-foreground mt-1">{result.explanation}</p>}
@@ -881,22 +850,6 @@ function PracticeMCQContent() {
   // ── Render: Aptitude ───────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-4">
-      {/* Answer feedback flash */}
-      <AnimatePresence>
-        {answerFeedback && (
-          <motion.div
-            className={cn(
-              "fixed inset-0 pointer-events-none z-40",
-              answerFeedback === "correct" ? "bg-success/10" : "bg-danger/10"
-            )}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          />
-        )}
-      </AnimatePresence>
-
       {/* Back button + header */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <button
@@ -1050,19 +1003,21 @@ function PracticeMCQContent() {
                   </span>
                 </div>
                 {/* Legend pills */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-success/20 bg-success/5">
-                    <div className="w-2 h-2 rounded-full bg-success" />
-                    <span className="text-success">Correct</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-danger/20 bg-danger/5">
-                    <div className="w-2 h-2 rounded-full bg-danger" />
-                    <span className="text-danger">Wrong</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-border bg-secondary/30">
-                    <div className="w-2 h-2 rounded-full bg-secondary border border-border" />
-                    <span>Unattempted</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="chip chip-success">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                    Correct
+                  </span>
+                  <span className="chip chip-danger">
+                    <span className="w-1.5 h-1.5 rounded-full bg-danger" />
+                    Wrong
+                  </span>
+                  {/* .chip is unlayered, so its `border: 1px solid` shorthand (currentColor)
+                      beats Tailwind's layered border-* utilities — set the token inline. */}
+                  <span className="chip bg-secondary/30 text-muted-foreground" style={{ borderColor: "var(--border)" }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-secondary border border-border" />
+                    Unattempted
+                  </span>
                 </div>
               </div>
 
@@ -1081,21 +1036,16 @@ function PracticeMCQContent() {
                   return (
                     <GlassCard
                       key={q.id}
-                      className={cn(
-                        "transition-all duration-200 p-4 sm:p-5",
-                        state.locked && !result && "border-success/20",
-                        result?.correct && "border-success/20",
-                        result && !result.correct && "border-danger/20",
-                      )}
+                      className="transition-colors duration-200 p-4 sm:p-5"
                     >
                       {/* Question row */}
                       <div className="flex items-start gap-3 mb-3">
                         {/* Number badge */}
                         <span className={cn(
-                          "flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border mt-0.5",
-                          state.locked && !result ? "bg-success border-success text-white"
-                            : result?.correct ? "bg-success border-success text-white"
-                            : result && !result.correct ? "bg-danger/20 border-danger/40 text-danger"
+                          "flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border mt-0.5",
+                          state.locked && !result ? "opt-correct-fill"
+                            : result?.correct ? "opt-correct-fill"
+                            : result && !result.correct ? "opt-wrong"
                             : "bg-secondary border-border text-muted-foreground"
                         )}>
                           {result?.correct || (state.locked && !result) ? <CheckCircle className="h-3.5 w-3.5" />
@@ -1126,24 +1076,24 @@ function PracticeMCQContent() {
                               onClick={() => !isAnswered && !state.submitting && handleAptAnswer(qIdx, key)}
                               disabled={isAnswered || state.submitting}
                               className={cn(
-                                "flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm border transition-all duration-150",
+                                "flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm border transition-colors duration-150",
                                 // Unanswered idle
                                 !isAnswered && !isSelected && "border-border text-foreground hover:border-primary/40 hover:bg-primary/5",
                                 // Unanswered selected (pre-submit highlight)
-                                !isAnswered && isSelected && "border-primary bg-primary/10 text-foreground",
+                                !isAnswered && isSelected && "opt-selected text-foreground",
                                 // Correct option after answer
-                                isAnswered && isCorrectOpt && "border-success/60 bg-success/10 text-success",
+                                isAnswered && isCorrectOpt && "opt-correct",
                                 // Wrong selected
-                                isAnswered && isWrongSelected && "border-danger/60 bg-danger/10 text-danger",
+                                isAnswered && isWrongSelected && "opt-wrong text-foreground",
                                 // Neutral unchosen after answer
-                                isAnswered && !isCorrectOpt && !isWrongSelected && "border-border text-muted-foreground opacity-50",
+                                isAnswered && !isCorrectOpt && !isWrongSelected && "border-border text-muted-foreground opacity-60",
                               )}
                             >
                               {/* Letter badge */}
                               <span className={cn(
-                                "w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold border flex-shrink-0",
-                                isAnswered && isCorrectOpt ? "bg-success border-success text-white"
-                                  : isAnswered && isWrongSelected ? "bg-danger border-danger text-white"
+                                "w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
+                                isAnswered && isCorrectOpt ? "opt-correct-fill"
+                                  : isAnswered && isWrongSelected ? "opt-wrong-fill"
                                   : !isAnswered && isSelected ? "border-primary text-primary"
                                   : "border-border text-muted-foreground"
                               )}>
@@ -1161,17 +1111,20 @@ function PracticeMCQContent() {
                       {/* Feedback bar */}
                       {isAnswered && (
                         <div className={cn(
-                          "mt-3 rounded-lg px-3 py-2 text-xs border flex items-start justify-between gap-3",
-                          state.locked && !result ? "bg-success/8 border-success/20 text-success"
-                            : result?.correct ? "bg-success/8 border-success/20 text-success"
-                            : "bg-danger/8 border-danger/20 text-danger"
+                          "info-box mt-3 text-xs text-foreground flex items-start justify-between gap-3",
+                          state.locked && !result ? "info-box-success"
+                            : result?.correct ? "info-box-success"
+                            : "info-box-danger"
                         )}>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold mb-0.5">
+                            <p className={cn(
+                              "font-medium mb-0.5",
+                              (state.locked && !result) || result?.correct ? "text-success" : "text-danger"
+                            )}>
                               {state.locked && !result
                                 ? "Already answered correctly"
                                 : result?.correct
-                                ? `Correct!${result.points_earned > 0 ? ` +${result.points_earned} pt` : ""}`
+                                ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pt` : ""}`
                                 : `Incorrect — correct answer: ${result?.correct_option}`}
                             </p>
                             {(result?.explanation || (state.locked && q.explanation)) && (

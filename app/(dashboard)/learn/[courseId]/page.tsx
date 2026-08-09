@@ -321,10 +321,8 @@ function QuizBlock({ content }: { content: string }) {
         <span className="text-base">🧩</span>
         <span className="text-[11px] font-bold uppercase tracking-widest text-coding">Quick Check</span>
         {answered && (
-          <span className={cn('ml-auto text-[10px] font-semibold px-2.5 py-0.5 rounded-full border',
-            isRight ? 'bg-success/20 text-success border-success/30' : 'bg-danger/20 text-danger border-danger/30'
-          )}>
-            {isRight ? '✓ Correct!' : '✗ Not quite — see green'}
+          <span className={cn('chip ml-auto text-[10px]', isRight ? 'chip-success' : 'chip-danger')}>
+            {isRight ? 'Correct' : 'Not quite — correct answer highlighted'}
           </span>
         )}
       </div>
@@ -336,15 +334,15 @@ function QuizBlock({ content }: { content: string }) {
             let rowCls = 'border border-border bg-secondary/30 hover:bg-secondary/60 hover:border-primary/40 cursor-pointer'
             let dotCls = 'border-border text-muted-foreground bg-transparent'
             if (answered) {
-              if (idx === correctIdx)  { rowCls = 'border border-success/60 bg-success/10 cursor-default'; dotCls = 'border-success bg-success/30 text-success' }
-              else if (idx === selected){ rowCls = 'border border-danger/60 bg-danger/10 cursor-default';   dotCls = 'border-danger bg-danger/30 text-danger' }
-              else                      { rowCls = 'border border-border bg-transparent opacity-35 cursor-default' }
+              if (idx === correctIdx)  { rowCls = 'border opt-correct cursor-default'; dotCls = 'opt-correct-fill' }
+              else if (idx === selected){ rowCls = 'border opt-wrong cursor-default';   dotCls = 'opt-wrong-fill' }
+              else                      { rowCls = 'border border-border bg-transparent opacity-60 cursor-default' }
             }
             return (
               <button key={idx} onClick={() => !answered && setSelected(idx)}
-                className={cn('rounded-xl px-4 py-2.5 text-left text-sm text-foreground/90 transition-all duration-200 flex items-center gap-3 w-full', rowCls)}
+                className={cn('rounded-xl px-4 py-2.5 text-left text-sm text-foreground/90 transition-colors duration-200 flex items-center gap-3 w-full', rowCls)}
               >
-                <span className={cn('w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all', dotCls)}>
+                <span className={cn('w-6 h-6 rounded-full border flex items-center justify-center text-[10px] font-semibold flex-shrink-0 transition-colors', dotCls)}>
                   {answered && idx === correctIdx ? '✓' : answered && idx === selected && !isRight ? '✗' : alpha}
                 </span>
                 {opt.text}
@@ -727,7 +725,6 @@ export default function CourseDetailPage() {
   const [mcqPage, setMcqPage] = useState(1)
   const MCQ_PAGE_SIZE = 5
   const [mcqQStates, setMcqQStates] = useState<McqQState[]>([])
-  const [answerFeedback, setAnswerFeedback] = useState<"correct" | "wrong" | null>(null)
   const [moduleAssignments, setModuleAssignments] = useState<ModuleAssignment[]>([])
   const [panelOpen, setPanelOpen] = useState(true)
 
@@ -773,7 +770,6 @@ export default function CourseDetailPage() {
     setMcqQuestions([])
     setMcqQStates([])
     setMcqPage(1)
-    setAnswerFeedback(null)
     setMcqLoading(true)
     try {
       const res = await api.get(`/mcq/questions?lesson_id=${lessonId}`)
@@ -822,14 +818,10 @@ export default function CourseDetailPage() {
       })
       updateUser({ points: result.total_points })
       if (result.correct) {
-        setAnswerFeedback("correct")
-        fireStars()
         toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
       } else {
-        setAnswerFeedback("wrong")
         toast.error("Incorrect — check the explanation below")
       }
-      setTimeout(() => setAnswerFeedback(null), 700)
     } catch {
       updateMcqQState(qIndex, { submitting: false, selected: null })
       toast.error("Failed to submit answer")
@@ -1484,22 +1476,6 @@ export default function CourseDetailPage() {
               </motion.button>
             )}
 
-            {/* Answer flash overlay */}
-            <AnimatePresence>
-              {answerFeedback && (
-                <motion.div
-                  className={cn(
-                    "fixed inset-0 pointer-events-none z-40",
-                    answerFeedback === "correct" ? "bg-success/10" : "bg-danger/10"
-                  )}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                />
-              )}
-            </AnimatePresence>
-
             {!mcqTopic ? (
               <GlassCard className="flex flex-col items-center justify-center h-64 text-center gap-3">
                 <Brain className="h-10 w-10 text-primary/40" />
@@ -1527,15 +1503,15 @@ export default function CourseDetailPage() {
                       — Page {mcqPage}/{Math.ceil(mcqQuestions.length / MCQ_PAGE_SIZE)} ({mcqQuestions.length} Qs)
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-success/20 bg-success/5">
-                      <div className="w-2 h-2 rounded-full bg-success" />
-                      <span className="text-success">Correct</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-full border border-danger/20 bg-danger/5">
-                      <div className="w-2 h-2 rounded-full bg-danger" />
-                      <span className="text-danger">Wrong</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="chip chip-success">
+                      <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                      Correct
+                    </span>
+                    <span className="chip chip-danger">
+                      <span className="w-1.5 h-1.5 rounded-full bg-danger" />
+                      Wrong
+                    </span>
                   </div>
                 </div>
 
@@ -1551,19 +1527,16 @@ export default function CourseDetailPage() {
                     return (
                       <GlassCard
                         key={q.id}
-                        className={cn(
-                          "transition-all duration-200",
-                          isLocked && "border-success/30 bg-success/5"
-                        )}
+                        className="transition-colors duration-200"
                       >
                         {/* Question header */}
                         <div className="flex items-start gap-3 mb-4">
                           <span className={cn(
-                            "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border",
+                            "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border",
                             isLocked
-                              ? "bg-success border-success text-white"
+                              ? "opt-correct-fill"
                               : result && !result.correct
-                              ? "bg-danger/20 border-danger/50 text-danger"
+                              ? "opt-wrong"
                               : "bg-secondary border-border text-muted-foreground"
                           )}>
                             {qIndex + 1}
@@ -1597,21 +1570,21 @@ export default function CourseDetailPage() {
                                 onClick={() => !isLocked && !result && !state.submitting && handleMcqAnswer(qIndex, idx)}
                                 disabled={isLocked || !!result || state.submitting}
                                 className={cn(
-                                  "w-full p-3 rounded-xl text-left transition-all duration-150 border text-sm",
-                                  !result && !isLocked && isSelected && "border-primary bg-primary/10 text-foreground",
+                                  "w-full p-3 rounded-xl text-left transition-colors duration-150 border text-sm",
+                                  !result && !isLocked && isSelected && "opt-selected text-foreground",
                                   !result && !isLocked && !isSelected && "border-border hover:border-primary/40 hover:bg-primary/5 text-foreground",
-                                  isLockCorrect && "border-success bg-success/10 text-success",
-                                  result && isCorrectOpt && "border-success bg-success/10 text-success",
-                                  result && wasSelectedWrong && "border-danger bg-danger/10 text-danger",
-                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-40",
-                                  isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-40",
+                                  isLockCorrect && "opt-correct",
+                                  result && isCorrectOpt && "opt-correct",
+                                  result && wasSelectedWrong && "opt-wrong text-foreground",
+                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
+                                  isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-60",
                                 )}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className={cn(
-                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border flex-shrink-0",
-                                    (result && isCorrectOpt) || isLockCorrect ? "bg-success border-success text-white"
-                                    : result && wasSelectedWrong ? "bg-danger border-danger text-white"
+                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
+                                    (result && isCorrectOpt) || isLockCorrect ? "opt-correct-fill"
+                                    : result && wasSelectedWrong ? "opt-wrong-fill"
                                     : "border-border text-muted-foreground"
                                   )}>
                                     {String.fromCharCode(65 + idx)}
@@ -1630,17 +1603,17 @@ export default function CourseDetailPage() {
                         {(result || isLocked) && (
                           <div className="mt-3 flex items-start justify-between gap-3">
                             <div className={cn(
-                              "flex-1 p-3 rounded-lg text-xs leading-relaxed",
-                              isLocked || result?.correct
-                                ? "bg-success/10 border border-success/20 text-success"
-                                : "bg-danger/10 border border-danger/20 text-danger"
+                              "info-box flex-1 text-xs leading-relaxed text-foreground",
+                              isLocked || result?.correct ? "info-box-success" : "info-box-danger"
                             )}>
-                              {isLocked && !result && <p className="font-medium mb-1">Already answered correctly!</p>}
+                              {isLocked && !result && (
+                                <p className="font-medium mb-1 text-success">Already answered correctly</p>
+                              )}
                               {result && (
-                                <p className="font-medium mb-1">
+                                <p className={cn("font-medium mb-1", result.correct ? "text-success" : "text-danger")}>
                                   {result.correct
-                                    ? `Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`
-                                    : `Wrong — correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
+                                    ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pts` : ""}`
+                                    : `Incorrect — the correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
                                 </p>
                               )}
                               {result?.explanation && <p className="text-muted-foreground mt-1">{result.explanation}</p>}
