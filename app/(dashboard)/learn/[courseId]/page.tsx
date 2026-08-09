@@ -820,7 +820,7 @@ export default function CourseDetailPage() {
       if (result.correct) {
         toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
       } else {
-        toast.error("Incorrect — check the explanation below")
+        toast.error("Incorrect — try again")
       }
     } catch {
       updateMcqQState(qIndex, { submitting: false, selected: null })
@@ -1563,6 +1563,10 @@ export default function CourseDetailPage() {
                             const isCorrectOpt = result ? idx === correctAnswer : false
                             const wasSelectedWrong = !!(result && isSelected && !isCorrectOpt)
                             const isLockCorrect = isLocked && idx === correctAnswer
+                            // Only reveal the correct option once it has actually been
+                            // answered correctly — a wrong attempt must not spoil it,
+                            // since the student can still Try Again.
+                            const revealCorrect = isLockCorrect || !!(result?.correct && isCorrectOpt)
 
                             return (
                               <button
@@ -1573,17 +1577,16 @@ export default function CourseDetailPage() {
                                   "w-full p-3 rounded-xl text-left transition-colors duration-150 border text-sm",
                                   !result && !isLocked && isSelected && "opt-selected text-foreground",
                                   !result && !isLocked && !isSelected && "border-border hover:border-primary/40 hover:bg-primary/5 text-foreground",
-                                  isLockCorrect && "opt-correct",
-                                  result && isCorrectOpt && "opt-correct",
+                                  revealCorrect && "opt-correct",
                                   result && wasSelectedWrong && "opt-wrong text-foreground",
-                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
+                                  result && !revealCorrect && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
                                   isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-60",
                                 )}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className={cn(
                                     "w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
-                                    (result && isCorrectOpt) || isLockCorrect ? "opt-correct-fill"
+                                    revealCorrect ? "opt-correct-fill"
                                     : result && wasSelectedWrong ? "opt-wrong-fill"
                                     : "border-border text-muted-foreground"
                                   )}>
@@ -1591,7 +1594,7 @@ export default function CourseDetailPage() {
                                   </span>
                                   <span className="flex-1 text-sm leading-relaxed">{opt}</span>
                                   {state.submitting && isSelected && <Loader2 className="h-4 w-4 animate-spin ml-auto flex-shrink-0" />}
-                                  {((result && isCorrectOpt) || isLockCorrect) && <CheckCircle className="h-4 w-4 ml-auto text-success flex-shrink-0" />}
+                                  {revealCorrect && <CheckCircle className="h-4 w-4 ml-auto text-success flex-shrink-0" />}
                                   {result && wasSelectedWrong && <XCircle className="h-4 w-4 ml-auto text-danger flex-shrink-0" />}
                                 </div>
                               </button>
@@ -1613,10 +1616,13 @@ export default function CourseDetailPage() {
                                 <p className={cn("font-medium mb-1", result.correct ? "text-success" : "text-danger")}>
                                   {result.correct
                                     ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pts` : ""}`
-                                    : `Incorrect — the correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
+                                    : "Incorrect — give it another try"}
                                 </p>
                               )}
-                              {result?.explanation && <p className="text-muted-foreground mt-1">{result.explanation}</p>}
+                              {/* Explanation gives the answer away, so hold it back until solved */}
+                              {result?.correct && result.explanation && (
+                                <p className="text-muted-foreground mt-1">{result.explanation}</p>
+                              )}
                             </div>
                             {result && !result.correct && (
                               <Button

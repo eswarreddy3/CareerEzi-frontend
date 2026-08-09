@@ -243,7 +243,7 @@ function PracticeMCQContent() {
       if (result.correct) {
         toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
       } else {
-        toast.error("Incorrect — check the explanation below")
+        toast.error("Incorrect — try again")
       }
       api.get("/mcq/topics").then((res) => setTopics(res.data)).catch(() => {})
     } catch {
@@ -727,6 +727,10 @@ function PracticeMCQContent() {
                             const isCorrectOpt = result ? idx === correctAnswer : false
                             const wasSelectedWrong = !!(result && isSelected && !isCorrectOpt)
                             const isLockCorrect = isLocked && idx === correctAnswer
+                            // Only reveal the correct option once it has actually been
+                            // answered correctly — a wrong attempt must not spoil it,
+                            // since the student can still Try Again.
+                            const revealCorrect = isLockCorrect || !!(result?.correct && isCorrectOpt)
 
                             return (
                               <button
@@ -737,17 +741,16 @@ function PracticeMCQContent() {
                                   "w-full p-3 rounded-xl text-left transition-colors duration-150 border text-sm",
                                   !result && !isLocked && isSelected && "opt-selected text-foreground",
                                   !result && !isLocked && !isSelected && "border-border hover:border-primary/40 hover:bg-primary/5 text-foreground",
-                                  isLockCorrect && "opt-correct",
-                                  result && isCorrectOpt && "opt-correct",
+                                  revealCorrect && "opt-correct",
                                   result && wasSelectedWrong && "opt-wrong text-foreground",
-                                  result && !isCorrectOpt && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
+                                  result && !revealCorrect && !wasSelectedWrong && "border-border text-muted-foreground opacity-60",
                                   isLocked && !isLockCorrect && "border-border text-muted-foreground opacity-60",
                                 )}
                               >
                                 <div className="flex items-center gap-2">
                                   <span className={cn(
                                     "w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
-                                    (result && isCorrectOpt) || isLockCorrect ? "opt-correct-fill"
+                                    revealCorrect ? "opt-correct-fill"
                                     : result && wasSelectedWrong ? "opt-wrong-fill"
                                     : "border-border text-muted-foreground"
                                   )}>
@@ -755,7 +758,7 @@ function PracticeMCQContent() {
                                   </span>
                                   <span className="flex-1">{opt}</span>
                                   {state.submitting && isSelected && <Loader2 className="h-4 w-4 animate-spin ml-auto flex-shrink-0" />}
-                                  {((result && isCorrectOpt) || isLockCorrect) && <CheckCircle className="h-4 w-4 ml-auto text-success flex-shrink-0" />}
+                                  {revealCorrect && <CheckCircle className="h-4 w-4 ml-auto text-success flex-shrink-0" />}
                                   {result && wasSelectedWrong && <XCircle className="h-4 w-4 ml-auto text-danger flex-shrink-0" />}
                                 </div>
                               </button>
@@ -777,10 +780,13 @@ function PracticeMCQContent() {
                                 <p className={cn("font-medium mb-1", result.correct ? "text-success" : "text-danger")}>
                                   {result.correct
                                     ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pts` : ""}`
-                                    : `Incorrect — the correct answer is ${String.fromCharCode(65 + result.correct_answer)}`}
+                                    : "Incorrect — give it another try"}
                                 </p>
                               )}
-                              {result?.explanation && <p className="text-muted-foreground mt-1">{result.explanation}</p>}
+                              {/* Explanation gives the answer away, so hold it back until solved */}
+                              {result?.correct && result.explanation && (
+                                <p className="text-muted-foreground mt-1">{result.explanation}</p>
+                              )}
                             </div>
                             {result && !result.correct && (
                               <Button
@@ -1069,6 +1075,8 @@ function PracticeMCQContent() {
                           const isSelected = state.selected === key
                           const isCorrectOpt = correctKey ? key === correctKey : false
                           const isWrongSelected = isAnswered && isSelected && !isCorrectOpt
+                          // Hold the answer back after a wrong attempt — Retry is still available.
+                          const revealCorrect = isCorrectOpt && (state.locked || !!result?.correct)
 
                           return (
                             <button
@@ -1081,18 +1089,18 @@ function PracticeMCQContent() {
                                 !isAnswered && !isSelected && "border-border text-foreground hover:border-primary/40 hover:bg-primary/5",
                                 // Unanswered selected (pre-submit highlight)
                                 !isAnswered && isSelected && "opt-selected text-foreground",
-                                // Correct option after answer
-                                isAnswered && isCorrectOpt && "opt-correct",
+                                // Correct option — only once actually solved
+                                revealCorrect && "opt-correct",
                                 // Wrong selected
                                 isAnswered && isWrongSelected && "opt-wrong text-foreground",
                                 // Neutral unchosen after answer
-                                isAnswered && !isCorrectOpt && !isWrongSelected && "border-border text-muted-foreground opacity-60",
+                                isAnswered && !revealCorrect && !isWrongSelected && "border-border text-muted-foreground opacity-60",
                               )}
                             >
                               {/* Letter badge */}
                               <span className={cn(
                                 "w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold border flex-shrink-0",
-                                isAnswered && isCorrectOpt ? "opt-correct-fill"
+                                revealCorrect ? "opt-correct-fill"
                                   : isAnswered && isWrongSelected ? "opt-wrong-fill"
                                   : !isAnswered && isSelected ? "border-primary text-primary"
                                   : "border-border text-muted-foreground"
@@ -1101,7 +1109,7 @@ function PracticeMCQContent() {
                               </span>
                               <span className="flex-1 leading-snug">{optText}</span>
                               {state.submitting && isSelected && <Loader2 className="h-3.5 w-3.5 animate-spin flex-shrink-0 text-primary" />}
-                              {isAnswered && isCorrectOpt && <CheckCircle className="h-3.5 w-3.5 flex-shrink-0 text-success" />}
+                              {revealCorrect && <CheckCircle className="h-3.5 w-3.5 flex-shrink-0 text-success" />}
                               {isAnswered && isWrongSelected && <XCircle className="h-3.5 w-3.5 flex-shrink-0 text-danger" />}
                             </button>
                           )
@@ -1125,9 +1133,10 @@ function PracticeMCQContent() {
                                 ? "Already answered correctly"
                                 : result?.correct
                                 ? `Correct${result.points_earned > 0 ? ` — +${result.points_earned} pt` : ""}`
-                                : `Incorrect — correct answer: ${result?.correct_option}`}
+                                : "Incorrect — give it another try"}
                             </p>
-                            {(result?.explanation || (state.locked && q.explanation)) && (
+                            {/* Explanation names the answer, so keep it hidden until solved */}
+                            {((state.locked && q.explanation) || (result?.correct && result.explanation)) && (
                               <p className="text-muted-foreground leading-relaxed">
                                 {result?.explanation ?? q.explanation}
                               </p>
