@@ -77,7 +77,7 @@ type StudentNavBlock = StudentNavItemBlock | StudentNavSection
 const studentNavBlocks: StudentNavBlock[] = [
   { type: "item",    item: { href: "/dashboard",      label: "Dashboard",      icon: LayoutDashboard }, color: "indigo" },
   {
-    type: "section", id: "learn", label: "Learn", icon: BookOpen, color: "blue", highlight: true,
+    type: "section", id: "learn", label: "Courses", icon: BookOpen, color: "blue", highlight: true,
     items: [
       { href: "/learn",        label: "Learn",        icon: BookOpen    },
       { href: "/practice-mcq", label: "Practice MCQ", icon: FileQuestion },
