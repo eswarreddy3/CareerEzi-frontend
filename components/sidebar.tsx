@@ -36,6 +36,7 @@ import {
   GraduationCap,
   ClipboardCheck,
   Award,
+  Sparkles,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -151,6 +152,7 @@ const branchAdminNavItems: NavItem[] = [
 const superAdminNav: SuperAdminNav = {
   standalone: [
     { href: "/super-admin",        label: "Overview",     icon: Globe     },
+    { href: "/super-admin/ai",     label: "Saarthi AI",   icon: Sparkles  },
     { href: "/super-admin/backup", label: "Data Backup",  icon: Database  },
   ],
   groups: [

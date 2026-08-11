@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, type FormEvent } from "react"
-import { Plus, Search, RefreshCw, Ban, CheckCircle2, Trash2, Loader2, Lock, LayoutGrid, Link2, Pencil, Upload, X } from "lucide-react"
+import { Plus, Search, RefreshCw, Ban, CheckCircle2, Trash2, Loader2, Lock, LayoutGrid, Link2, Pencil, Upload, X, Sparkles, Globe } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -48,6 +48,7 @@ interface College {
   allowed_domain_ids: string[] | null
   allowed_course_ids: string[] | null
   allowed_coding_module_ids: number[] | null
+  allowed_ai_feature_keys: string[] | null
   student_count: number
   is_active: boolean
   activated_at: string | null
@@ -104,6 +105,59 @@ const statusConfig = {
 // Domain selector shows for any paid plan (base, pro, enterprise) — not free
 function hasDomainControl(planType: string | null) {
   return planType === "base" || planType === "pro" || planType === "enterprise"
+}
+
+// The two licensable AI packs. Deferred features (job matching, tutor, coding
+// hints) join `ai_coach` rather than getting their own key, so a college
+// already holding it picks them up with no re-licensing.
+const AI_PACKS: { key: string; label: string; hint: string }[] = [
+  {
+    key: "ai_coach",
+    label: "Dashboard AI",
+    hint: "Study plan, daily nudge, weakness diagnosis, placement readiness score",
+  },
+  {
+    key: "mock_interview",
+    label: "Mock Interview",
+    hint: "Voice interviews by company, domain or skill — with a scored report",
+  },
+]
+
+/**
+ * Tri-state control for the default-ALLOW access lists.
+ *
+ * `NULL` (unrestricted) and `[]` (all locked) mean opposite things, and this
+ * modal used to collapse them on open — so opening and saving it silently
+ * locked a college out of everything. This makes the distinction explicit.
+ */
+function AccessScopeToggle({
+  label, unrestricted, onChange, count,
+}: {
+  label: string
+  unrestricted: boolean
+  onChange: (v: boolean) => void
+  count: number
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/20 p-2.5">
+      <Checkbox
+        checked={unrestricted}
+        onCheckedChange={(v) => onChange(!!v)}
+        className="border-border data-[state=checked]:bg-success data-[state=checked]:border-success"
+      />
+      <div className="min-w-0 flex-1">
+        <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <Globe className="h-3.5 w-3.5 text-success" />
+          All {label.toLowerCase()} unlocked
+        </span>
+        <span className="block text-xs text-muted-foreground">
+          {unrestricted
+            ? "This college gets every item, including any added later."
+            : `Restricted to the ${count} item(s) selected below.`}
+        </span>
+      </div>
+    </div>
+  )
 }
 
 function DomainCheckboxList({
@@ -171,6 +225,14 @@ export default function CollegesPage() {
   const [editCourseIds, setEditCourseIds] = useState<string[]>([])
   const [editCodingModuleIds, setEditCodingModuleIds] = useState<number[]>([])
   const [isSavingDomains, setIsSavingDomains] = useState(false)
+  // Tri-state: NULL ("unrestricted") and [] ("all locked") mean opposite things
+  // for domains/courses/modules. Collapsing them on open — as this modal used
+  // to — silently locked every college out the first time it was saved.
+  const [unrestrictedDomains, setUnrestrictedDomains] = useState(false)
+  const [unrestrictedCourses, setUnrestrictedCourses] = useState(false)
+  const [unrestrictedModules, setUnrestrictedModules] = useState(false)
+  // AI packs are DEFAULT-DENY — no tri-state needed, absent means no access.
+  const [editAiKeys, setEditAiKeys] = useState<string[]>([])
 
   // Social links modal
   const [socialCollege, setSocialCollege] = useState<College | null>(null)
@@ -262,10 +324,19 @@ export default function CollegesPage() {
 
   const openEditDomains = (college: College) => {
     setEditDomainCollege(college)
+    // Remember which lists were NULL so saving can send NULL back. Without
+    // this the `?? []` below turns "everything unlocked" into "all locked".
+    setUnrestrictedDomains(college.allowed_domain_ids == null)
+    setUnrestrictedCourses(college.allowed_course_ids == null)
+    setUnrestrictedModules(college.allowed_coding_module_ids == null)
     setEditDomainIds(college.allowed_domain_ids ?? [])
     setEditCourseIds(college.allowed_course_ids ?? [])
     setEditCodingModuleIds(college.allowed_coding_module_ids ?? [])
+    setEditAiKeys(college.allowed_ai_feature_keys ?? [])
   }
+
+  const toggleAiKey = (key: string) =>
+    setEditAiKeys((prev) => prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key])
 
   const toggleEditDomain = (id: string) =>
     setEditDomainIds((prev) => prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id])
@@ -281,12 +352,19 @@ export default function CollegesPage() {
     setIsSavingDomains(true)
     try {
       await api.patch(`/super-admin/colleges/${editDomainCollege.id}`, {
-        allowed_domain_ids: editDomainIds,
-        allowed_course_ids: editCourseIds,
-        allowed_coding_module_ids: editCodingModuleIds,
+        // null = unrestricted (all unlocked); [] = everything locked
+        allowed_domain_ids: unrestrictedDomains ? null : editDomainIds,
+        allowed_course_ids: unrestrictedCourses ? null : editCourseIds,
+        allowed_coding_module_ids: unrestrictedModules ? null : editCodingModuleIds,
+        allowed_ai_feature_keys: editAiKeys,
       })
       toast.success("Access updated", {
-        description: `${editDomainIds.length} domain(s), ${editCourseIds.length} course(s), ${editCodingModuleIds.length} module(s) unlocked.`,
+        description: [
+          unrestrictedDomains ? "all domains" : `${editDomainIds.length} domain(s)`,
+          unrestrictedCourses ? "all courses" : `${editCourseIds.length} course(s)`,
+          unrestrictedModules ? "all modules" : `${editCodingModuleIds.length} module(s)`,
+          `${editAiKeys.length} AI pack(s)`,
+        ].join(", "),
       })
       setEditDomainCollege(null)
       fetchColleges()
@@ -563,17 +641,30 @@ export default function CollegesPage() {
                         )}
                       </td>
                       <td className="py-3 px-4">
-                        {canEditDomains ? (
-                          college.allowed_domain_ids && college.allowed_domain_ids.length > 0 ? (
-                            <span className="text-xs text-success">
-                              {college.allowed_domain_ids.length} / {domains.length} unlocked
+                        <div className="flex flex-col gap-1">
+                          {canEditDomains ? (
+                            college.allowed_domain_ids == null ? (
+                              <span className="text-xs text-success">All unlocked</span>
+                            ) : college.allowed_domain_ids.length > 0 ? (
+                              <span className="text-xs text-success">
+                                {college.allowed_domain_ids.length} / {domains.length} unlocked
+                              </span>
+                            ) : (
+                              <span className="text-xs text-warning">All locked</span>
+                            )
+                          ) : (
+                            <span className="text-xs text-muted-foreground">All access</span>
+                          )}
+                          {/* AI is default-deny, so absence is the normal state */}
+                          {college.allowed_ai_feature_keys?.length ? (
+                            <span className="inline-flex w-fit items-center gap-1 text-xs text-coding">
+                              <Sparkles className="h-3 w-3" />
+                              AI {college.allowed_ai_feature_keys.length}/2
                             </span>
                           ) : (
-                            <span className="text-xs text-warning">All locked</span>
-                          )
-                        ) : (
-                          <span className="text-xs text-muted-foreground">All access</span>
-                        )}
+                            <span className="text-xs text-muted-foreground">No AI</span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-foreground">{college.student_count.toLocaleString()}</td>
                       <td className="py-3 px-4">
@@ -745,7 +836,7 @@ export default function CollegesPage() {
       {/* Edit Access Modal */}
       <ModalForm
         title={`Manage Access — ${editDomainCollege?.name}`}
-        description="Control which domains, courses, and coding modules students in this college can access."
+        description="Control which domains, courses, coding modules and AI packs students in this college can access."
         isOpen={!!editDomainCollege}
         onClose={() => setEditDomainCollege(null)}
         onSubmit={(e) => { e.preventDefault(); handleSaveDomains() }}
@@ -753,16 +844,68 @@ export default function CollegesPage() {
         submitLabel="Save Access Settings"
       >
         <div className="space-y-6">
-          <DomainCheckboxList
-            domains={domains}
-            selected={editDomainIds}
-            onToggle={toggleEditDomain}
+          {/* ── Saarthi AI packs — DEFAULT-DENY ──────────────────────────────
+              Listed first because it is the only setting here that costs money
+              and the only one that is off by default. */}
+          <div className="rounded-xl border border-coding/25 bg-coding/5 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-coding" />
+              <Label className="text-foreground">Saarthi AI</Label>
+              <span className="chip chip-coding ml-auto">{editAiKeys.length} / 2</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Off unless granted. A college without a pack sees no AI anywhere — no card,
+              no menu item, nothing. Each granted pack costs tokens against the monthly budget.
+            </p>
+            <div className="grid grid-cols-1 gap-2 pt-1">
+              {AI_PACKS.map((pack) => (
+                <label
+                  key={pack.key}
+                  className="flex items-start gap-3 p-2.5 rounded-lg bg-secondary/30 border border-border hover:border-coding/40 cursor-pointer transition-colors"
+                >
+                  <Checkbox
+                    checked={editAiKeys.includes(pack.key)}
+                    onCheckedChange={() => toggleAiKey(pack.key)}
+                    className="mt-0.5 border-border data-[state=checked]:bg-coding data-[state=checked]:border-coding"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-foreground">{pack.label}</span>
+                    <span className="block text-xs text-muted-foreground">{pack.hint}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+            {editAiKeys.length === 0 && (
+              <p className="text-xs text-muted-foreground">No AI for this college.</p>
+            )}
+          </div>
+
+          <AccessScopeToggle
+            label="Domains"
+            unrestricted={unrestrictedDomains}
+            onChange={setUnrestrictedDomains}
+            count={editDomainIds.length}
           />
+          {!unrestrictedDomains && (
+            <DomainCheckboxList
+              domains={domains}
+              selected={editDomainIds}
+              onToggle={toggleEditDomain}
+            />
+          )}
           <div className="border-t border-border pt-4 space-y-2">
             <div className="flex items-center gap-2">
               <Lock className="h-4 w-4 text-primary" />
               <Label className="text-foreground">Available Courses (Learn section)</Label>
             </div>
+            <AccessScopeToggle
+              label="Courses"
+              unrestricted={unrestrictedCourses}
+              onChange={setUnrestrictedCourses}
+              count={editCourseIds.length}
+            />
+            {!unrestrictedCourses && (
+            <>
             <p className="text-xs text-muted-foreground">
               Select which courses appear unlocked in the Course Library. Unchecked courses will be locked.
             </p>
@@ -786,6 +929,8 @@ export default function CollegesPage() {
               ? <p className="text-xs text-primary">{editCourseIds.length} of {courses.length} courses selected</p>
               : <p className="text-xs text-warning">No courses selected — all courses will be locked.</p>
             }
+            </>
+            )}
           </div>
 
           {/* Coding modules access */}
@@ -795,6 +940,14 @@ export default function CollegesPage() {
                 <Lock className="h-4 w-4 text-primary" />
                 <Label className="text-foreground">Available Coding Modules</Label>
               </div>
+              <AccessScopeToggle
+                label="Coding modules"
+                unrestricted={unrestrictedModules}
+                onChange={setUnrestrictedModules}
+                count={editCodingModuleIds.length}
+              />
+              {!unrestrictedModules && (
+              <>
               <p className="text-xs text-muted-foreground">
                 Select which coding modules students can access. Unchecked modules will be locked.
               </p>
@@ -821,6 +974,8 @@ export default function CollegesPage() {
                 ? <p className="text-xs text-primary">{editCodingModuleIds.length} of {codingModules.length} modules selected</p>
                 : <p className="text-xs text-warning">No modules selected — all coding modules will be locked.</p>
               }
+              </>
+              )}
             </div>
           )}
         </div>
