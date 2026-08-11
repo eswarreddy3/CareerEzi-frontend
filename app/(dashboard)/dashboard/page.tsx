@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { GlassCard } from "@/components/glass-card"
+import { SaarthiCoachCard } from "@/components/saarthi/coach-card"
 import { FeedbackModal } from "@/components/feedback-modal"
 import {
   Trophy, Star, Flame, Code2, Loader2, Quote, Zap,
@@ -947,6 +948,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+
+      {/* Saarthi coach — renders nothing unless the college is AI-licensed.
+          Reads a stored plan row; makes no AI call on page load. */}
+      <SaarthiCoachCard />
 
       {/* ── Hero + Stat cards row ── */}
       {data && (
