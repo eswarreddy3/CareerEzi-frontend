@@ -157,3 +157,102 @@ export async function fetchTopicGuide(topic: string, kind = "aptitude"): Promise
   const { data } = await api.get(`/ai/topic-guide/${encodeURIComponent(topic)}?kind=${kind}`)
   return data
 }
+
+
+// ─── Mock interview ──────────────────────────────────────────────────────────
+export type InterviewTrack = "company" | "domain" | "skill"
+export type InterviewLevel = "internship" | "fresher" | "1-2" | "2-5"
+export type InterviewRound = "hr" | "technical" | "mixed"
+
+export interface InterviewTurn {
+  turn: number
+  question: string
+  answer: string | null
+  words?: number
+  filler_words?: number
+}
+
+export interface InterviewReport {
+  overall_score: number
+  summary: string
+  communication: number
+  technical_depth: number
+  structure: number
+  confidence: number
+  strengths: string[]
+  improvements: string[]
+  per_question: { turn: number; score: number; note: string }[]
+  next_steps: string[]
+  measured?: Record<string, number>
+  generated_by?: string
+}
+
+export interface InterviewSession {
+  session_uid: string
+  track: InterviewTrack
+  track_ref: string | null
+  track_label: string
+  level: InterviewLevel
+  level_label: string
+  round_type: InterviewRound
+  round_label: string
+  input_mode: string
+  turn_count: number
+  total_turns: number
+  status: "in_progress" | "completed" | "abandoned"
+  overall_score: number | null
+  report: InterviewReport | null
+  transcript?: InterviewTurn[]
+  started_at: string
+  completed_at: string | null
+  quota?: { used: number; limit: number; remaining: number | null; resets_at: string }
+}
+
+export interface InterviewOptions {
+  tracks: {
+    company: { ref: string; label: string; logo?: string }[]
+    domain: { ref: string; label: string; icon?: string }[]
+    skill: { ref: string; label: string }[]
+  }
+  levels: { value: InterviewLevel; label: string }[]
+  rounds: { value: InterviewRound; label: string }[]
+  quota?: { used: number; limit: number; remaining: number | null; resets_at: string }
+}
+
+export async function fetchInterviewOptions(): Promise<InterviewOptions> {
+  const { data } = await api.get("/ai/interview/options")
+  return data
+}
+
+export async function startInterview(body: {
+  track: InterviewTrack; track_ref?: string; level: InterviewLevel
+  round: InterviewRound; input_mode: string; total_turns?: number
+}): Promise<InterviewSession> {
+  const { data } = await api.post("/ai/interview/start", body)
+  return data
+}
+
+export async function fetchInterview(uid: string): Promise<InterviewSession> {
+  const { data } = await api.get(`/ai/interview/${uid}`)
+  return data
+}
+
+export async function answerInterview(uid: string, answer: string): Promise<{
+  done: boolean; question?: string; turn?: number; total_turns?: number
+  report?: InterviewReport; session?: InterviewSession
+}> {
+  const { data } = await api.post(`/ai/interview/${uid}/answer`, { answer })
+  return data
+}
+
+export async function endInterview(uid: string): Promise<{
+  report: InterviewReport | null; session: InterviewSession
+}> {
+  const { data } = await api.post(`/ai/interview/${uid}/end`)
+  return data
+}
+
+export async function fetchInterviewHistory(): Promise<InterviewSession[]> {
+  const { data } = await api.get("/ai/interview/history")
+  return data
+}

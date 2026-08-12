@@ -101,6 +101,7 @@ const studentNavBlocks: StudentNavBlock[] = [
   { type: "item", item: { href: "/domain-programs", label: "Domain Programs", icon: Layers         }, color: "teal",    highlight: true },
   { type: "item", item: { href: "/company-prep",    label: "Company Prep",    icon: Building2      }, color: "orange"  },
   { type: "item", item: { href: "/my-plan",         label: "My Plan",         icon: Sparkles       }, color: "violet", highlight: true, requires: "ai_coach" },
+  { type: "item", item: { href: "/mock-interview",  label: "Mock Interview",  icon: MessageSquare  }, color: "rose",   highlight: true, requires: "mock_interview" },
   {
     type: "section", id: "placement", label: "Placement Cell", icon: GraduationCap, color: "emerald", highlight: true,
     items: [
