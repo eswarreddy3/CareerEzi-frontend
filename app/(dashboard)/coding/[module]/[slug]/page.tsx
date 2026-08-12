@@ -25,6 +25,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { saarthi } from "@/lib/saarthi-events"
 import { motion, AnimatePresence } from "framer-motion"
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false })
@@ -297,6 +298,7 @@ export default function CodingIDEPage({ params }: { params: Promise<{ module: st
       })
       const { status, message, test_results, points_awarded, milestone_bonus } = res.data
       if (status === "accepted") {
+        saarthi.emit("coding_accepted", { title: currentProblem.title })
         const baseDesc = points_awarded > 0 ? `+${points_awarded} points earned!` : message
         toast.success("Solution Accepted!", { description: baseDesc })
         if (milestone_bonus > 0)

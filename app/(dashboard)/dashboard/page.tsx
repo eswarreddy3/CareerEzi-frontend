@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { GlassCard } from "@/components/glass-card"
-import { SaarthiCoachCard } from "@/components/saarthi/coach-card"
+import { SaarthiHero } from "@/components/saarthi/saarthi-hero"
+import { SaarthiPlanMissionsCard } from "@/components/saarthi/plan-missions-card"
+import { useAIStore } from "@/store/aiStore"
+import { cn } from "@/lib/utils"
 import { FeedbackModal } from "@/components/feedback-modal"
 import {
   Trophy, Star, Flame, Code2, Loader2, Quote, Zap,
@@ -42,6 +45,8 @@ interface DashboardData {
   mcq_week_count: number
   mcq_accuracy: number
   best_assignment_pct: number
+  best_assignment_week_pct?: number
+  coding_week_count?: number
   lesson_week_count: number
   course_progress: CourseProgress[]
 }
@@ -698,8 +703,11 @@ function UpcomingDrivesCard({ jobs, data }: { jobs: Job[]; data: DashboardData }
 // ── Weekly Missions ───────────────────────────────────────────────────────────
 function WeeklyMissionsCard({ data }: { data: DashboardData }) {
   const missions = [
-    { label: "Solve 3 coding problems",     done: data.solved_count >= 3,         icon: "💻", doneClass: "bg-coding/10 border border-coding/25",   checkColor: "text-coding"  },
-    { label: "Score 80%+ on any assignment", done: data.best_assignment_pct >= 80, icon: "📋", doneClass: "bg-warning/10 border border-warning/25",  checkColor: "text-warning" },
+    // These two used LIFETIME counters (solved_count / best_assignment_pct) on a
+    // card headed "Weekly Missions", so once a student had ever done them they
+    // stayed ticked forever. Now read genuinely weekly fields.
+    { label: "Solve 3 coding problems this week", done: (data.coding_week_count ?? 0) >= 3,        icon: "💻", doneClass: "bg-coding/10 border border-coding/25",   checkColor: "text-coding"  },
+    { label: "Score 80%+ on an assignment",       done: (data.best_assignment_week_pct ?? 0) >= 80, icon: "📋", doneClass: "bg-warning/10 border border-warning/25",  checkColor: "text-warning" },
     { label: "Practice 20 MCQs this week",  done: data.mcq_week_count >= 20,      icon: "❓", doneClass: "bg-primary/10 border border-primary/25",  checkColor: "text-primary" },
     { label: "Complete 1 lesson this week", done: data.lesson_week_count >= 1,    icon: "📚", doneClass: "bg-success/10 border border-success/25",  checkColor: "text-success" },
     { label: "Maintain a daily streak",     done: data.streak >= 1,               icon: "🔥", doneClass: "bg-streak/10 border border-streak/25",    checkColor: "text-streak"  },
@@ -896,6 +904,10 @@ function InsightsRow({ data }: { data: DashboardData }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user, updateUser } = useAuthStore()
+  // Saarthi replaces the hero AND owns the readiness number when licensed.
+  const { load: loadAICaps, has: hasAIPack } = useAIStore()
+  useEffect(() => { loadAICaps() }, [loadAICaps])
+  const hasCoach = hasAIPack("ai_coach")
   const [data, setData] = useState<DashboardData | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
@@ -949,9 +961,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
 
-      {/* Saarthi coach — renders nothing unless the college is AI-licensed.
-          Reads a stored plan row; makes no AI call on page load. */}
-      <SaarthiCoachCard />
+      {/* Saarthi hero — approach B. Renders nothing unless the college is
+          AI-licensed; reads a stored plan row and makes no AI call on mount. */}
+      {hasCoach && <SaarthiHero firstName={firstName} />}
 
       {/* ── Hero + Stat cards row ── */}
       {data && (
@@ -1012,8 +1024,12 @@ export default function DashboardPage() {
         <motion.div className="space-y-3"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
           <SectionHeading icon={Target} color={adminCardColor(0)} title="Placement Snapshot" subtitle="Your readiness, activity & college standing" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <PlacementReadinessCard data={data} />
+          <div className={cn("grid grid-cols-1 gap-5",
+                             hasCoach ? "lg:grid-cols-2" : "lg:grid-cols-3")}>
+            {/* Saarthi owns the readiness number when licensed. Showing this
+                card too would put two different scores, from two different
+                formulas, on the same screen. */}
+            {!hasCoach && <PlacementReadinessCard data={data} />}
             <ActivityHeatmapCard data={data} />
             <CollegeLeaderboardCard leaderboard={leaderboard} />
           </div>
@@ -1037,10 +1053,12 @@ export default function DashboardPage() {
         <CodingProfileStats withHeading singleRow />
       </motion.div>
 
-      {/* ── Weekly Missions ── */}
+      {/* ── This week: Saarthi's personalised plan, or the static missions ──
+          Never both — they are two contradictory answers to "what do I do
+          this week", one generic and one built from the student's own data. */}
       {data && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <WeeklyMissionsCard data={data} />
+          {hasCoach ? <SaarthiPlanMissionsCard /> : <WeeklyMissionsCard data={data} />}
         </motion.div>
       )}
 

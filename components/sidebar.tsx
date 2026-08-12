@@ -45,6 +45,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore } from "@/store/authStore"
 import { useUIStore } from "@/store/uiStore"
+import { useAIStore } from "@/store/aiStore"
+import type { PackKey } from "@/lib/ai"
 import { Logo } from "@/components/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { FeedbackModal } from "@/components/feedback-modal"
@@ -71,7 +73,11 @@ type StudentNavSection = {
   type: "section"; id: string; label: string; icon: React.ElementType
   items: NavItem[]; color: NavColor; highlight?: boolean
 }
-type StudentNavItemBlock = { type: "item"; item: NavItem; color: NavColor; highlight?: boolean }
+type StudentNavItemBlock = {
+  type: "item"; item: NavItem; color: NavColor; highlight?: boolean
+  /** Hide unless the college holds this AI pack. See AI_Intigration.md §C3. */
+  requires?: PackKey
+}
 type StudentNavBlock = StudentNavItemBlock | StudentNavSection
 
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Student nav blocks Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
@@ -94,7 +100,7 @@ const studentNavBlocks: StudentNavBlock[] = [
   },
   { type: "item", item: { href: "/domain-programs", label: "Domain Programs", icon: Layers         }, color: "teal",    highlight: true },
   { type: "item", item: { href: "/company-prep",    label: "Company Prep",    icon: Building2      }, color: "orange"  },
-  { type: "item", item: { href: "/my-plan",         label: "My Plan",         icon: Sparkles       }, color: "violet", highlight: true },
+  { type: "item", item: { href: "/my-plan",         label: "My Plan",         icon: Sparkles       }, color: "violet", highlight: true, requires: "ai_coach" },
   {
     type: "section", id: "placement", label: "Placement Cell", icon: GraduationCap, color: "emerald", highlight: true,
     items: [
@@ -224,6 +230,19 @@ export function Sidebar() {
   const navItems =
     role === "branch_admin" ? branchAdminNavItems
     : studentNavItems
+
+  // AI-gated nav. Capabilities are fetched once per session and cost nothing.
+  // Only students have AI-gated entries, so don't call it for admins.
+  const { caps, load: loadCaps, has: hasPack } = useAIStore()
+  React.useEffect(() => { if (role === "student") loadCaps() }, [role, loadCaps])
+
+  // Fail CLOSED: hide until capabilities confirm the grant. A college without
+  // an AI pack must never see the entry — not even briefly on first paint.
+  const visibleStudentBlocks = React.useMemo(
+    () => studentNavBlocks.filter((b) =>
+      b.type !== "item" || !b.requires || (!!caps && hasPack(b.requires))),
+    [caps, hasPack],
+  )
 
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     const s: Record<string, boolean> = {}
@@ -401,7 +420,7 @@ export function Sidebar() {
           /* Student nav */
           ) : role === "student" ? (
             <ul className="space-y-0.5">
-              {studentNavBlocks.map((block) => {
+              {visibleStudentBlocks.map((block) => {
                 const c = C[block.color]
 
                 /* Ã¢â€â‚¬Ã¢â€â‚¬ Standalone item Ã¢â€â‚¬Ã¢â€â‚¬ */

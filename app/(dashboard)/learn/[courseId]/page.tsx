@@ -27,6 +27,7 @@ import {
   X,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { saarthi } from "@/lib/saarthi-events"
 import { fireStars, fireSchoolPride } from "@/lib/effects"
 import { PointsBurst } from "@/components/points-burst"
 import { GlassCard } from "@/components/glass-card"
@@ -903,6 +904,8 @@ export default function CourseDetailPage() {
       updateUser({ points: total_points })
 
       fireStars()
+      // Tell Saarthi. Zero tokens — she reacts from a local line bank.
+      saarthi.emit("lesson_complete", { title: activeLesson?.title ?? "" })
       setLessonCompleteAnim(true)
       setEarnedPoints(points_earned > 0 ? points_earned : 10)
       setShowPointsBurst(true)

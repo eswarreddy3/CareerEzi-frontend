@@ -13,7 +13,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import {
   CalendarDays, CheckCircle2, ChevronRight, Loader2, RefreshCw, Sun,
-  Target, TrendingUp, Lightbulb, Lock,
+  Target, TrendingUp, Lightbulb, Lock, GraduationCap,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -21,6 +21,7 @@ import { GlassCard } from "@/components/glass-card"
 import { SaarthiOrb, type SaarthiMood } from "@/components/saarthi/orb"
 import { ReadinessRing, bandTone } from "@/components/saarthi/readiness-ring"
 import { PlanItemRow } from "@/components/saarthi/plan-item"
+import { TopicGuideSheet } from "@/components/saarthi/topic-guide-sheet"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAIStore } from "@/store/aiStore"
@@ -34,14 +35,23 @@ export default function MyPlanPage() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [celebrated, setCelebrated] = useState(false)
+  const [denied, setDenied] = useState(false)
+  const [guideTopic, setGuideTopic] = useState<string | null>(null)
 
   useEffect(() => { load() }, [load])
 
   const loadPlan = useCallback(async () => {
     try {
       setPlan(await fetchPlan())
+      setDenied(false)
     } catch (e: any) {
-      if (e?.response?.status !== 403) toast.error("Could not load your plan")
+      const status = e?.response?.status
+      // The BACKEND is the authority on access, not the capabilities cache.
+      // Gating the render on `caps` raced with this fetch: when the plan
+      // resolved first, caps was still null and the page wrongly showed
+      // "Not available" to a student who genuinely had access.
+      if (status === 403) setDenied(true)
+      else toast.error(e?.response?.data?.message ?? "Could not load your plan")
     } finally {
       setLoading(false)
     }
@@ -79,7 +89,7 @@ export default function MyPlanPage() {
     } finally { setBusy(false) }
   }
 
-  if (loading || (!caps && !plan)) {
+  if (loading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-60 w-full rounded-2xl" />
@@ -88,7 +98,7 @@ export default function MyPlanPage() {
     )
   }
 
-  if (!has("ai_coach") || !plan) {
+  if (denied) {
     return (
       <GlassCard className="p-10 text-center">
         <Lock className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -96,6 +106,20 @@ export default function MyPlanPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Your college doesn&apos;t have this feature enabled.
         </p>
+      </GlassCard>
+    )
+  }
+
+  // Reachable when the request failed for a non-403 reason (server error,
+  // network). Offer a retry rather than pretending it's a licensing problem.
+  if (!plan) {
+    return (
+      <GlassCard className="p-10 text-center">
+        <h2 className="font-serif text-xl font-semibold">Couldn&apos;t load your plan</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Something went wrong on our side.</p>
+        <Button className="mt-4" onClick={() => { setLoading(true); loadPlan() }}>
+          <RefreshCw className="mr-1.5 h-4 w-4" />Try again
+        </Button>
       </GlassCard>
     )
   }
@@ -208,6 +232,24 @@ export default function MyPlanPage() {
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">{narration.weakness_note}</p>
 
+          {!!plan.highlights?.weak_topics?.length && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {plan.highlights.weak_topics.map((w) => (
+                <button
+                  key={w.topic}
+                  onClick={() => setGuideTopic(w.topic)}
+                  className="chip chip-warning inline-flex items-center gap-1 transition-opacity hover:opacity-80"
+                >
+                  <GraduationCap className="h-3 w-3" />
+                  {w.topic} · {w.accuracy}%
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Tap a topic and Saarthi will walk you through it.
+          </p>
+
           <div className="mt-4 space-y-2">
             {readiness.gaps.map((gap, i) => (
               <div key={i} className="rounded-lg border border-border bg-card/60 p-3">
@@ -261,6 +303,12 @@ export default function MyPlanPage() {
           </div>
         </GlassCard>
       </div>
+
+      <TopicGuideSheet
+        topic={guideTopic}
+        open={!!guideTopic}
+        onClose={() => setGuideTopic(null)}
+      />
 
       <p className="pb-2 text-center text-[11px] text-muted-foreground">
         Updated {new Date(plan.generated_at).toLocaleString()} · Saarthi builds this from your own activity
