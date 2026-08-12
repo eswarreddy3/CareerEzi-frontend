@@ -8,7 +8,7 @@
  * per surface. Unlicensed colleges keep the original card untouched.
  *
  * What makes it feel like a tutor rather than a widget:
- *   - Saarthi greets by name and reacts live to what the student does
+ *   - Saarthi greets by name (the narration greeting IS the heading)
  *   - "Insight chips" state facts no generic chatbot could know — batch
  *     standing, their own study hours, days to their next drive
  *   - One clear next action, not a wall of metrics
@@ -24,10 +24,9 @@ import {
 } from "lucide-react"
 
 import { GlassCard } from "@/components/glass-card"
-import { SaarthiPresence } from "@/components/saarthi/saarthi-presence"
+import { SaarthiOrb } from "@/components/saarthi/orb"
 import { ReadinessRing, bandTone } from "@/components/saarthi/readiness-ring"
 import { Skeleton } from "@/components/ui/skeleton"
-import { saarthi } from "@/lib/saarthi-events"
 import { fetchPlan, type StudyPlan } from "@/lib/ai"
 import { cn } from "@/lib/utils"
 
@@ -47,16 +46,6 @@ export function SaarthiHero({ firstName }: { firstName?: string }) {
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
-
-  // Greet once the plan is in, so the first thing on screen is Saarthi noticing you.
-  useEffect(() => {
-    if (!plan) return
-    const t = setTimeout(() => {
-      saarthi.emit("greet", { name: firstName ?? "" },
-                   plan.narration?.greeting || undefined)
-    }, 650)
-    return () => clearTimeout(t)
-  }, [plan, firstName])
 
   const chips = useMemo(() => buildChips(plan), [plan])
 
@@ -104,8 +93,11 @@ export function SaarthiHero({ firstName }: { firstName?: string }) {
                 {narration?.focus ?? "Open your plan to see what's next."}
               </p>
             </div>
-            {/* Live reactions land here */}
-            <SaarthiPresence size={64} baseMood={baseMood} className="hidden shrink-0 sm:flex" />
+            {/* A plain orb, NOT a SaarthiPresence. The floating companion in
+                the dashboard layout already owns live reactions everywhere;
+                mounting a second reactive Saarthi here would pop two bubbles
+                for the same event. */}
+            <SaarthiOrb mood={baseMood} size={64} className="hidden shrink-0 sm:block" />
           </div>
 
           {!!chips.length && (

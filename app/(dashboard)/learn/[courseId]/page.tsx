@@ -920,6 +920,7 @@ export default function CourseDetailPage() {
       if (course_completion_bonus > 0) {
         setTimeout(() => {
           fireSchoolPride()
+          saarthi.emit("course_complete", { title: course?.title ?? "" })
           toast.success(`Course complete! +${course_completion_bonus} bonus pts 🎓`, {
             description: "Fynity is issuing your certificate — it'll be emailed to you shortly.",
             duration: 8000,

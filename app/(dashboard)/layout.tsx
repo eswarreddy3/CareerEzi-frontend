@@ -1,6 +1,7 @@
 "use client"
 
 import { Sidebar } from "@/components/sidebar"
+import { SaarthiMount } from "@/components/saarthi/saarthi-mount"
 import { useUIStore } from "@/store/uiStore"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +28,10 @@ export default function DashboardLayout({
           {children}
         </div>
       </main>
+
+      {/* Floating Saarthi — students at AI-licensed colleges only.
+          Renders nothing for anyone else. */}
+      <SaarthiMount />
     </div>
   )
 }

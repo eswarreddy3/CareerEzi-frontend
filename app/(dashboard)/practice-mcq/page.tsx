@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState, useEffect, useCallback } from "react"
+import { Suspense, useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { saarthi } from "@/lib/saarthi-events"
 import { useAuthStore } from "@/store/authStore"
 import { motion } from "framer-motion"
 import { AdminHero, adminCardColor, adminCardGradient, SurfaceTexture } from "@/components/admin-stat-card"
@@ -148,6 +149,10 @@ function PracticeMCQContent() {
   const [loadingAptQ, setLoadingAptQ] = useState(false)
   const [aptSidebarOpen, setAptSidebarOpen] = useState(true)
 
+  // Consecutive correct answers, for Saarthi's streak reaction. A ref, not
+  // state — it must never trigger a re-render of the question list.
+  const correctRun = useRef(0)
+
   const { updateUser } = useAuthStore()
 
   // ── Programming: load topics ───────────────────────────────────────────────
@@ -242,8 +247,16 @@ function PracticeMCQContent() {
       updateUser({ points: result.total_points })
       if (result.correct) {
         toast.success(`Correct!${result.points_earned > 0 ? ` +${result.points_earned} pts` : ""}`)
+        // Saarthi reacts. A run of correct answers is worth more than each one
+        // individually, so she only calls out the streak from 3 up.
+        const run = correctRun.current + 1
+        correctRun.current = run
+        if (run >= 3) saarthi.emit("mcq_streak", { count: run, nonce: run })
+        else saarthi.emit("mcq_correct", { nonce: run })
       } else {
+        correctRun.current = 0
         toast.error("Incorrect — try again")
+        saarthi.emit("mcq_wrong")
       }
       api.get("/mcq/topics").then((res) => setTopics(res.data)).catch(() => {})
     } catch {

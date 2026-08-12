@@ -8,7 +8,7 @@
  * no matter how often it's opened.
  */
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useAIStore } from "@/store/aiStore"
 import { fetchPlan, refreshPlan, setPlanMode, type StudyPlan } from "@/lib/ai"
 import { fireStars } from "@/lib/effects"
+import { saarthi } from "@/lib/saarthi-events"
 import { cn } from "@/lib/utils"
 
 export default function MyPlanPage() {
@@ -64,8 +65,21 @@ export default function MyPlanPage() {
     if (plan && plan.progress.total > 0 && plan.progress.done === plan.progress.total && !celebrated) {
       setCelebrated(true)
       fireStars()
+      saarthi.emit("plan_complete")
     }
   }, [plan, celebrated])
+
+  // Items tick from live data on each read, so a student returning after doing
+  // the work sees Saarthi notice it. Only fires when the count actually rises.
+  const prevDone = useRef<number | null>(null)
+  useEffect(() => {
+    if (!plan) return
+    const done = plan.progress.done
+    if (prevDone.current !== null && done > prevDone.current && done < plan.progress.total) {
+      saarthi.emit("plan_item_done", { left: plan.progress.total - done })
+    }
+    prevDone.current = done
+  }, [plan])
 
   async function changeMode(mode: "daily" | "weekly") {
     if (!plan || plan.plan_mode === mode || busy) return
@@ -83,9 +97,14 @@ export default function MyPlanPage() {
       setCelebrated(false)
       toast.success("Plan rebuilt from your latest activity")
     } catch (e: any) {
-      toast.error(e?.response?.status === 429
-        ? "You've used your plan refreshes for today"
-        : "Could not refresh your plan")
+      if (e?.response?.status === 429) {
+        // Backstop: another tab may have spent the last rebuild.
+        const q = e.response.data?.quota
+        if (q) setPlan((p) => (p ? { ...p, quota: q } : p))
+        toast.error(e.response.data?.message ?? "No rebuilds left today")
+      } else {
+        toast.error("Could not refresh your plan")
+      }
     } finally { setBusy(false) }
   }
 
@@ -124,7 +143,13 @@ export default function MyPlanPage() {
     )
   }
 
-  const { readiness, narration, items, progress } = plan
+  const { readiness, narration, items, progress, quota } = plan
+  // Only Rebuild is rationed. Reading the plan, switching mode and opening a
+  // topic guide are all free and must never be blocked by this.
+  const outOfRebuilds = !!quota && quota.limit > 0 && (quota.remaining ?? 0) <= 0
+  const resetsAtLabel = quota?.resets_at
+    ? new Date(quota.resets_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    : "midnight"
   const allDone = progress.total > 0 && progress.done === progress.total
   const mood: SaarthiMood = allDone ? "celebrating"
     : readiness.score < 35 ? "concerned" : "idle"
@@ -176,11 +201,30 @@ export default function MyPlanPage() {
                   </button>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={doRefresh} disabled={busy}>
-                {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
-                Rebuild
-              </Button>
+              {/* Rebuild is the ONLY action that costs anything, so it is the
+                  only one that carries a daily limit. The button knows its own
+                  state from the plan payload — no click needed to find out. */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline" size="sm" onClick={doRefresh}
+                  disabled={busy || outOfRebuilds}
+                  title={outOfRebuilds
+                    ? `No rebuilds left today. Resets at ${resetsAtLabel}.`
+                    : "Rebuild your plan from your latest activity"}
+                >
+                  {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        : <RefreshCw className="mr-1.5 h-3.5 w-3.5" />}
+                  Rebuild
+                </Button>
+                {quota && quota.limit > 0 && (
+                  <span className={cn("font-mono text-[11px] tabular-nums",
+                                      outOfRebuilds ? "text-warning" : "text-muted-foreground")}>
+                    {outOfRebuilds
+                      ? `resets ${resetsAtLabel}`
+                      : `${quota.remaining ?? quota.limit - quota.used} left today`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
