@@ -6,8 +6,8 @@ const dsaContent: Record<number, string> = {
 1: `# Data Structure Introduction
 
 :::scenario
-Definition
-A Data Structure is a way to store and organise data in computer memory so that it can be accessed and processed efficiently.It is NOT a programming language like C, C++, or Java — it is a way of organizing and storing data in memory, along with operations that can be performed on it.The name itself says it all: Data Structure = Organising Data in Memory.
+**Definition**
+A Data Structure is a way to store and organise data in computer memory so that it can be accessed and processed efficiently. It is NOT a programming language like C, C++, or Java — it is a way of organizing and storing data in memory, along with operations that can be performed on it. The name itself says it all: Data Structure = Organising Data in Memory.
 :::
 
 ## What is Data?
@@ -26,7 +26,8 @@ As applications are getting complex and the amount of data is increasing day by 
 - Multiple Requests — If thousands of users are searching data simultaneously on a web server, there are chances that search will fail or be very slow.
 
 :::tip
-The SolutionData Structures organise data in a way that the required data can be searched and retrieved efficiently, often reducing the need to traverse all items. This is what makes programs fast.
+**The Solution**
+Data Structures organise data in a way that the required data can be searched and retrieved efficiently, often reducing the need to traverse all items. This is what makes programs fast.
 :::
 
 ## Advantages of Data Structures
@@ -52,8 +53,7 @@ ADT gives us the blueprint, while the data structure provides the implementation
 
 | Operation | Definition | Example |
 | --- | --- | --- |
-| Traversing | 
-Visit each element at least once to perform an operation like searching or sorting | Calculate average of marks by visiting each element |
+| Traversing | Visit each element at least once to perform an operation like searching or sorting | Calculate average of marks by visiting each element |
 | Insertion | Process of adding a new element to the data structure at any location | Adding a new student record to an array |
 | Deletion | Process of removing an element from the data structure | Removing an employee from the company record |
 | Searching | Finding the location of an element within a data structure (Eg: Linear, Binary search) | Finding a student by roll number |
@@ -71,11 +71,7 @@ Visit each element at least once to perform an operation like searching or sorti
 | Printer Queue | Queue (FIFO) |
 | File System (Folders/Files) | Trees |
 | Database Indexing | B+ Trees, Hash Tables |
-| Undo/Redo in MS Word | Stack |
-
-:::insight
-
-:::`,
+| Undo/Redo in MS Word | Stack |`,
 
 // ─────────────────────────────────────────────────────────────────
 2: `# Classification of Data Structures
@@ -145,8 +141,8 @@ In a non-linear data structure, one element can be connected to MORE THAN ONE el
 3: `# Introduction to Algorithms
 
 :::scenario
-Definition
-An Algorithm is a process or a set of rules required to perform calculations or some other problem-solving operations especially by a computer.It is NOT a complete program or code — it is just the logic (solution) of a problem which can be represented either as an informal description using a Flowchart or Pseudocode.An algorithm is language-independent — the same algorithm can be coded in C, Java, Python, or any other language.
+**Definition**
+An Algorithm is a process or a set of rules required to perform calculations or some other problem-solving operations especially by a computer. It is NOT a complete program or code — it is just the logic (solution) of a problem which can be represented either as an informal description using a Flowchart or Pseudocode. An algorithm is language-independent — the same algorithm can be coded in C, Java, Python, or any other language.
 :::
 
 ## Characteristics of a Good Algorithm
@@ -155,9 +151,7 @@ An Algorithm is a process or a set of rules required to perform calculations or 
 | --- | --- | --- | --- |
 | Input | Takes 0 or more inputs | No way to pass values | function add(a, b) — takes 2 inputs |
 | Output | Produces 1 or more outputs | Function with no return | return sum — produces a result |
-| Unambiguity | Every step is clear and simple | Vague step: 'do something' | 
-Step 3: if a > b then pr
-int a |
+| Unambiguity | Every step is clear and simple | Vague step: 'do something' | Step 3: if a > b then print a |
 | Finiteness | Terminates after finite steps | Infinite while(true) loop | Loop runs exactly n times then stops |
 | Effectiveness | Each step is basic & executable | Step involving impossible math | x = a + b (basic arithmetic) |
 
@@ -184,8 +178,7 @@ It is an algorithm paradigm that makes an optimal choice on each iteration with 
 
 ### 4. Dynamic Programming
 
-Breaks complex problems into simpler subproblems and stores results of subproblems to a
-void recomputation. Uses memoisation (top-down) or tabulation (bottom-up). Examples: Fibonacci, Longest Common Subsequence.
+Breaks complex problems into simpler subproblems and stores results of subproblems to avoid recomputation. Uses memoisation (top-down) or tabulation (bottom-up). Examples: Fibonacci, Longest Common Subsequence.
 
 ## Algorithm Categories
 
@@ -243,7 +236,8 @@ Step 6: STOP
 4: `# Asymptotic Analysis — Big O, Ω, Θ
 
 :::scenario
-Why Asymptotic Analysis?The time required by an algorithm comes under three types: Worst Case, Average Case, and Best Case.We need a HARDWARE-INDEPENDENT way to measure algorithm efficiency. Asymptotic analysis describes how running time or space GROWS as input size (n) grows — regardless of machine speed.We generally consider WORST-CASE complexity as it is the maximum time taken for any given input size.
+**Why Asymptotic Analysis?**
+The time required by an algorithm comes under three types: Worst Case, Average Case, and Best Case. We need a HARDWARE-INDEPENDENT way to measure algorithm efficiency. Asymptotic analysis describes how running time or space GROWS as input size (n) grows — regardless of machine speed. We generally consider WORST-CASE complexity as it is the maximum time taken for any given input size.
 :::
 
 ## Types of Cases
@@ -374,7 +368,8 @@ else high=mid-1;             // each iteration halves → O(log n)
 5: `# DS — Pointers
 
 :::scenario
-What is a Pointer?A Pointer is a variable that STORES THE MEMORY ADDRESS of another variable. Instead of holding a data value directly, it holds the location (address) where data lives in memory.Every variable in a program is stored at a specific memory address. Pointers let us directly access and manipulate that memory.
+**What is a Pointer?**
+A Pointer is a variable that STORES THE MEMORY ADDRESS of another variable. Instead of holding a data value directly, it holds the location (address) where data lives in memory. Every variable in a program is stored at a specific memory address. Pointers let us directly access and manipulate that memory.
 :::
 
 ## Memory and Addresses — How It Works
@@ -426,8 +421,7 @@ Value of a = 5  Address of a (stored in b) = 2831685116  Value of b = address of
 | --- | --- | --- |
 | NULL Pointer | Points to nothing — safer than uninitialized | int *p = NULL; |
 | Wild Pointer | Uninitialized — points to random location — DANGEROUS | int *p; (without =NULL) |
-| Void Pointer | Generic pointer — can po
-int to any data type | void *p; |
+| Void Pointer | Generic pointer — can point to any data type | void *p; |
 | Double Pointer | Pointer to a pointer — stores address of a pointer | int **p = &ptr; |
 | Dangling Pointer | Points to freed/deleted memory — causes crashes | free(p); then use p → undefined |
 | Constant Pointer | Pointer address cannot change, but value can | int * const p = &a; |
@@ -460,7 +454,8 @@ int *p1 = &arr[0];
 6: `# DS — Structures
 
 :::scenario
-What is a Structure?A Structure (struct) is a user-defined composite data type that defines a GROUPED LIST OF VARIABLES placed under one name in a block of memory.Think of it as a custom 'blueprint' or 'template' — like a form with multiple fields of different types all belonging to one entity.Unlike an array (same type only), a structure can hold variables of DIFFERENT data types.
+**What is a Structure?**
+A Structure (struct) is a user-defined composite data type that defines a GROUPED LIST OF VARIABLES placed under one name in a block of memory. Think of it as a custom 'blueprint' or 'template' — like a form with multiple fields of different types all belonging to one entity. Unlike an array (same type only), a structure can hold variables of DIFFERENT data types.
 :::
 
 ## Declaring a Structure — Syntax
@@ -568,7 +563,8 @@ printf('Roll: %d, Name: %s\\n', students[i].roll_no, students[i].name);
 7: `# DS — Arrays
 
 :::scenario
-What is an Array?An Array is a collection of elements of the SAME DATA TYPE stored in CONTIGUOUS (adjacent) memory locations. Elements are accessed using an index number starting from 0.Arrays are the simplest and most widely used data structure. They form the backbone of more complex data structures like stacks, queues, and heaps.
+**What is an Array?**
+An Array is a collection of elements of the SAME DATA TYPE stored in CONTIGUOUS (adjacent) memory locations. Elements are accessed using an index number starting from 0. Arrays are the simplest and most widely used data structure. They form the backbone of more complex data structures like stacks, queues, and heaps.
 :::
 
 ## Memory Layout of an Array
@@ -608,8 +604,7 @@ int matrix[2][3] = {{1,2,3},{4,5,6}};
 
 ## Array Operations with Code
 
-### Traversal — 
-Visit Each Element
+### Traversal — Visit Each Element
 
 \`\`\`
 int arr[5] = {10, 20, 30, 40, 50};
@@ -714,7 +709,8 @@ Space Complexity for worst case is O(n) — where n is the number of elements st
 8: `# DS — Linked List
 
 :::scenario
-Why Do We Need a Linked List?Limitation of Arrays: If we declare an array of size 3, we can only store 3 values (stored contiguously). Total memory used = 3 × 4 = 12 bytes.Drawbacks: (1) Cannot insert more than 3 elements. (2) Memory wastage if array is not full. (3) Fixed size at compile time — no flexibility.SOLUTION: Linked List — elements are NOT stored contiguously. Each node stores its data and a pointer to the next node. Size can grow/shrink dynamically at runtime.
+**Why Do We Need a Linked List?**
+Limitation of Arrays: If we declare an array of size 3, we can only store 3 values (stored contiguously). Total memory used = 3 × 4 = 12 bytes. Drawbacks: (1) Cannot insert more than 3 elements. (2) Memory wastage if array is not full. (3) Fixed size at compile time — no flexibility. SOLUTION: Linked List — elements are NOT stored contiguously. Each node stores its data and a pointer to the next node. Size can grow/shrink dynamically at runtime.
 :::
 
 ## What is a Linked List?
@@ -819,8 +815,7 @@ temp->next = NULL;   // second-last becomes last
 }
 \`\`\`
 
-### 4. Traversal — Pr
-int All Nodes
+### 4. Traversal — Print All Nodes
 
 \`\`\`
 void traverse(struct Node* head) {
@@ -912,7 +907,8 @@ temp->next = newNode;
 9: `# DS — Skip List
 
 :::scenario
-What is a Skip List?A Skip List is a probabilistic data structure built on top of a SORTED Linked List. It adds multiple levels of 'express lanes' with fewer elements — allowing O(log n) average search instead of O(n).Think of it like a city bus system: a slow bus stops everywhere, an express bus only stops at major stops. You ride the express as far as possible, then transfer to the slow bus.Skip Lists are an alternative to balanced BSTs (AVL, Red-Black Trees) — simpler to implement with similar average performance.
+**What is a Skip List?**
+A Skip List is a probabilistic data structure built on top of a SORTED Linked List. It adds multiple levels of 'express lanes' with fewer elements — allowing O(log n) average search instead of O(n). Think of it like a city bus system: a slow bus stops everywhere, an express bus only stops at major stops. You ride the express as far as possible, then transfer to the slow bus. Skip Lists are an alternative to balanced BSTs (AVL, Red-Black Trees) — simpler to implement with similar average performance.
 :::
 
 ## Skip List Structure — Visual
@@ -984,7 +980,8 @@ if(curr && curr->key == key)
 10: `# DS — Stack
 
 :::scenario
-What is a Stack?A Stack is a linear data structure that follows the LIFO principle — LAST IN, FIRST OUT.The element inserted LAST is the first to be REMOVED. Think of a stack of plates — you always add and remove from the TOP.Real-life example: Undo button (Ctrl+Z) — the last action done is the first to be undone.
+**What is a Stack?**
+A Stack is a linear data structure that follows the LIFO principle — LAST IN, FIRST OUT. The element inserted LAST is the first to be REMOVED. Think of a stack of plates — you always add and remove from the TOP. Real-life example: Undo button (Ctrl+Z) — the last action done is the first to be undone.
 :::
 
 ## Stack — Visual Diagram
@@ -1163,15 +1160,15 @@ If we have to create a path to solve a maze, if we are moving in a particular pa
 | pop() | O(1) | O(1) |
 | peek() | O(1) | O(1) |
 | isEmpty() | O(1) | O(1) |
-| Traversal (pr
-int all) | O(n) | O(1) |
+| Traversal (print all) | O(n) | O(1) |
 | Total Space (n elements) | — | O(n) |`,
 
 // ─────────────────────────────────────────────────────────────────
 11: `# DS — Queue
 
 :::scenario
-What is a Queue?A Queue is a linear data structure that can be defined as an ORDERED LIST which enables insert operations at one end called REAR and delete operations at another end called FRONT.Queue is referred to as FIRST IN FIRST OUT (FIFO) list — the element inserted first is the first to be removed.Real-life example: People standing in a queue/line — the first person to join the queue gets served first.
+**What is a Queue?**
+A Queue is a linear data structure that can be defined as an ORDERED LIST which enables insert operations at one end called REAR and delete operations at another end called FRONT. Queue is referred to as FIRST IN FIRST OUT (FIFO) list — the element inserted first is the first to be removed. Real-life example: People standing in a queue/line — the first person to join the queue gets served first.
 :::
 
 ## Queue — Visual Diagram
@@ -1283,8 +1280,7 @@ Elements are served based on PRIORITY rather than their order of arrival. Higher
 | Application | How Queue is Used |
 | --- | --- |
 | CPU Scheduling (FCFS) | Processes wait in queue — first to arrive is first to execute |
-| Printer Queue | Pr
-int jobs queued — first submitted is first printed |
+| Printer Queue | Print jobs queued — first submitted is first printed |
 | Web Server Requests | HTTP requests processed in order of arrival |
 | BFS Graph Traversal | Nodes to visit stored in queue — processed level by level |
 | Keyboard Buffer | Characters typed stored in queue — displayed in order |
@@ -1306,7 +1302,8 @@ int jobs queued — first submitted is first printed |
 12: `# DS — Trees
 
 :::scenario
-What is a Tree?We have read data structures like Array, Linked List, Stack, and Queue — in all of them, elements are arranged in a SEQUENTIAL manner.A Tree is a NON-LINEAR data structure because it does not store data in a sequential manner. It is a HIERARCHICAL structure as elements in a tree are arranged at multiple levels.Definition: A Tree is a collection of objects or entities known as NODES that are linked together to represent or simulate hierarchy.In tree data structure, the topmost node is called the ROOT node. Each node contains some data and links (references) to other nodes that can be called its CHILDREN.
+**What is a Tree?**
+We have read data structures like Array, Linked List, Stack, and Queue — in all of them, elements are arranged in a SEQUENTIAL manner. A Tree is a NON-LINEAR data structure because it does not store data in a sequential manner. It is a HIERARCHICAL structure as elements in a tree are arranged at multiple levels. Definition: A Tree is a collection of objects or entities known as NODES that are linked together to represent or simulate hierarchy. In tree data structure, the topmost node is called the ROOT node. Each node contains some data and links (references) to other nodes that can be called its CHILDREN.
 :::
 
 ## Tree Structure — Visual Diagram
@@ -1362,11 +1359,9 @@ node->data = value;
 | Complete Binary Tree | All levels completely filled EXCEPT possibly last; last level filled left to right | Used in Heap data structure |
 | Perfect Binary Tree | ALL internal nodes have exactly 2 children AND all leaves are at same level | Used in symmetry-based algorithms |
 | Balanced Binary Tree | Height of left and right subtrees differs by at most 1 for ALL nodes | AVL Tree, Red-Black Tree |
-| Degenerate / Skewed Tree | Every node has only ONE child — behaves like a Linked List (worst case for BST) | O(n) search — a
-void this! |
+| Degenerate / Skewed Tree | Every node has only ONE child — behaves like a Linked List (worst case for BST) | O(n) search — avoid this! |
 
-## Tree Traversals — 4 Ways to 
-Visit All Nodes
+## Tree Traversals — 4 Ways to Visit All Nodes
 Traversal means visiting all nodes of a tree exactly once. There are 4 main traversals:
 
 ### 1. Inorder Traversal — Left → Node → Right (LNR)
@@ -1455,8 +1450,7 @@ printf('%d ', node->data);
 
 | Property | Formula | Example (height=3) |
 | --- | --- | --- |
-| Maximum nodes at level i | 2^i | 
-Level 3: 2³ = 8 nodes |
+| Maximum nodes at level i | 2^i | Level 3: 2³ = 8 nodes |
 | Maximum nodes in height-h tree | 2^(h+1) - 1 | Height 3: 2⁴-1 = 15 nodes |
 | Minimum height for n nodes | ⌊log₂(n)⌋ | n=7 nodes: ⌊log₂7⌋ = 2 |
 | Minimum nodes at height h | h + 1 | Height 3: minimum 4 nodes |
@@ -1473,7 +1467,8 @@ BST Property
 For EVERY node in the tree:
 •  All values in the LEFT subtree < Node value
 •  All values in the RIGHT subtree > Node value
-•  Both left and right subtrees must also be BSTsThis property allows O(log n) search on a balanced BST!
+•  Both left and right subtrees must also be BSTs
+This property allows O(log n) search on a balanced BST!
 \`\`\`
 
 \`\`\`
@@ -1602,7 +1597,8 @@ Time complexity for search: O(L) where L = length of the word. Space: O(ALPHABET
 14: `# DS — Graphs
 
 :::scenario
-What is a Graph?A Graph G can be defined as an ordered set G(V, E) where V(G) represents the SET OF VERTICES and E(G) represents the SET OF EDGES connecting those vertices.Unlike Trees, Graphs can have CYCLES and a vertex can connect to ANY other vertex — there is no parent-child hierarchy. Trees are actually a special case of graphs (connected, acyclic).
+**What is a Graph?**
+A Graph G can be defined as an ordered set G(V, E) where V(G) represents the SET OF VERTICES and E(G) represents the SET OF EDGES connecting those vertices. Unlike Trees, Graphs can have CYCLES and a vertex can connect to ANY other vertex — there is no parent-child hierarchy. Trees are actually a special case of graphs (connected, acyclic).
 :::
 
 ## Graph — Visual Example
@@ -1621,8 +1617,7 @@ E = {A→B, D→A, D→B, D→C, D→E}
 
 | Term | Definition | Example |
 | --- | --- | --- |
-| Vertex (V) | A node or po
-int in the graph | A, B, C, D, E in the graph above |
+| Vertex (V) | A node or point in the graph | A, B, C, D, E in the graph above |
 | Edge (E) | A connection/link between two vertices | A-B is an edge connecting A and B |
 | Degree | Number of edges connected to a vertex | Degree of D = 3 (B-D, C-D, D-E) |
 | In-Degree | Number of edges COMING IN to a vertex (directed) | A's in-degree = 1 (D→A) |
@@ -1715,7 +1710,8 @@ g->array[dest].head = n;
 15: `# Graph Traversal — BFS & DFS
 
 :::scenario
-What is Graph Traversal?Graph traversal means visiting all vertices of a graph. Unlike trees (which have one root), graphs may have cycles and disconnected components — so we need to track visited nodes.Two fundamental strategies: BFS (Breadth First Search) explores layer by layer using a QUEUE, while DFS (Depth First Search) goes as deep as possible using a STACK.
+**What is Graph Traversal?**
+Graph traversal means visiting all vertices of a graph. Unlike trees (which have one root), graphs may have cycles and disconnected components — so we need to track visited nodes. Two fundamental strategies: BFS (Breadth First Search) explores layer by layer using a QUEUE, while DFS (Depth First Search) goes as deep as possible using a STACK.
 :::
 
 ## Breadth First Search (BFS)
@@ -1859,7 +1855,8 @@ if(graph[v][u]==1 && !visited[u])
 16: `# Searching
 
 :::scenario
-What is Searching?Searching is the process of finding a specific element (the 'key') within a data structure. On each day, we search for something in our daily life. Similarly, in computer science, huge data is stored in a computer that whenever user asks for any data, the computer searches for that data in memory and provides it to the user.There are mainly two techniques available to search data in an array: Linear Search and Binary Search.
+**What is Searching?**
+Searching is the process of finding a specific element (the 'key') within a data structure. On each day, we search for something in our daily life. Similarly, in computer science, huge data is stored in a computer that whenever user asks for any data, the computer searches for that data in memory and provides it to the user. There are mainly two techniques available to search data in an array: Linear Search and Binary Search.
 :::
 
 ## 1. Linear Search
@@ -2007,12 +2004,15 @@ Position Formula:  pos = low + [ (key - arr[low]) × (high - low) ]
 | Interpolation | O(1) | O(log log n) | O(n) | Sorted + uniform | O(1) |
 | Exponential | O(1) | O(log n) | O(log n) | Sorted array | O(log n) |
 | Fibonacci Search | O(1) | O(log n) | O(log n) | Sorted array | O(1) |
-| 💡 When to Use Which?
-•  Unsorted / small array → Linear Search
-•  Large sorted array → Binary Search
-•  Large sorted array with uniform distribution → Interpolation Search
-•  Very large sorted data (disk-based) → Exponential or Jump Search
-•  Searching strings / words → Trie + Linear or Hashing |  |  |  |  |  |`,
+
+:::tip
+**When to Use Which?**
+- Unsorted / small array → Linear Search
+- Large sorted array → Binary Search
+- Large sorted array with uniform distribution → Interpolation Search
+- Very large sorted data (disk-based) → Exponential or Jump Search
+- Searching strings / words → Trie + Linear or Hashing
+:::`,
 
 // ─────────────────────────────────────────────────────────────────
 17: `# Searching Algorithms with Examples
@@ -2026,7 +2026,8 @@ All four searching algorithms (Linear, Binary, Jump, Interpolation) with complex
 18: `# Sorting Algorithms
 
 :::scenario
-What is Sorting?Sorting is the process of arranging elements in a specific order — ascending or descending. Sorting algorithms are used to rearrange elements in an array or a given data structure either in an ascending or descending order. The comparison operator decides the new order of elements.Sorting is fundamental because: (1) Binary Search requires sorted data. (2) Many algorithms work faster on sorted data. (3) Data presentation is clearer when sorted.
+**What is Sorting?**
+Sorting is the process of arranging elements in a specific order — ascending or descending. Sorting algorithms are used to rearrange elements in an array or a given data structure either in an ascending or descending order. The comparison operator decides the new order of elements. Sorting is fundamental because: (1) Binary Search requires sorted data. (2) Many algorithms work faster on sorted data. (3) Data presentation is clearer when sorted.
 :::
 
 ## All Sorting Algorithms — Complexity Overview
@@ -2224,8 +2225,7 @@ heapify(arr, i, 0);  // restore heap property
 
 ## Sorting Algorithm Selection Guide
 
-| Situation / Constra
-int | Best Sorting Algorithm |
+| Situation / Constraint | Best Sorting Algorithm |
 | --- | --- |
 | Small dataset (n < 20) | Insertion Sort — low overhead, simple |
 | Nearly sorted data | Insertion Sort — O(n) best case |
@@ -2248,7 +2248,8 @@ All six sorting algorithm implementations (Bubble, Selection, Insertion, Merge, 
 20: `# DS Interview Questions — 50 Q&A
 
 :::scenario
-Interview PreparationThese 50 questions cover the most frequently asked DSA interview questions at top tech companies like Google, Amazon, Microsoft, Meta, Flipkart, and others. Study these carefully — understanding the WHY behind each answer is more important than memorising them.
+**Interview Preparation**
+These 50 questions cover the most frequently asked DSA interview questions at top tech companies like Google, Amazon, Microsoft, Meta, Flipkart, and others. Study these carefully — understanding the WHY behind each answer is more important than memorising them.
 :::
 
 ## 🟢 Beginner Level — Q1 to Q15
@@ -2285,16 +2286,14 @@ Interview PreparationThese 50 questions cover the most frequently asked DSA inte
 | Q23 | What is an AVL tree? | Self-balancing BST where Balance Factor (height_left - height_right) must be -1, 0, or +1 for ALL nodes. Rotations performed to maintain balance after insert/delete. |
 | Q24 | Dijkstra's algorithm? | Finds shortest path from source to all vertices in weighted graph (non-negative edges only). Uses min-heap. Time: O((V+E) log V). Greedy approach. |
 | Q25 | What is a Trie? | Tree for strings — each EDGE represents one character. Used for autocomplete, spell check, dictionary. Search time: O(L) where L = string length. |
-| Q26 | What is Dynamic Programming? | Breaks complex problems into overlapping subproblems, stores results (memoization or tabulation) to a
-void recomputation. Example: Fibonacci, Knapsack, LCS. |
+| Q26 | What is Dynamic Programming? | Breaks complex problems into overlapping subproblems, stores results (memoization or tabulation) to avoid recomputation. Example: Fibonacci, Knapsack, LCS. |
 | Q27 | Topological Sort? | Linear ordering of vertices in a DAG such that for every directed edge u→v, vertex u comes before v. Uses DFS or Kahn's algorithm (BFS). O(V+E). |
 | Q28 | Minimum Spanning Tree? | A tree connecting all V vertices of a weighted graph with minimum total edge weight. Algorithms: Prim's (greedy, vertex-based), Kruskal's (greedy, edge-based). |
 | Q29 | Detect cycle in Linked List? | Floyd's Cycle Detection — slow pointer moves 1 step, fast pointer moves 2 steps. If they ever MEET, cycle exists. If fast reaches NULL, no cycle. O(n) time, O(1) space. |
 | Q30 | Reverse a Linked List? | Iterative: keep prev=NULL, curr=head. While curr!=NULL: save next, curr.next=prev, prev=curr, curr=next. Final: head=prev. O(n) time, O(1) space. |
 | Q31 | Find loop start in LL? | After Floyd's detects meeting point: reset one pointer to head. Advance BOTH one step at a time. They meet at the LOOP START. O(n) time. |
 | Q32 | Height of binary tree? | Recursive: height(node) = 1 + max(height(left), height(right)). Base case: height(NULL) = 0. Time: O(n). |
-| Q33 | Level order traversal? | BFS using queue: enqueue root, while queue not empty: dequeue node, pr
-int it, enqueue its children. Time: O(n), Space: O(n) for queue. |
+| Q33 | Level order traversal? | BFS using queue: enqueue root, while queue not empty: dequeue node, print it, enqueue its children. Time: O(n), Space: O(n) for queue. |
 | Q34 | Check if BST is valid? | Inorder traversal should give strictly increasing sequence. OR: for each node, ensure it lies within (min, max) bounds — pass bounds through recursion. |
 | Q35 | Two Sum problem? | Use Hash Map: for each element, check if (target - element) is in map. If yes → found! If no → add element to map. O(n) time, O(n) space. |
 
@@ -2309,8 +2308,7 @@ int it, enqueue its children. Time: O(n), Space: O(n) for queue. |
 | Q40 | Kth largest element? | Use MIN-HEAP of size k: iterate all elements, push to heap, if heap size > k pop the min. After all elements, top of heap IS the Kth largest. O(n log k). |
 | Q41 | Count inversions in array? | Modified Merge Sort: during merge step, if element from right array is placed before element from left array, count inversions += (elements remaining in left). O(n log n). |
 | Q42 | Word Ladder problem? | BFS on word graph: each word is a node, edges connect words differing by exactly one letter. BFS gives minimum number of transformations. O(N × L²) where N=words, L=word length. |
-| Q43 | Union-Find / DSU? | Disjo
-int Set Union tracks connected components. Operations: find(x) — get root of x's component. union(x,y) — merge components. Used in Kruskal's MST, cycle detection. |
+| Q43 | Union-Find / DSU? | Disjoint Set Union tracks connected components. Operations: find(x) — get root of x's component. union(x,y) — merge components. Used in Kruskal's MST, cycle detection. |
 | Q44 | Floyd-Warshall? | All-pairs shortest path using DP. For each intermediate vertex k: dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]). Time: O(V³). Handles negative weights (not cycles). |
 | Q45 | KMP String Matching? | Knuth-Morris-Pratt finds pattern P in text T. Builds failure function (LPS array) from pattern in O(M). Then searches in O(N). Total O(N+M) vs naive O(N×M). |
 | Q46 | Largest rectangle histogram? | Use stack: for each bar, pop bars that are taller than current. Area = popped height × (current_index - stack_top - 1). Track max area. O(n) time, O(n) space. |
@@ -2356,8 +2354,7 @@ left++; right--;
 
 ## Pattern 2 — Sliding Window
 
-Use when: Subarray or substring problems with a size constra
-int (max/min sum of k elements, longest substring without repeat, etc.).
+Use when: Subarray or substring problems with a size constraint (max/min sum of k elements, longest substring without repeat, etc.).
 
 \`\`\`
 // Problem: Maximum sum of subarray of size k
