@@ -19,12 +19,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { X } from "lucide-react"
+import { ArrowLeftRight, X } from "lucide-react"
 
 import { SaarthiOrb, type SaarthiMood } from "@/components/saarthi/orb"
 import {
   DEFAULT_DURATION, EVENT_DURATION, EVENT_MOOD, lineFor, saarthi,
 } from "@/lib/saarthi-events"
+import { useUIStore } from "@/store/uiStore"
 import { cn } from "@/lib/utils"
 
 const DISMISS_KEY = "saarthi:dismissed"
@@ -40,6 +41,8 @@ const CORNER_CLASS: Record<Corner, string> = {
 
 export function SaarthiCompanion() {
   const reduced = useReducedMotion()
+  const panelOpen = useUIStore((s) => s.saarthiOpen)
+  const openPanel = useUIStore((s) => s.setSaarthiOpen)
   const [dismissed, setDismissed] = useState(true)      // assume hidden until storage says otherwise
   const [hydrated, setHydrated] = useState(false)
   const [corner, setCorner] = useState<Corner>("br")
@@ -109,7 +112,9 @@ export function SaarthiCompanion() {
     try { localStorage.setItem(POS_KEY, next) } catch { /* ignore */ }
   }
 
-  if (!hydrated || dismissed) return null
+  // The drawer docks to the right edge and would sit on top of her, so she
+  // steps aside for as long as it's open.
+  if (!hydrated || dismissed || panelOpen) return null
 
   const onLeft = corner === "bl"
 
@@ -139,27 +144,43 @@ export function SaarthiCompanion() {
       </AnimatePresence>
 
       <div className="pointer-events-auto relative">
+        {/* Hover controls. Tapping the orb itself opens the drawer — that is
+            the one thing a student actually wants from her — so moving and
+            dismissing live on these two, out of the way until hovered. */}
         <AnimatePresence>
           {showClose && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.7 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.7 }}
-              onClick={dismiss}
-              aria-label="Hide Saarthi"
-              title="Hide Saarthi"
-              className="absolute -right-1 -top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-border bg-popover text-muted-foreground shadow hover:text-foreground"
-            >
-              <X className="h-3 w-3" />
-            </motion.button>
+            <>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                onClick={dismiss}
+                aria-label="Hide Saarthi"
+                title="Hide Saarthi"
+                className="absolute -right-1 -top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-border bg-popover text-muted-foreground shadow hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </motion.button>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                onClick={flipCorner}
+                aria-label="Move Saarthi to the other corner"
+                title="Move Saarthi"
+                className="absolute -left-1 -top-1 z-10 grid h-5 w-5 place-items-center rounded-full border border-border bg-popover text-muted-foreground shadow hover:text-foreground"
+              >
+                <ArrowLeftRight className="h-3 w-3" />
+              </motion.button>
+            </>
           )}
         </AnimatePresence>
 
         <button
           type="button"
-          onClick={flipCorner}
-          aria-label="Saarthi — tap to move to the other corner"
-          title="Move Saarthi"
+          onClick={() => openPanel(true)}
+          aria-label="Open Saarthi"
+          title="Open Saarthi"
           className="rounded-full transition-transform hover:scale-105 active:scale-95"
         >
           <SaarthiOrb mood={mood} size={56} />

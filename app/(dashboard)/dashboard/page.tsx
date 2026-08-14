@@ -2,9 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { GlassCard } from "@/components/glass-card"
-import { SaarthiHero } from "@/components/saarthi/saarthi-hero"
-import { SaarthiPlanMissionsCard } from "@/components/saarthi/plan-missions-card"
-import { useAIStore } from "@/store/aiStore"
 import { cn } from "@/lib/utils"
 import { FeedbackModal } from "@/components/feedback-modal"
 import {
@@ -904,10 +901,8 @@ function InsightsRow({ data }: { data: DashboardData }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { user, updateUser } = useAuthStore()
-  // Saarthi replaces the hero AND owns the readiness number when licensed.
-  const { load: loadAICaps, has: hasAIPack } = useAIStore()
-  useEffect(() => { loadAICaps() }, [loadAICaps])
-  const hasCoach = hasAIPack("ai_coach")
+  // Saarthi no longer lives on this page — she is the right-edge drawer
+  // mounted by SaarthiMount in the dashboard layout, on every route.
   const [data, setData] = useState<DashboardData | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [jobs, setJobs] = useState<Job[]>([])
@@ -960,10 +955,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-
-      {/* Saarthi hero — approach B. Renders nothing unless the college is
-          AI-licensed; reads a stored plan row and makes no AI call on mount. */}
-      {hasCoach && <SaarthiHero firstName={firstName} />}
 
       {/* ── Hero + Stat cards row ── */}
       {data && (
@@ -1024,12 +1015,11 @@ export default function DashboardPage() {
         <motion.div className="space-y-3"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
           <SectionHeading icon={Target} color={adminCardColor(0)} title="Placement Snapshot" subtitle="Your readiness, activity & college standing" />
-          <div className={cn("grid grid-cols-1 gap-5",
-                             hasCoach ? "lg:grid-cols-2" : "lg:grid-cols-3")}>
-            {/* Saarthi owns the readiness number when licensed. Showing this
-                card too would put two different scores, from two different
-                formulas, on the same screen. */}
-            {!hasCoach && <PlacementReadinessCard data={data} />}
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+            {/* NOTE: this score and Saarthi's readiness come from two different
+                formulas, so a licensed student sees two numbers that disagree —
+                this card on the page, hers in the drawer. */}
+            <PlacementReadinessCard data={data} />
             <ActivityHeatmapCard data={data} />
             <CollegeLeaderboardCard leaderboard={leaderboard} />
           </div>
@@ -1053,12 +1043,12 @@ export default function DashboardPage() {
         <CodingProfileStats withHeading singleRow />
       </motion.div>
 
-      {/* ── This week: Saarthi's personalised plan, or the static missions ──
-          Never both — they are two contradictory answers to "what do I do
-          this week", one generic and one built from the student's own data. */}
+      {/* ── This week ──
+          The personalised version of this lives in Saarthi's drawer now, so
+          the page always shows the static missions. */}
       {data && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          {hasCoach ? <SaarthiPlanMissionsCard /> : <WeeklyMissionsCard data={data} />}
+          <WeeklyMissionsCard data={data} />
         </motion.div>
       )}
 
