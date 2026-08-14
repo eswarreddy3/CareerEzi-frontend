@@ -489,6 +489,22 @@ const BLOCK_CFG = {
     labelClass: 'text-success',
     headerBg: 'bg-success/10',
   },
+  definition: {
+    bg: 'bg-coding/5',
+    border: 'border border-coding/30 border-l-[4px] border-l-coding',
+    icon: '📖',
+    label: 'Definition',
+    labelClass: 'text-coding',
+    headerBg: 'bg-coding/10',
+  },
+  note: {
+    bg: 'bg-warning/5',
+    border: 'border border-warning/30 border-l-[4px] border-l-warning',
+    icon: '📌',
+    label: 'Note',
+    labelClass: 'text-warning',
+    headerBg: 'bg-warning/10',
+  },
 } as const
 
 // LANG_LABEL and LANG_DOT are defined above as LANG_LABEL_MAP / LANG_DOT_MAP (used by CopyCodeBlock)

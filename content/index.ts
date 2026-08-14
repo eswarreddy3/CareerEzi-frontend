@@ -9,6 +9,7 @@ import dsaContent from "./courses/dsa"
 import pandasContent from "./courses/pandas"
 import numpyContent from "./courses/numpy"
 import statisticsContent from "./courses/statistics"
+import edaContent from "./courses/eda"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -18,6 +19,7 @@ const courseContent: Record<string, Record<number, string>> = {
   pandas: pandasContent,
   numpy: numpyContent,
   statistics: statisticsContent,
+  eda: edaContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
