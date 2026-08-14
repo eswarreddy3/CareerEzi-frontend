@@ -36,6 +36,7 @@ import { useUIStore } from "@/store/uiStore"
 import { cn } from "@/lib/utils"
 
 const OPEN_KEY = "saarthi:panel"
+const SEEN_KEY = "saarthi:seen"
 const DESKTOP = 1024
 
 const AREA_LABEL: Record<string, string> = {
@@ -50,6 +51,9 @@ export function SaarthiPanel() {
   const [plan, setPlan] = useState<StudyPlan | null>(null)
   const [loading, setLoading] = useState(true)
   const [hydrated, setHydrated] = useState(false)
+  // Assume the hint has been seen until storage says otherwise, so a returning
+  // student never gets a one-frame flash of it.
+  const [seen, setSeen] = useState(true)
 
   // The plan is a stored row, so fetching on mount costs nothing and lets the
   // edge tab show the readiness number before anything is opened.
@@ -65,6 +69,7 @@ export function SaarthiPanel() {
   // Restore the remembered state on mount only — avoids an SSR/client mismatch.
   useEffect(() => {
     try {
+      setSeen(localStorage.getItem(SEEN_KEY) === "1")
       if (window.innerWidth >= DESKTOP && localStorage.getItem(OPEN_KEY) === "1") {
         setOpen(true)
       }
@@ -75,7 +80,12 @@ export function SaarthiPanel() {
   useEffect(() => {
     if (!hydrated) return
     try { localStorage.setItem(OPEN_KEY, open ? "1" : "0") } catch { /* ignore */ }
-  }, [open, hydrated])
+    // Opening her once is proof enough that she has been found.
+    if (open && !seen) {
+      setSeen(true)
+      try { localStorage.setItem(SEEN_KEY, "1") } catch { /* ignore */ }
+    }
+  }, [open, hydrated, seen])
 
   useEffect(() => {
     if (!open) return
@@ -109,38 +119,85 @@ export function SaarthiPanel() {
   return (
     <>
       {/* ── Edge tab ──────────────────────────────────────────────────────
-          The only permanently visible trace of the AI. It carries the
-          readiness score so the number the hero card used to show is still
-          on screen without opening anything. */}
+          The only permanently visible trace of the AI, so it is deliberately
+          loud: solid brand gradient, a breathing glow and a nudge every few
+          seconds. A tab that blends into the page margin is a tab nobody ever
+          discovers — and an AI coach nobody opens may as well not be licensed.
+          Both animations stop under prefers-reduced-motion. */}
       <AnimatePresence>
         {!open && (
-          <motion.button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Open Saarthi"
-            title="Open Saarthi"
-            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 20 }}
+          <motion.div
+            initial={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 20 }}
-            className={cn(
-              "fixed right-0 top-1/2 z-30 -translate-y-1/2 rounded-l-xl border border-r-0",
-              "border-primary/30 bg-gradient-to-b from-primary/15 via-coding/15 to-coral/15",
-              "px-1.5 py-3.5 shadow-lg backdrop-blur transition-[padding] hover:pr-2.5",
-            )}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, x: 24 }}
+            className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2"
           >
-            <span className="flex flex-col items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-coding" />
-              {readiness && (
-                <span className={cn("font-mono text-sm font-bold tabular-nums",
-                                    bandTone(readiness.score))}>
-                  {readiness.score}
-                </span>
+            {/* First-run hint. Shown until the student opens her once, then
+                never again — the tab has to explain itself exactly one time. */}
+            <AnimatePresence>
+              {!seen && (
+                <motion.button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  initial={reduced ? { opacity: 0 } : { opacity: 0, x: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: 0.6, type: "spring", stiffness: 400, damping: 30 }}
+                  className={cn(
+                    "hidden max-w-[13rem] rounded-2xl rounded-br-sm border border-primary/30",
+                    "bg-popover px-3 py-2 text-left text-xs leading-snug shadow-xl sm:block",
+                  )}
+                >
+                  <span className="block font-semibold text-foreground">
+                    Saarthi lives here
+                  </span>
+                  <span className="mt-0.5 block text-muted-foreground">
+                    Your AI coach — readiness, insights and today&apos;s plan.
+                  </span>
+                </motion.button>
               )}
-              <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground [writing-mode:vertical-rl]">
-                Saarthi
-              </span>
-            </span>
-          </motion.button>
+            </AnimatePresence>
+
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Open Saarthi"
+              title="Open Saarthi"
+              className="group relative"
+            >
+              {/* Breathing halo. A blurred sibling rather than a scaled box,
+                  so it can never widen the page or spawn a scrollbar. */}
+              {!reduced && (
+                <motion.span
+                  aria-hidden
+                  className="absolute inset-0 rounded-l-2xl bg-primary blur-lg"
+                  animate={{ opacity: [0.3, 0.75, 0.3] }}
+                  transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+                />
+              )}
+
+              <motion.span
+                animate={reduced ? undefined : { x: [0, -5, 0] }}
+                transition={{ duration: 0.9, repeat: Infinity, repeatDelay: 4.5, ease: "easeInOut" }}
+                className={cn(
+                  "relative flex flex-col items-center gap-1.5 rounded-l-2xl",
+                  "bg-gradient-to-b from-primary via-coding to-coral px-2 py-4",
+                  "text-primary-foreground shadow-xl ring-1 ring-inset ring-white/20",
+                  "transition-[padding] group-hover:pr-3.5",
+                )}
+              >
+                <Sparkles className="h-4 w-4" />
+                {readiness && (
+                  <span className="font-mono text-base font-bold leading-none tabular-nums">
+                    {readiness.score}
+                  </span>
+                )}
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] [writing-mode:vertical-rl]">
+                  Saarthi
+                </span>
+              </motion.span>
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 
