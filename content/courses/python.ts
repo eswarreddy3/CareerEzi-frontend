@@ -516,7 +516,7 @@ There are two main types of type casting:
 
 2. Explicit (Manual) Type Casting
 
-# Implicit Type Casting (Automatic)
+## Implicit Type Casting (Automatic)
 
 Implicit type casting happens automatically. The programmer does not need to do anything.
 
@@ -539,7 +539,7 @@ Example
 
 - Then performs the addition
 
-# Explicit Type Casting (Manual)
+## Explicit Type Casting (Manual)
 
 Explicit type casting is done manually by the programmer.
 
@@ -1447,7 +1447,7 @@ for i in range(1, 6):
 > • pass: placeholder — does nothing
 > • Always update the condition variable in while loops!
 
-# Python Programming
+## Python Programming
 ## COMPLETE BEGINNER COURSE — LESSONS 6 TO 10
 Strings • Lists • Tuples & Sets • Dictionaries • Functions
 📘  What you will learn in this volume:
@@ -1571,11 +1571,13 @@ print(len(word)) # 6
 
 Slicing lets you extract a portion of a string using the [start:stop:step] syntax. The start index is inclusive, stop is exclusive.
 
-> 📐  Syntax
-> string [ start : stop : step ]
-> start  = index to begin from (default: 0)
-> stop   = index to stop BEFORE (default: end of string)
-> step   = how many characters to jump (default: 1)
+### 📐  Syntax
+\`\`\`python
+string [ start : stop : step ]
+start  = index to begin from (default: 0)
+stop   = index to stop BEFORE (default: end of string)
+step   = how many characters to jump (default: 1)
+\`\`\`
 
 \`\`\`python
 s = "HELLO WORLD"
@@ -1768,11 +1770,13 @@ Finally, the list ["home", "alice", "documents"] is joined using "/" as a separa
 
 - They are faster, cleaner, and more readable
 
-> 📐  Syntax
-> f"text {variable} more text"
-> f"expression result: {2 + 3}"
-> f"formatted number: {pi:.2f}"
-> f"padded: {name:>15}"
+### 📐  Syntax
+\`\`\`text
+f"text {variable} more text"
+f"expression result: {2 + 3}"
+f"formatted number: {pi:.2f}"
+f"padded: {name:>15}"
+\`\`\`
 
 \`\`\`python
 name  = "Alice"
@@ -2112,7 +2116,6 @@ Explanation
 
 ![Image 8](/pyimages/pimg8.png)
 
-
 All list methods:
 
 | Method | Description | Syntax | Example |
@@ -2298,9 +2301,11 @@ Explanation (Line by Line)
 
 List comprehension is an elegant, readable one-liner that creates a new list from an existing sequence. It replaces multi-line for loops with a concise expression.
 
-> 📐  Syntax
-> [ expression   for   variable   in   iterable ]
-> [ expression   for   variable   in   iterable   if   condition ]
+### 📐  Syntax
+\`\`\`python
+[ expression   for   variable   in   iterable ]
+[ expression   for   variable   in   iterable   if   condition ]
+\`\`\`
 
 1. Traditional Loop (Squares)
 
@@ -2546,7 +2551,7 @@ Explanation:
 
 - The list inside it is modified
 
-# Packing, Unpacking and Nested Tuples
+## Packing, Unpacking and Nested Tuples
 
 Tuple packing means storing multiple values into a tuple automatically.
 
@@ -2575,7 +2580,7 @@ Explanation:
 
 - Then access first element → 3
 
-# Tuple Operations and Methods
+## Tuple Operations and Methods
 
 Even though tuples are immutable, they support operations like combining, repeating, and checking elements.
 
@@ -2809,7 +2814,7 @@ print(person.get('phone', 'N/A'))
 
 - Default value can be provided ('N/A')
 
-# Modifying Dictionary Data
+## Modifying Dictionary Data
 
 Dictionaries are mutable, so values can be added, updated, or removed.
 
@@ -2853,7 +2858,7 @@ Description:
 
 - Loop accesses both key and value together
 
-# Nested Dictionaries
+## Nested Dictionaries
 
 Dictionaries can contain other dictionaries, allowing structured data storage.
 
@@ -2872,7 +2877,7 @@ Description:
 
 - Access is done using multiple keys
 
-# Dictionary Comprehension
+## Dictionary Comprehension
 
 Dictionary comprehension allows creating dictionaries in a single line.
 
@@ -2897,7 +2902,7 @@ Description:
 
 - Only even numbers are included
 
-# Useful Dictionary Operations
+## Useful Dictionary Operations
 
 Dictionaries support many practical operations.
 
@@ -3056,9 +3061,11 @@ print(f'Avg Salary: Rs.{avg:,.0f}')  # Avg Salary: Rs.91,667
 
 Similar to list comprehension, dictionary comprehension creates a dict in a single, readable line.
 
-> 📐  Syntax
-> { key_expr : value_expr   for   item   in   iterable }
-> { key_expr : value_expr   for   item   in   iterable   if   condition }
+### 📐  Syntax
+\`\`\`python
+{ key_expr : value_expr   for   item   in   iterable }
+{ key_expr : value_expr   for   item   in   iterable   if   condition }
+\`\`\`
 
 \`\`\`python
 # Squares dictionary
@@ -3206,11 +3213,13 @@ Used to send a result back to the caller. It is optional but very useful.
 
 ## 📝  Defining & Calling Functions
 
-> 📐  Syntax
-> def  function_name( parameters ):
->     """Docstring — describes what this function does"""
->     # function body — indented code block
->     return value   # optional — sends result back
+### 📐  Syntax
+\`\`\`python
+def  function_name( parameters ):
+    """Docstring — describes what this function does"""
+    # function body — indented code block
+    return value   # optional — sends result back
+\`\`\`
 
 \`\`\`python
 # Simple function — no parameters
@@ -3527,11 +3536,13 @@ Shows how Python groups different types of inputs
 
 A lambda is a small anonymous function defined in a single line. It can have any number of arguments but only ONE expression. Lambda functions are often used as short-lived helpers for sorting, filtering, and mapping.
 
-> 📐  Syntax
-> lambda  arguments  :  expression
-> # Equivalent to:
-> def function_name(arguments):
->     return expression
+### 📐  Syntax
+\`\`\`python
+lambda  arguments  :  expression
+# Equivalent to:
+def function_name(arguments):
+    return expression
+\`\`\`
 
 \`\`\`python
 # Lambda examples
@@ -3859,7 +3870,7 @@ Contents
 ## Advanced Functions
 *args, **kwargs, Lambda, Closures, Decorators & Recursion
 
-# 📌  What Makes a Function "Advanced"?
+## 📌  What Makes a Function "Advanced"?
 
 At the beginner level you learned to define functions with fixed parameters and return values. Advanced functions unlock much more power:
 
@@ -3875,7 +3886,7 @@ At the beginner level you learned to define functions with fixed parameters and 
 
 These tools appear in every professional Python codebase. Mastering them puts you firmly in "intermediate" territory.
 
-# 1️⃣  *args — Variable Positional Arguments
+## 1️⃣  *args — Variable Positional Arguments
 
 Normally a Python function accepts a fixed number of positional arguments. If you call it with more or fewer arguments, you get a TypeError. *args removes that restriction entirely.
 
@@ -3884,37 +3895,44 @@ When you put an asterisk (*) before a parameter name, Python collects all extra 
 ![Image 16](/pyimages/pimg16.png)
 
 > 💡  Key Point: Inside the function, args is a regular Python tuple. You can loop over it, index it, pass it to sum(), len(), etc.
-> 📐  Syntax
-> def function_name(*args):
->     # args is a TUPLE — iterate it, sum it, index it
->     for item in args:
->         print(item)
-> # Call with any number of positional arguments:
-> function_name(1, 2, 3)
-> function_name("a", "b", "c", "d", "e")
+
+### 📐  Syntax
+\`\`\`python
+def function_name(*args):
+    # args is a TUPLE — iterate it, sum it, index it
+    for item in args:
+        print(item)
+# Call with any number of positional arguments:
+function_name(1, 2, 3)
+function_name("a", "b", "c", "d", "e")
+\`\`\`
 
   Example 1: Basic *args — Sum Any Number of Values
 
 This example shows the simplest use of *args: accepting any number of numbers and summing them. Notice that Python automatically packs all the positional arguments into a tuple.
 
->   🐍 Example 1 — Basic *args
-> def total(*numbers):
->     """Sum any quantity of numeric arguments."""
->     print(f"Received as tuple: {numbers}")
->     return sum(numbers)
-> # Call with 2 arguments
-> print(total(1, 2))
-> # Call with 3 arguments
-> print(total(10, 20, 30))
-> # Call with 6 arguments
-> print(total(1, 2, 3, 4, 5, 6))
-> ▶  Output
-> Received as tuple: (1, 2)
-> 3
-> Received as tuple: (10, 20, 30)
-> 60
-> Received as tuple: (1, 2, 3, 4, 5, 6)
-> 21
+### 🐍 Example 1 — Basic *args
+\`\`\`python
+def total(*numbers):
+    """Sum any quantity of numeric arguments."""
+    print(f"Received as tuple: {numbers}")
+    return sum(numbers)
+# Call with 2 arguments
+print(total(1, 2))
+# Call with 3 arguments
+print(total(10, 20, 30))
+# Call with 6 arguments
+print(total(1, 2, 3, 4, 5, 6))
+\`\`\`
+
+\`\`\`output
+Received as tuple: (1, 2)
+3
+Received as tuple: (10, 20, 30)
+60
+Received as tuple: (1, 2, 3, 4, 5, 6)
+21
+\`\`\`
 
 Explanation: The function total() takes *numbers, which means Python collects all positional arguments into a tuple called numbers. We can then pass that tuple directly to the built-in sum() function. The function works with 2 arguments, 3 arguments, or 6 — it does not care.
 
@@ -3922,20 +3940,24 @@ Explanation: The function total() takes *numbers, which means Python collects al
 
 A regular parameter can appear before *args. Python assigns arguments left-to-right: the first argument goes to the regular parameter, and all remaining arguments are packed into args.
 
->   🐍 Example 2 — Regular param + *args
-> def greet(greeting, *names):
->     """Greet one or more people with the same greeting."""
->     for name in names:
->         print(f"{greeting}, {name}!")
-> # First arg → greeting, rest → names tuple
-> greet("Hello", "Alice", "Bob", "Carol")
-> # Works with just one name too
-> greet("Good morning", "David")
-> ▶  Output
-> Hello, Alice!
-> Hello, Bob!
-> Hello, Carol!
-> Good morning, David!
+### 🐍 Example 2 — Regular param + *args
+\`\`\`python
+def greet(greeting, *names):
+    """Greet one or more people with the same greeting."""
+    for name in names:
+        print(f"{greeting}, {name}!")
+# First arg → greeting, rest → names tuple
+greet("Hello", "Alice", "Bob", "Carol")
+# Works with just one name too
+greet("Good morning", "David")
+\`\`\`
+
+\`\`\`output
+Hello, Alice!
+Hello, Bob!
+Hello, Carol!
+Good morning, David!
+\`\`\`
 
 Explanation: "Hello" is assigned to greeting because it is the first positional argument. "Alice", "Bob", and "Carol" are packed into the names tuple. The for loop then iterates over the tuple and prints a personalised greeting for each name.
 
@@ -3943,21 +3965,25 @@ Explanation: "Hello" is assigned to greeting because it is the first positional 
 
 If you already have values stored in a list, you can unpack them into positional arguments using the * operator at the call site. This is the reverse operation of collecting them.
 
->   🐍 Example 3 — Unpacking with *
-> def total(*numbers):
->     return sum(numbers)
-> nums = [5, 10, 15, 20]
-> # Without unpacking — passes the WHOLE list as ONE argument
-> # total(nums)  ← This would fail because sum() gets a list of lists
-> # WITH unpacking — passes each element as a separate argument
-> result = total(*nums)
-> print(f"total(*nums) = {result}")   # same as total(5, 10, 15, 20)
-> # Works with tuples too
-> values = (100, 200, 300)
-> print(total(*values))  # 600
-> ▶  Output
-> total(*nums) = 50
-> 600
+### 🐍 Example 3 — Unpacking with *
+\`\`\`python
+def total(*numbers):
+    return sum(numbers)
+nums = [5, 10, 15, 20]
+# Without unpacking — passes the WHOLE list as ONE argument
+# total(nums)  ← This would fail because sum() gets a list of lists
+# WITH unpacking — passes each element as a separate argument
+result = total(*nums)
+print(f"total(*nums) = {result}")   # same as total(5, 10, 15, 20)
+# Works with tuples too
+values = (100, 200, 300)
+print(total(*values))  # 600
+\`\`\`
+
+\`\`\`output
+total(*nums) = 50
+600
+\`\`\`
 
 Explanation: total(*nums) is exactly equivalent to writing total(5, 10, 15, 20). The * before the variable "unpacks" the sequence and passes each element as a separate positional argument.
 
@@ -3965,65 +3991,76 @@ Explanation: total(*nums) is exactly equivalent to writing total(5, 10, 15, 20).
 
 args is just a tuple — its elements can be of any type: strings, numbers, booleans, lists, even other functions. This example demonstrates mixed types and shows how to inspect each element.
 
->   🐍 Example 4 — Mixed types in *args
-> def describe(*items):
->     """Print each item with its type and position."""
->     print(f"Total items received: {len(items)}")
->     for i, item in enumerate(items, 1):
->         print(f"  Item {i}: {item!r}  (type: {type(item).__name__})")
-> describe("hello", 42, 3.14, True, [1, 2, 3])
-> ▶  Output
-> Total items received: 5
->   Item 1: 'hello'  (type: str)
->   Item 2: 42  (type: int)
->   Item 3: 3.14  (type: float)
->   Item 4: True  (type: bool)
->   Item 5: [1, 2, 3]  (type: list)
+### 🐍 Example 4 — Mixed types in *args
+\`\`\`python
+def describe(*items):
+    """Print each item with its type and position."""
+    print(f"Total items received: {len(items)}")
+    for i, item in enumerate(items, 1):
+        print(f"  Item {i}: {item!r}  (type: {type(item).__name__})")
+describe("hello", 42, 3.14, True, [1, 2, 3])
+\`\`\`
+
+\`\`\`output
+Total items received: 5
+  Item 1: 'hello'  (type: str)
+  Item 2: 42  (type: int)
+  Item 3: 3.14  (type: float)
+  Item 4: True  (type: bool)
+  Item 5: [1, 2, 3]  (type: list)
+\`\`\`
 
 Explanation: enumerate(items, 1) gives us both the index (starting at 1) and the value. The !r format specifier shows the repr() of the item, which includes quotes around strings. This demonstrates that args truly accepts anything.
 
-# 2️⃣  **kwargs — Variable Keyword Arguments
+## 2️⃣  **kwargs — Variable Keyword Arguments
 
 **kwargs is the keyword-argument counterpart of *args. While *args collects extra positional arguments into a tuple, **kwargs collects extra keyword arguments into a dictionary.
 
 The double asterisk (**) is the syntax that makes it work. "kwargs" is just a convention — the real magic is in the **. Inside the function, kwargs is a regular Python dictionary where keys are the argument names (as strings) and values are the argument values.
 
 > 💡  Key Point: kwargs is a dict. You can use all dictionary methods on it: .items(), .keys(), .values(), .get(), and so on.
-> 📐  Syntax
-> def function_name(**kwargs):
->     # kwargs is a DICT of {keyword: value} pairs
->     for key, value in kwargs.items():
->         print(f"{key}: {value}")
-> # Call with any keyword arguments:
-> function_name(name="Alice", age=25, city="Hyderabad")
+
+### 📐  Syntax
+\`\`\`python
+def function_name(**kwargs):
+    # kwargs is a DICT of {keyword: value} pairs
+    for key, value in kwargs.items():
+        print(f"{key}: {value}")
+# Call with any keyword arguments:
+function_name(name="Alice", age=25, city="Hyderabad")
+\`\`\`
 
   Example 1: Basic **kwargs — Building a Profile
 
 This example uses **kwargs to accept any number of named attributes and build a profile. The caller decides which fields to include; the function handles whatever it receives.
 
->   🐍 Example 1 — Basic **kwargs
-> def create_profile(**details):
->     """Build a user profile from arbitrary keyword arguments."""
->     print("─── Profile ───────────────────")
->     for key, val in details.items():
->         print(f"  {key:15}: {val}")
->     print("───────────────────────────────")
-> # Call with 5 keyword arguments
-> create_profile(
->     name="Alice",
->     age=25,
->     city="Hyderabad",
->     role="Developer",
->     experience="3 years"
-> )
-> ▶  Output
-> ─── Profile ───────────────────
->   name           : Alice
->   age            : 25
->   city           : Hyderabad
->   role           : Developer
->   experience     : 3 years
-> ───────────────────────────────
+### 🐍 Example 1 — Basic **kwargs
+\`\`\`python
+def create_profile(**details):
+    """Build a user profile from arbitrary keyword arguments."""
+    print("─── Profile ───────────────────")
+    for key, val in details.items():
+        print(f"  {key:15}: {val}")
+    print("───────────────────────────────")
+# Call with 5 keyword arguments
+create_profile(
+    name="Alice",
+    age=25,
+    city="Hyderabad",
+    role="Developer",
+    experience="3 years"
+)
+\`\`\`
+
+\`\`\`output
+─── Profile ───────────────────
+  name           : Alice
+  age            : 25
+  city           : Hyderabad
+  role           : Developer
+  experience     : 3 years
+───────────────────────────────
+\`\`\`
 
 Explanation: Every keyword argument becomes a key-value pair in the kwargs dict. The .items() method returns both the key and value together, which we use to print the profile. The function does not care how many keyword arguments are passed — it handles any number.
 
@@ -4031,24 +4068,28 @@ Explanation: Every keyword argument becomes a key-value pair in the kwargs dict.
 
 A common pattern with **kwargs is to extract known keys using .get(key, default). This lets you define expected parameters while still accepting unexpected ones gracefully.
 
->   🐍 Example 2 — Default values with .get()
-> def configure(**settings):
->     """Configure a server with optional settings."""
->     # Use .get() to extract values with fallback defaults
->     host  = settings.get("host",  "localhost")
->     port  = settings.get("port",  8080)
->     debug = settings.get("debug", False)
->     print(f"Server: {host}:{port}  |  debug={debug}")
-> # Provide specific settings
-> configure(host="example.com", port=443, debug=True)
-> # Provide no settings — all defaults are used
-> configure()
-> # Provide only some settings
-> configure(port=9000)
-> ▶  Output
-> Server: example.com:443  |  debug=True
-> Server: localhost:8080  |  debug=False
-> Server: localhost:9000  |  debug=False
+### 🐍 Example 2 — Default values with .get()
+\`\`\`python
+def configure(**settings):
+    """Configure a server with optional settings."""
+    # Use .get() to extract values with fallback defaults
+    host  = settings.get("host",  "localhost")
+    port  = settings.get("port",  8080)
+    debug = settings.get("debug", False)
+    print(f"Server: {host}:{port}  |  debug={debug}")
+# Provide specific settings
+configure(host="example.com", port=443, debug=True)
+# Provide no settings — all defaults are used
+configure()
+# Provide only some settings
+configure(port=9000)
+\`\`\`
+
+\`\`\`output
+Server: example.com:443  |  debug=True
+Server: localhost:8080  |  debug=False
+Server: localhost:9000  |  debug=False
+\`\`\`
 
 Explanation: settings.get("host", "localhost") looks up "host" in the kwargs dict. If it is present, it returns that value; if absent, it returns the default "localhost". This is much cleaner than checking if each key exists manually.
 
@@ -4056,25 +4097,29 @@ Explanation: settings.get("host", "localhost") looks up "host" in the kwargs dic
 
 Just as * unpacks a list into positional arguments, ** unpacks a dictionary into keyword arguments at the call site.
 
->   🐍 Example 3 — Unpacking a dict with **
-> def create_profile(**details):
->     for key, val in details.items():
->         print(f"  {key}: {val}")
-> # Dictionary already contains the data
-> user_data = {"name": "Bob", "age": 30, "city": "Mumbai"}
-> # WITHOUT unpacking — this would fail (passes a dict as one arg)
-> # create_profile(user_data)  ← TypeError!
-> # WITH ** unpacking — each key becomes a keyword argument
-> create_profile(**user_data)
-> # Equivalent to: create_profile(name="Bob", age=30, city="Mumbai")
-> ▶  Output
->   name: Bob
->   age: 30
->   city: Mumbai
+### 🐍 Example 3 — Unpacking a dict with **
+\`\`\`python
+def create_profile(**details):
+    for key, val in details.items():
+        print(f"  {key}: {val}")
+# Dictionary already contains the data
+user_data = {"name": "Bob", "age": 30, "city": "Mumbai"}
+# WITHOUT unpacking — this would fail (passes a dict as one arg)
+# create_profile(user_data)  ← TypeError!
+# WITH ** unpacking — each key becomes a keyword argument
+create_profile(**user_data)
+# Equivalent to: create_profile(name="Bob", age=30, city="Mumbai")
+\`\`\`
+
+\`\`\`output
+  name: Bob
+  age: 30
+  city: Mumbai
+\`\`\`
 
 Explanation: **user_data unpacks the dictionary so that each key becomes a keyword argument name. This is extremely useful when you load data from a JSON file or API response and want to pass it directly into a function.
 
-# 3️⃣  Combining All Argument Types — The Correct Order
+## 3️⃣  Combining All Argument Types — The Correct Order
 
 Python is strict about the order in which different argument types must appear in a function signature. Violating this order causes a SyntaxError at parse time, before the code even runs.
 
@@ -4091,20 +4136,24 @@ Python is strict about the order in which different argument types must appear i
 
 This example defines a function that uses all five argument types in the correct order, then calls it so you can see exactly which value goes where.
 
->   🐍 Example 1 — All argument types together
-> def full_signature(pos, default="hi", *args, kw_only=0, **kwargs):
->     print(f"pos       = {pos}")       # required positional
->     print(f"default   = {default}")   # optional positional
->     print(f"args      = {args}")      # extra positional → tuple
->     print(f"kw_only   = {kw_only}")   # must use keyword
->     print(f"kwargs    = {kwargs}")    # extra keyword → dict
-> full_signature("must", "hey", 1, 2, 3, kw_only=99, x=10, y=20)
-> ▶  Output
-> pos       = must
-> default   = hey
-> args      = (1, 2, 3)
-> kw_only   = 99
-> kwargs    = {'x': 10, 'y': 20}
+### 🐍 Example 1 — All argument types together
+\`\`\`python
+def full_signature(pos, default="hi", *args, kw_only=0, **kwargs):
+    print(f"pos       = {pos}")       # required positional
+    print(f"default   = {default}")   # optional positional
+    print(f"args      = {args}")      # extra positional → tuple
+    print(f"kw_only   = {kw_only}")   # must use keyword
+    print(f"kwargs    = {kwargs}")    # extra keyword → dict
+full_signature("must", "hey", 1, 2, 3, kw_only=99, x=10, y=20)
+\`\`\`
+
+\`\`\`output
+pos       = must
+default   = hey
+args      = (1, 2, 3)
+kw_only   = 99
+kwargs    = {'x': 10, 'y': 20}
+\`\`\`
 
 Explanation: "must" → pos (required, 1st), "hey" → default (overrides the default), 1,2,3 → args tuple (everything that doesn't match a named parameter), kw_only=99 → keyword-only parameter (cannot be passed positionally), x=10,y=20 → kwargs dict.
 
@@ -4112,29 +4161,33 @@ Explanation: "must" → pos (required, 1st), "hey" → default (overrides the de
 
 A real-world example: a log() function that accepts a mandatory level, any number of messages, and optional metadata. This pattern is used in professional logging libraries.
 
->   🐍 Example 2 — Flexible log() function
-> def log(level, *messages, separator=" | ", **meta):
->     """
->     level     : required string (INFO, ERROR, DEBUG)
->     *messages : any number of message strings
->     separator : keyword-only, defaults to " | "
->     **meta    : optional key=value metadata tags
->     """
->     body = separator.join(str(m) for m in messages)
->     tags = "  " + " ".join(f"{k}={v}" for k, v in meta.items()) if meta else ""
->     print(f"[{level.upper()}] {body}{tags}")
-> # One level, two messages
-> log("info", "Server started", "Port 8080")
-> # One level, one message, metadata tags
-> log("error", "DB connection failed", host="db.local", code=503)
-> # Custom separator
-> log("debug", "x=1", "y=2", "z=3", separator=" >> ")
-> ▶  Output
-> [INFO] Server started | Port 8080
-> [ERROR] DB connection failed  host=db.local code=503
-> [DEBUG] x=1 >> y=2 >> z=3
+### 🐍 Example 2 — Flexible log() function
+\`\`\`python
+def log(level, *messages, separator=" | ", **meta):
+    """
+    level     : required string (INFO, ERROR, DEBUG)
+    *messages : any number of message strings
+    separator : keyword-only, defaults to " | "
+    **meta    : optional key=value metadata tags
+    """
+    body = separator.join(str(m) for m in messages)
+    tags = "  " + " ".join(f"{k}={v}" for k, v in meta.items()) if meta else ""
+    print(f"[{level.upper()}] {body}{tags}")
+# One level, two messages
+log("info", "Server started", "Port 8080")
+# One level, one message, metadata tags
+log("error", "DB connection failed", host="db.local", code=503)
+# Custom separator
+log("debug", "x=1", "y=2", "z=3", separator=" >> ")
+\`\`\`
 
-# 4️⃣  Lambda Functions — Anonymous One-Liners
+\`\`\`output
+[INFO] Server started | Port 8080
+[ERROR] DB connection failed  host=db.local code=503
+[DEBUG] x=1 >> y=2 >> z=3
+\`\`\`
+
+## 4️⃣  Lambda Functions — Anonymous One-Liners
 
 A lambda is a small, anonymous function written in a single expression. It is not stored under a name (unless you assign it to a variable) and is typically used where a full def would be overkill. Lambdas are the backbone of functional programming in Python.
 
@@ -4172,50 +4225,57 @@ Avoid lambda functions when:
 
 ![Image 17](/pyimages/pimg17.png)
 
-> 📐  Syntax
-> lambda  param1, param2, ...  :  expression
-> # The expression is automatically returned — no "return" keyword needed
-> # Equivalent regular function:
-> def name(param1, param2, ...):
->     return expression
+### 📐  Syntax
+\`\`\`python
+lambda  param1, param2, ...  :  expression
+# The expression is automatically returned — no "return" keyword needed
+# Equivalent regular function:
+def name(param1, param2, ...):
+    return expression
+\`\`\`
+
 > 💡  When to use lambda vs def: Use lambda for simple, single-expression functions passed as arguments. Use def when the function has multiple steps, needs a docstring, or will be reused in many places.
 
   Example 1: Basic Lambda Expressions
 
 These examples show simple lambdas assigned to variables. While you can do this, the real power of lambdas is passing them directly as arguments without assigning to a variable first.
 
->   🐍 Example 1 — Basic lambda expressions
-> # A lambda that doubles a number
-> double = lambda x: x * 2
-> print(double(7))          # 14
-> # A lambda that squares a number
-> square = lambda x: x ** 2
-> print(square(9))          # 81
-> # A lambda with two parameters
-> add = lambda a, b: a + b
-> print(add(4, 6))          # 10
-> # A lambda that builds a string
-> greet = lambda name: f"Hello, {name}!"
-> print(greet("Alice"))     # Hello, Alice!
-> # A lambda that returns a boolean
-> is_even = lambda n: n % 2 == 0
-> print(is_even(8))         # True
-> print(is_even(7))         # False
-> # A lambda with three parameters (clamps n between lo and hi)
-> clamp = lambda n, lo, hi: max(lo, min(n, hi))
-> print(clamp(150, 0, 100))  # 100  (too high → clamped to max)
-> print(clamp(-5,  0, 100))  # 0    (too low  → clamped to min)
-> print(clamp(50,  0, 100))  # 50   (in range → unchanged)
-> ▶  Output
-> 14
-> 81
-> 10
-> Hello, Alice!
-> True
-> False
-> 100
-> 0
-> 50
+### 🐍 Example 1 — Basic lambda expressions
+\`\`\`python
+# A lambda that doubles a number
+double = lambda x: x * 2
+print(double(7))          # 14
+# A lambda that squares a number
+square = lambda x: x ** 2
+print(square(9))          # 81
+# A lambda with two parameters
+add = lambda a, b: a + b
+print(add(4, 6))          # 10
+# A lambda that builds a string
+greet = lambda name: f"Hello, {name}!"
+print(greet("Alice"))     # Hello, Alice!
+# A lambda that returns a boolean
+is_even = lambda n: n % 2 == 0
+print(is_even(8))         # True
+print(is_even(7))         # False
+# A lambda with three parameters (clamps n between lo and hi)
+clamp = lambda n, lo, hi: max(lo, min(n, hi))
+print(clamp(150, 0, 100))  # 100  (too high → clamped to max)
+print(clamp(-5,  0, 100))  # 0    (too low  → clamped to min)
+print(clamp(50,  0, 100))  # 50   (in range → unchanged)
+\`\`\`
+
+\`\`\`output
+14
+81
+10
+Hello, Alice!
+True
+False
+100
+0
+50
+\`\`\`
 
 Explanation: Each lambda takes parameters before the colon and returns the expression after the colon. The clamp lambda uses Python's nested max/min trick: min(n, hi) ensures n is not above hi, then max(lo, ...) ensures it is not below lo.
 
@@ -4223,25 +4283,29 @@ Explanation: Each lambda takes parameters before the colon and returns the expre
 
 The sorted() function accepts a key= parameter — a function that extracts a comparison value from each element. Lambdas are perfect here because the key function is usually simple and used only once.
 
->   🐍 Example 2 — Lambda with sorted()
-> students = [
->     {"name": "Alice", "gpa": 3.9, "age": 21},
->     {"name": "Bob",   "gpa": 3.5, "age": 23},
->     {"name": "Carol", "gpa": 3.7, "age": 20},
-> ]
-> # Sort by GPA, highest first (reverse=True)
-> by_gpa = sorted(students, key=lambda s: s["gpa"], reverse=True)
-> print("By GPA:", [s["name"] for s in by_gpa])
-> # Sort by name, alphabetically
-> by_name = sorted(students, key=lambda s: s["name"])
-> print("By name:", [s["name"] for s in by_name])
-> # Sort by age, youngest first
-> by_age = sorted(students, key=lambda s: s["age"])
-> print("By age:", [s["name"] for s in by_age])
-> ▶  Output
-> By GPA:  ['Alice', 'Carol', 'Bob']
-> By name: ['Alice', 'Bob', 'Carol']
-> By age:  ['Carol', 'Alice', 'Bob']
+### 🐍 Example 2 — Lambda with sorted()
+\`\`\`python
+students = [
+    {"name": "Alice", "gpa": 3.9, "age": 21},
+    {"name": "Bob",   "gpa": 3.5, "age": 23},
+    {"name": "Carol", "gpa": 3.7, "age": 20},
+]
+# Sort by GPA, highest first (reverse=True)
+by_gpa = sorted(students, key=lambda s: s["gpa"], reverse=True)
+print("By GPA:", [s["name"] for s in by_gpa])
+# Sort by name, alphabetically
+by_name = sorted(students, key=lambda s: s["name"])
+print("By name:", [s["name"] for s in by_name])
+# Sort by age, youngest first
+by_age = sorted(students, key=lambda s: s["age"])
+print("By age:", [s["name"] for s in by_age])
+\`\`\`
+
+\`\`\`output
+By GPA:  ['Alice', 'Carol', 'Bob']
+By name: ['Alice', 'Bob', 'Carol']
+By age:  ['Carol', 'Alice', 'Bob']
+\`\`\`
 
 Explanation: key=lambda s: s["gpa"] tells sorted() to use each student's "gpa" value as the sort key. sorted() calls this lambda once for each item in the list to get its key, then sorts by those keys. This avoids having to define a separate named function just for sorting.
 
@@ -4249,23 +4313,27 @@ Explanation: key=lambda s: s["gpa"] tells sorted() to use each student's "gpa" v
 
 filter(function, iterable) returns only the elements for which the function returns True. Lambda makes it easy to specify the filter condition inline.
 
->   🐍 Example 3 — Lambda with filter()
-> scores = [45, 78, 92, 34, 88, 55, 99, 62]
-> # Keep only scores >= 60 (passing grade)
-> passed = list(filter(lambda s: s >= 60, scores))
-> print("Passed:", passed)
-> # Keep only even numbers
-> numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-> evens = list(filter(lambda n: n % 2 == 0, numbers))
-> print("Evens:", evens)
-> # Keep only non-empty strings
-> words = ["apple", "", "banana", "", "cherry"]
-> non_empty = list(filter(lambda w: w != "", words))
-> print("Non-empty:", non_empty)
-> ▶  Output
-> Passed: [78, 92, 88, 99, 62]
-> Evens: [2, 4, 6, 8, 10]
-> Non-empty: ['apple', 'banana', 'cherry']
+### 🐍 Example 3 — Lambda with filter()
+\`\`\`python
+scores = [45, 78, 92, 34, 88, 55, 99, 62]
+# Keep only scores >= 60 (passing grade)
+passed = list(filter(lambda s: s >= 60, scores))
+print("Passed:", passed)
+# Keep only even numbers
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+evens = list(filter(lambda n: n % 2 == 0, numbers))
+print("Evens:", evens)
+# Keep only non-empty strings
+words = ["apple", "", "banana", "", "cherry"]
+non_empty = list(filter(lambda w: w != "", words))
+print("Non-empty:", non_empty)
+\`\`\`
+
+\`\`\`output
+Passed: [78, 92, 88, 99, 62]
+Evens: [2, 4, 6, 8, 10]
+Non-empty: ['apple', 'banana', 'cherry']
+\`\`\`
 
 Explanation: filter() calls the lambda for each element and keeps only those for which the lambda returns True. We wrap the result in list() because filter() returns an iterator, not a list. The lambda condition can be any expression that evaluates to True or False.
 
@@ -4273,63 +4341,71 @@ Explanation: filter() calls the lambda for each element and keeps only those for
 
 map(function, iterable) applies a function to every element and returns the transformed values. Use it with lambda to apply quick transformations without writing a loop.
 
->   🐍 Example 4 — Lambda with map()
-> prices = [100, 200, 300, 400, 500]
-> # Add 18% GST to every price
-> with_gst = list(map(lambda p: round(p * 1.18, 2), prices))
-> print("With GST:", with_gst)
-> # Convert Celsius temperatures to Fahrenheit
-> celsius = [0, 20, 37, 100]
-> fahrenheit = list(map(lambda c: (c * 9/5) + 32, celsius))
-> print("Fahrenheit:", fahrenheit)
-> # Convert all strings to uppercase
-> names = ["alice", "bob", "carol"]
-> upper = list(map(lambda n: n.upper(), names))
-> print("Upper:", upper)
-> ▶  Output
-> With GST: [118.0, 236.0, 354.0, 472.0, 590.0]
-> Fahrenheit: [32.0, 68.0, 98.6, 212.0]
-> Upper: ['ALICE', 'BOB', 'CAROL']
+### 🐍 Example 4 — Lambda with map()
+\`\`\`python
+prices = [100, 200, 300, 400, 500]
+# Add 18% GST to every price
+with_gst = list(map(lambda p: round(p * 1.18, 2), prices))
+print("With GST:", with_gst)
+# Convert Celsius temperatures to Fahrenheit
+celsius = [0, 20, 37, 100]
+fahrenheit = list(map(lambda c: (c * 9/5) + 32, celsius))
+print("Fahrenheit:", fahrenheit)
+# Convert all strings to uppercase
+names = ["alice", "bob", "carol"]
+upper = list(map(lambda n: n.upper(), names))
+print("Upper:", upper)
+\`\`\`
+
+\`\`\`output
+With GST: [118.0, 236.0, 354.0, 472.0, 590.0]
+Fahrenheit: [32.0, 68.0, 98.6, 212.0]
+Upper: ['ALICE', 'BOB', 'CAROL']
+\`\`\`
 
 Explanation: map() applies the lambda to every element and returns an iterator. We wrap it in list() to get a list. This is more concise than a for loop when the transformation is simple. For complex multi-step transformations, a regular for loop or list comprehension is clearer.
 
-# 5️⃣  Closures — Functions That Remember
+## 5️⃣  Closures — Functions That Remember
 
 A closure is created when an inner function references variables from its enclosing (outer) scope, and the outer function returns the inner function. Even after the outer function has finished executing, the inner function still "remembers" and has access to those variables.
 
 Think of it like this: when you create a closure, the inner function captures a "snapshot" of the variables it needs from the outer scope. This lets you create specialised functions that carry their own private data.
 
-# 💡  Why use closures? Closures create private state without needing a full class. They are perfect for factories that produce customised functions, counters, and simple configuration.
+## 💡  Why use closures? Closures create private state without needing a full class. They are perfect for factories that produce customised functions, counters, and simple configuration.
 
   Example 1: Function Factory — Creating Custom Multipliers
 
 A classic closure example: a factory function that produces multiplier functions. Each returned function "closes over" a different value of factor.
 
->   🐍 Example 1 — Closure as a function factory
-> def make_multiplier(factor):
->     """Return a function that multiplies any number by factor."""
->     def multiply(number):
->         # This inner function "remembers" the value of factor
->         # even after make_multiplier() has finished running
->         return number * factor
->     return multiply   # return the function itself, not its result
-> # Create three different multiplier functions
-> double  = make_multiplier(2)   # factor=2 is "captured"
-> triple  = make_multiplier(3)   # factor=3 is "captured"
-> times10 = make_multiplier(10)  # factor=10 is "captured"
-> # Each function behaves differently
-> print(double(5))     # 5 * 2 = 10
-> print(triple(5))     # 5 * 3 = 15
-> print(times10(7))    # 7 * 10 = 70
-> # You can even verify what they captured:
-> print(double.__closure__[0].cell_contents)   # 2
-> print(triple.__closure__[0].cell_contents)   # 3
-> ▶  Output
-> 10
-> 15
-> 70
-> 2
-> 3
+### 🐍 Example 1 — Closure as a function factory
+\`\`\`python
+def make_multiplier(factor):
+    """Return a function that multiplies any number by factor."""
+    def multiply(number):
+        # This inner function "remembers" the value of factor
+        # even after make_multiplier() has finished running
+        return number * factor
+    return multiply   # return the function itself, not its result
+# Create three different multiplier functions
+double  = make_multiplier(2)   # factor=2 is "captured"
+triple  = make_multiplier(3)   # factor=3 is "captured"
+times10 = make_multiplier(10)  # factor=10 is "captured"
+# Each function behaves differently
+print(double(5))     # 5 * 2 = 10
+print(triple(5))     # 5 * 3 = 15
+print(times10(7))    # 7 * 10 = 70
+# You can even verify what they captured:
+print(double.__closure__[0].cell_contents)   # 2
+print(triple.__closure__[0].cell_contents)   # 3
+\`\`\`
+
+\`\`\`output
+10
+15
+70
+2
+3
+\`\`\`
 
 Explanation: make_multiplier(2) creates and returns the multiply function. At that moment, the value 2 is "closed over" — stored alongside the function. When you later call double(5), multiply still knows that factor=2 even though make_multiplier() finished running long ago.
 
@@ -4337,72 +4413,82 @@ Explanation: make_multiplier(2) creates and returns the multiply function. At th
 
 Closures can maintain mutable state by using a mutable container (a list) inside the closure. This lets you build counter objects without writing a class.
 
->   🐍 Example 2 — Stateful counter using closure
-> def make_counter(start=0):
->     """Return an increment function that counts from start."""
->     count = [start]   # Use a list so we can mutate it inside the closure
->     def increment(step=1):
->         count[0] += step   # modify the mutable list element
->         return count[0]
->     def reset():
->         count[0] = start   # reset back to starting value
->     increment.reset = reset  # attach reset as an attribute
->     return increment
-> counter = make_counter(10)  # starts counting from 10
-> print(counter())     # 11  (increments by 1)
-> print(counter())     # 12
-> print(counter(5))    # 17  (increments by 5)
-> counter.reset()      # reset back to start (10)
-> print(counter())     # 11  (counting from 10 again)
-> ▶  Output
-> 11
-> 12
-> 17
-> 11
+### 🐍 Example 2 — Stateful counter using closure
+\`\`\`python
+def make_counter(start=0):
+    """Return an increment function that counts from start."""
+    count = [start]   # Use a list so we can mutate it inside the closure
+    def increment(step=1):
+        count[0] += step   # modify the mutable list element
+        return count[0]
+    def reset():
+        count[0] = start   # reset back to starting value
+    increment.reset = reset  # attach reset as an attribute
+    return increment
+counter = make_counter(10)  # starts counting from 10
+print(counter())     # 11  (increments by 1)
+print(counter())     # 12
+print(counter(5))    # 17  (increments by 5)
+counter.reset()      # reset back to start (10)
+print(counter())     # 11  (counting from 10 again)
+\`\`\`
+
+\`\`\`output
+11
+12
+17
+11
+\`\`\`
 
 Explanation: We store count as a single-element list [start] because integers are immutable in Python — you cannot rebind them from inside a nested function without the nonlocal keyword. A list is mutable, so count[0] += step works. Each call to make_counter() creates an independent counter with its own private count list.
 
-# 6️⃣  Decorators — Wrapping Functions with Extra Behaviour
+## 6️⃣  Decorators — Wrapping Functions with Extra Behaviour
 
 A decorator is a function that takes another function as input, adds some behaviour before or after it (or both), and returns the enhanced version. Python's @decorator syntax is just a shorthand that makes this pattern clean to write.
 
 The underlying mechanism is simple: @timer above a function is exactly the same as writing my_function = timer(my_function) after the function definition.
 
-# 📐  Syntax
-## @decorator_name       # shorthand — equivalent to the line below
+### 📐  Syntax
+\`\`\`python
+@decorator_name       # shorthand — equivalent to the line below
 def my_function():
 ...
 # The above is IDENTICAL to:
 def my_function():
 ...
 my_function = decorator_name(my_function)
+\`\`\`
 
   Example 1: Timer Decorator — Measure Execution Time
 
 A practical decorator that measures how long any function takes to run. Once defined, it can be applied to any function with a single @ line.
 
->   🐍 Example 1 — Timer decorator
-> import time
-> def timer(func):
->     """Decorator: print the execution time of any function."""
->     def wrapper(*args, **kwargs):
->         start  = time.perf_counter()      # record start time
->         result = func(*args, **kwargs)    # run the original function
->         end    = time.perf_counter()      # record end time
->         elapsed = end - start
->         print(f"{func.__name__}() took {elapsed:.4f} seconds")
->         return result
->     return wrapper
-> # Apply the decorator with @ syntax
-> @timer
-> def slow_sum(n):
->     """Sum all numbers from 0 to n."""
->     return sum(range(n))
-> result = slow_sum(10_000_000)
-> print(f"Result: {result:,}")
-> ▶  Output
-> slow_sum() took 0.2831 seconds
-> Result: 49,999,995,000,000
+### 🐍 Example 1 — Timer decorator
+\`\`\`python
+import time
+def timer(func):
+    """Decorator: print the execution time of any function."""
+    def wrapper(*args, **kwargs):
+        start  = time.perf_counter()      # record start time
+        result = func(*args, **kwargs)    # run the original function
+        end    = time.perf_counter()      # record end time
+        elapsed = end - start
+        print(f"{func.__name__}() took {elapsed:.4f} seconds")
+        return result
+    return wrapper
+# Apply the decorator with @ syntax
+@timer
+def slow_sum(n):
+    """Sum all numbers from 0 to n."""
+    return sum(range(n))
+result = slow_sum(10_000_000)
+print(f"Result: {result:,}")
+\`\`\`
+
+\`\`\`output
+slow_sum() took 0.2831 seconds
+Result: 49,999,995,000,000
+\`\`\`
 
 Explanation: The timer decorator defines a wrapper function that has *args and **kwargs so it can wrap any function regardless of its signature. It records time before and after calling the original function. @timer is syntactic sugar for slow_sum = timer(slow_sum) — after decoration, slow_sum points to wrapper, which calls the original slow_sum internally.
 
@@ -4410,38 +4496,42 @@ Explanation: The timer decorator defines a wrapper function that has *args and *
 
 A logger decorator that prints the function name, arguments, and return value every time the function is called. Useful for debugging without modifying the function body.
 
->   🐍 Example 2 — Logger decorator
-> def logger(func):
->     """Decorator: log every call to the function."""
->     def wrapper(*args, **kwargs):
->         # Log what was called
->         print(f"  → Calling {func.__name__} with args={args} kwargs={kwargs}")
->         result = func(*args, **kwargs)
->         # Log what was returned
->         print(f"  ← {func.__name__} returned {result}")
->         return result
->     return wrapper
-> @logger
-> def add(a, b):
->     """Add two numbers."""
->     return a + b
-> @logger
-> def greet(name, greeting="Hello"):
->     return f"{greeting}, {name}!"
-> add(3, 5)
-> greet("Alice")
-> greet("Bob", greeting="Good morning")
-> ▶  Output
->   → Calling add with args=(3, 5) kwargs={}
->   ← add returned 8
->   → Calling greet with args=('Alice',) kwargs={}
->   ← greet returned Hello, Alice!
->   → Calling greet with args=('Bob',) kwargs={'greeting': 'Good morning'}
->   ← greet returned Good morning, Bob!
+### 🐍 Example 2 — Logger decorator
+\`\`\`python
+def logger(func):
+    """Decorator: log every call to the function."""
+    def wrapper(*args, **kwargs):
+        # Log what was called
+        print(f"  → Calling {func.__name__} with args={args} kwargs={kwargs}")
+        result = func(*args, **kwargs)
+        # Log what was returned
+        print(f"  ← {func.__name__} returned {result}")
+        return result
+    return wrapper
+@logger
+def add(a, b):
+    """Add two numbers."""
+    return a + b
+@logger
+def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+add(3, 5)
+greet("Alice")
+greet("Bob", greeting="Good morning")
+\`\`\`
+
+\`\`\`output
+  → Calling add with args=(3, 5) kwargs={}
+  ← add returned 8
+  → Calling greet with args=('Alice',) kwargs={}
+  ← greet returned Hello, Alice!
+  → Calling greet with args=('Bob',) kwargs={'greeting': 'Good morning'}
+  ← greet returned Good morning, Bob!
+\`\`\`
 
 Explanation: The same logger decorator is applied to both add() and greet(). This demonstrates the reusability of decorators — once written, you can use @logger on any function with no changes. The wrapper function captures and logs the arguments automatically because it uses *args and **kwargs.
 
-# 7️⃣  Recursion — Functions That Call Themselves
+## 7️⃣  Recursion — Functions That Call Themselves
 
 Recursion is when a function calls itself to solve a smaller version of the same problem. It is a powerful technique for problems that have a naturally self-similar or hierarchical structure, such as tree traversal, directory scanning, and divide-and-conquer algorithms.
 
@@ -4453,41 +4543,48 @@ Every recursive function MUST have two components:
 
 ![Image 18](/pyimages/pimg18.png)
 
-> 📐  Syntax
-> def recursive_function(problem):
->     if base_case_condition:          # STOP — simplest possible problem
->         return simplest_answer
->     # Reduce the problem, then recurse (must get CLOSER to base case!)
->     return recursive_function(smaller_problem)
+### 📐  Syntax
+\`\`\`python
+def recursive_function(problem):
+    if base_case_condition:          # STOP — simplest possible problem
+        return simplest_answer
+    # Reduce the problem, then recurse (must get CLOSER to base case!)
+    return recursive_function(smaller_problem)
+\`\`\`
+
 > 💡  WARNING: Every recursive call MUST move closer to the base case. If it does not, you will get an infinite recursion and Python will raise a RecursionError after ~1000 calls.
 
   Example 1: Factorial — n! = n × (n-1) × ... × 1
 
 The factorial of n (written n!) is the product of all positive integers from 1 to n. It is the "Hello World" of recursion because the mathematical definition is itself recursive: n! = n × (n-1)!
 
->   🐍 Example 1 — Factorial
-> def factorial(n):
->     """
->     Compute n! recursively.
->     Base case:     factorial(0) = 1  (by definition)
->     Recursive case: factorial(n) = n * factorial(n-1)
->     """
->     if n <= 1:                      # BASE CASE: 0! = 1, 1! = 1
->         return 1
->     return n * factorial(n - 1)    # RECURSIVE CASE: n * (n-1)!
-> print(factorial(0))   # 1
-> print(factorial(5))   # 120  = 5 × 4 × 3 × 2 × 1
-> print(factorial(10))  # 3628800
-> # Trace the calls for factorial(4):
-> # factorial(4) → 4 * factorial(3)
-> #              → 4 * 3 * factorial(2)
-> #              → 4 * 3 * 2 * factorial(1)
-> #              → 4 * 3 * 2 * 1   (base case!)
-> #              → 24
-> ▶  Output
-> 1
-> 120
-> 3628800
+### 🐍 Example 1 — Factorial
+\`\`\`python
+def factorial(n):
+    """
+    Compute n! recursively.
+    Base case:     factorial(0) = 1  (by definition)
+    Recursive case: factorial(n) = n * factorial(n-1)
+    """
+    if n <= 1:                      # BASE CASE: 0! = 1, 1! = 1
+        return 1
+    return n * factorial(n - 1)    # RECURSIVE CASE: n * (n-1)!
+print(factorial(0))   # 1
+print(factorial(5))   # 120  = 5 × 4 × 3 × 2 × 1
+print(factorial(10))  # 3628800
+# Trace the calls for factorial(4):
+# factorial(4) → 4 * factorial(3)
+#              → 4 * 3 * factorial(2)
+#              → 4 * 3 * 2 * factorial(1)
+#              → 4 * 3 * 2 * 1   (base case!)
+#              → 24
+\`\`\`
+
+\`\`\`output
+1
+120
+3628800
+\`\`\`
 
 Explanation: factorial(5) calls factorial(4), which calls factorial(3), and so on, until factorial(1) hits the base case and returns 1. Python then unwinds the call stack: 1×2=2, 2×3=6, 6×4=24, 24×5=120.
 
@@ -4495,25 +4592,29 @@ Explanation: factorial(5) calls factorial(4), which calls factorial(3), and so o
 
 The Fibonacci sequence is: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ... Each number is the sum of the two preceding numbers. This makes it a perfect example of recursion with two base cases.
 
->   🐍 Example 2 — Fibonacci sequence
-> def fib(n):
->     """
->     Return the nth Fibonacci number.
->     Base cases:     fib(0) = 0,  fib(1) = 1
->     Recursive case: fib(n) = fib(n-1) + fib(n-2)
->     """
->     if n <= 1:                       # TWO base cases
->         return n                     # fib(0)=0, fib(1)=1
->     return fib(n - 1) + fib(n - 2)  # recursive case
-> # Print first 10 Fibonacci numbers
-> print([fib(i) for i in range(10)])
-> # Individual lookups
-> print(fib(10))   # 55
-> print(fib(15))   # 610
-> ▶  Output
-> [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
-> 55
-> 610
+### 🐍 Example 2 — Fibonacci sequence
+\`\`\`python
+def fib(n):
+    """
+    Return the nth Fibonacci number.
+    Base cases:     fib(0) = 0,  fib(1) = 1
+    Recursive case: fib(n) = fib(n-1) + fib(n-2)
+    """
+    if n <= 1:                       # TWO base cases
+        return n                     # fib(0)=0, fib(1)=1
+    return fib(n - 1) + fib(n - 2)  # recursive case
+# Print first 10 Fibonacci numbers
+print([fib(i) for i in range(10)])
+# Individual lookups
+print(fib(10))   # 55
+print(fib(15))   # 610
+\`\`\`
+
+\`\`\`output
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+55
+610
+\`\`\`
 
 Explanation: Each call to fib(n) makes TWO recursive calls: fib(n-1) and fib(n-2). This means the total number of calls grows exponentially. For fib(5), Python makes 15 function calls. For fib(30) it makes millions. To fix this, use memoisation with @functools.lru_cache.
 
@@ -4521,25 +4622,29 @@ Explanation: Each call to fib(n) makes TWO recursive calls: fib(n-1) and fib(n-2
 
 A cleaner example: recursively sum all digits of a number. 12345 → 1+2+3+4+5 = 15. The idea is to peel off the last digit (n % 10) and recurse on the rest (n // 10).
 
->   🐍 Example 3 — Sum of digits
-> def digit_sum(n):
->     """
->     Sum all digits of a non-negative integer.
->     Base case:     single digit — return it directly
->     Recursive case: last digit + digit_sum(remaining digits)
->     """
->     if n < 10:           # BASE CASE: single digit
->         return n
->     return (n % 10) + digit_sum(n // 10)
->     # n % 10  → last digit    (12345 % 10 = 5)
->     # n // 10 → remove last   (12345 // 10 = 1234)
-> print(digit_sum(12345))   # 1+2+3+4+5 = 15
-> print(digit_sum(9999))    # 9+9+9+9   = 36
-> print(digit_sum(7))       # 7  (base case)
-> ▶  Output
-> 15
-> 36
-> 7
+### 🐍 Example 3 — Sum of digits
+\`\`\`python
+def digit_sum(n):
+    """
+    Sum all digits of a non-negative integer.
+    Base case:     single digit — return it directly
+    Recursive case: last digit + digit_sum(remaining digits)
+    """
+    if n < 10:           # BASE CASE: single digit
+        return n
+    return (n % 10) + digit_sum(n // 10)
+    # n % 10  → last digit    (12345 % 10 = 5)
+    # n // 10 → remove last   (12345 // 10 = 1234)
+print(digit_sum(12345))   # 1+2+3+4+5 = 15
+print(digit_sum(9999))    # 9+9+9+9   = 36
+print(digit_sum(7))       # 7  (base case)
+\`\`\`
+
+\`\`\`output
+15
+36
+7
+\`\`\`
 
 Explanation: For digit_sum(12345): the last digit is 12345%10=5, the rest is 12345//10=1234. So we return 5 + digit_sum(1234). This continues until we reach a single-digit number.
 
@@ -4547,26 +4652,30 @@ Explanation: For digit_sum(12345): the last digit is 12345%10=5, the rest is 123
 
 Recursion works naturally on strings: to reverse a string, take the first character and append it after the reverse of the remaining characters.
 
->   🐍 Example 4 — Reverse a string
-> def reverse(s):
->     """
->     Reverse a string recursively.
->     Base case:     string of 0 or 1 characters → return as-is
->     Recursive case: reverse(s[1:]) + s[0]
->     """
->     if len(s) <= 1:           # BASE CASE: empty or single char
->         return s
->     return reverse(s[1:]) + s[0]
->     # s[1:]  → everything except first char ("ython")
->     # s[0]   → first character ("P")
-> print(reverse("Python"))   # nohtyP
-> print(reverse("hello"))    # olleh
-> print(reverse("a"))        # a   (base case)
-> print(reverse(""))         # ""  (base case)
-> ▶  Output
-> nohtyP
-> olleh
-> a
+### 🐍 Example 4 — Reverse a string
+\`\`\`python
+def reverse(s):
+    """
+    Reverse a string recursively.
+    Base case:     string of 0 or 1 characters → return as-is
+    Recursive case: reverse(s[1:]) + s[0]
+    """
+    if len(s) <= 1:           # BASE CASE: empty or single char
+        return s
+    return reverse(s[1:]) + s[0]
+    # s[1:]  → everything except first char ("ython")
+    # s[0]   → first character ("P")
+print(reverse("Python"))   # nohtyP
+print(reverse("hello"))    # olleh
+print(reverse("a"))        # a   (base case)
+print(reverse(""))         # ""  (base case)
+\`\`\`
+
+\`\`\`output
+nohtyP
+olleh
+a
+\`\`\`
 
 Explanation: reverse("Python") calls reverse("ython"), which calls reverse("thon"), and so on. When we reach "n" (single character), we return "n". Then we start building the result: "n" + "o" + "h" + "t" + "y" + "P" = "nohtyP".
 
@@ -4574,35 +4683,39 @@ Explanation: reverse("Python") calls reverse("ython"), which calls reverse("thon
 
 Binary search is a classic divide-and-conquer algorithm. Given a sorted list, it repeatedly halves the search space until it finds the target or determines it is not there.
 
->   🐍 Example 5 — Binary search (recursive)
-> def binary_search(arr, target, lo=0, hi=None):
->     """
->     Search for target in sorted list arr.
->     Returns the index if found, -1 if not found.
->     """
->     if hi is None:
->         hi = len(arr) - 1
->     if lo > hi:              # BASE CASE: search space exhausted
->         return -1
->     mid = (lo + hi) // 2    # find middle index
->     if arr[mid] == target:   # BASE CASE: found it!
->         return mid
->     elif arr[mid] < target:  # target is in RIGHT half
->         return binary_search(arr, target, mid + 1, hi)
->     else:                    # target is in LEFT half
->         return binary_search(arr, target, lo, mid - 1)
-> data = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
-> print(binary_search(data, 23))   # 5   (found at index 5)
-> print(binary_search(data, 56))   # 7   (found at index 7)
-> print(binary_search(data, 99))   # -1  (not found)
-> ▶  Output
-> 5
-> 7
-> -1
+### 🐍 Example 5 — Binary search (recursive)
+\`\`\`python
+def binary_search(arr, target, lo=0, hi=None):
+    """
+    Search for target in sorted list arr.
+    Returns the index if found, -1 if not found.
+    """
+    if hi is None:
+        hi = len(arr) - 1
+    if lo > hi:              # BASE CASE: search space exhausted
+        return -1
+    mid = (lo + hi) // 2    # find middle index
+    if arr[mid] == target:   # BASE CASE: found it!
+        return mid
+    elif arr[mid] < target:  # target is in RIGHT half
+        return binary_search(arr, target, mid + 1, hi)
+    else:                    # target is in LEFT half
+        return binary_search(arr, target, lo, mid - 1)
+data = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+print(binary_search(data, 23))   # 5   (found at index 5)
+print(binary_search(data, 56))   # 7   (found at index 7)
+print(binary_search(data, 99))   # -1  (not found)
+\`\`\`
+
+\`\`\`output
+5
+7
+-1
+\`\`\`
 
 Explanation: For a 10-element list, binary search takes at most log₂(10) ≈ 4 comparisons to find any element — compared to 10 comparisons for a linear search. Each recursive call halves lo or hi, so the search space shrinks by half each time, guaranteeing we reach the base case.
 
-# 💡  Lesson Recap — Key Takeaways
+## 💡  Lesson Recap — Key Takeaways
 ## *args: packs all extra positional arguments into a TUPLE inside the function — def f(*args)
 **kwargs: packs all extra keyword arguments into a DICT inside the function — def f(**kwargs)
 Parameter order: positional → default → *args → keyword-only → **kwargs
@@ -4618,7 +4731,7 @@ Recursion caution: Python default limit is 1000 calls; use iteration or lru_cach
 ## Modules & Packages
 Organise and reuse code across files and projects
 
-# 📌  What Is a Module?
+## 📌  What Is a Module?
 
 A module is simply a Python file (.py) that contains functions, classes, variables, and runnable code. Any .py file you write is already a module — you can import it in other files and reuse its contents without copying and pasting code.
 
@@ -4633,7 +4746,7 @@ Python's strength comes largely from its vast module ecosystem: hundreds of modu
 | PyPI | Python Package Index — 500,000+ third-party packages at pypi.org |
 | pip | Package installer — pip install package_name |
 
-# 📥  Importing Modules — 4 Styles
+## 📥  Importing Modules — 4 Styles
 
 Python gives you four different ways to import modules. Each style has its own trade-offs in terms of readability, namespace cleanliness, and typing convenience.
 
@@ -4643,23 +4756,27 @@ Python gives you four different ways to import modules. Each style has its own t
 
 The cleanest style. You import the whole module and access everything with the module name as a prefix. This makes it crystal clear where each function comes from.
 
->   🐍 Example 1 — import module
-> import math
-> import os
-> # Use the module name as a prefix
-> print(math.sqrt(144))   # 12.0
-> print(math.pi)          # 3.141592653589793
-> print(math.e)           # 2.718281828459045
-> print(math.floor(4.9))  # 4
-> print(math.ceil(4.1))   # 5
-> print(os.getcwd())      # print current working directory
-> ▶  Output
-> 12.0
-> 3.141592653589793
-> 2.718281828459045
-> 4
-> 5
-> /home/alice/projects   (your actual directory)
+### 🐍 Example 1 — import module
+\`\`\`python
+import math
+import os
+# Use the module name as a prefix
+print(math.sqrt(144))   # 12.0
+print(math.pi)          # 3.141592653589793
+print(math.e)           # 2.718281828459045
+print(math.floor(4.9))  # 4
+print(math.ceil(4.1))   # 5
+print(os.getcwd())      # print current working directory
+\`\`\`
+
+\`\`\`output
+12.0
+3.141592653589793
+2.718281828459045
+4
+5
+/home/alice/projects   (your actual directory)
+\`\`\`
 
 Explanation: math.sqrt(144) makes it obvious that sqrt comes from the math module. This is the recommended style for most situations because it avoids name collisions and makes the code self-documenting.
 
@@ -4667,25 +4784,29 @@ Explanation: math.sqrt(144) makes it obvious that sqrt comes from the math modul
 
 Import only specific names from a module. You can use them directly without the module prefix — good when you use a few functions very frequently.
 
->   🐍 Example 2 — from module import name
-> from math import sqrt, pi, floor, ceil, factorial
-> # Now use directly — no "math." prefix needed
-> print(sqrt(81))        # 9.0
-> print(floor(4.9))      # 4
-> print(ceil(4.1))       # 5
-> print(factorial(6))    # 720
-> print(pi)              # 3.141592653589793
-> # Practical: area of a circle
-> radius = 5
-> area = pi * radius ** 2
-> print(f"Area = {area:.2f}")   # Area = 78.54
-> ▶  Output
-> 9.0
-> 4
-> 5
-> 720
-> 3.141592653589793
-> Area = 78.54
+### 🐍 Example 2 — from module import name
+\`\`\`python
+from math import sqrt, pi, floor, ceil, factorial
+# Now use directly — no "math." prefix needed
+print(sqrt(81))        # 9.0
+print(floor(4.9))      # 4
+print(ceil(4.1))       # 5
+print(factorial(6))    # 720
+print(pi)              # 3.141592653589793
+# Practical: area of a circle
+radius = 5
+area = pi * radius ** 2
+print(f"Area = {area:.2f}")   # Area = 78.54
+\`\`\`
+
+\`\`\`output
+9.0
+4
+5
+720
+3.141592653589793
+Area = 78.54
+\`\`\`
 
 Explanation: Only the listed names are added to the current namespace. Other math functions like math.tan() are NOT available — you imported only what you asked for. This style is clean but can cause confusion if two modules export functions with the same name.
 
@@ -4693,25 +4814,29 @@ Explanation: Only the listed names are added to the current namespace. Other mat
 
 Import a module with a shorter nickname. Essential for modules with long names, and a standard convention in the data science world (import numpy as np, import pandas as pd).
 
->   🐍 Example 3 — import with alias
-> import datetime as dt
-> import os.path as osp
-> # Use the alias instead of the full name
-> today = dt.date.today()
-> print(today)                    # 2024-12-25
-> now = dt.datetime.now()
-> print(now.strftime("%H:%M:%S")) # current time like 14:30:22
-> print(osp.exists("notes.txt"))  # True or False
-> print(osp.join("data", "output", "results.csv"))  # data/output/results.csv
-> # Industry standard aliases (memorise these):
-> # import numpy as np
-> # import pandas as pd
-> # import matplotlib.pyplot as plt
-> ▶  Output
-> 2024-12-25
-> 14:30:22
-> False
-> data/output/results.csv
+### 🐍 Example 3 — import with alias
+\`\`\`python
+import datetime as dt
+import os.path as osp
+# Use the alias instead of the full name
+today = dt.date.today()
+print(today)                    # 2024-12-25
+now = dt.datetime.now()
+print(now.strftime("%H:%M:%S")) # current time like 14:30:22
+print(osp.exists("notes.txt"))  # True or False
+print(osp.join("data", "output", "results.csv"))  # data/output/results.csv
+# Industry standard aliases (memorise these):
+# import numpy as np
+# import pandas as pd
+# import matplotlib.pyplot as plt
+\`\`\`
+
+\`\`\`output
+2024-12-25
+14:30:22
+False
+data/output/results.csv
+\`\`\`
 
 Explanation: import datetime as dt means "import the datetime module and refer to it as dt". Every use of dt.something is exactly the same as datetime.something. Aliases reduce typing for frequently used modules.
 
@@ -4719,23 +4844,26 @@ Explanation: import datetime as dt means "import the datetime module and refer t
 
 Imports everything from a module directly into the current namespace. Convenient in interactive shells but strongly discouraged in production code.
 
->   🐍 Example 4 — Wildcard import (use carefully)
-> from math import *
-> # Everything from math is now available directly
-> print(ceil(2.3))      # 3
-> print(sin(pi / 2))    # 1.0
-> print(log(100, 10))   # 2.0
-> # DANGER — why to avoid this:
-> # What if two modules both define "sum", "max", or "open"?
-> # The second import silently overwrites the first.
-> # Inspect a module — useful for learning what is available
-> import random
-> print(dir(random))        # list all functions and variables
-> print(random.__file__)    # file path of the module
-> help(random.randint)      # read the built-in documentation
+### 🐍 Example 4 — Wildcard import (use carefully)
+\`\`\`python
+from math import *
+# Everything from math is now available directly
+print(ceil(2.3))      # 3
+print(sin(pi / 2))    # 1.0
+print(log(100, 10))   # 2.0
+# DANGER — why to avoid this:
+# What if two modules both define "sum", "max", or "open"?
+# The second import silently overwrites the first.
+# Inspect a module — useful for learning what is available
+import random
+print(dir(random))        # list all functions and variables
+print(random.__file__)    # file path of the module
+help(random.randint)      # read the built-in documentation
+\`\`\`
+
 > 💡  Best practice: Use "import module" or "from module import specific_name". Avoid wildcard imports (from module import *) in any file that other people will read or maintain.
 
-# 🛠️  Creating a Custom Module
+## 🛠️  Creating a Custom Module
 
 Every .py file you write is automatically a module. To create a reusable module: write functions and variables in a .py file, then import that file in any other Python file in the same directory.
 
@@ -4745,8 +4873,9 @@ Every .py file you write is automatically a module. To create a reusable module:
 
 Create a file called myutils.py with reusable utilities. The if __name__ == "__main__": block at the bottom allows the file to be both run directly for testing and imported cleanly.
 
-# 🐍 myutils.py — the module file
-## # ─── myutils.py ──────────────────────────────────────────────
+### 🐍 myutils.py — the module file
+\`\`\`python
+# ─── myutils.py ──────────────────────────────────────────────
 """Utility functions for the project."""
 # Module-level constants
 PI = 3.14159265358979
@@ -4780,45 +4909,51 @@ print("Running myutils tests...")
 print(greet("World"))               # Hello, World!
 print(celsius_to_fahrenheit(100))   # 212.0
 print(is_palindrome("racecar"))     # True
+\`\`\`
 
   Example 2: Importing and Using the Module — main.py
 
 Now import myutils from any other Python file in the same directory. You can import the whole module or selectively import specific names.
 
->   🐍 main.py — using the module
-> # ─── main.py ─────────────────────────────────────────────────
-> import myutils                          # import the whole module
-> from myutils import greet, is_palindrome, PI
-> # Use functions via the module name
-> print(myutils.celsius_to_fahrenheit(37))    # 98.6
-> print(myutils.factorial(7))                 # 5040
-> # Use selectively imported functions directly
-> print(greet("Alice"))                       # Hello, Alice!
-> print(greet("Bob", "Good morning"))         # Good morning, Bob!
-> print(is_palindrome("never odd or even"))   # True
-> print(PI)                                   # 3.14159265358979
-> # Use the Calculator class from the module
-> calc = myutils.Calculator()
-> print(calc.add(10, 5))    # 15
-> print(calc.div(20, 4))    # 5.0
-> ▶  Output
-> 98.6
-> 5040
-> Hello, Alice!
-> Good morning, Bob!
-> True
-> 3.14159265358979
-> 15
-> 5.0
+### 🐍 main.py — using the module
+\`\`\`python
+# ─── main.py ─────────────────────────────────────────────────
+import myutils                          # import the whole module
+from myutils import greet, is_palindrome, PI
+# Use functions via the module name
+print(myutils.celsius_to_fahrenheit(37))    # 98.6
+print(myutils.factorial(7))                 # 5040
+# Use selectively imported functions directly
+print(greet("Alice"))                       # Hello, Alice!
+print(greet("Bob", "Good morning"))         # Good morning, Bob!
+print(is_palindrome("never odd or even"))   # True
+print(PI)                                   # 3.14159265358979
+# Use the Calculator class from the module
+calc = myutils.Calculator()
+print(calc.add(10, 5))    # 15
+print(calc.div(20, 4))    # 5.0
+\`\`\`
 
-# 📁  Packages — Multi-Module Projects
+\`\`\`output
+98.6
+5040
+Hello, Alice!
+Good morning, Bob!
+True
+3.14159265358979
+15
+5.0
+\`\`\`
+
+## 📁  Packages — Multi-Module Projects
 
 A package is a directory that contains multiple Python modules plus a special __init__.py file. The __init__.py file is what tells Python "this directory is a package, not just a folder of files". Packages let you organise large projects into logical namespaces.
 
   Example 1: Package Directory Structure
 
-# 🐍 Package directory structure
-## # Recommended directory structure:
+### 🐍 Package directory structure
+\`\`\`python
+# Recommended directory structure:
 my_project/
 main.py                  ← your entry point
 utils/                   ← this is the PACKAGE directory
@@ -4830,6 +4965,7 @@ data/                ← sub-package
 __init__.py
 loader.py
 cleaner.py
+\`\`\`
 
  What is Happening
 
@@ -4861,8 +4997,9 @@ cleaner.py
 
   Example 2: Importing from a Package
 
-# 🐍 Importing from a package
-## # Importing from the utils package in main.py
+### 🐍 Importing from a package
+\`\`\`python
+# Importing from the utils package in main.py
 # Import an entire module from the package
 from utils import math_utils
 result = math_utils.factorial(5)   # 120
@@ -4879,6 +5016,7 @@ data = load_csv("students.csv")
 # __all__ = ["factorial", "circle_area", "is_palindrome"]
 # Then in main.py:
 from utils import factorial    # works directly!
+\`\`\`
 
  Import Entire Module
 
@@ -4922,7 +5060,7 @@ Now in main.py:
 
 - Makes code cleaner and easier to use
 
-# 📚  Standard Library — Key Modules Reference
+## 📚  Standard Library — Key Modules Reference
 
 | Module | Key Items & Typical Use |
 | --- | --- |
@@ -4939,7 +5077,7 @@ Now in main.py:
 | itertools | chain, product, permutations, combinations, cycle — Iterators |
 | functools | reduce, partial, lru_cache, wraps — Functional programming |
 
-# 🔒  The __name__ == "__main__" Guard
+## 🔒  The __name__ == "__main__" Guard
 
 When Python imports a module, it sets the module's __name__ attribute to the module's file name (without .py). But when you run a file directly with python myfile.py, Python sets __name__ to the special string "__main__".
 
@@ -4947,30 +5085,34 @@ This means you can write code that runs tests or demos when the file is run dire
 
   Example 1: Using the __main__ Guard
 
->   🐍 Example — __main__ guard
-> # myutils.py
-> def add(a, b): return a + b
-> def sub(a, b): return a - b
-> # Guard: this block runs ONLY when executed as: python myutils.py
-> # It is completely SKIPPED when: import myutils
-> if __name__ == "__main__":
->     print("Testing myutils...")
->     assert add(2, 3) == 5,   "add failed"
->     assert sub(10, 4) == 6,  "sub failed"
->     print("All tests passed ✅")
-> # ─────────────────────────────────────────────────────────────
-> # When you run:  python myutils.py
-> #   __name__ == "__main__"  →  tests RUN
-> # When you run:  import myutils  (from another file)
-> #   __name__ == "myutils"   →  tests SKIPPED
-> ▶  Output
-> # Running: python myutils.py
-> Testing myutils...
-> All tests passed ✅
-> # Importing: import myutils
-> (no output — tests are skipped)
+### 🐍 Example — __main__ guard
+\`\`\`python
+# myutils.py
+def add(a, b): return a + b
+def sub(a, b): return a - b
+# Guard: this block runs ONLY when executed as: python myutils.py
+# It is completely SKIPPED when: import myutils
+if __name__ == "__main__":
+    print("Testing myutils...")
+    assert add(2, 3) == 5,   "add failed"
+    assert sub(10, 4) == 6,  "sub failed"
+    print("All tests passed ✅")
+# ─────────────────────────────────────────────────────────────
+# When you run:  python myutils.py
+#   __name__ == "__main__"  →  tests RUN
+# When you run:  import myutils  (from another file)
+#   __name__ == "myutils"   →  tests SKIPPED
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+\`\`\`output
+# Running: python myutils.py
+Testing myutils...
+All tests passed ✅
+# Importing: import myutils
+(no output — tests are skipped)
+\`\`\`
+
+## 💡  Lesson Recap — Key Takeaways
 ## Module = any .py file; Package = directory with __init__.py inside
 import math → access as math.sqrt(); from math import sqrt → access directly as sqrt()
 import numpy as np → creates an alias (industry standard for data science libraries)
@@ -4985,7 +5127,7 @@ Standard Library is already installed — use math, os, sys, json, csv, datetime
 ## File Handling
 Read, write, and manage files — give your programs persistence
 
-# 📌  Why File Handling?
+## 📌  Why File Handling?
 
 Programs are ephemeral — when they end, all data in memory is lost. Files provide persistence: your programs can save results, read configuration, process data from spreadsheets, log events, and interact with the real file system.
 
@@ -4993,7 +5135,7 @@ File handling is essential in every real-world application: web servers write lo
 
 ![Image 21](/pyimages/pimg21.png)
 
-# 🗂️  File Modes — Complete Reference
+## 🗂️  File Modes — Complete Reference
 
 | Mode | Full Behaviour |
 | --- | --- |
@@ -5005,42 +5147,48 @@ File handling is essential in every real-world application: web servers write lo
 | "b"  — Binary | Add to any mode: "rb", "wb", "ab". For non-text files: images, PDFs, audio, executables. |
 | "t"  — Text | Default mode. "rt" = "r". Handles platform line-ending differences automatically (\\n vs \\r\\n). |
 
-# 📖  Reading Files
+## 📖  Reading Files
 
 The safest and most Pythonic way to open any file is with the with statement (context manager). It guarantees the file is closed even if an exception occurs inside the block. Always use with — never manually call f.close().
 
-# 📐  Syntax
-## with open("filename.txt", "r", encoding="utf-8") as f:
+### 📐  Syntax
+\`\`\`python
+with open("filename.txt", "r", encoding="utf-8") as f:
 content    = f.read()       # entire file as ONE string
 first_line = f.readline()   # read ONE line (advances pointer)
 all_lines  = f.readlines()  # list of all lines (with \\n)
 for line in f:              # iterate line by line (best for large files)
 process(line)
+\`\`\`
 
   Example 1: read() — Read the Entire File as One String
 
 Use f.read() when you need the complete file content as a single string. Good for small files where you want to search, replace, or parse the whole content at once.
 
->   🐍 Example 1 — f.read()
-> # First, let us create a sample file to read
-> with open("poem.txt", "w", encoding="utf-8") as f:
->     f.write("Roses are red,\\n")
->     f.write("Violets are blue,\\n")
->     f.write("Python is great,\\n")
->     f.write("And so are you!\\n")
-> # Now read the entire file as one string
-> with open("poem.txt", "r", encoding="utf-8") as f:
->     content = f.read()       # reads everything at once
-> print(content)
-> print(f"Total characters: {len(content)}")
-> print(f"Contains 'Python': {'Python' in content}")
-> ▶  Output
-> Roses are red,
-> Violets are blue,
-> Python is great,
-> And so are you!
-> Total characters: 62
-> Contains 'Python': True
+### 🐍 Example 1 — f.read()
+\`\`\`python
+# First, let us create a sample file to read
+with open("poem.txt", "w", encoding="utf-8") as f:
+    f.write("Roses are red,\\n")
+    f.write("Violets are blue,\\n")
+    f.write("Python is great,\\n")
+    f.write("And so are you!\\n")
+# Now read the entire file as one string
+with open("poem.txt", "r", encoding="utf-8") as f:
+    content = f.read()       # reads everything at once
+print(content)
+print(f"Total characters: {len(content)}")
+print(f"Contains 'Python': {'Python' in content}")
+\`\`\`
+
+\`\`\`output
+Roses are red,
+Violets are blue,
+Python is great,
+And so are you!
+Total characters: 62
+Contains 'Python': True
+\`\`\`
 
 Explanation: f.read() returns the entire file as one string, including newline characters (\\n). After read() the file pointer is at the end — calling read() again would return an empty string. The with block ensures the file is closed when we exit, even if an error occurs.
 
@@ -5048,28 +5196,32 @@ Explanation: f.read() returns the entire file as one string, including newline c
 
 Use readlines() when you want to process each line individually and need random access to lines by index.
 
->   🐍 Example 2 — f.readlines()
-> # Create a data file
-> with open("data.txt", "w") as f:
->     f.write("Alice 95\\n")
->     f.write("Bob 82\\n")
->     f.write("Carol 91\\n")
->     f.write("David 78\\n")
-> # Read all lines into a list
-> with open("data.txt", "r") as f:
->     lines = f.readlines()     # each element includes trailing \\n
-> print(f"Total lines: {len(lines)}")
-> for i, line in enumerate(lines, 1):
->     # rstrip() removes the trailing \\n from each line
->     clean = line.rstrip()
->     name, score = clean.split()
->     print(f"  Line {i}: {name} scored {score}")
-> ▶  Output
-> Total lines: 4
->   Line 1: Alice scored 95
->   Line 2: Bob scored 82
->   Line 3: Carol scored 91
->   Line 4: David scored 78
+### 🐍 Example 2 — f.readlines()
+\`\`\`python
+# Create a data file
+with open("data.txt", "w") as f:
+    f.write("Alice 95\\n")
+    f.write("Bob 82\\n")
+    f.write("Carol 91\\n")
+    f.write("David 78\\n")
+# Read all lines into a list
+with open("data.txt", "r") as f:
+    lines = f.readlines()     # each element includes trailing \\n
+print(f"Total lines: {len(lines)}")
+for i, line in enumerate(lines, 1):
+    # rstrip() removes the trailing \\n from each line
+    clean = line.rstrip()
+    name, score = clean.split()
+    print(f"  Line {i}: {name} scored {score}")
+\`\`\`
+
+\`\`\`output
+Total lines: 4
+  Line 1: Alice scored 95
+  Line 2: Bob scored 82
+  Line 3: Carol scored 91
+  Line 4: David scored 78
+\`\`\`
 
 Explanation: readlines() returns a Python list where each element is one line of text, including the trailing newline character \\n. We use .rstrip() to strip that trailing whitespace before processing. This approach loads the entire file into memory at once.
 
@@ -5077,49 +5229,57 @@ Explanation: readlines() returns a Python list where each element is one line of
 
 The best approach for large files. Instead of reading the whole file into memory, Python reads and processes one line at a time. This works even for files that are gigabytes in size.
 
->   🐍 Example 3 — Iterate line by line
-> # Create a larger sample file
-> with open("book.txt", "w", encoding="utf-8") as f:
->     f.write("The quick brown fox jumps over the lazy dog.\\n")
->     f.write("\\n")   # blank line
->     f.write("Python is a versatile programming language.\\n")
->     f.write("It is used for web development, data science, AI.\\n")
-> # Count words without loading entire file into memory
-> word_count = 0
-> line_count = 0
-> with open("book.txt", "r", encoding="utf-8") as f:
->     for line in f:                    # Python reads ONE line at a time
->         line = line.strip()           # remove leading/trailing whitespace
->         if line:                      # skip blank lines
->             line_count += 1
->             word_count += len(line.split())
-> print(f"Lines (non-blank): {line_count}")
-> print(f"Total words:       {word_count}")
-> ▶  Output
-> Lines (non-blank): 3
-> Total words:       25
+### 🐍 Example 3 — Iterate line by line
+\`\`\`python
+# Create a larger sample file
+with open("book.txt", "w", encoding="utf-8") as f:
+    f.write("The quick brown fox jumps over the lazy dog.\\n")
+    f.write("\\n")   # blank line
+    f.write("Python is a versatile programming language.\\n")
+    f.write("It is used for web development, data science, AI.\\n")
+# Count words without loading entire file into memory
+word_count = 0
+line_count = 0
+with open("book.txt", "r", encoding="utf-8") as f:
+    for line in f:                    # Python reads ONE line at a time
+        line = line.strip()           # remove leading/trailing whitespace
+        if line:                      # skip blank lines
+            line_count += 1
+            word_count += len(line.split())
+print(f"Lines (non-blank): {line_count}")
+print(f"Total words:       {word_count}")
+\`\`\`
+
+\`\`\`output
+Lines (non-blank): 3
+Total words:       25
+\`\`\`
 
 Explanation: for line in f is the most memory-efficient reading method. Python reads one line at a time from disk rather than loading everything into RAM. This is crucial for log files, data pipelines, and any file that could be hundreds of MB or GB in size.
 
-# ✍️  Writing Files
+## ✍️  Writing Files
 
   Example 1: write() — Create or Overwrite a File
 
 Use "w" mode to write text to a file. If the file already exists, its contents are completely erased first. If the file does not exist, it is created.
 
->   🐍 Example 1 — write() to a file
-> # Create a new file (or OVERWRITE existing)
-> with open("output.txt", "w", encoding="utf-8") as f:
->     f.write("Line 1: Hello, File!\\n")   # \\n required — write() does not add it
->     f.write("Line 2: Python rocks!\\n")
->     f.write("Line 3: File handling is easy.\\n")
-> # Verify by reading it back
-> with open("output.txt", "r") as f:
->     print(f.read())
-> ▶  Output
-> Line 1: Hello, File!
-> Line 2: Python rocks!
-> Line 3: File handling is easy.
+### 🐍 Example 1 — write() to a file
+\`\`\`python
+# Create a new file (or OVERWRITE existing)
+with open("output.txt", "w", encoding="utf-8") as f:
+    f.write("Line 1: Hello, File!\\n")   # \\n required — write() does not add it
+    f.write("Line 2: Python rocks!\\n")
+    f.write("Line 3: File handling is easy.\\n")
+# Verify by reading it back
+with open("output.txt", "r") as f:
+    print(f.read())
+\`\`\`
+
+\`\`\`output
+Line 1: Hello, File!
+Line 2: Python rocks!
+Line 3: File handling is easy.
+\`\`\`
 
 Explanation: Unlike print(), f.write() does NOT automatically add a newline at the end of each string. You must explicitly include \\n if you want each write to be on a new line. The file is automatically closed when the with block ends.
 
@@ -5127,21 +5287,25 @@ Explanation: Unlike print(), f.write() does NOT automatically add a newline at t
 
 writelines() accepts any iterable of strings and writes them all. Like write(), it does not add newlines automatically — include \\n in each string if needed.
 
->   🐍 Example 2 — writelines() and print(..., file=f)
-> names = ["Alice\\n", "Bob\\n", "Carol\\n", "David\\n"]
-> with open("names.txt", "w") as f:
->     f.writelines(names)   # writes all strings in the list
-> # Alternative: using print() with file= argument
-> with open("report.txt", "w") as f:
->     print("Sales Report 2024", file=f)  # print() adds \\n automatically
->     print("=" * 20,           file=f)
->     print(f"Total: Rs.{9999:,}", file=f)
-> with open("report.txt", "r") as f:
->     print(f.read())
-> ▶  Output
-> Sales Report 2024
-> ====================
-> Total: Rs.9,999
+### 🐍 Example 2 — writelines() and print(..., file=f)
+\`\`\`python
+names = ["Alice\\n", "Bob\\n", "Carol\\n", "David\\n"]
+with open("names.txt", "w") as f:
+    f.writelines(names)   # writes all strings in the list
+# Alternative: using print() with file= argument
+with open("report.txt", "w") as f:
+    print("Sales Report 2024", file=f)  # print() adds \\n automatically
+    print("=" * 20,           file=f)
+    print(f"Total: Rs.{9999:,}", file=f)
+with open("report.txt", "r") as f:
+    print(f.read())
+\`\`\`
+
+\`\`\`output
+Sales Report 2024
+====================
+Total: Rs.9,999
+\`\`\`
 
 Explanation: print(value, file=f) is a very convenient trick — it redirects print output to any file object instead of the screen, and automatically adds newlines. writelines() is faster for writing large lists because it makes fewer system calls than writing line by line.
 
@@ -5149,27 +5313,31 @@ Explanation: print(value, file=f) is a very convenient trick — it redirects pr
 
 Use "a" mode when you want to add new content to the END of an existing file without touching what is already there. Perfect for log files.
 
->   🐍 Example 3 — Append mode
-> from datetime import datetime
-> # Each time this runs, a new log entry is ADDED
-> # The file is never erased — old entries are preserved
-> with open("app.log", "a") as f:
->     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
->     f.write(f"[{ts}] INFO: Server started\\n")
-> # Simulate a second event
-> with open("app.log", "a") as f:
->     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
->     f.write(f"[{ts}] INFO: User logged in: alice\\n")
-> # Read the log
-> with open("app.log", "r") as f:
->     print(f.read())
-> ▶  Output
-> [2024-12-25 14:30:00] INFO: Server started
-> [2024-12-25 14:30:01] INFO: User logged in: alice
+### 🐍 Example 3 — Append mode
+\`\`\`python
+from datetime import datetime
+# Each time this runs, a new log entry is ADDED
+# The file is never erased — old entries are preserved
+with open("app.log", "a") as f:
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    f.write(f"[{ts}] INFO: Server started\\n")
+# Simulate a second event
+with open("app.log", "a") as f:
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    f.write(f"[{ts}] INFO: User logged in: alice\\n")
+# Read the log
+with open("app.log", "r") as f:
+    print(f.read())
+\`\`\`
+
+\`\`\`output
+[2024-12-25 14:30:00] INFO: Server started
+[2024-12-25 14:30:01] INFO: User logged in: alice
+\`\`\`
 
 Explanation: Every time you open a file in "a" mode and write to it, the new content is added at the very end. If you used "w" mode here instead, you would lose the previous log entries every time the program runs. Append mode is essential for log files.
 
-# 📊  Working with CSV Files
+## 📊  Working with CSV Files
 
 CSV (Comma-Separated Values) is the most common format for tabular data — think Excel spreadsheets as plain text. Python's built-in csv module handles edge cases like quoted fields, commas inside values, and different delimiters (tab, semicolon, etc.).
 
@@ -5177,67 +5345,79 @@ CSV (Comma-Separated Values) is the most common format for tabular data — thin
 
 csv.writer handles all the formatting: quoting fields that contain commas, adding proper line endings, etc. Always use newline="" when opening CSV files to prevent double line endings.
 
->   🐍 Example 1 — Writing CSV with csv.writer
-> import csv
-> students = [
->     ["Name",  "Age", "Grade", "City"],      # header row
->     ["Alice", 20,    "A",     "Hyderabad"],
->     ["Bob",   22,    "B",     "Mumbai"],
->     ["Carol", 21,    "A+",    "Bangalore"],
-> ]
-> # newline="" is required for csv module — prevents extra blank lines
-> with open("students.csv", "w", newline="", encoding="utf-8") as f:
->     writer = csv.writer(f)
->     writer.writerows(students)   # write ALL rows at once
-> print("students.csv created successfully!")
-> ▶  Output
-> students.csv created successfully!
-> # File contents:
-> Name,Age,Grade,City
-> Alice,20,A,Hyderabad
-> Bob,22,B,Mumbai
-> Carol,21,A+,Bangalore
+### 🐍 Example 1 — Writing CSV with csv.writer
+\`\`\`python
+import csv
+students = [
+    ["Name",  "Age", "Grade", "City"],      # header row
+    ["Alice", 20,    "A",     "Hyderabad"],
+    ["Bob",   22,    "B",     "Mumbai"],
+    ["Carol", 21,    "A+",    "Bangalore"],
+]
+# newline="" is required for csv module — prevents extra blank lines
+with open("students.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerows(students)   # write ALL rows at once
+print("students.csv created successfully!")
+\`\`\`
+
+\`\`\`output
+students.csv created successfully!
+# File contents:
+Name,Age,Grade,City
+Alice,20,A,Hyderabad
+Bob,22,B,Mumbai
+Carol,21,A+,Bangalore
+\`\`\`
 
   Example 2: Reading a CSV File with csv.reader
 
 csv.reader returns each row as a list of strings. Use next(reader) to skip the header row, then iterate over the remaining rows.
 
->   🐍 Example 2 — Reading CSV with csv.reader
-> import csv
-> with open("students.csv", "r", encoding="utf-8") as f:
->     reader = csv.reader(f)
->     header = next(reader)          # read and skip the header row
->     print("Columns:", header)
->     print("-" * 45)
->     for row in reader:
->         name, age, grade, city = row   # unpack the row
->         print(f"{name:8} | Age {age} | Grade {grade} | {city}")
-> ▶  Output
-> Columns: ['Name', 'Age', 'Grade', 'City']
-> ---------------------------------------------
-> Alice    | Age 20 | Grade A  | Hyderabad
-> Bob      | Age 22 | Grade B  | Mumbai
-> Carol    | Age 21 | Grade A+ | Bangalore
+### 🐍 Example 2 — Reading CSV with csv.reader
+\`\`\`python
+import csv
+with open("students.csv", "r", encoding="utf-8") as f:
+    reader = csv.reader(f)
+    header = next(reader)          # read and skip the header row
+    print("Columns:", header)
+    print("-" * 45)
+    for row in reader:
+        name, age, grade, city = row   # unpack the row
+        print(f"{name:8} | Age {age} | Grade {grade} | {city}")
+\`\`\`
+
+\`\`\`output
+Columns: ['Name', 'Age', 'Grade', 'City']
+---------------------------------------------
+Alice    | Age 20 | Grade A  | Hyderabad
+Bob      | Age 22 | Grade B  | Mumbai
+Carol    | Age 21 | Grade A+ | Bangalore
+\`\`\`
 
   Example 3: DictReader — Rows as Dictionaries (Recommended)
 
 DictReader automatically uses the first row as column headers and returns each subsequent row as an OrderedDict. This is much more readable because you access fields by name instead of by index.
 
->   🐍 Example 3 — DictReader
-> import csv
-> with open("students.csv", "r") as f:
->     reader = csv.DictReader(f)   # first row becomes the keys
->     for row in reader:
->         # Access fields by name — much clearer than row[0], row[2]!
->         print(f"{row['Name']} (age {row['Age']}) → Grade: {row['Grade']} from {row['City']}")
-> ▶  Output
-> Alice (age 20) → Grade: A from Hyderabad
-> Bob (age 22) → Grade: B from Mumbai
-> Carol (age 21) → Grade: A+ from Bangalore
+### 🐍 Example 3 — DictReader
+\`\`\`python
+import csv
+with open("students.csv", "r") as f:
+    reader = csv.DictReader(f)   # first row becomes the keys
+    for row in reader:
+        # Access fields by name — much clearer than row[0], row[2]!
+        print(f"{row['Name']} (age {row['Age']}) → Grade: {row['Grade']} from {row['City']}")
+\`\`\`
+
+\`\`\`output
+Alice (age 20) → Grade: A from Hyderabad
+Bob (age 22) → Grade: B from Mumbai
+Carol (age 21) → Grade: A+ from Bangalore
+\`\`\`
 
 Explanation: With csv.reader, you access fields by position: row[0] for name, row[2] for grade. With csv.DictReader, you access by name: row["Name"], row["Grade"]. DictReader is far more readable and does not break if you add columns to the CSV.
 
-# 🔷  Working with JSON Files
+## 🔷  Working with JSON Files
 
 JSON (JavaScript Object Notation) is the universal data-interchange format used by almost every web API. Python dictionaries and lists map directly to JSON objects and arrays. The json module provides four functions for working with JSON.
 
@@ -5252,31 +5432,35 @@ JSON (JavaScript Object Notation) is the universal data-interchange format used 
 
 Use json.dumps() to convert a Python object to a JSON-formatted string. The indent parameter makes it human-readable (pretty-printed).
 
->   🐍 Example 1 — json.dumps() Python → JSON string
-> import json
-> student = {
->     "name":   "Alice",
->     "age":    20,
->     "grades": [85, 92, 78, 95],
->     "active": True,
->     "address": {"city": "Hyderabad", "pin": "500001"}
-> }
-> # Convert to JSON string (pretty-printed with indent=4)
-> json_str = json.dumps(student, indent=4)
-> print(json_str)
-> print(f"Type: {type(json_str)}")  # str
-> ▶  Output
-> {
->     "name": "Alice",
->     "age": 20,
->     "grades": [85, 92, 78, 95],
->     "active": true,
->     "address": {
->         "city": "Hyderabad",
->         "pin": "500001"
->     }
-> }
-> Type: <class 'str'>
+### 🐍 Example 1 — json.dumps() Python → JSON string
+\`\`\`python
+import json
+student = {
+    "name":   "Alice",
+    "age":    20,
+    "grades": [85, 92, 78, 95],
+    "active": True,
+    "address": {"city": "Hyderabad", "pin": "500001"}
+}
+# Convert to JSON string (pretty-printed with indent=4)
+json_str = json.dumps(student, indent=4)
+print(json_str)
+print(f"Type: {type(json_str)}")  # str
+\`\`\`
+
+\`\`\`output
+{
+    "name": "Alice",
+    "age": 20,
+    "grades": [85, 92, 78, 95],
+    "active": true,
+    "address": {
+        "city": "Hyderabad",
+        "pin": "500001"
+    }
+}
+Type: <class 'str'>
+\`\`\`
 
 Explanation: Notice that Python's True becomes JSON's true (lowercase). Python None becomes JSON's null. Strings are always double-quoted in JSON. The resulting string is just a regular Python string that happens to be valid JSON.
 
@@ -5284,57 +5468,66 @@ Explanation: Notice that Python's True becomes JSON's true (lowercase). Python N
 
 Use json.dump() to save Python data to a JSON file, and json.load() to read it back. This is the standard way to save configuration or program state between runs.
 
->   🐍 Example 2 — json.dump() and json.load()
-> import json
-> # Save Python object to a JSON file
-> with open("student.json", "w", encoding="utf-8") as f:
->     json.dump(student, f, indent=4)   # student is the dict from above
-> # Load JSON file back into Python
-> with open("student.json", "r", encoding="utf-8") as f:
->     loaded = json.load(f)
-> # Access the loaded data just like any Python dict
-> print(loaded["name"])              # Alice
-> print(loaded["grades"])            # [85, 92, 78, 95]
-> print(loaded["address"]["city"])   # Hyderabad
-> # Compute average grade
-> avg = sum(loaded["grades"]) / len(loaded["grades"])
-> print(f"Average grade: {avg:.1f}")  # 87.5
-> ▶  Output
-> Alice
-> [85, 92, 78, 95]
-> Hyderabad
-> Average grade: 87.5
+### 🐍 Example 2 — json.dump() and json.load()
+\`\`\`python
+import json
+# Save Python object to a JSON file
+with open("student.json", "w", encoding="utf-8") as f:
+    json.dump(student, f, indent=4)   # student is the dict from above
+# Load JSON file back into Python
+with open("student.json", "r", encoding="utf-8") as f:
+    loaded = json.load(f)
+# Access the loaded data just like any Python dict
+print(loaded["name"])              # Alice
+print(loaded["grades"])            # [85, 92, 78, 95]
+print(loaded["address"]["city"])   # Hyderabad
+# Compute average grade
+avg = sum(loaded["grades"]) / len(loaded["grades"])
+print(f"Average grade: {avg:.1f}")  # 87.5
+\`\`\`
+
+\`\`\`output
+Alice
+[85, 92, 78, 95]
+Hyderabad
+Average grade: 87.5
+\`\`\`
 
   Example 3: Parsing an API Response — json.loads()
 
 When you call a web API, the response body is a JSON string. Use json.loads() (load string) to convert it into a Python dictionary or list that you can work with.
 
->   🐍 Example 3 — json.loads() for API responses
-> import json
-> # Simulate an API response (in real code this would come from requests.get())
-> api_response = '{"status":"ok","count":3,"items":[10,20,30],"user":"Alice"}'
-> # Parse the JSON string into a Python dict
-> data = json.loads(api_response)
-> print(type(data))           # <class 'dict'>
-> print(data["status"])       # ok
-> print(data["count"])        # 3
-> print(data["items"])        # [10, 20, 30]
-> print(sum(data["items"]))   # 60
-> ▶  Output
-> <class 'dict'>
-> ok
-> 3
-> [10, 20, 30]
-> 60
+### 🐍 Example 3 — json.loads() for API responses
+\`\`\`python
+import json
+# Simulate an API response (in real code this would come from requests.get())
+api_response = '{"status":"ok","count":3,"items":[10,20,30],"user":"Alice"}'
+# Parse the JSON string into a Python dict
+data = json.loads(api_response)
+print(type(data))           # <class 'dict'>
+print(data["status"])       # ok
+print(data["count"])        # 3
+print(data["items"])        # [10, 20, 30]
+print(sum(data["items"]))   # 60
+\`\`\`
 
-# 📁  File & Directory Operations — pathlib
+\`\`\`output
+<class 'dict'>
+ok
+3
+[10, 20, 30]
+60
+\`\`\`
+
+## 📁  File & Directory Operations — pathlib
 
 Python provides two ways to work with the file system: the older os/os.path modules and the modern pathlib.Path (added in Python 3.4). pathlib is recommended for all new code — it is object-oriented, cleaner, and more readable.
 
   Example 1: Basic pathlib Operations
 
-# 🐍 Example 1 — Path object basics
-## from pathlib import Path
+### 🐍 Example 1 — Path object basics
+\`\`\`python
+from pathlib import Path
 # Create a Path object
 p = Path("data/students.csv")
 # Inspect the path components
@@ -5349,11 +5542,13 @@ print(p.is_dir())   # True if it is a directory
 # Get file size
 if p.exists():
 print(f"Size: {p.stat().st_size} bytes")
+\`\`\`
 
   Example 2: Creating Directories and Searching for Files
 
-# 🐍 Example 2 — Directories and glob patterns
-## from pathlib import Path
+### 🐍 Example 2 — Directories and glob patterns
+\`\`\`python
+from pathlib import Path
 # Create a directory (no error if it already exists)
 Path("logs").mkdir(parents=True, exist_ok=True)
 Path("data/reports").mkdir(parents=True, exist_ok=True)
@@ -5368,8 +5563,9 @@ print(f"Found {len(py_files)} Python files")
 csv_files = list(Path("data").glob("*.csv"))
 for f in csv_files:
 print(f"  {f.name}  ({f.stat().st_size} bytes)")
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+## 💡  Lesson Recap — Key Takeaways
 ## ALWAYS use "with open(...) as f:" — it auto-closes the file even if an error occurs
 "r"=read, "w"=write/overwrite, "a"=append (never erases), "x"=create new only
 Always specify encoding="utf-8" for text files — avoids issues with special characters
@@ -5384,17 +5580,17 @@ Always use newline="" when opening CSV files for writing`,
 ## Exception Handling
 Write robust programs that handle errors gracefully
 
-# 📌  What Is an Exception?
+## 📌  What Is an Exception?
 
 An exception is a runtime error — an error that occurs while the program is running, not when Python parses the code. When Python encounters something it cannot handle (dividing by zero, opening a missing file, accessing a missing key), it raises an exception.
 
 Without exception handling, these errors immediately crash your program and print a traceback. With exception handling, you can catch the error, respond gracefully, inform the user, and optionally continue running.
 
-# 💡  Key concept: Every exception is an object — an instance of a class that inherits from BaseException. Python has a rich hierarchy of built-in exception classes, and you can create your own custom ones.
+## 💡  Key concept: Every exception is an object — an instance of a class that inherits from BaseException. Python has a rich hierarchy of built-in exception classes, and you can create your own custom ones.
 
 ![Image22](/pyimages/pimg22.png)
 
-# ⚡  Common Built-in Exceptions
+## ⚡  Common Built-in Exceptions
 
 | Exception | What Causes It — Example |
 | --- | --- |
@@ -5411,12 +5607,13 @@ Without exception handling, these errors immediately crash your program and prin
 | RecursionError | Recursion depth exceeded (~1000 calls) |
 | StopIteration | Iterator exhausted — next() on empty iterator |
 
-# 🛡️  try / except — The Basic Structure
+## 🛡️  try / except — The Basic Structure
 
 The try block contains code that might fail. The except block catches specific exception types and runs recovery code. Python checks each except clause in order from top to bottom and runs only the first one that matches.
 
-# 📐  Syntax
-## try:
+### 📐  Syntax
+\`\`\`python
+try:
 # Code that might raise an exception
 risky_operation()
 except ExceptionType:
@@ -5425,32 +5622,37 @@ handle_the_error()
 except AnotherType as e:
 # "as e" gives you access to the exception object
 print(f"Error: {e}")
+\`\`\`
 
   Example 1: Catching a Specific Exception
 
 The most basic and important use of exception handling: anticipate which error might occur and handle exactly that one.
 
->   🐍 Example 1 — Catching specific exceptions
-> try:
->     number = int(input("Enter a number: "))   # may raise ValueError
->     result = 100 / number                     # may raise ZeroDivisionError
->     print(f"100 ÷ {number} = {result:.2f}")
-> except ZeroDivisionError:
->     # This runs ONLY if ZeroDivisionError was raised
->     print("Error: cannot divide by zero!")
-> except ValueError:
->     # This runs ONLY if ValueError was raised
->     print("Error: please enter a valid whole number!")
-> ▶  Output
-> # Input: 0
-> Enter a number: 0
-> Error: cannot divide by zero!
-> # Input: abc
-> Enter a number: abc
-> Error: please enter a valid whole number!
-> # Input: 4
-> Enter a number: 4
-> 100 ÷ 4 = 25.00
+### 🐍 Example 1 — Catching specific exceptions
+\`\`\`python
+try:
+    number = int(input("Enter a number: "))   # may raise ValueError
+    result = 100 / number                     # may raise ZeroDivisionError
+    print(f"100 ÷ {number} = {result:.2f}")
+except ZeroDivisionError:
+    # This runs ONLY if ZeroDivisionError was raised
+    print("Error: cannot divide by zero!")
+except ValueError:
+    # This runs ONLY if ValueError was raised
+    print("Error: please enter a valid whole number!")
+\`\`\`
+
+\`\`\`output
+# Input: 0
+Enter a number: 0
+Error: cannot divide by zero!
+# Input: abc
+Enter a number: abc
+Error: please enter a valid whole number!
+# Input: 4
+Enter a number: 4
+100 ÷ 4 = 25.00
+\`\`\`
 
 Explanation: Python tries the code in the try block. If int(input()) raises a ValueError (user typed letters), Python jumps to the ValueError handler. If the division raises ZeroDivisionError (user typed 0), Python jumps to that handler. If no exception is raised, both handlers are skipped.
 
@@ -5458,60 +5660,68 @@ Explanation: Python tries the code in the try block. If int(input()) raises a Va
 
 If two different exceptions should be handled the same way, you can group them in a tuple inside a single except clause.
 
->   🐍 Example 2 — Multiple exceptions in one handler
-> # Catch multiple exceptions with the SAME handler
-> try:
->     x = int("not_a_number")  # raises ValueError
-> except (ValueError, TypeError) as e:
->     print(f"Conversion error: {type(e).__name__}: {e}")
-> # Another example: database operations that can fail in multiple ways
-> def fetch_record(data, key, index):
->     try:
->         return data[key][index]
->     except (KeyError, IndexError) as e:
->         print(f"Data access failed ({type(e).__name__}): {e}")
->         return None
-> db = {"users": ["Alice", "Bob", "Carol"]}
-> print(fetch_record(db, "users", 1))      # Bob
-> print(fetch_record(db, "users", 99))     # IndexError
-> print(fetch_record(db, "products", 0))   # KeyError
-> ▶  Output
-> Conversion error: ValueError: invalid literal for int() with base 10: 'not_a_number'
-> Bob
-> Data access failed (IndexError): list index out of range
-> Data access failed (KeyError): 'products'
+### 🐍 Example 2 — Multiple exceptions in one handler
+\`\`\`python
+# Catch multiple exceptions with the SAME handler
+try:
+    x = int("not_a_number")  # raises ValueError
+except (ValueError, TypeError) as e:
+    print(f"Conversion error: {type(e).__name__}: {e}")
+# Another example: database operations that can fail in multiple ways
+def fetch_record(data, key, index):
+    try:
+        return data[key][index]
+    except (KeyError, IndexError) as e:
+        print(f"Data access failed ({type(e).__name__}): {e}")
+        return None
+db = {"users": ["Alice", "Bob", "Carol"]}
+print(fetch_record(db, "users", 1))      # Bob
+print(fetch_record(db, "users", 99))     # IndexError
+print(fetch_record(db, "products", 0))   # KeyError
+\`\`\`
+
+\`\`\`output
+Conversion error: ValueError: invalid literal for int() with base 10: 'not_a_number'
+Bob
+Data access failed (IndexError): list index out of range
+Data access failed (KeyError): 'products'
+\`\`\`
 
   Example 3: Using "as e" to Inspect the Exception Object
 
 The "as e" syntax gives you access to the exception object itself. This lets you print a detailed message, log the error, or extract specific attributes.
 
->   🐍 Example 3 — Inspecting the exception object
-> try:
->     result = 10 / 0
-> except ZeroDivisionError as e:
->     print(f"Exception type:    {type(e).__name__}")
->     print(f"Exception message: {e}")
->     print(f"Exception args:    {e.args}")
-> # FileNotFoundError has extra attributes
-> try:
->     open("missing_file.txt")
-> except FileNotFoundError as e:
->     print(f"\\nFileNotFoundError details:")
->     print(f"  errno:    {e.errno}")
->     print(f"  strerror: {e.strerror}")
->     print(f"  filename: {e.filename}")
-> ▶  Output
-> Exception type:    ZeroDivisionError
-> Exception message: division by zero
-> Exception args:    ('division by zero',)
-> FileNotFoundError details:
->   errno:    2
->   strerror: No such file or directory
->   filename: missing_file.txt
+### 🐍 Example 3 — Inspecting the exception object
+\`\`\`python
+try:
+    result = 10 / 0
+except ZeroDivisionError as e:
+    print(f"Exception type:    {type(e).__name__}")
+    print(f"Exception message: {e}")
+    print(f"Exception args:    {e.args}")
+# FileNotFoundError has extra attributes
+try:
+    open("missing_file.txt")
+except FileNotFoundError as e:
+    print(f"\\nFileNotFoundError details:")
+    print(f"  errno:    {e.errno}")
+    print(f"  strerror: {e.strerror}")
+    print(f"  filename: {e.filename}")
+\`\`\`
+
+\`\`\`output
+Exception type:    ZeroDivisionError
+Exception message: division by zero
+Exception args:    ('division by zero',)
+FileNotFoundError details:
+  errno:    2
+  strerror: No such file or directory
+  filename: missing_file.txt
+\`\`\`
 
 Explanation: type(e).__name__ gives the class name as a string ("ZeroDivisionError"). str(e) or just e in an f-string gives the error message. e.args is the tuple of arguments passed to the exception constructor. Specific exception types like FileNotFoundError have additional attributes like errno and filename.
 
-# ✅  try / except / else / finally — The Full Structure
+## ✅  try / except / else / finally — The Full Structure
 
 The complete exception-handling structure has four clauses. You do not need all four every time, but understanding when each runs gives you precise control.
 
@@ -5526,28 +5736,30 @@ The complete exception-handling structure has four clauses. You do not need all 
 
 A division function that shows exactly when each clause runs. Run it with different inputs to see the pattern.
 
->   🐍 Example 1 — All four clauses
-> def safe_divide(a, b):
->     """Demonstrate all four exception-handling clauses."""
->     try:
->         result = a / b                    # might raise ZeroDivisionError or TypeError
->     except ZeroDivisionError:
->         print(f"  ❌ Cannot divide {a} by zero!")
->         return None
->     except TypeError as e:
->         print(f"  ❌ Type error: {e}")
->         return None
->     else:
->         # Runs ONLY when NO exception occurred
->         print(f"  ✅ {a} ÷ {b} = {result:.4f}")
->         return result
->     finally:
->         # ALWAYS runs — perfect for cleanup code
->         print(f"  🔁 safe_divide({a}, {b}) complete")
-> safe_divide(10, 4)      # success path
-> safe_divide(10, 0)      # ZeroDivisionError
-> safe_divide(10, "x")    # TypeError
-> ▶  Output
+### 🐍 Example 1 — All four clauses
+\`\`\`python
+def safe_divide(a, b):
+    """Demonstrate all four exception-handling clauses."""
+    try:
+        result = a / b                    # might raise ZeroDivisionError or TypeError
+    except ZeroDivisionError:
+        print(f"  ❌ Cannot divide {a} by zero!")
+        return None
+    except TypeError as e:
+        print(f"  ❌ Type error: {e}")
+        return None
+    else:
+        # Runs ONLY when NO exception occurred
+        print(f"  ✅ {a} ÷ {b} = {result:.4f}")
+        return result
+    finally:
+        # ALWAYS runs — perfect for cleanup code
+        print(f"  🔁 safe_divide({a}, {b}) complete")
+safe_divide(10, 4)      # success path
+safe_divide(10, 0)      # ZeroDivisionError
+safe_divide(10, "x")    # TypeError
+\`\`\`
+
 >   ✅ 10 ÷ 4 = 2.5000
 >   🔁 safe_divide(10, 4) complete
 >   ❌ Cannot divide 10 by zero!
@@ -5557,51 +5769,55 @@ A division function that shows exactly when each clause runs. Run it with differ
 
 Explanation: Notice that finally ALWAYS runs, even when we return inside the except block. The else block runs instead of the except block when everything in try succeeds. This is cleaner than putting the success code at the bottom of try, because any exception in the success code would be mistakenly caught.
 
-# 🔥  Handling Multiple Exceptions — Layered Strategy
+## 🔥  Handling Multiple Exceptions — Layered Strategy
 
 Real programs deal with many failure modes. A robust file processor shows how to layer exception handling for each type of failure, providing a specific, helpful error message for each.
 
   Example 1: Robust Config File Loader
 
->   🐍 Example 1 — Layered exception handling
-> import json, os
-> def load_config(path):
->     """Load JSON config file — handle every possible failure mode."""
->     try:
->         with open(path, "r", encoding="utf-8") as f:
->             raw = f.read()
->         config = json.loads(raw)
->         port   = int(config.get("port", 8080))
->         host   = config["host"]          # may raise KeyError
->         return {"host": host, "port": port}
->     except FileNotFoundError:
->         print(f"Config file not found: {path}")
->         print("Using defaults: localhost:8080")
->         return {"host": "localhost", "port": 8080}
->     except PermissionError:
->         print(f"No read permission: {path}")
->         return None
->     except json.JSONDecodeError as e:
->         print(f"Invalid JSON in {path}: {e.msg} at line {e.lineno}")
->         return None
->     except KeyError as e:
->         print(f"Missing required key in config: {e}")
->         return None
->     except ValueError as e:
->         print(f"Invalid value in config: {e}")
->         return None
->     finally:
->         print(f"load_config({path!r}) finished")
-> # Test with a missing file
-> cfg = load_config("server.json")
-> print(f"Config: {cfg}")
-> ▶  Output
-> Config file not found: server.json
-> Using defaults: localhost:8080
-> load_config('server.json') finished
-> Config: {'host': 'localhost', 'port': 8080}
+### 🐍 Example 1 — Layered exception handling
+\`\`\`python
+import json, os
+def load_config(path):
+    """Load JSON config file — handle every possible failure mode."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            raw = f.read()
+        config = json.loads(raw)
+        port   = int(config.get("port", 8080))
+        host   = config["host"]          # may raise KeyError
+        return {"host": host, "port": port}
+    except FileNotFoundError:
+        print(f"Config file not found: {path}")
+        print("Using defaults: localhost:8080")
+        return {"host": "localhost", "port": 8080}
+    except PermissionError:
+        print(f"No read permission: {path}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Invalid JSON in {path}: {e.msg} at line {e.lineno}")
+        return None
+    except KeyError as e:
+        print(f"Missing required key in config: {e}")
+        return None
+    except ValueError as e:
+        print(f"Invalid value in config: {e}")
+        return None
+    finally:
+        print(f"load_config({path!r}) finished")
+# Test with a missing file
+cfg = load_config("server.json")
+print(f"Config: {cfg}")
+\`\`\`
 
-# 🚀  raise — Throwing Exceptions Manually
+\`\`\`output
+Config file not found: server.json
+Using defaults: localhost:8080
+load_config('server.json') finished
+Config: {'host': 'localhost', 'port': 8080}
+\`\`\`
+
+## 🚀  raise — Throwing Exceptions Manually
 
 You can raise exceptions yourself using the raise statement. This is how you enforce constraints, signal invalid input to callers, and make your functions fail loudly and clearly rather than silently producing wrong results.
 
@@ -5609,62 +5825,70 @@ You can raise exceptions yourself using the raise statement. This is how you enf
 
 Raise an exception as soon as you detect invalid input — before any damage is done. Choose the most appropriate exception type: ValueError for bad values, TypeError for wrong types.
 
->   🐍 Example 1 — Raising exceptions for validation
-> def set_age(age):
->     """Set a persons age — validate the input first."""
->     if not isinstance(age, (int, float)):
->         raise TypeError(f"age must be a number, got {type(age).__name__}")
->     if not 0 <= age <= 150:
->         raise ValueError(f"age {age} is unrealistic (must be 0–150)")
->     return int(age)
-> # Test with a string
-> try:
->     set_age("twenty")
-> except TypeError as e:
->     print(f"TypeError:  {e}")
-> # Test with an out-of-range value
-> try:
->     set_age(200)
-> except ValueError as e:
->     print(f"ValueError: {e}")
-> # Test with a valid value
-> print(f"Valid age: {set_age(25)}")
-> ▶  Output
-> TypeError:  age must be a number, got str
-> ValueError: age 200 is unrealistic (must be 0–150)
-> Valid age: 25
+### 🐍 Example 1 — Raising exceptions for validation
+\`\`\`python
+def set_age(age):
+    """Set a persons age — validate the input first."""
+    if not isinstance(age, (int, float)):
+        raise TypeError(f"age must be a number, got {type(age).__name__}")
+    if not 0 <= age <= 150:
+        raise ValueError(f"age {age} is unrealistic (must be 0–150)")
+    return int(age)
+# Test with a string
+try:
+    set_age("twenty")
+except TypeError as e:
+    print(f"TypeError:  {e}")
+# Test with an out-of-range value
+try:
+    set_age(200)
+except ValueError as e:
+    print(f"ValueError: {e}")
+# Test with a valid value
+print(f"Valid age: {set_age(25)}")
+\`\`\`
+
+\`\`\`output
+TypeError:  age must be a number, got str
+ValueError: age 200 is unrealistic (must be 0–150)
+Valid age: 25
+\`\`\`
 
   Example 2: Re-raising and Chaining Exceptions
 
 Sometimes you want to log or partially handle an exception, then let it propagate to the caller. Use bare "raise" to re-raise the current exception. Use "raise X from Y" to chain exceptions.
 
->   🐍 Example 2 — Re-raise and exception chaining
-> import logging
-> # Re-raise: log it, then let it propagate
-> def process(data):
->     try:
->         result = int(data)   # may raise ValueError
->     except ValueError as e:
->         logging.error(f"Failed to parse: {data!r} — {e}")
->         raise   # bare raise — re-raises the SAME exception
-> # Exception chaining — wrap one exception in another
-> def connect(host):
->     try:
->         # Simulate a connection failure
->         raise OSError("Connection refused")
->     except OSError as e:
->         # Raise a higher-level exception, but preserve the original cause
->         raise ConnectionError(f"Failed to connect to {host}") from e
-> try:
->     connect("db.local")
-> except ConnectionError as e:
->     print(f"ConnectionError: {e}")
->     print(f"Caused by: {e.__cause__}")
-> ▶  Output
-> ConnectionError: Failed to connect to db.local
-> Caused by: Connection refused
+### 🐍 Example 2 — Re-raise and exception chaining
+\`\`\`python
+import logging
+# Re-raise: log it, then let it propagate
+def process(data):
+    try:
+        result = int(data)   # may raise ValueError
+    except ValueError as e:
+        logging.error(f"Failed to parse: {data!r} — {e}")
+        raise   # bare raise — re-raises the SAME exception
+# Exception chaining — wrap one exception in another
+def connect(host):
+    try:
+        # Simulate a connection failure
+        raise OSError("Connection refused")
+    except OSError as e:
+        # Raise a higher-level exception, but preserve the original cause
+        raise ConnectionError(f"Failed to connect to {host}") from e
+try:
+    connect("db.local")
+except ConnectionError as e:
+    print(f"ConnectionError: {e}")
+    print(f"Caused by: {e.__cause__}")
+\`\`\`
 
-# 🏗️  Custom Exceptions — Building Your Own
+\`\`\`output
+ConnectionError: Failed to connect to db.local
+Caused by: Connection refused
+\`\`\`
+
+## 🏗️  Custom Exceptions — Building Your Own
 
 Custom exceptions let you define domain-specific error types with meaningful names and additional data. Callers can catch your specific exception type rather than catching a generic ValueError or Exception.
 
@@ -5676,8 +5900,9 @@ Best practice: create a base exception class for your application (AppError), th
 
 A bank account example with a custom exception hierarchy. Each exception carries the relevant data fields, making error handling much richer than a plain error message.
 
-# 🐍 Example 1 — Custom exception hierarchy
-## # Step 1: Define the base exception for all app errors
+### 🐍 Example 1 — Custom exception hierarchy
+\`\`\`python
+# Step 1: Define the base exception for all app errors
 class AppError(Exception):
 """Base class for all application-specific exceptions."""
 pass
@@ -5699,44 +5924,49 @@ def __init__(self, host, timeout_secs):
 self.host    = host
 self.timeout = timeout_secs
 super().__init__(f"Timeout connecting to {host} after {timeout_secs}s")
+\`\`\`
 
   Example 2: Using Custom Exceptions in a BankAccount Class
 
 Now use the custom exceptions in a real class. The rich error information (balance, amount) lets callers display precise, helpful messages to the user.
 
->   🐍 Example 2 — Custom exceptions with BankAccount
-> class BankAccount:
->     def __init__(self, owner, balance=0):
->         self.owner   = owner
->         self.balance = balance
->     def deposit(self, amount):
->         if amount <= 0:
->             raise ValueError("Deposit amount must be positive")
->         self.balance += amount
->         return self.balance
->     def withdraw(self, amount):
->         if amount > self.balance:
->             raise InsufficientFundsError(self.balance, amount)
->         self.balance -= amount
->         return self.balance
-> # Use the account
-> account = BankAccount("Alice", 1000)
-> account.deposit(500)
-> print(f"Balance after deposit: Rs.{account.balance:,}")
-> # Try to withdraw too much
-> try:
->     account.withdraw(3000)
-> except InsufficientFundsError as e:
->     print(f"Transaction failed: {e}")
->     print(f"Current balance:      Rs.{e.balance:,}")
->     print(f"Attempted withdrawal: Rs.{e.amount:,}")
->     print(f"Shortfall:            Rs.{e.amount - e.balance:,}")
-> ▶  Output
-> Balance after deposit: Rs.1,500
-> Transaction failed: Need Rs.3,000 but only Rs.1,500 available
-> Current balance:      Rs.1,500
-> Attempted withdrawal: Rs.3,000
-> Shortfall:            Rs.1,500
+### 🐍 Example 2 — Custom exceptions with BankAccount
+\`\`\`python
+class BankAccount:
+    def __init__(self, owner, balance=0):
+        self.owner   = owner
+        self.balance = balance
+    def deposit(self, amount):
+        if amount <= 0:
+            raise ValueError("Deposit amount must be positive")
+        self.balance += amount
+        return self.balance
+    def withdraw(self, amount):
+        if amount > self.balance:
+            raise InsufficientFundsError(self.balance, amount)
+        self.balance -= amount
+        return self.balance
+# Use the account
+account = BankAccount("Alice", 1000)
+account.deposit(500)
+print(f"Balance after deposit: Rs.{account.balance:,}")
+# Try to withdraw too much
+try:
+    account.withdraw(3000)
+except InsufficientFundsError as e:
+    print(f"Transaction failed: {e}")
+    print(f"Current balance:      Rs.{e.balance:,}")
+    print(f"Attempted withdrawal: Rs.{e.amount:,}")
+    print(f"Shortfall:            Rs.{e.amount - e.balance:,}")
+\`\`\`
+
+\`\`\`output
+Balance after deposit: Rs.1,500
+Transaction failed: Need Rs.3,000 but only Rs.1,500 available
+Current balance:      Rs.1,500
+Attempted withdrawal: Rs.3,000
+Shortfall:            Rs.1,500
+\`\`\`
 
 Explanation: InsufficientFundsError stores balance and amount as attributes. The caller can access e.balance and e.amount to show precise details — something impossible with a plain ValueError. This is the real power of custom exceptions.
 
@@ -5744,33 +5974,37 @@ Explanation: InsufficientFundsError stores balance and amount as attributes. The
 
 Because custom exceptions inherit from AppError, you can catch them either specifically (for fine-grained handling) or generally (for catch-all logging).
 
->   🐍 Example 3 — Catching custom exceptions
-> # Catch SPECIFICALLY — only InsufficientFundsError
-> try:
->     account.withdraw(5000)
-> except InsufficientFundsError as e:
->     print(f"Funds error: {e}")
-> # Catch ALL app errors generically via the base class
-> try:
->     raise ConnectionTimeoutError("db.local", 30)
-> except AppError as e:
->     # This catches ANY exception in our AppError hierarchy
->     print(f"App error ({type(e).__name__}): {e}")
-> # Catching order matters — specific before general!
-> try:
->     account.withdraw(5000)
-> except InsufficientFundsError as e:
->     print(f"Not enough funds: balance=Rs.{e.balance:,}")
-> except AppError as e:
->     print(f"General app error: {e}")   # fallback for other app errors
-> except Exception as e:
->     print(f"Unexpected error: {e}")    # last resort
-> ▶  Output
-> Funds error: Need Rs.5,000 but only Rs.1,500 available
-> App error (ConnectionTimeoutError): Timeout connecting to db.local after 30s
-> Not enough funds: balance=Rs.1,500
+### 🐍 Example 3 — Catching custom exceptions
+\`\`\`python
+# Catch SPECIFICALLY — only InsufficientFundsError
+try:
+    account.withdraw(5000)
+except InsufficientFundsError as e:
+    print(f"Funds error: {e}")
+# Catch ALL app errors generically via the base class
+try:
+    raise ConnectionTimeoutError("db.local", 30)
+except AppError as e:
+    # This catches ANY exception in our AppError hierarchy
+    print(f"App error ({type(e).__name__}): {e}")
+# Catching order matters — specific before general!
+try:
+    account.withdraw(5000)
+except InsufficientFundsError as e:
+    print(f"Not enough funds: balance=Rs.{e.balance:,}")
+except AppError as e:
+    print(f"General app error: {e}")   # fallback for other app errors
+except Exception as e:
+    print(f"Unexpected error: {e}")    # last resort
+\`\`\`
 
-# 📋  Exception Handling Best Practices
+\`\`\`output
+Funds error: Need Rs.5,000 but only Rs.1,500 available
+App error (ConnectionTimeoutError): Timeout connecting to db.local after 30s
+Not enough funds: balance=Rs.1,500
+\`\`\`
+
+## 📋  Exception Handling Best Practices
 
 ✅  DO | ❌  AVOID
 Catch specific exceptions: except ValueError: | Bare except: — catches even KeyboardInterrupt and SystemExit
@@ -5803,18 +6037,18 @@ Contents
 ## Object-Oriented Programming
 Classes, Objects, __init__, self, Instance vs Class Variables, Dunder Methods
 
-# 📌  What Is Object-Oriented Programming?
+## 📌  What Is Object-Oriented Programming?
 
 Object-Oriented Programming (OOP) is a programming paradigm that organises code around objects — entities that bundle related data (attributes) and behaviour (methods) together in one cohesive unit called a class.
 
 Instead of writing separate functions that operate on separate variables, OOP packages everything that logically belongs together into a single class. This makes large programs dramatically easier to design, understand, extend, and maintain.
 
-# 💡  Real-world analogy: A class is like a blueprint for a house. The blueprint describes the structure — number of rooms, windows, walls. An object is the actual house built from that blueprint. You can build many houses from one blueprint, each with its own colour and furniture (data), but all sharing the same structure and layout (methods).
+## 💡  Real-world analogy: A class is like a blueprint for a house. The blueprint describes the structure — number of rooms, windows, walls. An object is the actual house built from that blueprint. You can build many houses from one blueprint, each with its own colour and furniture (data), but all sharing the same structure and layout (methods).
 
 ❌  Procedural Style | ✅  Object-Oriented Style
 name = "Alice" age  = 25 gpa  = 3.8 # Data and logic disconnected: get_grade(gpa) | alice = Student("Alice", 25, 3.8) # Data and logic bundled: alice.get_grade() alice.enroll(course)
 
-# 🏗️  Classes & Objects — Blueprint vs Instance
+## 🏗️  Classes & Objects — Blueprint vs Instance
 
 A CLASS is a template or blueprint. An OBJECT (also called an instance) is a concrete thing created from that blueprint. The class defines what data an object stores and what actions it can perform. When you create an object, Python calls the class and allocates memory for a fresh, independent instance.
 
@@ -5824,8 +6058,9 @@ Visual overview of how a class maps to its instances:
 
 ![Image 24](/pyimages/pimg24.png)
 
-# 📐  Syntax
-## class ClassName:           # PascalCase convention (not snake_case)
+### 📐  Syntax
+\`\`\`python
+class ClassName:           # PascalCase convention (not snake_case)
 """Class docstring."""
 class_variable = value     # shared by ALL instances
 def __init__(self, param1, param2):  # constructor — called at creation
@@ -5836,6 +6071,7 @@ return self.attr1      # access own data via self
 # Create objects (instantiate):
 obj1 = ClassName(val1, val2)   # → Python calls __init__ automatically
 obj2 = ClassName(val3, val4)   # → independent object, own data
+\`\`\`
 
 Visual overview of how a class maps to its instances:
 
@@ -5843,8 +6079,9 @@ Visual overview of how a class maps to its instances:
 
 A full example covering class variables, instance variables, the constructor, multiple methods, and the __str__ dunder method. Read the comments carefully — each line is explained.
 
-# 🐍 Example 1 — Dog class definition
-## class Dog:
+### 🐍 Example 1 — Dog class definition
+\`\`\`python
+class Dog:
 """Represents a dog. Demonstrates all core OOP concepts."""
 # ── Class variables ── shared by ALL Dog instances ──────
 species    = "Canis lupus familiaris"
@@ -5870,44 +6107,49 @@ print(f"Happy birthday, {self.name}! Now {self.age}.")
 # ── Dunder method ─────────────────────────────────────────
 def __str__(self):   # called by print(dog) and str(dog)
 return f"Dog({self.name}, {self.breed}, {self.age}yr)"
+\`\`\`
 
->   🐍 Example 1 continued — Using the Dog objects
-> # ── Create three independent Dog objects ────────────────────
-> dog1 = Dog("Buddy", "Labrador", 3)   # __init__ called with these args
-> dog2 = Dog("Max",   "Poodle",   1)
-> dog3 = Dog("Luna",  "Husky",    5)
-> # ── Call instance methods (each uses its own data) ──────────
-> dog1.bark()                   # Buddy says: Woof! Woof!
-> print(dog1.get_info())        # Name: Buddy | Breed: Labrador | Age: 3
-> print(dog1.is_adult())        # True (age 3 >= 2)
-> dog2.birthday()               # Happy birthday, Max! Now 2.
-> # ── Access attributes directly ───────────────────────────────
-> print(dog1.name)              # Buddy
-> print(dog2.name)              # Max  ← completely independent
-> dog1.age = 4                  # directly modify one attribute
-> # ── Class variables ──────────────────────────────────────────
-> print(Dog.species)            # Canis lupus familiaris
-> print(Dog.total_dogs)         # 3  (three objects were created)
-> print(dog1.species)           # also works via instance (reads class)
-> # ── __str__ dunder: print() uses it automatically ────────────
-> print(dog1)   # Dog(Buddy, Labrador, 4yr)
-> print(dog2)   # Dog(Max, Poodle, 2yr)
-> ▶  Output
-> Buddy says: Woof! Woof!
-> Name: Buddy | Breed: Labrador | Age: 3
-> True
-> Happy birthday, Max! Now 2.
-> Buddy
-> Max
-> Canis lupus familiaris
-> 3
-> Canis lupus familiaris
-> Dog(Buddy, Labrador, 4yr)
-> Dog(Max, Poodle, 2yr)
+### 🐍 Example 1 continued — Using the Dog objects
+\`\`\`python
+# ── Create three independent Dog objects ────────────────────
+dog1 = Dog("Buddy", "Labrador", 3)   # __init__ called with these args
+dog2 = Dog("Max",   "Poodle",   1)
+dog3 = Dog("Luna",  "Husky",    5)
+# ── Call instance methods (each uses its own data) ──────────
+dog1.bark()                   # Buddy says: Woof! Woof!
+print(dog1.get_info())        # Name: Buddy | Breed: Labrador | Age: 3
+print(dog1.is_adult())        # True (age 3 >= 2)
+dog2.birthday()               # Happy birthday, Max! Now 2.
+# ── Access attributes directly ───────────────────────────────
+print(dog1.name)              # Buddy
+print(dog2.name)              # Max  ← completely independent
+dog1.age = 4                  # directly modify one attribute
+# ── Class variables ──────────────────────────────────────────
+print(Dog.species)            # Canis lupus familiaris
+print(Dog.total_dogs)         # 3  (three objects were created)
+print(dog1.species)           # also works via instance (reads class)
+# ── __str__ dunder: print() uses it automatically ────────────
+print(dog1)   # Dog(Buddy, Labrador, 4yr)
+print(dog2)   # Dog(Max, Poodle, 2yr)
+\`\`\`
+
+\`\`\`output
+Buddy says: Woof! Woof!
+Name: Buddy | Breed: Labrador | Age: 3
+True
+Happy birthday, Max! Now 2.
+Buddy
+Max
+Canis lupus familiaris
+3
+Canis lupus familiaris
+Dog(Buddy, Labrador, 4yr)
+Dog(Max, Poodle, 2yr)
+\`\`\`
 
 Key insight: dog1.age = 4 changes only dog1's age. dog2 and dog3 are completely unaffected — they each have their own independent instance variables. But Dog.species is shared — change it via Dog.species = "..." and ALL dogs see the new value immediately.
 
-# 🔧  The __init__ Constructor — Deep Dive
+## 🔧  The __init__ Constructor — Deep Dive
 
 __init__ is Python's constructor method. It runs automatically the moment you write Dog("Buddy", "Lab", 3). Its job is to set up the object — validate inputs, store data as self.attributes, and initialise any collections the object needs.
 
@@ -5917,52 +6159,56 @@ The self parameter is always first and always refers to the newly created object
 
 A more realistic class that demonstrates: constructor validation, storing instance data, maintaining a history list, a class-level interest rate, and a method that calls another method (deposit calls add to history).
 
->   🐍 Example 2 — BankAccount class
-> class BankAccount:
->     """A bank account with owner, balance and transaction history."""
->     interest_rate = 0.04   # 4% annual — CLASS variable (same for all)
->     def __init__(self, owner, balance=0, currency="INR"):
->         if balance < 0:
->             raise ValueError("Opening balance cannot be negative")
->         # Store instance data
->         self.owner        = owner
->         self.balance      = balance
->         self.currency     = currency
->         self.transactions = []    # each account gets its OWN empty list
->         print(f"Account created for {owner} with {currency} {balance:,.0f}")
->     def deposit(self, amount):
->         if amount <= 0: raise ValueError("Deposit must be positive")
->         self.balance += amount
->         self.transactions.append(("DEP", amount, self.balance))
->         return self.balance
->     def withdraw(self, amount):
->         if amount > self.balance: raise ValueError("Insufficient funds")
->         self.balance -= amount
->         self.transactions.append(("WDR", amount, self.balance))
->         return self.balance
->     def statement(self):
->         print(f"\\n─── Statement: {self.owner} ───")
->         for txn_type, amt, bal in self.transactions:
->             print(f"  {txn_type}: {self.currency} {amt:8,.0f}  → bal={bal:,.0f}")
->         print(f"  Balance: {self.currency} {self.balance:,.0f}")
->     def add_interest(self):
->         interest = self.balance * BankAccount.interest_rate
->         self.deposit(interest)   # reuse deposit method!
->         print(f"Interest {BankAccount.interest_rate*100:.0f}% added: {self.currency} {interest:,.0f}")
-> acc = BankAccount("Alice", 10000)
-> acc.deposit(5000)
-> acc.withdraw(2000)
-> acc.add_interest()
-> acc.statement()
-> ▶  Output
-> Account created for Alice with INR 10,000
-> ─── Statement: Alice ───
->   DEP: INR     5,000  → bal=15,000
->   WDR: INR     2,000  → bal=13,000
->   DEP: INR       520  → bal=13,520
->   Balance: INR 13,520
+### 🐍 Example 2 — BankAccount class
+\`\`\`python
+class BankAccount:
+    """A bank account with owner, balance and transaction history."""
+    interest_rate = 0.04   # 4% annual — CLASS variable (same for all)
+    def __init__(self, owner, balance=0, currency="INR"):
+        if balance < 0:
+            raise ValueError("Opening balance cannot be negative")
+        # Store instance data
+        self.owner        = owner
+        self.balance      = balance
+        self.currency     = currency
+        self.transactions = []    # each account gets its OWN empty list
+        print(f"Account created for {owner} with {currency} {balance:,.0f}")
+    def deposit(self, amount):
+        if amount <= 0: raise ValueError("Deposit must be positive")
+        self.balance += amount
+        self.transactions.append(("DEP", amount, self.balance))
+        return self.balance
+    def withdraw(self, amount):
+        if amount > self.balance: raise ValueError("Insufficient funds")
+        self.balance -= amount
+        self.transactions.append(("WDR", amount, self.balance))
+        return self.balance
+    def statement(self):
+        print(f"\\n─── Statement: {self.owner} ───")
+        for txn_type, amt, bal in self.transactions:
+            print(f"  {txn_type}: {self.currency} {amt:8,.0f}  → bal={bal:,.0f}")
+        print(f"  Balance: {self.currency} {self.balance:,.0f}")
+    def add_interest(self):
+        interest = self.balance * BankAccount.interest_rate
+        self.deposit(interest)   # reuse deposit method!
+        print(f"Interest {BankAccount.interest_rate*100:.0f}% added: {self.currency} {interest:,.0f}")
+acc = BankAccount("Alice", 10000)
+acc.deposit(5000)
+acc.withdraw(2000)
+acc.add_interest()
+acc.statement()
+\`\`\`
 
-# 📦  Instance vs Class Variables
+\`\`\`output
+Account created for Alice with INR 10,000
+─── Statement: Alice ───
+  DEP: INR     5,000  → bal=15,000
+  WDR: INR     2,000  → bal=13,000
+  DEP: INR       520  → bal=13,520
+  Balance: INR 13,520
+\`\`\`
+
+## 📦  Instance vs Class Variables
 
 Understanding the difference between instance and class variables is critical for writing correct OOP code. Instance variables belong to individual objects; class variables are shared across all instances.
 
@@ -5977,55 +6223,59 @@ Understanding the difference between instance and class variables is critical fo
 
   Example 3: Student — Class Variables, @classmethod, @staticmethod
 
->   🐍 Example 3 — Class variables, @classmethod, @staticmethod
-> class Student:
->     # Class variables — shared across ALL students
->     school_name = "careerEzi Academy"
->     passing_gpa = 2.0
->     total_count = 0
->     def __init__(self, name, gpa):
->         # Instance variables — unique to each student
->         self.name = name
->         self.gpa  = gpa
->         Student.total_count += 1   # update shared class counter
->     @classmethod
->     def get_count(cls):
->         """@classmethod: receives cls (the class itself), not self."""
->         return f"{cls.total_count} students enrolled at {cls.school_name}"
->     @staticmethod
->     def letter_grade(gpa):
->         """@staticmethod: no self or cls — just a utility function."""
->         if gpa >= 3.7: return "A"
->         if gpa >= 3.3: return "B+"
->         if gpa >= 3.0: return "B"
->         return "C"
-> s1 = Student("Alice", 3.9)
-> s2 = Student("Bob",   3.4)
-> s3 = Student("Carol", 3.0)
-> # Instance variables — each object has its own
-> print(s1.name, s1.gpa)         # Alice 3.9
-> print(s2.name, s2.gpa)         # Bob   3.4
-> # Class variable — same for all
-> print(Student.school_name)      # careerEzi Academy
-> print(Student.get_count())      # 3 students enrolled at careerEzi Academy
-> # @staticmethod — called on class or instance
-> print(Student.letter_grade(3.9))   # A
-> print(s1.letter_grade(3.4))        # B+
-> # Changing class variable via ClassName affects ALL instances
-> Student.school_name = "Advanced careerEzi Academy"
-> print(s1.school_name)    # Advanced careerEzi Academy
-> print(s2.school_name)    # Advanced careerEzi Academy
-> ▶  Output
-> Alice 3.9
-> Bob 3.4
-> careerEzi Academy
-> 3 students enrolled at careerEzi Academy
-> A
-> B+
-> Advanced careerEzi Academy
-> Advanced careerEzi Academy
+### 🐍 Example 3 — Class variables, @classmethod, @staticmethod
+\`\`\`python
+class Student:
+    # Class variables — shared across ALL students
+    school_name = "careerEzi Academy"
+    passing_gpa = 2.0
+    total_count = 0
+    def __init__(self, name, gpa):
+        # Instance variables — unique to each student
+        self.name = name
+        self.gpa  = gpa
+        Student.total_count += 1   # update shared class counter
+    @classmethod
+    def get_count(cls):
+        """@classmethod: receives cls (the class itself), not self."""
+        return f"{cls.total_count} students enrolled at {cls.school_name}"
+    @staticmethod
+    def letter_grade(gpa):
+        """@staticmethod: no self or cls — just a utility function."""
+        if gpa >= 3.7: return "A"
+        if gpa >= 3.3: return "B+"
+        if gpa >= 3.0: return "B"
+        return "C"
+s1 = Student("Alice", 3.9)
+s2 = Student("Bob",   3.4)
+s3 = Student("Carol", 3.0)
+# Instance variables — each object has its own
+print(s1.name, s1.gpa)         # Alice 3.9
+print(s2.name, s2.gpa)         # Bob   3.4
+# Class variable — same for all
+print(Student.school_name)      # careerEzi Academy
+print(Student.get_count())      # 3 students enrolled at careerEzi Academy
+# @staticmethod — called on class or instance
+print(Student.letter_grade(3.9))   # A
+print(s1.letter_grade(3.4))        # B+
+# Changing class variable via ClassName affects ALL instances
+Student.school_name = "Advanced careerEzi Academy"
+print(s1.school_name)    # Advanced careerEzi Academy
+print(s2.school_name)    # Advanced careerEzi Academy
+\`\`\`
 
-# ✨  Dunder (Magic) Methods
+\`\`\`output
+Alice 3.9
+Bob 3.4
+careerEzi Academy
+3 students enrolled at careerEzi Academy
+A
+B+
+Advanced careerEzi Academy
+Advanced careerEzi Academy
+\`\`\`
+
+## ✨  Dunder (Magic) Methods
 
 Dunder methods (double-underscore, also called magic methods) let your custom classes integrate seamlessly with Python's built-in syntax. They are called automatically by Python when you use print(), ==, +, len(), in, [], and other operators on your objects.
 
@@ -6048,53 +6298,57 @@ Implementing dunders makes your objects feel like native Python types — users 
 
 A 2D mathematical vector class that implements six dunder methods, making vectors work naturally with +, -, *, ==, len(), and unary negation. This is the exact pattern used in NumPy arrays and other scientific Python libraries.
 
->   🐍 Example 4 — Vector with dunder methods
-> import math
-> class Vector:
->     """2D mathematical vector with full operator support."""
->     def __init__(self, x, y):
->         self.x, self.y = x, y
->     def __str__(self):             # print(v) → "Vector(3, 4)"
->         return f"Vector({self.x}, {self.y})"
->     def __repr__(self):            # repr(v) → developer view
->         return f"Vector(x={self.x}, y={self.y})"
->     def __add__(self, other):      # v1 + v2
->         return Vector(self.x + other.x, self.y + other.y)
->     def __sub__(self, other):      # v1 - v2
->         return Vector(self.x - other.x, self.y - other.y)
->     def __mul__(self, scalar):     # v * 3  (scalar multiplication)
->         return Vector(self.x * scalar, self.y * scalar)
->     def __eq__(self, other):       # v1 == v2
->         return self.x == other.x and self.y == other.y
->     def __len__(self):             # len(v) → magnitude (integer)
->         return int(math.sqrt(self.x**2 + self.y**2))
->     def __neg__(self):             # -v  (unary negation)
->         return Vector(-self.x, -self.y)
->     def magnitude(self):           # exact float magnitude
->         return math.sqrt(self.x**2 + self.y**2)
-> v1 = Vector(3, 4)
-> v2 = Vector(1, 2)
-> print(v1)              # Vector(3, 4)    ← uses __str__
-> print(v1 + v2)         # Vector(4, 6)    ← uses __add__
-> print(v1 - v2)         # Vector(2, 2)    ← uses __sub__
-> print(v1 * 3)          # Vector(9, 12)   ← uses __mul__
-> print(v1 == v2)        # False           ← uses __eq__
-> print(v1 == Vector(3,4))  # True
-> print(len(v1))         # 5 (√(9+16)=5)  ← uses __len__
-> print(-v1)             # Vector(-3, -4)  ← uses __neg__
-> print(f"Exact magnitude: {v1.magnitude():.4f}")  # 5.0000
-> ▶  Output
-> Vector(3, 4)
-> Vector(4, 6)
-> Vector(2, 2)
-> Vector(9, 12)
-> False
-> True
-> 5
-> Vector(-3, -4)
-> Exact magnitude: 5.0000
+### 🐍 Example 4 — Vector with dunder methods
+\`\`\`python
+import math
+class Vector:
+    """2D mathematical vector with full operator support."""
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+    def __str__(self):             # print(v) → "Vector(3, 4)"
+        return f"Vector({self.x}, {self.y})"
+    def __repr__(self):            # repr(v) → developer view
+        return f"Vector(x={self.x}, y={self.y})"
+    def __add__(self, other):      # v1 + v2
+        return Vector(self.x + other.x, self.y + other.y)
+    def __sub__(self, other):      # v1 - v2
+        return Vector(self.x - other.x, self.y - other.y)
+    def __mul__(self, scalar):     # v * 3  (scalar multiplication)
+        return Vector(self.x * scalar, self.y * scalar)
+    def __eq__(self, other):       # v1 == v2
+        return self.x == other.x and self.y == other.y
+    def __len__(self):             # len(v) → magnitude (integer)
+        return int(math.sqrt(self.x**2 + self.y**2))
+    def __neg__(self):             # -v  (unary negation)
+        return Vector(-self.x, -self.y)
+    def magnitude(self):           # exact float magnitude
+        return math.sqrt(self.x**2 + self.y**2)
+v1 = Vector(3, 4)
+v2 = Vector(1, 2)
+print(v1)              # Vector(3, 4)    ← uses __str__
+print(v1 + v2)         # Vector(4, 6)    ← uses __add__
+print(v1 - v2)         # Vector(2, 2)    ← uses __sub__
+print(v1 * 3)          # Vector(9, 12)   ← uses __mul__
+print(v1 == v2)        # False           ← uses __eq__
+print(v1 == Vector(3,4))  # True
+print(len(v1))         # 5 (√(9+16)=5)  ← uses __len__
+print(-v1)             # Vector(-3, -4)  ← uses __neg__
+print(f"Exact magnitude: {v1.magnitude():.4f}")  # 5.0000
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+\`\`\`output
+Vector(3, 4)
+Vector(4, 6)
+Vector(2, 2)
+Vector(9, 12)
+False
+True
+5
+Vector(-3, -4)
+Exact magnitude: 5.0000
+\`\`\`
+
+## 💡  Lesson Recap — Key Takeaways
 ## Class = blueprint/template; Object = real instance created from the class
 __init__ is the constructor — called automatically when you write ClassName(...)
 self always refers to the current instance — always the first method parameter
@@ -6109,20 +6363,21 @@ PascalCase for class names (MyClass); snake_case for methods and variables`,
 ## OOP Concepts
 Inheritance • Polymorphism • Encapsulation • Abstraction — The Four Pillars
 
-# 📌  The Four Pillars of OOP
+## 📌  The Four Pillars of OOP
 
 These four principles define well-structured object-oriented code. Every professional Python framework — Django, Flask, SQLAlchemy, FastAPI — is built on these concepts. Together they produce systems that are modular, flexible, safe, and easy to extend.
 
 ![Image 26](/pyimages/pimg26.png)
 
-# 🧬  Pillar 1 — Inheritance
+## 🧬  Pillar 1 — Inheritance
 
 Inheritance allows a child class (subclass) to automatically acquire all the attributes and methods of a parent class (superclass) without copying any code. The child class then extends the parent by adding new methods or overrides existing ones with specialised behaviour.
 
 This is the IS-A relationship: a Dog IS-A Animal. A Dog can do everything an Animal can (eat, breathe) and more (bark, fetch). The parent defines the common interface; each child specialises it.
 
-# 📐  Syntax
-## class Child(Parent):           # inherit from Parent with (ParentName)
+### 📐  Syntax
+\`\`\`python
+class Child(Parent):           # inherit from Parent with (ParentName)
 def __init__(self, ...):
 super().__init__(...)  # MUST call parent constructor first!
 self.child_attr = ...  # add child-specific data
@@ -6130,123 +6385,138 @@ def override_method(self): # redefine parent behaviour
 ...
 def new_method(self):      # add brand new child-only behaviour
 ...
+\`\`\`
 
   Example 1: Animal Hierarchy — Dog, Cat, Bird
 
 A classic inheritance example. Animal defines the shared interface. Dog, Cat, and Bird each inherit it, override speak() with their own sound, and add their own unique methods.
 
->   🐍 Example 1a — Animal parent class
-> # ── Parent class (base / superclass) ────────────────────────
-> class Animal:
->     """Base class: defines attributes and methods ALL animals share."""
->     def __init__(self, name, age):
->         self.name = name
->         self.age  = age
->     def eat(self):
->         print(f"{self.name} is eating.")
->     def breathe(self):
->         print(f"{self.name} is breathing.")
->     def speak(self):             # default — child classes override this
->         print(f"{self.name} makes a sound.")
->     def __str__(self):
->         return f"{type(self).__name__}({self.name}, {self.age}yr)"
->   🐍 Example 1b — Dog, Cat, Bird subclasses
-> # ── Child class: Dog ─────────────────────────────────────────
-> class Dog(Animal):
->     def __init__(self, name, age, breed):
->         super().__init__(name, age)  # call Animal.__init__ first!
->         self.breed = breed           # Dog-only data
->     def speak(self):                 # OVERRIDE parent speak()
->         print(f"{self.name} says: Woof! Woof!")
->     def fetch(self, item):           # NEW method — Dog only
->         print(f"{self.name} fetches the {item}!")
-> # ── Child class: Cat ─────────────────────────────────────────
-> class Cat(Animal):
->     def __init__(self, name, age, indoor=True):
->         super().__init__(name, age)
->         self.indoor = indoor
->     def speak(self):                 # OVERRIDE
->         print(f"{self.name} says: Meow!")
->     def purr(self):                  # NEW — Cat only
->         print(f"{self.name} is purring...")
-> # ── Child class: Bird ────────────────────────────────────────
-> class Bird(Animal):
->     def __init__(self, name, age, wingspan_cm):
->         super().__init__(name, age)
->         self.wingspan_cm = wingspan_cm
->     def speak(self):
->         print(f"{self.name} says: Tweet!")
->     def fly(self):
->         print(f"{self.name} flies with {self.wingspan_cm}cm wingspan!")
->   🐍 Example 1c — Using the hierarchy
-> # ── Using the hierarchy ──────────────────────────────────────
-> dog  = Dog("Buddy", 3, "Labrador")
-> cat  = Cat("Whiskers", 5)
-> bird = Bird("Tweety", 2, 28)
-> # Inherited methods work without redefining them:
-> dog.eat()          # Buddy is eating.      ← from Animal
-> dog.breathe()      # Buddy is breathing.   ← from Animal
-> # Overridden method — Dog uses its own version:
-> dog.speak()        # Buddy says: Woof! Woof!  ← Dog override
-> cat.speak()        # Whiskers says: Meow!      ← Cat override
-> bird.speak()       # Tweety says: Tweet!       ← Bird override
-> # New methods specific to each subclass:
-> dog.fetch("ball")  # Buddy fetches the ball!
-> cat.purr()         # Whiskers is purring...
-> bird.fly()         # Tweety flies with 28cm wingspan!
-> # isinstance() checks — Dog IS-A Animal!
-> print(isinstance(dog, Dog))     # True
-> print(isinstance(dog, Animal))  # True  ← Dog IS-A Animal
-> print(isinstance(cat, Dog))     # False ← Cat is NOT a Dog
-> print(issubclass(Dog, Animal))  # True  ← class-level check
-> # __str__ inherited from Animal:
-> print(dog)    # Dog(Buddy, 3yr)
-> ▶  Output
-> Buddy is eating.
-> Buddy is breathing.
-> Buddy says: Woof! Woof!
-> Whiskers says: Meow!
-> Tweety says: Tweet!
-> Buddy fetches the ball!
-> Whiskers is purring...
-> Tweety flies with 28cm wingspan!
-> True
-> True
-> False
-> True
-> Dog(Buddy, 3yr)
+### 🐍 Example 1a — Animal parent class
+\`\`\`python
+# ── Parent class (base / superclass) ────────────────────────
+class Animal:
+    """Base class: defines attributes and methods ALL animals share."""
+    def __init__(self, name, age):
+        self.name = name
+        self.age  = age
+    def eat(self):
+        print(f"{self.name} is eating.")
+    def breathe(self):
+        print(f"{self.name} is breathing.")
+    def speak(self):             # default — child classes override this
+        print(f"{self.name} makes a sound.")
+    def __str__(self):
+        return f"{type(self).__name__}({self.name}, {self.age}yr)"
+\`\`\`
+
+### 🐍 Example 1b — Dog, Cat, Bird subclasses
+\`\`\`python
+# ── Child class: Dog ─────────────────────────────────────────
+class Dog(Animal):
+    def __init__(self, name, age, breed):
+        super().__init__(name, age)  # call Animal.__init__ first!
+        self.breed = breed           # Dog-only data
+    def speak(self):                 # OVERRIDE parent speak()
+        print(f"{self.name} says: Woof! Woof!")
+    def fetch(self, item):           # NEW method — Dog only
+        print(f"{self.name} fetches the {item}!")
+# ── Child class: Cat ─────────────────────────────────────────
+class Cat(Animal):
+    def __init__(self, name, age, indoor=True):
+        super().__init__(name, age)
+        self.indoor = indoor
+    def speak(self):                 # OVERRIDE
+        print(f"{self.name} says: Meow!")
+    def purr(self):                  # NEW — Cat only
+        print(f"{self.name} is purring...")
+# ── Child class: Bird ────────────────────────────────────────
+class Bird(Animal):
+    def __init__(self, name, age, wingspan_cm):
+        super().__init__(name, age)
+        self.wingspan_cm = wingspan_cm
+    def speak(self):
+        print(f"{self.name} says: Tweet!")
+    def fly(self):
+        print(f"{self.name} flies with {self.wingspan_cm}cm wingspan!")
+\`\`\`
+
+### 🐍 Example 1c — Using the hierarchy
+\`\`\`python
+# ── Using the hierarchy ──────────────────────────────────────
+dog  = Dog("Buddy", 3, "Labrador")
+cat  = Cat("Whiskers", 5)
+bird = Bird("Tweety", 2, 28)
+# Inherited methods work without redefining them:
+dog.eat()          # Buddy is eating.      ← from Animal
+dog.breathe()      # Buddy is breathing.   ← from Animal
+# Overridden method — Dog uses its own version:
+dog.speak()        # Buddy says: Woof! Woof!  ← Dog override
+cat.speak()        # Whiskers says: Meow!      ← Cat override
+bird.speak()       # Tweety says: Tweet!       ← Bird override
+# New methods specific to each subclass:
+dog.fetch("ball")  # Buddy fetches the ball!
+cat.purr()         # Whiskers is purring...
+bird.fly()         # Tweety flies with 28cm wingspan!
+# isinstance() checks — Dog IS-A Animal!
+print(isinstance(dog, Dog))     # True
+print(isinstance(dog, Animal))  # True  ← Dog IS-A Animal
+print(isinstance(cat, Dog))     # False ← Cat is NOT a Dog
+print(issubclass(Dog, Animal))  # True  ← class-level check
+# __str__ inherited from Animal:
+print(dog)    # Dog(Buddy, 3yr)
+\`\`\`
+
+\`\`\`output
+Buddy is eating.
+Buddy is breathing.
+Buddy says: Woof! Woof!
+Whiskers says: Meow!
+Tweety says: Tweet!
+Buddy fetches the ball!
+Whiskers is purring...
+Tweety flies with 28cm wingspan!
+True
+True
+False
+True
+Dog(Buddy, 3yr)
+\`\`\`
 
   Example 2: Multiple Inheritance — Duck inherits from three parents
 
 Python supports multiple inheritance — a class can inherit from more than one parent. Python uses the Method Resolution Order (MRO) to decide which parent's method to call if there is a conflict. Use sparingly.
 
->   🐍 Example 2 — Multiple inheritance
-> class Flyable:
->     def fly(self):
->         print(f"{self.name} is flying!")
-> class Swimmable:
->     def swim(self):
->         print(f"{self.name} is swimming!")
-> # Duck inherits from THREE parents: Animal, Flyable, Swimmable
-> class Duck(Animal, Flyable, Swimmable):
->     def speak(self):
->         print(f"{self.name} says: Quack!")
-> d = Duck("Donald", 3)
-> d.speak()    # Quack!      ← overridden
-> d.fly()      # flying!     ← from Flyable
-> d.swim()     # swimming!   ← from Swimmable
-> d.eat()      # eating.     ← from Animal
-> # Check the MRO (Method Resolution Order):
-> print(Duck.__mro__)
-> # (<class Duck>, <class Animal>, <class Flyable>, <class Swimmable>, ...)
-> ▶  Output
-> Donald says: Quack!
-> Donald is flying!
-> Donald is swimming!
-> Donald is eating.
-> (<class 'Duck'>, <class 'Animal'>, <class 'Flyable'>, <class 'Swimmable'>, ...)
+### 🐍 Example 2 — Multiple inheritance
+\`\`\`python
+class Flyable:
+    def fly(self):
+        print(f"{self.name} is flying!")
+class Swimmable:
+    def swim(self):
+        print(f"{self.name} is swimming!")
+# Duck inherits from THREE parents: Animal, Flyable, Swimmable
+class Duck(Animal, Flyable, Swimmable):
+    def speak(self):
+        print(f"{self.name} says: Quack!")
+d = Duck("Donald", 3)
+d.speak()    # Quack!      ← overridden
+d.fly()      # flying!     ← from Flyable
+d.swim()     # swimming!   ← from Swimmable
+d.eat()      # eating.     ← from Animal
+# Check the MRO (Method Resolution Order):
+print(Duck.__mro__)
+# (<class Duck>, <class Animal>, <class Flyable>, <class Swimmable>, ...)
+\`\`\`
 
-# 🔄  Pillar 2 — Polymorphism
+\`\`\`output
+Donald says: Quack!
+Donald is flying!
+Donald is swimming!
+Donald is eating.
+(<class 'Duck'>, <class 'Animal'>, <class 'Flyable'>, <class 'Swimmable'>, ...)
+\`\`\`
+
+## 🔄  Pillar 2 — Polymorphism
 
 Polymorphism (from Greek: "many forms") means the same method name produces different behaviour depending on the type of the object it is called on. It lets you write generic code that works with any subclass without knowing the exact type at runtime.
 
@@ -6254,51 +6524,55 @@ The key insight: you write a loop that calls animal.speak() for every animal in 
 
   Example 3: Method Polymorphism — Same Code, Different Results
 
->   🐍 Example 3 — Polymorphism in action
-> animals = [
->     Dog("Rex",    2, "German Shepherd"),
->     Cat("Luna",   4),
->     Bird("Rio",   1, 32),
->     Dog("Charlie",5, "Beagle"),
-> ]
-> # This single loop works for ANY Animal subclass.
-> # We never check the type — polymorphism handles it.
-> for animal in animals:
->     animal.speak()   # each object calls ITS OWN speak()
-> # ── Generic function using polymorphism ──────────────────────
-> def describe_animal(animal):
->     """Works with ANY Animal subclass — no isinstance() needed."""
->     print(f"--- {type(animal).__name__}: {animal.name} ---")
->     animal.speak()    # polymorphic — different for each type
->     animal.breathe()  # inherited from Animal — same for all
->     print(f"  Age: {animal.age} years")
-> describe_animal(Dog("Spot", 2, "Dalmatian"))
-> describe_animal(Cat("Felix", 3))
-> # ── Operator polymorphism ────────────────────────────────────
-> # The + operator behaves differently depending on the type:
-> print(5 + 3)             # integer addition    → 8
-> print("hi" + " you")    # string concatenation → "hi you"
-> print([1,2] + [3,4])    # list merge           → [1, 2, 3, 4]
-> v = Vector(1,2) + Vector(3,4)  # custom __add__ → Vector(4, 6)
-> ▶  Output
-> Rex says: Woof! Woof!
-> Luna says: Meow!
-> Rio says: Tweet!
-> Charlie says: Woof! Woof!
-> --- Dog: Spot ---
-> Spot says: Woof! Woof!
-> Spot is breathing.
->   Age: 2 years
-> --- Cat: Felix ---
-> Felix says: Meow!
-> Felix is breathing.
->   Age: 3 years
-> 8
-> hi you
-> [1, 2, 3, 4]
-> Vector(4, 6)
+### 🐍 Example 3 — Polymorphism in action
+\`\`\`python
+animals = [
+    Dog("Rex",    2, "German Shepherd"),
+    Cat("Luna",   4),
+    Bird("Rio",   1, 32),
+    Dog("Charlie",5, "Beagle"),
+]
+# This single loop works for ANY Animal subclass.
+# We never check the type — polymorphism handles it.
+for animal in animals:
+    animal.speak()   # each object calls ITS OWN speak()
+# ── Generic function using polymorphism ──────────────────────
+def describe_animal(animal):
+    """Works with ANY Animal subclass — no isinstance() needed."""
+    print(f"--- {type(animal).__name__}: {animal.name} ---")
+    animal.speak()    # polymorphic — different for each type
+    animal.breathe()  # inherited from Animal — same for all
+    print(f"  Age: {animal.age} years")
+describe_animal(Dog("Spot", 2, "Dalmatian"))
+describe_animal(Cat("Felix", 3))
+# ── Operator polymorphism ────────────────────────────────────
+# The + operator behaves differently depending on the type:
+print(5 + 3)             # integer addition    → 8
+print("hi" + " you")    # string concatenation → "hi you"
+print([1,2] + [3,4])    # list merge           → [1, 2, 3, 4]
+v = Vector(1,2) + Vector(3,4)  # custom __add__ → Vector(4, 6)
+\`\`\`
 
-# 🔒  Pillar 3 — Encapsulation
+\`\`\`output
+Rex says: Woof! Woof!
+Luna says: Meow!
+Rio says: Tweet!
+Charlie says: Woof! Woof!
+--- Dog: Spot ---
+Spot says: Woof! Woof!
+Spot is breathing.
+  Age: 2 years
+--- Cat: Felix ---
+Felix says: Meow!
+Felix is breathing.
+  Age: 3 years
+8
+hi you
+[1, 2, 3, 4]
+Vector(4, 6)
+\`\`\`
+
+## 🔒  Pillar 3 — Encapsulation
 
 Encapsulation means hiding internal implementation details and exposing only a clean, controlled public interface. This protects data integrity — the outside world cannot accidentally put your object into an invalid state.
 
@@ -6308,57 +6582,61 @@ Python implements encapsulation by convention and name-mangling (not hard enforc
 
   Example 4: SecureAccount — Private Data with @property
 
->   🐍 Example 4 — Encapsulation with @property
-> class SecureAccount:
->     """Bank account demonstrating all three access levels."""
->     def __init__(self, owner, pin, balance=0):
->         self.owner      = owner     # public   — freely accessible
->         self._bank      = "PyBank"  # _protected — convention: handle carefully
->         self.__balance  = balance   # __private  — name-mangled: _SecureAccount__balance
->         self.__pin      = pin       # __private
->         self.__history  = []        # __private
->     # @property creates a READ-ONLY getter for __balance
->     @property
->     def balance(self):
->         return self.__balance   # caller writes acc.balance, gets the value
->     # @property for history — returns a COPY (protects original)
->     @property
->     def history(self):
->         return list(self.__history)
->     def verify_pin(self, pin):
->         return self.__pin == pin
->     def deposit(self, amount, pin):
->         if not self.verify_pin(pin):
->             raise PermissionError("Invalid PIN")
->         if amount <= 0:
->             raise ValueError("Deposit must be positive")
->         self.__balance += amount
->         self.__history.append(f"+{amount}")
->     def withdraw(self, amount, pin):
->         if not self.verify_pin(pin):
->             raise PermissionError("Invalid PIN")
->         if amount > self.__balance:
->             raise ValueError("Insufficient funds")
->         self.__balance -= amount
->         self.__history.append(f"-{amount}")
-> acc = SecureAccount("Alice", pin=1234, balance=5000)
-> acc.deposit(2000, 1234)
-> acc.withdraw(500,  1234)
-> print(acc.balance)        # 6500  ← read via @property getter
-> print(acc.history)        # ["+2000", "-500"]
-> # Trying to access private attribute directly — AttributeError!
-> # print(acc.__balance)   ← AttributeError: no attribute __balance
-> # Wrong PIN test:
-> try:
->     acc.deposit(1000, 9999)   # wrong PIN
-> except PermissionError as e:
->     print(f"Blocked: {e}")
-> ▶  Output
-> 6500
-> ['+2000', '-500']
-> Blocked: Invalid PIN
+### 🐍 Example 4 — Encapsulation with @property
+\`\`\`python
+class SecureAccount:
+    """Bank account demonstrating all three access levels."""
+    def __init__(self, owner, pin, balance=0):
+        self.owner      = owner     # public   — freely accessible
+        self._bank      = "PyBank"  # _protected — convention: handle carefully
+        self.__balance  = balance   # __private  — name-mangled: _SecureAccount__balance
+        self.__pin      = pin       # __private
+        self.__history  = []        # __private
+    # @property creates a READ-ONLY getter for __balance
+    @property
+    def balance(self):
+        return self.__balance   # caller writes acc.balance, gets the value
+    # @property for history — returns a COPY (protects original)
+    @property
+    def history(self):
+        return list(self.__history)
+    def verify_pin(self, pin):
+        return self.__pin == pin
+    def deposit(self, amount, pin):
+        if not self.verify_pin(pin):
+            raise PermissionError("Invalid PIN")
+        if amount <= 0:
+            raise ValueError("Deposit must be positive")
+        self.__balance += amount
+        self.__history.append(f"+{amount}")
+    def withdraw(self, amount, pin):
+        if not self.verify_pin(pin):
+            raise PermissionError("Invalid PIN")
+        if amount > self.__balance:
+            raise ValueError("Insufficient funds")
+        self.__balance -= amount
+        self.__history.append(f"-{amount}")
+acc = SecureAccount("Alice", pin=1234, balance=5000)
+acc.deposit(2000, 1234)
+acc.withdraw(500,  1234)
+print(acc.balance)        # 6500  ← read via @property getter
+print(acc.history)        # ["+2000", "-500"]
+# Trying to access private attribute directly — AttributeError!
+# print(acc.__balance)   ← AttributeError: no attribute __balance
+# Wrong PIN test:
+try:
+    acc.deposit(1000, 9999)   # wrong PIN
+except PermissionError as e:
+    print(f"Blocked: {e}")
+\`\`\`
 
-# 🎭  Pillar 4 — Abstraction
+\`\`\`output
+6500
+['+2000', '-500']
+Blocked: Invalid PIN
+\`\`\`
+
+## 🎭  Pillar 4 — Abstraction
 
 Abstraction hides complexity and exposes only the essential interface. In Python, you create abstract classes using the abc (Abstract Base Class) module. An abstract class defines WHAT methods a class must have, without specifying HOW they work.
 
@@ -6368,70 +6646,77 @@ Any class that inherits from an abstract class MUST implement all @abstractmetho
 
 Shape is an abstract class that cannot be instantiated. It defines two abstract methods (area, perimeter) that every concrete shape MUST implement, plus concrete methods that use those abstract methods (describe, is_larger_than).
 
->   🐍 Example 5a — Abstract Shape base class and subclasses
-> from abc import ABC, abstractmethod
-> import math
-> # Abstract class — cannot be created directly (ABC = Abstract Base Class)
-> class Shape(ABC):
->     """Contract: ALL shapes MUST implement area() and perimeter()."""
->     @abstractmethod
->     def area(self) -> float:
->         """Return the area. Subclasses MUST implement this."""
->         pass   # no body needed — subclass provides it
->     @abstractmethod
->     def perimeter(self) -> float:
->         """Return the perimeter. Subclasses MUST implement this."""
->         pass
->     # Concrete method — works for ALL shapes using the abstract methods
->     def describe(self):
->         name = type(self).__name__
->         return f"{name}: area={self.area():.4f}, perimeter={self.perimeter():.4f}"
->     def is_larger_than(self, other):
->         return self.area() > other.area()
-> # Concrete subclasses — MUST implement area() and perimeter()
-> class Circle(Shape):
->     def __init__(self, radius):
->         self.radius = radius
->     def area(self):
->         return math.pi * self.radius ** 2
->     def perimeter(self):
->         return 2 * math.pi * self.radius
-> class Rectangle(Shape):
->     def __init__(self, width, height):
->         self.width, self.height = width, height
->     def area(self):
->         return self.width * self.height
->     def perimeter(self):
->         return 2 * (self.width + self.height)
-> class Triangle(Shape):
->     def __init__(self, a, b, c):
->         self.a, self.b, self.c = a, b, c
->     def perimeter(self):
->         return self.a + self.b + self.c
->     def area(self):
->         s = self.perimeter() / 2    # Heron's formula
->         return math.sqrt(s*(s-self.a)*(s-self.b)*(s-self.c))
->   🐍 Example 5b — Using the shape hierarchy
-> # ── Try to instantiate abstract class ───────────────────────
-> # Shape()   ← TypeError: Can't instantiate abstract class Shape
-> # ── Use the concrete subclasses ─────────────────────────────
-> shapes = [Circle(7), Rectangle(6, 4), Triangle(3, 4, 5)]
-> for shape in shapes:
->     print(shape.describe())
-> # Polymorphism: is_larger_than works for any two shapes
-> c, r = Circle(5), Rectangle(4, 8)
-> print(f"Circle larger than Rectangle: {c.is_larger_than(r)}")
-> # Sort shapes by area — works because each implements area()
-> shapes.sort(key=lambda s: s.area())
-> print("Sorted by area:", [type(s).__name__ for s in shapes])
-> ▶  Output
-> Circle: area=153.9380, perimeter=43.9823
-> Rectangle: area=24.0000, perimeter=20.0000
-> Triangle: area=6.0000, perimeter=12.0000
-> Circle larger than Rectangle: True
-> Sorted by area: ['Triangle', 'Rectangle', 'Circle']
+### 🐍 Example 5a — Abstract Shape base class and subclasses
+\`\`\`python
+from abc import ABC, abstractmethod
+import math
+# Abstract class — cannot be created directly (ABC = Abstract Base Class)
+class Shape(ABC):
+    """Contract: ALL shapes MUST implement area() and perimeter()."""
+    @abstractmethod
+    def area(self) -> float:
+        """Return the area. Subclasses MUST implement this."""
+        pass   # no body needed — subclass provides it
+    @abstractmethod
+    def perimeter(self) -> float:
+        """Return the perimeter. Subclasses MUST implement this."""
+        pass
+    # Concrete method — works for ALL shapes using the abstract methods
+    def describe(self):
+        name = type(self).__name__
+        return f"{name}: area={self.area():.4f}, perimeter={self.perimeter():.4f}"
+    def is_larger_than(self, other):
+        return self.area() > other.area()
+# Concrete subclasses — MUST implement area() and perimeter()
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+    def area(self):
+        return math.pi * self.radius ** 2
+    def perimeter(self):
+        return 2 * math.pi * self.radius
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width, self.height = width, height
+    def area(self):
+        return self.width * self.height
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+class Triangle(Shape):
+    def __init__(self, a, b, c):
+        self.a, self.b, self.c = a, b, c
+    def perimeter(self):
+        return self.a + self.b + self.c
+    def area(self):
+        s = self.perimeter() / 2    # Heron's formula
+        return math.sqrt(s*(s-self.a)*(s-self.b)*(s-self.c))
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+### 🐍 Example 5b — Using the shape hierarchy
+\`\`\`python
+# ── Try to instantiate abstract class ───────────────────────
+# Shape()   ← TypeError: Can't instantiate abstract class Shape
+# ── Use the concrete subclasses ─────────────────────────────
+shapes = [Circle(7), Rectangle(6, 4), Triangle(3, 4, 5)]
+for shape in shapes:
+    print(shape.describe())
+# Polymorphism: is_larger_than works for any two shapes
+c, r = Circle(5), Rectangle(4, 8)
+print(f"Circle larger than Rectangle: {c.is_larger_than(r)}")
+# Sort shapes by area — works because each implements area()
+shapes.sort(key=lambda s: s.area())
+print("Sorted by area:", [type(s).__name__ for s in shapes])
+\`\`\`
+
+\`\`\`output
+Circle: area=153.9380, perimeter=43.9823
+Rectangle: area=24.0000, perimeter=20.0000
+Triangle: area=6.0000, perimeter=12.0000
+Circle larger than Rectangle: True
+Sorted by area: ['Triangle', 'Rectangle', 'Circle']
+\`\`\`
+
+## 💡  Lesson Recap — Key Takeaways
 ## Inheritance: class Child(Parent) — child gets all parent attributes and methods FREE
 super().__init__() — ALWAYS call parent constructor in child __init__
 Override: define a method with same name in child for specialised behaviour
@@ -6446,7 +6731,7 @@ issubclass(Child, Parent) → True if Child inherits from Parent (class-level ch
 ## List Comprehensions
 Concise, Pythonic data transformations: List • Dict • Set • Generator
 
-# 📌  Why Comprehensions?
+## 📌  Why Comprehensions?
 
 Comprehensions are a hallmark of Pythonic code — single-line expressions that create new collections by transforming or filtering existing ones. They replace verbose for-loops with concise, readable expressions.
 
@@ -6454,10 +6739,11 @@ Every professional Python developer uses comprehensions daily. They are approxim
 
 ![Image28](/pyimages/pimg28.png)
 
-# 📋  List Comprehension — Complete Guide
+## 📋  List Comprehension — Complete Guide
 
-# 📐  Syntax
-## # Basic — transform every element:
+### 📐  Syntax
+\`\`\`python
+# Basic — transform every element:
 result = [ expression  for  variable  in  iterable ]
 # With filter — include only matching elements:
 result = [ expression  for  variable  in  iterable  if  condition ]
@@ -6465,36 +6751,41 @@ result = [ expression  for  variable  in  iterable  if  condition ]
 result = [ a if condition else b  for  variable  in  iterable ]
 # Nested — two loops (outer first):
 result = [ expr  for  v1 in iterable1  for  v2 in iterable2  if cond ]
+\`\`\`
 
   Example 1: Basic Transformations — Squares, Cubes, Strings
 
 Apply any operation to every element in one clean line. Compare each to its verbose for-loop equivalent to understand what the comprehension replaces.
 
->   🐍 Example 1 — Basic list comprehensions
-> # ── squares ──────────────────────────────────────────────────
-> # For loop version (4 lines):
-> # result = []
-> # for x in range(1, 11):
-> #     result.append(x**2)
-> # Comprehension version (1 line, ~1.35× faster):
-> squares = [x**2 for x in range(1, 11)]
-> print("Squares:", squares)
-> # ── cubes and strings ────────────────────────────────────────
-> cubes    = [x**3 for x in range(1, 6)]
-> strings  = [str(x) for x in range(1, 6)]
-> print("Cubes:", cubes)
-> print("Strings:", strings)
-> # ── Apply string methods ─────────────────────────────────────
-> uppercased = [s.upper() for s in ["hello", "world", "python"]]
-> stripped   = [s.strip() for s in ["  alice  ", " bob ", "carol"]]
-> print("Uppercased:", uppercased)
-> print("Stripped:", stripped)
-> ▶  Output
-> Squares: [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
-> Cubes: [1, 8, 27, 64, 125]
-> Strings: ['1', '2', '3', '4', '5']
-> Uppercased: ['HELLO', 'WORLD', 'PYTHON']
-> Stripped: ['alice', 'bob', 'carol']
+### 🐍 Example 1 — Basic list comprehensions
+\`\`\`python
+# ── squares ──────────────────────────────────────────────────
+# For loop version (4 lines):
+# result = []
+# for x in range(1, 11):
+#     result.append(x**2)
+# Comprehension version (1 line, ~1.35× faster):
+squares = [x**2 for x in range(1, 11)]
+print("Squares:", squares)
+# ── cubes and strings ────────────────────────────────────────
+cubes    = [x**3 for x in range(1, 6)]
+strings  = [str(x) for x in range(1, 6)]
+print("Cubes:", cubes)
+print("Strings:", strings)
+# ── Apply string methods ─────────────────────────────────────
+uppercased = [s.upper() for s in ["hello", "world", "python"]]
+stripped   = [s.strip() for s in ["  alice  ", " bob ", "carol"]]
+print("Uppercased:", uppercased)
+print("Stripped:", stripped)
+\`\`\`
+
+\`\`\`output
+Squares: [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+Cubes: [1, 8, 27, 64, 125]
+Strings: ['1', '2', '3', '4', '5']
+Uppercased: ['HELLO', 'WORLD', 'PYTHON']
+Stripped: ['alice', 'bob', 'carol']
+\`\`\`
 
  1: Squares
 
@@ -6540,28 +6831,32 @@ Strip:
 
 Add an if clause at the end to include only elements that pass a test. The if filters; the expression transforms (or just returns the value unchanged).
 
->   🐍 Example 2 — Filtering with if
-> # ── Keep only even numbers ───────────────────────────────────
-> evens = [x for x in range(1, 21) if x % 2 == 0]
-> print("Evens:", evens)
-> # ── Keep only words longer than 4 characters, uppercased ─────
-> words     = ["apple", "fig", "banana", "kiwi", "mango", "pear", "cherry"]
-> long_upper = [w.upper() for w in words if len(w) > 4]
-> print("Long words:", long_upper)
-> # ── Prime numbers (advanced filter) ─────────────────────────
-> # A prime has no divisors from 2 to x-1
-> primes = [x for x in range(2, 30)
->           if all(x % i != 0 for i in range(2, x))]
-> print("Primes:", primes)
-> # ── Extract passing scores (>= 60) ──────────────────────────
-> scores = [45, 78, 92, 34, 88, 55, 99, 62]
-> passing = [s for s in scores if s >= 60]
-> print("Passing:", passing)
-> ▶  Output
-> Evens: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-> Long words: ['APPLE', 'BANANA', 'MANGO', 'CHERRY']
-> Primes: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
-> Passing: [78, 92, 88, 99, 62]
+### 🐍 Example 2 — Filtering with if
+\`\`\`python
+# ── Keep only even numbers ───────────────────────────────────
+evens = [x for x in range(1, 21) if x % 2 == 0]
+print("Evens:", evens)
+# ── Keep only words longer than 4 characters, uppercased ─────
+words     = ["apple", "fig", "banana", "kiwi", "mango", "pear", "cherry"]
+long_upper = [w.upper() for w in words if len(w) > 4]
+print("Long words:", long_upper)
+# ── Prime numbers (advanced filter) ─────────────────────────
+# A prime has no divisors from 2 to x-1
+primes = [x for x in range(2, 30)
+          if all(x % i != 0 for i in range(2, x))]
+print("Primes:", primes)
+# ── Extract passing scores (>= 60) ──────────────────────────
+scores = [45, 78, 92, 34, 88, 55, 99, 62]
+passing = [s for s in scores if s >= 60]
+print("Passing:", passing)
+\`\`\`
+
+\`\`\`output
+Evens: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+Long words: ['APPLE', 'BANANA', 'MANGO', 'CHERRY']
+Primes: [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+Passing: [78, 92, 88, 99, 62]
+\`\`\`
 
  1: Even Numbers
 
@@ -6601,172 +6896,192 @@ Add an if clause at the end to include only elements that pass a test. The if fi
 
 Use a conditional expression (ternary) in the output part to produce different values based on each element. The format is: value_if_true if condition else value_if_false.
 
->   🐍 Example 3 — Ternary in comprehension
-> # ── Label each number as odd or even ─────────────────────────
-> labels = ["even" if n % 2 == 0 else "odd" for n in range(1, 11)]
-> print(labels)
-> # ── FizzBuzz in one line — classic interview problem! ─────────
-> fb = ["FizzBuzz" if n % 15 == 0
->       else "Fizz"     if n % 3  == 0
->       else "Buzz"     if n % 5  == 0
->       else str(n)
->       for n in range(1, 21)]
-> print(fb)
-> # ── Clamp scores to 0-100 range ──────────────────────────────
-> raw_scores = [-5, 45, 102, 78, 95, 110, 30]
-> clamped = [max(0, min(100, s)) for s in raw_scores]
-> print("Clamped:", clamped)
-> ▶  Output
-> ['odd','even','odd','even','odd','even','odd','even','odd','even']
-> ['1','2','Fizz','4','Buzz','Fizz','7','8','Fizz','Buzz','11','Fizz','13','14','FizzBuzz','16','17','Fizz','19','Buzz']
-> Clamped: [0, 45, 100, 78, 95, 100, 30]
+### 🐍 Example 3 — Ternary in comprehension
+\`\`\`python
+# ── Label each number as odd or even ─────────────────────────
+labels = ["even" if n % 2 == 0 else "odd" for n in range(1, 11)]
+print(labels)
+# ── FizzBuzz in one line — classic interview problem! ─────────
+fb = ["FizzBuzz" if n % 15 == 0
+      else "Fizz"     if n % 3  == 0
+      else "Buzz"     if n % 5  == 0
+      else str(n)
+      for n in range(1, 21)]
+print(fb)
+# ── Clamp scores to 0-100 range ──────────────────────────────
+raw_scores = [-5, 45, 102, 78, 95, 110, 30]
+clamped = [max(0, min(100, s)) for s in raw_scores]
+print("Clamped:", clamped)
+\`\`\`
+
+\`\`\`output
+['odd','even','odd','even','odd','even','odd','even','odd','even']
+['1','2','Fizz','4','Buzz','Fizz','7','8','Fizz','Buzz','11','Fizz','13','14','FizzBuzz','16','17','Fizz','19','Buzz']
+Clamped: [0, 45, 100, 78, 95, 100, 30]
+\`\`\`
 
   Example 4: Nested Comprehensions — Matrices and Cartesian Products
 
 Nested comprehensions have multiple for clauses, read left to right (outer loop first). They handle multi-dimensional data, Cartesian products, and flattening nested structures.
 
->   🐍 Example 4 — Nested comprehensions
-> # ── Flatten a nested list (list of lists → flat list) ────────
-> nested = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]
-> flat   = [x for row in nested for x in row]
-> print("Flat:", flat)
-> # ── Build a 3×3 multiplication table ────────────────────────
-> table = [[i * j for j in range(1, 4)] for i in range(1, 4)]
-> for row in table:
->     print(row)
-> # ── Transpose a matrix ───────────────────────────────────────
-> # Original: 3 rows × 3 cols → Transposed: 3 cols × 3 rows
-> matrix     = [[1,2,3],[4,5,6],[7,8,9]]
-> transposed = [[row[i] for row in matrix] for i in range(3)]
-> print("Transposed:", transposed)
-> # ── Cartesian product: every (colour, size) combination ──────
-> colours = ["red", "green", "blue"]
-> sizes   = ["S", "M", "L", "XL"]
-> combos  = [(c, s) for c in colours for s in sizes]
-> print(f"{len(combos)} combinations: {combos[:4]}...")
-> ▶  Output
-> Flat: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-> [1, 2, 3]
-> [2, 4, 6]
-> [3, 6, 9]
-> Transposed: [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-> 12 combinations: [('red', 'S'), ('red', 'M'), ('red', 'L'), ('red', 'XL')]...
+### 🐍 Example 4 — Nested comprehensions
+\`\`\`python
+# ── Flatten a nested list (list of lists → flat list) ────────
+nested = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]
+flat   = [x for row in nested for x in row]
+print("Flat:", flat)
+# ── Build a 3×3 multiplication table ────────────────────────
+table = [[i * j for j in range(1, 4)] for i in range(1, 4)]
+for row in table:
+    print(row)
+# ── Transpose a matrix ───────────────────────────────────────
+# Original: 3 rows × 3 cols → Transposed: 3 cols × 3 rows
+matrix     = [[1,2,3],[4,5,6],[7,8,9]]
+transposed = [[row[i] for row in matrix] for i in range(3)]
+print("Transposed:", transposed)
+# ── Cartesian product: every (colour, size) combination ──────
+colours = ["red", "green", "blue"]
+sizes   = ["S", "M", "L", "XL"]
+combos  = [(c, s) for c in colours for s in sizes]
+print(f"{len(combos)} combinations: {combos[:4]}...")
+\`\`\`
 
-# 📖  Dictionary Comprehension
+\`\`\`output
+Flat: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+[1, 2, 3]
+[2, 4, 6]
+[3, 6, 9]
+Transposed: [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
+12 combinations: [('red', 'S'), ('red', 'M'), ('red', 'L'), ('red', 'XL')]...
+\`\`\`
+
+## 📖  Dictionary Comprehension
 
 Dictionary comprehensions create a new dict by specifying key: value pairs. Use curly braces {} with a colon. Same filtering and ternary logic applies.
 
   Example 5: Dict Comprehensions — Squares, Filters, Inversion
 
->   🐍 Example 5 — Dictionary comprehensions
-> # ── Basic dict comprehension ─────────────────────────────────
-> squares = {x: x**2 for x in range(1, 6)}
-> print(squares)     # {1:1, 2:4, 3:9, 4:16, 5:25}
-> # ── Build dict from two parallel lists using zip() ──────────
-> keys   = ["name", "age", "city"]
-> values = ["Alice", 25, "Hyderabad"]
-> profile = {k: v for k, v in zip(keys, values)}
-> print(profile)
-> # ── Filter: keep only high-scoring students (score >= 80) ───
-> scores = {"Alice":95,"Bob":72,"Carol":88,"Dan":55,"Eve":91}
-> top    = {k: v for k, v in scores.items() if v >= 80}
-> print("Top students:", top)
-> # ── Apply 10% discount to all prices ────────────────────────
-> prices     = {"apple": 100, "banana": 50, "cherry": 200}
-> discounted = {item: round(price * 0.9, 2) for item, price in prices.items()}
-> print("After discount:", discounted)
-> # ── Invert a dictionary (swap keys and values) ───────────────
-> original = {"a": 1, "b": 2, "c": 3}
-> inverted = {v: k for k, v in original.items()}
-> print("Inverted:", inverted)
-> # ── Word frequency counter ───────────────────────────────────
-> words = ["apple","banana","apple","cherry","banana","apple"]
-> freq  = {w: words.count(w) for w in set(words)}
-> print("Frequency:", freq)
-> ▶  Output
-> {1:1, 2:4, 3:9, 4:16, 5:25}
-> {'name':'Alice','age':25,'city':'Hyderabad'}
-> Top students: {'Alice':95,'Carol':88,'Eve':91}
-> After discount: {'apple':90.0,'banana':45.0,'cherry':180.0}
-> Inverted: {1:'a', 2:'b', 3:'c'}
-> Frequency: {'apple':3,'banana':2,'cherry':1}
+### 🐍 Example 5 — Dictionary comprehensions
+\`\`\`python
+# ── Basic dict comprehension ─────────────────────────────────
+squares = {x: x**2 for x in range(1, 6)}
+print(squares)     # {1:1, 2:4, 3:9, 4:16, 5:25}
+# ── Build dict from two parallel lists using zip() ──────────
+keys   = ["name", "age", "city"]
+values = ["Alice", 25, "Hyderabad"]
+profile = {k: v for k, v in zip(keys, values)}
+print(profile)
+# ── Filter: keep only high-scoring students (score >= 80) ───
+scores = {"Alice":95,"Bob":72,"Carol":88,"Dan":55,"Eve":91}
+top    = {k: v for k, v in scores.items() if v >= 80}
+print("Top students:", top)
+# ── Apply 10% discount to all prices ────────────────────────
+prices     = {"apple": 100, "banana": 50, "cherry": 200}
+discounted = {item: round(price * 0.9, 2) for item, price in prices.items()}
+print("After discount:", discounted)
+# ── Invert a dictionary (swap keys and values) ───────────────
+original = {"a": 1, "b": 2, "c": 3}
+inverted = {v: k for k, v in original.items()}
+print("Inverted:", inverted)
+# ── Word frequency counter ───────────────────────────────────
+words = ["apple","banana","apple","cherry","banana","apple"]
+freq  = {w: words.count(w) for w in set(words)}
+print("Frequency:", freq)
+\`\`\`
 
-# 🔷  Set Comprehension
+\`\`\`output
+{1:1, 2:4, 3:9, 4:16, 5:25}
+{'name':'Alice','age':25,'city':'Hyderabad'}
+Top students: {'Alice':95,'Carol':88,'Eve':91}
+After discount: {'apple':90.0,'banana':45.0,'cherry':180.0}
+Inverted: {1:'a', 2:'b', 3:'c'}
+Frequency: {'apple':3,'banana':2,'cherry':1}
+\`\`\`
+
+## 🔷  Set Comprehension
 
 Set comprehensions use curly braces {} WITHOUT a colon. They work like list comprehensions but produce a set — automatically eliminating duplicate values.
 
   Example 6: Set Comprehensions — Unique Values
 
->   🐍 Example 6 — Set comprehensions
-> # ── Basic set comprehension — duplicates auto-removed ────────
-> # Input has duplicates: [1,2,2,3,3,3,4]
-> # Squaring first, then deduplicating:
-> unique_sq = {x**2 for x in [1, 2, 2, 3, 3, 3, 4]}
-> print(unique_sq)     # {1, 4, 9, 16}   — no duplicates!
-> # ── Extract unique first letters ─────────────────────────────
-> names    = ["Alice","Bob","Anna","Carol","Brian","Amy"]
-> initials = {n[0] for n in names}
-> print(initials)      # {"A", "B", "C"}  — only unique initials
-> # ── All unique vowels in a sentence ──────────────────────────
-> text   = "the quick brown fox jumps over the lazy dog"
-> vowels = {c for c in text if c in "aeiou"}
-> print(vowels)        # {"a","e","i","o","u"}
-> # ── Set operations on comprehension results ──────────────────
-> set_a = {x**2 for x in range(1, 6)}       # {1,4,9,16,25}
-> set_b = {x    for x in range(1,26) if x % 5 == 0}  # {5,10,15,20,25}
-> print("Intersection:", set_a & set_b)   # {25}
-> print("Union:",        set_a | set_b)
-> print("Difference:",   set_a - set_b)   # {1, 4, 9, 16}
-> ▶  Output
-> {1, 4, 9, 16}
-> {'A', 'B', 'C'}
-> {'a', 'e', 'i', 'o', 'u'}
-> Intersection: {25}
-> Union: {1, 4, 5, 9, 10, 15, 16, 20, 25}
-> Difference: {1, 4, 9, 16}
+### 🐍 Example 6 — Set comprehensions
+\`\`\`python
+# ── Basic set comprehension — duplicates auto-removed ────────
+# Input has duplicates: [1,2,2,3,3,3,4]
+# Squaring first, then deduplicating:
+unique_sq = {x**2 for x in [1, 2, 2, 3, 3, 3, 4]}
+print(unique_sq)     # {1, 4, 9, 16}   — no duplicates!
+# ── Extract unique first letters ─────────────────────────────
+names    = ["Alice","Bob","Anna","Carol","Brian","Amy"]
+initials = {n[0] for n in names}
+print(initials)      # {"A", "B", "C"}  — only unique initials
+# ── All unique vowels in a sentence ──────────────────────────
+text   = "the quick brown fox jumps over the lazy dog"
+vowels = {c for c in text if c in "aeiou"}
+print(vowels)        # {"a","e","i","o","u"}
+# ── Set operations on comprehension results ──────────────────
+set_a = {x**2 for x in range(1, 6)}       # {1,4,9,16,25}
+set_b = {x    for x in range(1,26) if x % 5 == 0}  # {5,10,15,20,25}
+print("Intersection:", set_a & set_b)   # {25}
+print("Union:",        set_a | set_b)
+print("Difference:",   set_a - set_b)   # {1, 4, 9, 16}
+\`\`\`
 
-# ⚡  Generator Expressions — Memory Efficiency
+\`\`\`output
+{1, 4, 9, 16}
+{'A', 'B', 'C'}
+{'a', 'e', 'i', 'o', 'u'}
+Intersection: {25}
+Union: {1, 4, 5, 9, 10, 15, 16, 20, 25}
+Difference: {1, 4, 9, 16}
+\`\`\`
+
+## ⚡  Generator Expressions — Memory Efficiency
 
 Generator expressions look identical to list comprehensions but use parentheses () instead of square brackets []. The crucial difference: a list comprehension builds the entire list in RAM immediately. A generator expression is lazy — it computes values one at a time, only when requested.
 
   Example 7: List vs Generator — Memory & Practical Use
 
->   🐍 Example 7 — Generator expressions
-> # ── Memory comparison ────────────────────────────────────────
-> import sys
-> # List comprehension: builds ALL 1 million values immediately (~8 MB)
-> lst = [x**2 for x in range(1_000_000)]
-> print(f"List size:      {sys.getsizeof(lst):>12,} bytes")
-> # Generator expression: computes ONE value at a time (~120 bytes)
-> gen = (x**2 for x in range(1_000_000))
-> print(f"Generator size: {sys.getsizeof(gen):>12,} bytes")
-> # ── Generators with built-in functions ──────────────────────
-> # sum() only needs one value at a time — perfect for generators
-> total   = sum(x**2 for x in range(1001))
-> print(f"Sum of squares: {total:,}")
-> maximum = max(len(w) for w in ["apple","kiwi","banana","fig"])
-> print(f"Longest word:   {maximum} chars")
-> # ── any() and all() short-circuit! ──────────────────────────
-> # They STOP as soon as the answer is known — very efficient!
-> nums = [2, 4, 7, 8, 10, 12]
-> all_even = all(n % 2 == 0 for n in nums)   # stops at 7 → False
-> any_odd  = any(n % 2 != 0 for n in nums)   # stops at 7 → True
-> print(f"All even: {all_even}  |  Any odd: {any_odd}")
-> # ── next() — pull values one at a time ──────────────────────
-> gen2 = (x**2 for x in range(5))
-> print(next(gen2))   # 0  (first value computed)
-> print(next(gen2))   # 1  (second value computed)
-> print(next(gen2))   # 4  (third value computed)
-> # 9 and 16 are still not computed!
-> ▶  Output
-> List size:        8,448,728 bytes
-> Generator size:          200 bytes
-> Sum of squares: 333,833,500
-> Longest word: 6 chars
-> All even: False  |  Any odd: True
-> 0
-> 1
-> 4
+### 🐍 Example 7 — Generator expressions
+\`\`\`python
+# ── Memory comparison ────────────────────────────────────────
+import sys
+# List comprehension: builds ALL 1 million values immediately (~8 MB)
+lst = [x**2 for x in range(1_000_000)]
+print(f"List size:      {sys.getsizeof(lst):>12,} bytes")
+# Generator expression: computes ONE value at a time (~120 bytes)
+gen = (x**2 for x in range(1_000_000))
+print(f"Generator size: {sys.getsizeof(gen):>12,} bytes")
+# ── Generators with built-in functions ──────────────────────
+# sum() only needs one value at a time — perfect for generators
+total   = sum(x**2 for x in range(1001))
+print(f"Sum of squares: {total:,}")
+maximum = max(len(w) for w in ["apple","kiwi","banana","fig"])
+print(f"Longest word:   {maximum} chars")
+# ── any() and all() short-circuit! ──────────────────────────
+# They STOP as soon as the answer is known — very efficient!
+nums = [2, 4, 7, 8, 10, 12]
+all_even = all(n % 2 == 0 for n in nums)   # stops at 7 → False
+any_odd  = any(n % 2 != 0 for n in nums)   # stops at 7 → True
+print(f"All even: {all_even}  |  Any odd: {any_odd}")
+# ── next() — pull values one at a time ──────────────────────
+gen2 = (x**2 for x in range(5))
+print(next(gen2))   # 0  (first value computed)
+print(next(gen2))   # 1  (second value computed)
+print(next(gen2))   # 4  (third value computed)
+# 9 and 16 are still not computed!
+\`\`\`
+
+\`\`\`output
+List size:        8,448,728 bytes
+Generator size:          200 bytes
+Sum of squares: 333,833,500
+Longest word: 6 chars
+All even: False  |  Any odd: True
+0
+1
+4
+\`\`\`
 
 Approach | Speed | Memory | Best Use
 for loop + append | Baseline (1×) | Normal | Simple loops, debugging, side effects
@@ -6779,7 +7094,7 @@ Generator expression | Same speed | Minimal (lazy) | Large data, sum/max/any/all
 ## Working with Libraries
 math, random, datetime — and the vast pip ecosystem
 
-# 📌  Python's Library Ecosystem
+## 📌  Python's Library Ecosystem
 
 Python's real power comes from its enormous library ecosystem. The Standard Library ships with every Python installation and covers mathematics, file I/O, networking, cryptography, text processing, and much more — no installation needed.
 
@@ -6794,7 +7109,7 @@ PyPI (Python Package Index) hosts over 500,000 third-party packages. With one pi
 | PyPI / pip | Install with pip install | numpy, pandas, requests, flask, django |
 | Your own modules | Files you write | myutils.py, models.py, config.py |
 
-# 📐  math — Mathematical Operations
+## 📐  math — Mathematical Operations
 
 The math module provides C-level implementations of mathematical functions and constants. They are significantly faster than pure Python equivalents and cover everything from rounding and roots to trigonometry and combinatorics.
 
@@ -6802,129 +7117,145 @@ The math module provides C-level implementations of mathematical functions and c
 
 The fundamental mathematical constants are immediately accessible. Rounding functions give you precise control over how numbers are rounded.
 
->   🐍 Example 1 — Constants and rounding
-> import math
-> # ── Mathematical constants ───────────────────────────────────
-> print(f"π (pi):    {math.pi}")    # 3.141592653589793
-> print(f"e:         {math.e}")     # 2.718281828459045  Euler's number
-> print(f"τ (tau):   {math.tau}")   # 6.283185307179586  = 2π
-> print(f"∞ (inf):   {math.inf}")   # inf
-> # ── Rounding functions ───────────────────────────────────────
-> print(math.floor(3.9))    # 3   — always round DOWN to integer
-> print(math.floor(-3.1))   # -4  — note: -3.1 rounds down to -4
-> print(math.ceil(3.1))     # 4   — always round UP to integer
-> print(math.ceil(-3.9))    # -3  — -3.9 rounds up to -3
-> print(math.trunc(3.9))    # 3   — truncate (drop decimal)
-> print(math.trunc(-3.9))   # -3  — towards zero (not floor!)
-> ▶  Output
-> π (pi):    3.141592653589793
-> e:         2.718281828459045
-> τ (tau):   6.283185307179586
-> ∞ (inf):   inf
-> 3
-> -4
-> 4
-> -3
-> 3
-> -3
+### 🐍 Example 1 — Constants and rounding
+\`\`\`python
+import math
+# ── Mathematical constants ───────────────────────────────────
+print(f"π (pi):    {math.pi}")    # 3.141592653589793
+print(f"e:         {math.e}")     # 2.718281828459045  Euler's number
+print(f"τ (tau):   {math.tau}")   # 6.283185307179586  = 2π
+print(f"∞ (inf):   {math.inf}")   # inf
+# ── Rounding functions ───────────────────────────────────────
+print(math.floor(3.9))    # 3   — always round DOWN to integer
+print(math.floor(-3.1))   # -4  — note: -3.1 rounds down to -4
+print(math.ceil(3.1))     # 4   — always round UP to integer
+print(math.ceil(-3.9))    # -3  — -3.9 rounds up to -3
+print(math.trunc(3.9))    # 3   — truncate (drop decimal)
+print(math.trunc(-3.9))   # -3  — towards zero (not floor!)
+\`\`\`
+
+\`\`\`output
+π (pi):    3.141592653589793
+e:         2.718281828459045
+τ (tau):   6.283185307179586
+∞ (inf):   inf
+3
+-4
+4
+-3
+3
+-3
+\`\`\`
 
 Key distinction: floor() always goes towards -∞; trunc() always goes towards 0. For positive numbers they are the same, but for negative numbers floor(-3.9)=-4 while trunc(-3.9)=-3.
 
   Example 2: Powers, Roots and Logarithms
 
->   🐍 Example 2 — Powers and logarithms
-> # ── Square root and powers ───────────────────────────────────
-> print(math.sqrt(144))     # 12.0   — always returns float
-> print(math.sqrt(2))       # 1.4142135623730951
-> print(math.pow(2, 10))    # 1024.0 — math.pow always returns float
-> print(2 ** 10)            # 1024   — Python operator, returns int for int
-> print(math.isqrt(17))     # 4      — integer square root (floor)
-> # ── Logarithms ───────────────────────────────────────────────
-> print(math.log(100, 10))  # 2.0    — log base 10
-> print(math.log10(1000))   # 3.0    — shorthand for log base 10
-> print(math.log2(1024))    # 10.0   — log base 2
-> print(math.log(math.e))   # 1.0    — natural log (base e)
-> # ── Practical: compound interest formula ────────────────────
-> principal = 10000   # Rs.10,000
-> rate      = 0.08    # 8% annual
-> years     = 5
-> amount    = principal * math.pow(1 + rate, years)
-> print(f"After {years} years: Rs.{amount:,.2f}")
-> ▶  Output
-> 12.0
-> 1.4142135623730951
-> 1024.0
-> 1024
-> 4
-> 2.0
-> 3.0
-> 10.0
-> 1.0
-> After 5 years: Rs.14,693.28
+### 🐍 Example 2 — Powers and logarithms
+\`\`\`python
+# ── Square root and powers ───────────────────────────────────
+print(math.sqrt(144))     # 12.0   — always returns float
+print(math.sqrt(2))       # 1.4142135623730951
+print(math.pow(2, 10))    # 1024.0 — math.pow always returns float
+print(2 ** 10)            # 1024   — Python operator, returns int for int
+print(math.isqrt(17))     # 4      — integer square root (floor)
+# ── Logarithms ───────────────────────────────────────────────
+print(math.log(100, 10))  # 2.0    — log base 10
+print(math.log10(1000))   # 3.0    — shorthand for log base 10
+print(math.log2(1024))    # 10.0   — log base 2
+print(math.log(math.e))   # 1.0    — natural log (base e)
+# ── Practical: compound interest formula ────────────────────
+principal = 10000   # Rs.10,000
+rate      = 0.08    # 8% annual
+years     = 5
+amount    = principal * math.pow(1 + rate, years)
+print(f"After {years} years: Rs.{amount:,.2f}")
+\`\`\`
+
+\`\`\`output
+12.0
+1.4142135623730951
+1024.0
+1024
+4
+2.0
+3.0
+10.0
+1.0
+After 5 years: Rs.14,693.28
+\`\`\`
 
   Example 3: Trigonometry and Geometry
 
 All trigonometric functions use radians. Use math.radians() to convert from degrees, or math.degrees() to convert to degrees.
 
->   🐍 Example 3 — Trigonometry and geometry
-> # ── Trigonometry (angles always in RADIANS) ─────────────────
-> print(math.sin(math.pi / 2))     # 1.0   sin(90°) = 1
-> print(math.cos(0))               # 1.0   cos(0°)  = 1
-> print(math.tan(math.pi / 4))     # 1.0   tan(45°) = 1
-> # ── Convert between degrees and radians ─────────────────────
-> print(math.degrees(math.pi))     # 180.0
-> print(math.radians(90))          # 1.5707963267948966
-> # ── Practical: distance between two GPS coordinates ─────────
-> # Using the Pythagorean theorem (flat-earth approximation)
-> x1, y1 = 3, 0
-> x2, y2 = 0, 4
-> distance = math.hypot(x2-x1, y2-y1)
-> print(f"Distance: {distance}")   # 5.0  (3-4-5 right triangle)
-> # ── Circle geometry calculator ───────────────────────────────
-> def circle_stats(radius):
->     return {
->         "area":          round(math.pi * radius**2, 4),
->         "circumference": round(2 * math.pi * radius, 4),
->         "diameter":      radius * 2,
->     }
-> print(circle_stats(7))
-> ▶  Output
-> 1.0
-> 1.0
-> 1.0
-> 180.0
-> 1.5707963267948966
-> Distance: 5.0
-> {'area': 153.938, 'circumference': 43.9823, 'diameter': 14}
+### 🐍 Example 3 — Trigonometry and geometry
+\`\`\`python
+# ── Trigonometry (angles always in RADIANS) ─────────────────
+print(math.sin(math.pi / 2))     # 1.0   sin(90°) = 1
+print(math.cos(0))               # 1.0   cos(0°)  = 1
+print(math.tan(math.pi / 4))     # 1.0   tan(45°) = 1
+# ── Convert between degrees and radians ─────────────────────
+print(math.degrees(math.pi))     # 180.0
+print(math.radians(90))          # 1.5707963267948966
+# ── Practical: distance between two GPS coordinates ─────────
+# Using the Pythagorean theorem (flat-earth approximation)
+x1, y1 = 3, 0
+x2, y2 = 0, 4
+distance = math.hypot(x2-x1, y2-y1)
+print(f"Distance: {distance}")   # 5.0  (3-4-5 right triangle)
+# ── Circle geometry calculator ───────────────────────────────
+def circle_stats(radius):
+    return {
+        "area":          round(math.pi * radius**2, 4),
+        "circumference": round(2 * math.pi * radius, 4),
+        "diameter":      radius * 2,
+    }
+print(circle_stats(7))
+\`\`\`
+
+\`\`\`output
+1.0
+1.0
+1.0
+180.0
+1.5707963267948966
+Distance: 5.0
+{'area': 153.938, 'circumference': 43.9823, 'diameter': 14}
+\`\`\`
 
   Example 4: Combinatorics — Permutations, Combinations, GCD
 
->   🐍 Example 4 — Combinatorics
-> # ── Combinatorics ────────────────────────────────────────────
-> print(math.factorial(10))   # 3628800    — 10! = 10×9×8×...×1
-> print(math.gcd(48, 18))     # 6          — greatest common divisor
-> print(math.lcm(4, 6))       # 12         — least common multiple
-> # ── Combinations: "n choose k" (order does not matter) ──────
-> # How many ways to choose 3 students from 10?
-> print(math.comb(10, 3))     # 120        — C(10,3) = 10!/(3!×7!)
-> # ── Permutations: ordered arrangements ──────────────────────
-> # How many 3-letter arrangements from 10 letters?
-> print(math.perm(10, 3))     # 720        — P(10,3) = 10×9×8
-> # ── Practical: probability calculator ───────────────────────
-> total  = math.comb(52, 5)   # 5-card hands from 52-card deck
-> flush  = 4 * math.comb(13, 5)  # 4 suits × C(13,5) flush hands
-> print(f"Total 5-card hands: {total:,}")
-> print(f"Probability of flush: 1 in {total//flush}")
-> ▶  Output
-> 3628800
-> 6
-> 12
-> 120
-> 720
-> Total 5-card hands: 2,598,960
-> Probability of flush: 1 in 508
+### 🐍 Example 4 — Combinatorics
+\`\`\`python
+# ── Combinatorics ────────────────────────────────────────────
+print(math.factorial(10))   # 3628800    — 10! = 10×9×8×...×1
+print(math.gcd(48, 18))     # 6          — greatest common divisor
+print(math.lcm(4, 6))       # 12         — least common multiple
+# ── Combinations: "n choose k" (order does not matter) ──────
+# How many ways to choose 3 students from 10?
+print(math.comb(10, 3))     # 120        — C(10,3) = 10!/(3!×7!)
+# ── Permutations: ordered arrangements ──────────────────────
+# How many 3-letter arrangements from 10 letters?
+print(math.perm(10, 3))     # 720        — P(10,3) = 10×9×8
+# ── Practical: probability calculator ───────────────────────
+total  = math.comb(52, 5)   # 5-card hands from 52-card deck
+flush  = 4 * math.comb(13, 5)  # 4 suits × C(13,5) flush hands
+print(f"Total 5-card hands: {total:,}")
+print(f"Probability of flush: 1 in {total//flush}")
+\`\`\`
 
-# 🎲  random — Generating Random Data
+\`\`\`output
+3628800
+6
+12
+120
+720
+Total 5-card hands: 2,598,960
+Probability of flush: 1 in 508
+\`\`\`
+
+## 🎲  random — Generating Random Data
 
 The random module generates pseudo-random numbers using the Mersenne Twister algorithm — one of the most widely used PRNGs. It is perfect for games, simulations, sampling, test data generation, and security tokens.
 
@@ -6932,8 +7263,9 @@ Use random.seed(n) to make results reproducible — same seed always produces th
 
   Example 5: Numbers, Choices, and Shuffle
 
-# 🐍 Example 5 — random numbers and sequences
-## import random
+### 🐍 Example 5 — random numbers and sequences
+\`\`\`python
+import random
 # ── Random floats ────────────────────────────────────────────
 print(random.random())            # float in [0.0, 1.0)
 print(random.uniform(1.5, 9.5))  # float in [1.5, 9.5]
@@ -6950,43 +7282,48 @@ print(random.sample(fruits,  k=3))  # 3 items WITHOUT replacement
 deck = list(range(1, 14))   # cards 1–13
 random.shuffle(deck)        # shuffle IN PLACE (no return value!)
 print("Shuffled deck:", deck[:5], "...")
+\`\`\`
 
   Example 6: Weighted Choices, Seeds, and Password Generator
 
->   🐍 Example 6 — Weighted choices, seed, password generator
-> # ── Weighted choices ─────────────────────────────────────────
-> # Lose is 5× more likely than win
-> outcomes = ["win",  "lose", "draw"]
-> weights  = [1,      5,      2    ]
-> results  = random.choices(outcomes, weights=weights, k=10)
-> print("Results:", results)
-> # ── Seed for reproducibility ─────────────────────────────────
-> random.seed(42)   # fix the starting point of the RNG
-> print([random.randint(1, 100) for _ in range(5)])
-> # Always produces: [52, 68, 24, 72, 17] with seed 42
-> random.seed(42)   # reset to same seed
-> print([random.randint(1, 100) for _ in range(5)])
-> # Same output again: [52, 68, 24, 72, 17]
-> # ── Gaussian (normal) distribution ──────────────────────────
-> # Mean=170cm, std_dev=10 → realistic human heights
-> heights = [round(random.gauss(170, 10), 1) for _ in range(8)]
-> print("Heights:", heights)
-> # ── Practical: secure password generator ────────────────────
-> import string
-> def gen_password(length=12):
->     chars = string.ascii_letters + string.digits + "!@#$%^&*"
->     return "".join(random.choices(chars, k=length))
-> print("Password:", gen_password())
-> print("Password:", gen_password(16))
-> ▶  Output
-> Results: ['lose','lose','win','lose','lose','draw','lose','lose','lose','draw']
-> [52, 68, 24, 72, 17]
-> [52, 68, 24, 72, 17]
-> Heights: [164.2, 178.1, 159.8, 172.4, 181.3, 168.7, 175.0, 163.9]
-> Password: Kp2#mQ8!nRjL
-> Password: sT9@fYqW2!nRjL&p
+### 🐍 Example 6 — Weighted choices, seed, password generator
+\`\`\`python
+# ── Weighted choices ─────────────────────────────────────────
+# Lose is 5× more likely than win
+outcomes = ["win",  "lose", "draw"]
+weights  = [1,      5,      2    ]
+results  = random.choices(outcomes, weights=weights, k=10)
+print("Results:", results)
+# ── Seed for reproducibility ─────────────────────────────────
+random.seed(42)   # fix the starting point of the RNG
+print([random.randint(1, 100) for _ in range(5)])
+# Always produces: [52, 68, 24, 72, 17] with seed 42
+random.seed(42)   # reset to same seed
+print([random.randint(1, 100) for _ in range(5)])
+# Same output again: [52, 68, 24, 72, 17]
+# ── Gaussian (normal) distribution ──────────────────────────
+# Mean=170cm, std_dev=10 → realistic human heights
+heights = [round(random.gauss(170, 10), 1) for _ in range(8)]
+print("Heights:", heights)
+# ── Practical: secure password generator ────────────────────
+import string
+def gen_password(length=12):
+    chars = string.ascii_letters + string.digits + "!@#$%^&*"
+    return "".join(random.choices(chars, k=length))
+print("Password:", gen_password())
+print("Password:", gen_password(16))
+\`\`\`
 
-# 📅  datetime — Dates, Times & Durations
+\`\`\`output
+Results: ['lose','lose','win','lose','lose','draw','lose','lose','lose','draw']
+[52, 68, 24, 72, 17]
+[52, 68, 24, 72, 17]
+Heights: [164.2, 178.1, 159.8, 172.4, 181.3, 168.7, 175.0, 163.9]
+Password: Kp2#mQ8!nRjL
+Password: sT9@fYqW2!nRjL&p
+\`\`\`
+
+## 📅  datetime — Dates, Times & Durations
 
 The datetime module is one of the most commonly used in real-world Python — logging, scheduling, reports, age calculations, countdowns, and API timestamps all depend on it. There are four main classes: date, time, datetime, and timedelta.
 
@@ -7003,78 +7340,86 @@ The datetime module is one of the most commonly used in real-world Python — lo
 
   Example 7: Creating, Accessing, and Formatting Dates
 
->   🐍 Example 7 — Working with dates and formatting
-> from datetime import datetime, date, time, timedelta
-> # ── Current date and time ────────────────────────────────────
-> now   = datetime.now()   # full datetime
-> today = date.today()     # date only
-> print(f"Now:   {now}")   # 2024-12-25 14:30:15.123456
-> print(f"Today: {today}") # 2024-12-25
-> # ── Create specific dates ────────────────────────────────────
-> birthday = date(1999, 7, 15)
-> meeting  = datetime(2024, 12, 25, 10, 30, 0)
-> # ── Access individual components ─────────────────────────────
-> print(f"Year: {now.year}  Month: {now.month}  Day: {now.day}")
-> print(f"Hour: {now.hour}  Min: {now.minute}  Sec: {now.second}")
-> print(f"Weekday: {today.strftime("%A")}")
-> # ── strftime: format datetime as a string ────────────────────
-> print(now.strftime("%Y-%m-%d"))           # 2024-12-25
-> print(now.strftime("%d/%m/%Y"))           # 25/12/2024
-> print(now.strftime("%B %d, %Y"))          # December 25, 2024
-> print(now.strftime("%I:%M %p"))           # 02:30 PM
-> print(now.strftime("%A, %d %b %Y"))       # Wednesday, 25 Dec 2024
-> ▶  Output
-> Now:   2024-12-25 14:30:15.123456
-> Today: 2024-12-25
-> Year: 2024  Month: 12  Day: 25
-> Hour: 14  Min: 30  Sec: 15
-> Weekday: Wednesday
-> 2024-12-25
-> 25/12/2024
-> December 25, 2024
-> 02:30 PM
-> Wednesday, 25 Dec 2024
+### 🐍 Example 7 — Working with dates and formatting
+\`\`\`python
+from datetime import datetime, date, time, timedelta
+# ── Current date and time ────────────────────────────────────
+now   = datetime.now()   # full datetime
+today = date.today()     # date only
+print(f"Now:   {now}")   # 2024-12-25 14:30:15.123456
+print(f"Today: {today}") # 2024-12-25
+# ── Create specific dates ────────────────────────────────────
+birthday = date(1999, 7, 15)
+meeting  = datetime(2024, 12, 25, 10, 30, 0)
+# ── Access individual components ─────────────────────────────
+print(f"Year: {now.year}  Month: {now.month}  Day: {now.day}")
+print(f"Hour: {now.hour}  Min: {now.minute}  Sec: {now.second}")
+print(f"Weekday: {today.strftime("%A")}")
+# ── strftime: format datetime as a string ────────────────────
+print(now.strftime("%Y-%m-%d"))           # 2024-12-25
+print(now.strftime("%d/%m/%Y"))           # 25/12/2024
+print(now.strftime("%B %d, %Y"))          # December 25, 2024
+print(now.strftime("%I:%M %p"))           # 02:30 PM
+print(now.strftime("%A, %d %b %Y"))       # Wednesday, 25 Dec 2024
+\`\`\`
+
+\`\`\`output
+Now:   2024-12-25 14:30:15.123456
+Today: 2024-12-25
+Year: 2024  Month: 12  Day: 25
+Hour: 14  Min: 30  Sec: 15
+Weekday: Wednesday
+2024-12-25
+25/12/2024
+December 25, 2024
+02:30 PM
+Wednesday, 25 Dec 2024
+\`\`\`
 
   Example 8: Date Arithmetic with timedelta
 
 timedelta represents a duration. Add or subtract timedelta objects from date or datetime objects to get new dates. Subtract two dates to get a timedelta.
 
->   🐍 Example 8 — Date arithmetic and age calculator
-> # ── Date arithmetic ──────────────────────────────────────────
-> one_week  = timedelta(weeks=1)
-> one_month = timedelta(days=30)
-> two_hours = timedelta(hours=2)
-> print(f"One week later:   {today + one_week}")
-> print(f"One month ago:    {today - one_month}")
-> print(f"2 hours from now: {now + two_hours}")
-> # ── Duration between two dates ───────────────────────────────
-> project_start = date(2024, 1, 1)
-> project_end   = date(2024, 12, 31)
-> duration      = project_end - project_start   # returns timedelta
-> print(f"Project duration: {duration.days} days")
-> # ── Age calculator ───────────────────────────────────────────
-> def calculate_age(dob: date) -> int:
->     today = date.today()
->     age   = today.year - dob.year
->     # Subtract 1 if birthday has not happened yet this year
->     if (today.month, today.day) < (dob.month, dob.day):
->         age -= 1
->     return age
-> born = date(1999, 7, 15)
-> print(f"Age: {calculate_age(born)} years")
-> # ── Parse a string into a datetime ──────────────────────────
-> dt_str = "25-12-2024 14:30"
-> parsed = datetime.strptime(dt_str, "%d-%m-%Y %H:%M")
-> print(f"Parsed: {parsed.year}/{parsed.month}/{parsed.day} at {parsed.hour}h")
-> ▶  Output
-> One week later:   2025-01-01
-> One month ago:    2024-11-25
-> 2 hours from now: 2024-12-25 16:30:15
-> Project duration: 365 days
-> Age: 25 years
-> Parsed: 2024/12/25 at 14h
+### 🐍 Example 8 — Date arithmetic and age calculator
+\`\`\`python
+# ── Date arithmetic ──────────────────────────────────────────
+one_week  = timedelta(weeks=1)
+one_month = timedelta(days=30)
+two_hours = timedelta(hours=2)
+print(f"One week later:   {today + one_week}")
+print(f"One month ago:    {today - one_month}")
+print(f"2 hours from now: {now + two_hours}")
+# ── Duration between two dates ───────────────────────────────
+project_start = date(2024, 1, 1)
+project_end   = date(2024, 12, 31)
+duration      = project_end - project_start   # returns timedelta
+print(f"Project duration: {duration.days} days")
+# ── Age calculator ───────────────────────────────────────────
+def calculate_age(dob: date) -> int:
+    today = date.today()
+    age   = today.year - dob.year
+    # Subtract 1 if birthday has not happened yet this year
+    if (today.month, today.day) < (dob.month, dob.day):
+        age -= 1
+    return age
+born = date(1999, 7, 15)
+print(f"Age: {calculate_age(born)} years")
+# ── Parse a string into a datetime ──────────────────────────
+dt_str = "25-12-2024 14:30"
+parsed = datetime.strptime(dt_str, "%d-%m-%Y %H:%M")
+print(f"Parsed: {parsed.year}/{parsed.month}/{parsed.day} at {parsed.hour}h")
+\`\`\`
 
-# 📦  pip — Python Package Manager
+\`\`\`output
+One week later:   2025-01-01
+One month ago:    2024-11-25
+2 hours from now: 2024-12-25 16:30:15
+Project duration: 365 days
+Age: 25 years
+Parsed: 2024/12/25 at 14h
+\`\`\`
+
+## 📦  pip — Python Package Manager
 
 pip is the standard tool for installing packages from PyPI. Every Python project uses pip to manage its dependencies. Combined with virtual environments, pip lets each project have its own isolated set of packages — preventing version conflicts between projects.
 
@@ -7095,8 +7440,9 @@ pip is the standard tool for installing packages from PyPI. Every Python project
 
 A virtual environment is an isolated Python installation for a single project. Without one, all projects share the same packages — meaning upgrading Flask for Project A might break Project B. Always use virtual environments.
 
-# 🐍 Example 9 — Virtual environments
-## # ── Why virtual environments? ────────────────────────────────
+### 🐍 Example 9 — Virtual environments
+\`\`\`python
+# ── Why virtual environments? ────────────────────────────────
 # Project A needs Django 4.2
 # Project B needs Django 3.2
 # Without venv → conflict! With venv → each project is isolated.
@@ -7117,6 +7463,7 @@ pip freeze > requirements.txt
 pip install -r requirements.txt
 # ── Deactivate when done ──────────────────────────────────────
 deactivate
+\`\`\`
 
 | Package | Install Command | What It Does |
 | --- | --- | --- |
@@ -7137,40 +7484,44 @@ deactivate
 
 The requests library is the most popular Python package — downloaded billions of times. It makes HTTP requests simple. Before using: pip install requests.
 
->   🐍 Example 10 — requests library
-> # pip install requests  (first time only)
-> import requests
-> # ── GET request: fetch data from an API ─────────────────────
-> resp = requests.get("https://httpbin.org/json")
-> print(f"Status code: {resp.status_code}")   # 200 = success
-> data = resp.json()     # automatically parse JSON response
-> print(data)
-> # ── GET with query parameters ────────────────────────────────
-> params   = {"q": "python", "per_page": 3}
-> response = requests.get("https://api.github.com/search/repositories",
->                         params=params)
-> results  = response.json()["items"]
-> for repo in results:
->     print(f"{repo['name']:30} ⭐{repo['stargazers_count']:,}")
-> # ── Error checking ───────────────────────────────────────────
-> response.raise_for_status()   # raises HTTPError if status >= 400
-> # ── POST request: send data to an API ───────────────────────
-> payload = {"name": "Alice", "score": 99}
-> r = requests.post("https://httpbin.org/post", json=payload)
-> print(r.json()["json"])    # API echoes back our data
-> # ── Practical: fetch exchange rates ─────────────────────────
-> # r = requests.get("https://api.exchangerate.host/latest?base=INR")
-> # rates = r.json()["rates"]
-> # print(f"1 INR = {rates['USD']:.6f} USD")
-> ▶  Output
-> Status code: 200
-> {'slideshow': {'author': 'Yours Truly', 'date': 'date of publication', ...}}
-> cpython                        ⭐62,000
-> awesome-python                 ⭐215,000
-> flask                          ⭐66,000
-> {'name': 'Alice', 'score': 99}
+### 🐍 Example 10 — requests library
+\`\`\`python
+# pip install requests  (first time only)
+import requests
+# ── GET request: fetch data from an API ─────────────────────
+resp = requests.get("https://httpbin.org/json")
+print(f"Status code: {resp.status_code}")   # 200 = success
+data = resp.json()     # automatically parse JSON response
+print(data)
+# ── GET with query parameters ────────────────────────────────
+params   = {"q": "python", "per_page": 3}
+response = requests.get("https://api.github.com/search/repositories",
+                        params=params)
+results  = response.json()["items"]
+for repo in results:
+    print(f"{repo['name']:30} ⭐{repo['stargazers_count']:,}")
+# ── Error checking ───────────────────────────────────────────
+response.raise_for_status()   # raises HTTPError if status >= 400
+# ── POST request: send data to an API ───────────────────────
+payload = {"name": "Alice", "score": 99}
+r = requests.post("https://httpbin.org/post", json=payload)
+print(r.json()["json"])    # API echoes back our data
+# ── Practical: fetch exchange rates ─────────────────────────
+# r = requests.get("https://api.exchangerate.host/latest?base=INR")
+# rates = r.json()["rates"]
+# print(f"1 INR = {rates['USD']:.6f} USD")
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+\`\`\`output
+Status code: 200
+{'slideshow': {'author': 'Yours Truly', 'date': 'date of publication', ...}}
+cpython                        ⭐62,000
+awesome-python                 ⭐215,000
+flask                          ⭐66,000
+{'name': 'Alice', 'score': 99}
+\`\`\`
+
+## 💡  Lesson Recap — Key Takeaways
 ## math: pi, e, sqrt, floor, ceil, log, log2, sin, cos, factorial, gcd, lcm, comb, perm, hypot
 random: random(), randint(a,b), choice(lst), choices(lst,k=n), sample(lst,k=n), shuffle(lst), seed(n)
 datetime: date.today(), datetime.now(), strftime("%Y-%m-%d"), strptime(str,fmt)
@@ -7203,7 +7554,7 @@ Contents
 ## Advanced OOP Concepts
 Multiple Inheritance, MRO, Method Overriding, Magic Methods & Context Managers
 
-# 📌  What Makes OOP "Advanced"?
+## 📌  What Makes OOP "Advanced"?
 
 You already know classes, inheritance, and encapsulation. Advanced OOP covers the nuances that separate beginner code from production-grade Python:
 
@@ -7217,7 +7568,7 @@ You already know classes, inheritance, and encapsulation. Advanced OOP covers th
 
 These patterns appear in every serious Python library: Django's models, SQLAlchemy sessions, Flask decorators, NumPy arrays all use advanced OOP extensively.
 
-# 1️⃣  Multiple Inheritance & Method Resolution Order (MRO)
+## 1️⃣  Multiple Inheritance & Method Resolution Order (MRO)
 
 Python allows a class to inherit from MULTIPLE parent classes at the same time. The list of parents is specified in the class definition: class Child(Base1, Base2, Base3). Each parent contributes its own attributes and methods to the child.
 
@@ -7225,19 +7576,21 @@ When Python looks up a method on an object, it searches through a specific order
 
 ![Image 30](/pyimages/pimg30.png)
 
-# 🔍  How MRO is Computed
+## 🔍  How MRO is Computed
 ## Rule 1: The class itself is always first in its own MRO.
 Rule 2: Parents are listed left-to-right as you wrote them: class D(B, C) → B before C.
 Rule 3: A class never appears before its own parents (child before parent).
 Rule 4: If a class appears in multiple inheritance paths, it only appears ONCE — at the rightmost valid position.
 The result: D → B → C → A → object  (for the diamond problem below)
 
-# 📐  Syntax / Template
-## class Child(Base1, Base2, Base3):  # inherit from all three, left-to-right priority
+### 📐  Syntax / Template
+\`\`\`python
+class Child(Base1, Base2, Base3):  # inherit from all three, left-to-right priority
 ...
 # Inspect the MRO at runtime:
 print(Child.__mro__)    # tuple: (Child, Base1, Base2, Base3, object)
 print(Child.mro())      # same as list
+\`\`\`
 
   Example 1: The Diamond Problem — Understanding MRO
 
@@ -7255,11 +7608,11 @@ super() does not mean "call my parent". It means "call the NEXT class in the MRO
 ▶  Expected Output [LOG] greet() was called Good day, sir. (<class 'FancyGreeter'>, <class 'LogMixin'>, <class 'FormalGreeter'>, <class 'A'>, <class 'object'>) |
 📝 | Explanation:  super() in LogMixin does NOT call LogMixin's parent in the class hierarchy — it calls the next class in FancyGreeter's MRO, which is FormalGreeter. This "cooperative" pattern lets mixins and extensions work together cleanly without hardcoding parent names.
 
-# 2️⃣  Method Overriding & super()
+## 2️⃣  Method Overriding & super()
 
 Method overriding is when a child class defines a method with the same name as a parent's method. The child's version takes priority. Use super().method() to call the parent's version and extend it rather than completely replacing it.
 
-# 🔢  How it works — Step by Step
+## 🔢  How it works — Step by Step
 ## Step 1:  Python looks up a method on the object's class first.
 Step 2:  If not found, Python walks up the MRO (parent, grandparent...) until found.
 Step 3:  If the child defines the same method name → child's version runs (override).
@@ -7273,7 +7626,7 @@ The Shape → Circle → Square hierarchy shows two patterns: pure override (rep
 ▶  Expected Output crimson Circle | radius=7 | area=153.938 navy Square | side=5 | area=25 153.9380 25   red Circle | radius=3 | area=28.2743   blue Square | side=4 | area=16   red Circle | radius=10 | area=314.1593 |
 📝 | Explanation:  super().__init__(colour) calls Shape's constructor so the colour attribute gets set up properly. super().describe() gets Shape's string ("crimson Circle"), then Circle's describe() adds radius and area information. This pattern avoids duplicating the base description logic.
 
-# 3️⃣  Magic / Dunder Methods — Complete Guide
+## 3️⃣  Magic / Dunder Methods — Complete Guide
 
 Magic methods (named with double underscores on both sides, like __str__) are called automatically by Python when you use built-in operations on your object. They let your custom classes behave like native Python types — working with print(), len(), +, ==, in, [], and even with statements.
 
@@ -7311,13 +7664,13 @@ This example implements __len__, __bool__, __contains__, __getitem__, __iter__, 
 ▶  Expected Output Total items: 6 iPhone in cart: True Laptop in cart: False Cart is empty: False Empty cart: True First item: Apple iPhone 15   Apple iPhone 15 → Rs.75,000   AirPods Pro → Rs.22,000   Case → Rs.500 ===========================================  Alice's Cart ===========================================   Apple iPhone 15     x 1  Rs.  75,000   AirPods Pro         x 2  Rs.  44,000   Case                x 3  Rs.   1,500 ───────────────────────────────────────────   TOTAL:  Rs.     120,500   ShoppingCart(owner='Alice', items=3) Merged cart owner: Alice+Bob Merged total items: 7 |
 📝 | Explanation:  Each dunder corresponds to exactly one Python operation. __len__ powers len(). __contains__ powers the in operator. __iter__ makes for loops work. __add__ makes + work. __str__ is for print() while __repr__ is for the developer (REPL, logs, repr()). None of these are ever called directly — Python invokes them automatically.
 
-# 4️⃣  Context Managers — __enter__ & __exit__
+## 4️⃣  Context Managers — __enter__ & __exit__
 
 A context manager defines setup logic (__enter__) and teardown logic (__exit__) that run automatically with Python's with statement. This guarantees cleanup ALWAYS happens — even if an exception is raised inside the with block.
 
 You already use context managers every time you write "with open(file) as f:". The file object's __exit__ closes the file automatically. You can create your own for any resource that needs guaranteed cleanup.
 
-# 🔄  Context Manager Lifecycle
+## 🔄  Context Manager Lifecycle
 ## 1. Python evaluates the expression after "with"  →  calls __enter__()
 2. __enter__() sets up the resource and returns something
 3. The returned value is bound to the "as" variable
@@ -7341,7 +7694,7 @@ The contextlib.contextmanager decorator lets you write a context manager as a si
 ▶  Expected Output [Heavy computation] Starting... Result: 333,332,333,000 [Heavy computation] Finished in 0.0842s |
 📝 | Explanation:  The @contextmanager decorator transforms a generator function into a full context manager. yield splits setup (before) from teardown (after). The try/finally guarantees the finally block runs even if an exception occurs in the with block body. This is often much simpler than writing a class with __enter__ and __exit__.
 
-# 💡  Lesson Recap — Key Takeaways
+## 💡  Lesson Recap — Key Takeaways
 ## Multiple Inheritance: class D(B, C) → Python searches B first, then C, then shared ancestors
 MRO: always check Class.__mro__ when debugging — it shows exact lookup order
 super() follows MRO — always use it instead of hardcoding Parent.method(self)
@@ -7356,7 +7709,7 @@ __enter__ + __exit__ implement the context manager protocol (with statement)
 ## Iterators & Generators
 Iterator Protocol, yield keyword, Generator Expressions & Pipelines
 
-# 📌  What Is an Iterator?
+## 📌  What Is an Iterator?
 
 An iterator is any object that implements the iterator protocol — two methods: __iter__() and __next__(). Every for loop in Python secretly uses this protocol: it calls iter() on the object to get an iterator, then calls next() repeatedly until StopIteration is raised.
 
@@ -7364,23 +7717,25 @@ Understanding iterators lets you create data sources that produce values lazily 
 
 ![Image32](/pyimages/pimg32.png)
 
-# 🔄  What Happens Inside a for Loop
+## 🔄  What Happens Inside a for Loop
 ## for item in collection:     # Python secretly does this:
 process(item)           # 1. iterator = iter(collection)  → calls __iter__()
-# 2. try: item = next(iterator)   → calls __next__()
-# 3. if StopIteration is raised → loop ends
-# 4. otherwise → run loop body, go back to step 2
+## 2. try: item = next(iterator)   → calls __next__()
+## 3. if StopIteration is raised → loop ends
+## 4. otherwise → run loop body, go back to step 2
 
-# 1️⃣  The Iterator Protocol
+## 1️⃣  The Iterator Protocol
 
-# 📐  Syntax / Template
-## class MyIterator:
+### 📐  Syntax / Template
+\`\`\`python
+class MyIterator:
 def __iter__(self):   # return the iterator object — usually "self"
 return self
 def __next__(self):   # return next value OR raise StopIteration when done
 if self.is_done:
 raise StopIteration   # ← signal that iteration is complete
 return self.compute_next_value()
+\`\`\`
 
   Example 1: Counter — A Custom Infinite Iterator
 
@@ -7392,40 +7747,44 @@ An infinite counter that produces values forever. We use itertools.islice to tak
 
   Example 2: SquareRange — A Finite Iterator
 
->   🐍  Example 2 — Finite SquareRange iterator
-> class SquareRange:
->     """Yields the squares of integers from start to end (inclusive)."""
->     def __init__(self, start, end):
->         self.current = start
->         self.end     = end
->     def __iter__(self):
->         return self
->     def __next__(self):
->         if self.current > self.end:    # ← check if we are done
->             raise StopIteration        # ← signal end of iteration
->         result       = self.current ** 2   # compute the square
->         self.current += 1                  # advance position
->         return result
-> # ── Use in a for loop ────────────────────────────────────────
-> for sq in SquareRange(1, 6):
->     print(sq, end=" ")    # 1 4 9 16 25 36
-> # ── Use in list comprehension ────────────────────────────────
-> squares = [x for x in SquareRange(1, 5)]
-> print(squares)    # [1, 4, 9, 16, 25]
-> # ── sum(), max(), min() all work with iterators ──────────────
-> print(sum(SquareRange(1, 10)))   # 385  (sum of squares 1..10)
-> ▶  Expected Output
-> 1 4 9 16 25 36
-> [1, 4, 9, 16, 25]
-> 385
+### 🐍  Example 2 — Finite SquareRange iterator
+\`\`\`python
+class SquareRange:
+    """Yields the squares of integers from start to end (inclusive)."""
+    def __init__(self, start, end):
+        self.current = start
+        self.end     = end
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self.current > self.end:    # ← check if we are done
+            raise StopIteration        # ← signal end of iteration
+        result       = self.current ** 2   # compute the square
+        self.current += 1                  # advance position
+        return result
+# ── Use in a for loop ────────────────────────────────────────
+for sq in SquareRange(1, 6):
+    print(sq, end=" ")    # 1 4 9 16 25 36
+# ── Use in list comprehension ────────────────────────────────
+squares = [x for x in SquareRange(1, 5)]
+print(squares)    # [1, 4, 9, 16, 25]
+# ── sum(), max(), min() all work with iterators ──────────────
+print(sum(SquareRange(1, 10)))   # 385  (sum of squares 1..10)
+\`\`\`
 
-# 2️⃣  The yield Keyword — Generator Functions
+\`\`\`output
+1 4 9 16 25 36
+[1, 4, 9, 16, 25]
+385
+\`\`\`
+
+## 2️⃣  The yield Keyword — Generator Functions
 
 A generator function is any function that contains the yield keyword. When called, it does NOT execute immediately — instead, it returns a generator object (which is an iterator). Each call to next() runs the function body until the next yield statement, pauses there, and returns the yielded value.
 
 All local variables and the execution position are preserved between calls. This is the key difference from a regular function — a generator can "remember where it was".
 
-# ⚡  yield vs return
+## ⚡  yield vs return
 ## return:  terminates the function completely. All local state is gone.
 yield:   PAUSES the function. All local variables are saved. Execution resumes
 at the next line after yield when next() is called again.
@@ -7446,55 +7805,63 @@ The same SquareRange logic from above, rewritten as a generator. Compare the two
 
 An infinite generator that produces the Fibonacci sequence. It runs forever — use itertools.islice or a conditional break to stop it.
 
->   🐍  Example 4 — Infinite Fibonacci generator
-> def fibonacci():
->     """Infinite Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, ..."""
->     a, b = 0, 1
->     while True:        # infinite loop — generator never exhausts
->         yield a        # produce current value, then pause
->         a, b = b, a+b  # update: new a=old b, new b=old a+old b
-> # Take first 10 using next() in a list comprehension
-> fib = fibonacci()
-> first_10 = [next(fib) for _ in range(10)]
-> print(first_10)   # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
-> # Take first N using itertools.islice
-> import itertools
-> first_15 = list(itertools.islice(fibonacci(), 15))
-> print(first_15)
-> # Sum of first 20 Fibonacci numbers
-> total = sum(itertools.islice(fibonacci(), 20))
-> print(f"Sum of first 20 Fibonacci: {total:,}")
-> ▶  Expected Output
-> [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
-> [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
-> Sum of first 20 Fibonacci: 10,945
+### 🐍  Example 4 — Infinite Fibonacci generator
+\`\`\`python
+def fibonacci():
+    """Infinite Fibonacci sequence: 0, 1, 1, 2, 3, 5, 8, 13, ..."""
+    a, b = 0, 1
+    while True:        # infinite loop — generator never exhausts
+        yield a        # produce current value, then pause
+        a, b = b, a+b  # update: new a=old b, new b=old a+old b
+# Take first 10 using next() in a list comprehension
+fib = fibonacci()
+first_10 = [next(fib) for _ in range(10)]
+print(first_10)   # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+# Take first N using itertools.islice
+import itertools
+first_15 = list(itertools.islice(fibonacci(), 15))
+print(first_15)
+# Sum of first 20 Fibonacci numbers
+total = sum(itertools.islice(fibonacci(), 20))
+print(f"Sum of first 20 Fibonacci: {total:,}")
+\`\`\`
+
+\`\`\`output
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+Sum of first 20 Fibonacci: 10,945
+\`\`\`
 
   Example 5: yield from — Delegating to Sub-Generators
 
 "yield from" delegates iteration to another iterable. It is cleaner and more efficient than manually looping and yielding each item. It also correctly handles two-way send() communication and exception propagation.
 
->   🐍  Example 5 — yield from
-> # ── yield from: chain multiple iterables ────────────────────
-> def chain(*iterables):
->     """Yield all items from multiple iterables in sequence."""
->     for it in iterables:
->         yield from it      # equivalent to: for x in it: yield x
->                            # but more efficient and handles send()
-> result = list(chain([1, 2], "AB", range(3, 6)))
-> print(result)   # [1, 2, 'A', 'B', 3, 4, 5]
-> # ── Recursive generator with yield from ─────────────────────
-> def flatten(nested):
->     """Flatten arbitrarily nested lists."""
->     for item in nested:
->         if isinstance(item, list):
->             yield from flatten(item)   # recurse into sub-lists
->         else:
->             yield item                 # yield leaf values directly
-> deep = [1, [2, [3, [4]], 5], 6]
-> print(list(flatten(deep)))   # [1, 2, 3, 4, 5, 6]
-> ▶  Expected Output
-> [1, 2, 'A', 'B', 3, 4, 5]
-> [1, 2, 3, 4, 5, 6]
+### 🐍  Example 5 — yield from
+\`\`\`python
+# ── yield from: chain multiple iterables ────────────────────
+def chain(*iterables):
+    """Yield all items from multiple iterables in sequence."""
+    for it in iterables:
+        yield from it      # equivalent to: for x in it: yield x
+                           # but more efficient and handles send()
+result = list(chain([1, 2], "AB", range(3, 6)))
+print(result)   # [1, 2, 'A', 'B', 3, 4, 5]
+# ── Recursive generator with yield from ─────────────────────
+def flatten(nested):
+    """Flatten arbitrarily nested lists."""
+    for item in nested:
+        if isinstance(item, list):
+            yield from flatten(item)   # recurse into sub-lists
+        else:
+            yield item                 # yield leaf values directly
+deep = [1, [2, [3, [4]], 5], 6]
+print(list(flatten(deep)))   # [1, 2, 3, 4, 5, 6]
+\`\`\`
+
+\`\`\`output
+[1, 2, 'A', 'B', 3, 4, 5]
+[1, 2, 3, 4, 5, 6]
+\`\`\`
 
   Example 6: send() — Two-Way Communication with a Generator
 
@@ -7504,7 +7871,7 @@ Normally data flows ONE WAY: caller gets values from the generator via next(). T
 ▶  Expected Output 10 35 50 |
 📝 | Explanation:  Before calling send(), you must "prime" the generator with next() (or send(None)). This advances execution to the first yield. After priming, send(value) resumes the generator — the sent value becomes the result of the yield expression, and execution continues until the next yield or return.
 
-# 3️⃣  Generator Expressions vs List Comprehensions
+## 3️⃣  Generator Expressions vs List Comprehensions
 
 Generator expressions use () instead of []. They look identical to list comprehensions but are fundamentally different: a list comprehension builds everything in memory immediately. A generator expression is lazy — it produces values one at a time only when requested.
 
@@ -7516,7 +7883,7 @@ Generator expressions use () instead of []. They look identical to list comprehe
 ▶  Expected Output List size:         800,056 bytes Generator size:         200 bytes Sum of squares 1-1000: 333,833,500 All even: False Any > 9:  True |
 📝 | Explanation:  The pipeline pattern is powerful: each generator stage is lazy. No data actually moves until the final for loop starts pulling values. all() and any() short-circuit — they stop iterating as soon as the answer is known, which is why all(n%2==0) stops at 7 and any(n>9) stops at 10.
 
-# 💡  Lesson Recap — Key Takeaways
+## 💡  Lesson Recap — Key Takeaways
 ## Iterator protocol: __iter__() returns self; __next__() returns next value or raises StopIteration
 for x in obj secretly calls iter(obj) then next() repeatedly until StopIteration
 Generator function: any function with yield — returns a generator object when called
@@ -7531,7 +7898,7 @@ Use generators with sum(), max(), min(), any(), all() — they accept any iterab
 ## Decorators
 Function Decorators, Parameterised Decorators, Class Decorators & Built-in Decorators
 
-# 📌  What Is a Decorator?
+## 📌  What Is a Decorator?
 
 A decorator is a function that takes another function as input, adds behaviour around it (before the call, after the call, or both), and returns the enhanced version. You apply a decorator with the @ symbol above a function definition.
 
@@ -7539,27 +7906,30 @@ A decorator is a function that takes another function as input, adds behaviour a
 
 ![Image 33](/pyimages/pimg33.png)
 
-# 🎨  The Decorator Substitution
+## 🎨  The Decorator Substitution
 ## @logger                    # This is EXACTLY equivalent to:
 def add(a, b):             # def add(a, b):
 return a + b           #     return a + b
-# add = logger(add)   ← Python does this for you
+## add = logger(add)   ← Python does this for you
 After decoration, "add" no longer refers to the original function.
 It refers to whatever logger() returned — usually a "wrapper" function.
 
-# 1️⃣  Building a Decorator — Step by Step
+## 1️⃣  Building a Decorator — Step by Step
 
-> 📐  Syntax / Template
-> def decorator(func):          # 1. accepts the function to wrap
->     @functools.wraps(func)    # 2. preserves __name__, __doc__, __module__
->     def wrapper(*args, **kwargs):  # 3. *args, **kwargs = accepts ANY signature
->         # 4. Code to run BEFORE the original function
->         result = func(*args, **kwargs)   # 5. Call the ORIGINAL function
->         # 6. Code to run AFTER the original function
->         return result         # 7. Return the original function's result
->     return wrapper            # 8. Return the wrapper function (not its result!)
-> @decorator                   # Apply: my_func = decorator(my_func)
-> def my_func(): ...
+### 📐  Syntax / Template
+\`\`\`python
+def decorator(func):          # 1. accepts the function to wrap
+    @functools.wraps(func)    # 2. preserves __name__, __doc__, __module__
+    def wrapper(*args, **kwargs):  # 3. *args, **kwargs = accepts ANY signature
+        # 4. Code to run BEFORE the original function
+        result = func(*args, **kwargs)   # 5. Call the ORIGINAL function
+        # 6. Code to run AFTER the original function
+        return result         # 7. Return the original function's result
+    return wrapper            # 8. Return the wrapper function (not its result!)
+@decorator                   # Apply: my_func = decorator(my_func)
+def my_func(): ...
+\`\`\`
+
 > ⚠️  Always use @functools.wraps(func) inside your decorator. Without it, the decorated function loses its __name__, __doc__, and __module__ — which breaks help(), logging, and debugging tools.
 
   Example 1: Logger Decorator — Log Every Call
@@ -7570,57 +7940,65 @@ It refers to whatever logger() returned — usually a "wrapper" function.
 
   Example 2: Timer Decorator — Measure Execution Time
 
->   🐍  Example 2 — Timer decorator
-> import functools, time
-> def timer(func):
->     """Decorator: print how long the function took to run."""
->     @functools.wraps(func)
->     def wrapper(*args, **kwargs):
->         start  = time.perf_counter()           # high-precision timer
->         result = func(*args, **kwargs)         # run the function
->         end    = time.perf_counter()
->         print(f"{func.__name__}: {(end-start)*1000:.2f}ms")
->         return result
->     return wrapper
-> @timer
-> def slow_sum(n):
->     """Sum numbers from 0 to n."""
->     return sum(range(n))
-> result = slow_sum(10_000_000)
-> print(f"Result: {result:,}")
-> ▶  Expected Output
-> slow_sum: 312.45ms
-> Result: 49,999,995,000,000
+### 🐍  Example 2 — Timer decorator
+\`\`\`python
+import functools, time
+def timer(func):
+    """Decorator: print how long the function took to run."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start  = time.perf_counter()           # high-precision timer
+        result = func(*args, **kwargs)         # run the function
+        end    = time.perf_counter()
+        print(f"{func.__name__}: {(end-start)*1000:.2f}ms")
+        return result
+    return wrapper
+@timer
+def slow_sum(n):
+    """Sum numbers from 0 to n."""
+    return sum(range(n))
+result = slow_sum(10_000_000)
+print(f"Result: {result:,}")
+\`\`\`
+
+\`\`\`output
+slow_sum: 312.45ms
+Result: 49,999,995,000,000
+\`\`\`
 
   Example 3: Stacking Decorators — Applied Bottom-Up, Executed Top-Down
 
 You can apply multiple decorators to one function. They are applied in BOTTOM-UP order (closest to the function first), but they execute in TOP-DOWN order when the function is called.
 
->   🐍  Example 3 — Stacking decorators
-> # Stacking decorators:
-> @logger    # applied SECOND → outermost wrapper
-> @timer     # applied FIRST  → innermost wrapper (closest to original)
-> def power(base, exp):
->     return base ** exp
-> # Equivalent to:
-> # power = logger(timer(power))
-> # When power(2, 20) is called:
-> # 1. logger's wrapper runs first (logs the call)
-> # 2. timer's wrapper runs (starts timer)
-> # 3. original power() runs
-> # 4. timer wrapper finishes (prints elapsed time)
-> # 5. logger wrapper finishes (logs the return value)
-> power(2, 20)
-> ▶  Expected Output
-> → Calling power((2, 20), {})
-> power: 0.01ms
-> ← power returned 1048576
+### 🐍  Example 3 — Stacking decorators
+\`\`\`python
+# Stacking decorators:
+@logger    # applied SECOND → outermost wrapper
+@timer     # applied FIRST  → innermost wrapper (closest to original)
+def power(base, exp):
+    return base ** exp
+# Equivalent to:
+# power = logger(timer(power))
+# When power(2, 20) is called:
+# 1. logger's wrapper runs first (logs the call)
+# 2. timer's wrapper runs (starts timer)
+# 3. original power() runs
+# 4. timer wrapper finishes (prints elapsed time)
+# 5. logger wrapper finishes (logs the return value)
+power(2, 20)
+\`\`\`
 
-# 2️⃣  Parameterised Decorators (Decorator Factories)
+\`\`\`output
+→ Calling power((2, 20), {})
+power: 0.01ms
+← power returned 1048576
+\`\`\`
+
+## 2️⃣  Parameterised Decorators (Decorator Factories)
 
 Sometimes you want to configure a decorator: @retry(max_attempts=3) or @require_role("admin"). This requires three levels of nesting: an outer factory function that receives the parameters, an inner decorator that receives the function, and a wrapper that receives the call arguments.
 
-# 🔢  How it works — Step by Step
+## 🔢  How it works — Step by Step
 ## Step 1:  The factory function is called with the configuration parameters → @retry(3, delay=0.1)
 Step 2:  The factory returns a decorator function
 Step 3:  Python applies the decorator to the function → decorator(func)
@@ -7633,126 +8011,138 @@ Step 5:  The wrapper is called when the user calls the decorated function
 ▶  Expected Output   Attempt 1/3 failed: Parse failed!   Attempt 2/3 failed: Parse failed! Parsed: hello world   (or similar — depends on random) |
 📝 | Explanation:  Three levels: retry(3, delay=0.1) is called first — it receives the config and returns decorator. Python then calls decorator(unstable_parser) — it wraps the function and returns wrapper. Later, unstable_parser("hello") calls wrapper("hello") which runs the retry logic.
 
-# 3️⃣  Class Decorators & Built-in Decorators
+## 3️⃣  Class Decorators & Built-in Decorators
 
   Example 5: CallCounter — Stateful Class Decorator
 
 A class can be used as a decorator if it implements __call__. The advantage: classes have state (instance variables), making them ideal for stateful decorators like call counters.
 
->   🐍  Example 5 — Class-based stateful decorator
-> import functools
-> class CallCounter:
->     """Stateful decorator: counts how many times the function is called."""
->     def __init__(self, func):
->         functools.update_wrapper(self, func)   # copy __name__, __doc__ to self
->         self.func  = func
->         self.calls = 0   # mutable state — impossible with a regular function
->     def __call__(self, *args, **kwargs):
->         # __call__ makes this class instance callable: greet("Alice") calls this
->         self.calls += 1
->         print(f"{self.func.__name__} called {self.calls}× total")
->         return self.func(*args, **kwargs)
-> @CallCounter   # greet = CallCounter(greet)
-> def greet(name):
->     return f"Hello, {name}!"
-> greet("Alice")   # greet called 1× total
-> greet("Bob")     # greet called 2× total
-> greet("Carol")   # greet called 3× total
-> print(f"Total calls: {greet.calls}")   # 3
-> ▶  Expected Output
-> greet called 1× total
-> greet called 2× total
-> greet called 3× total
-> Total calls: 3
+### 🐍  Example 5 — Class-based stateful decorator
+\`\`\`python
+import functools
+class CallCounter:
+    """Stateful decorator: counts how many times the function is called."""
+    def __init__(self, func):
+        functools.update_wrapper(self, func)   # copy __name__, __doc__ to self
+        self.func  = func
+        self.calls = 0   # mutable state — impossible with a regular function
+    def __call__(self, *args, **kwargs):
+        # __call__ makes this class instance callable: greet("Alice") calls this
+        self.calls += 1
+        print(f"{self.func.__name__} called {self.calls}× total")
+        return self.func(*args, **kwargs)
+@CallCounter   # greet = CallCounter(greet)
+def greet(name):
+    return f"Hello, {name}!"
+greet("Alice")   # greet called 1× total
+greet("Bob")     # greet called 2× total
+greet("Carol")   # greet called 3× total
+print(f"Total calls: {greet.calls}")   # 3
+\`\`\`
+
+\`\`\`output
+greet called 1× total
+greet called 2× total
+greet called 3× total
+Total calls: 3
+\`\`\`
 
   Example 6: Built-in Decorators — @lru_cache, @property, @staticmethod
 
->   🐍  Example 6 — @lru_cache, @property, @staticmethod, @classmethod
-> from functools import lru_cache, cached_property
-> # ── @lru_cache — Memoisation (cache results) ─────────────────
-> # LRU = Least Recently Used. Caches the last maxsize results.
-> # Calling fib(50) without caching: ~2^50 recursive calls
-> # Calling fib(50) with @lru_cache: only 50 unique calls (rest are cache hits)
-> @lru_cache(maxsize=128)
-> def fib(n):
->     if n <= 1: return n
->     return fib(n-1) + fib(n-2)
-> print(fib(50))            # 12586269025  — instant!
-> print(fib.cache_info())   # CacheInfo(hits=48, misses=51, maxsize=128, currsize=51)
-> fib.cache_clear()         # clear the cache if needed
-> # ── @property — attribute-style access with logic ────────────
-> class Circle:
->     def __init__(self, radius):
->         self.radius = radius
->     @property
->     def area(self):                # accessed as c.area, not c.area()
->         return 3.14159 * self.radius ** 2
->     @property
->     def circumference(self):
->         return 2 * 3.14159 * self.radius
->     @area.setter
->     def area(self, value):         # c.area = 100 → sets radius
->         import math
->         self.radius = math.sqrt(value / 3.14159)
-> c = Circle(7)
-> print(c.area)              # 153.938  ← no () needed!
-> print(c.circumference)     # 43.982
-> c.area = 314.159           # setter adjusts the radius
-> print(c.radius)            # ~10.0
-> # ── @staticmethod and @classmethod ──────────────────────────
-> class Temperature:
->     @staticmethod
->     def celsius_to_fahrenheit(c):
->         return (c * 9/5) + 32
->     @classmethod
->     def from_fahrenheit(cls, f):
->         return cls((f - 32) * 5/9)   # create instance from Fahrenheit
-> print(Temperature.celsius_to_fahrenheit(100))   # 212.0
-> t = Temperature.from_fahrenheit(212)
-> ▶  Expected Output
-> 12586269025
-> CacheInfo(hits=48, misses=51, maxsize=128, currsize=51)
-> 153.93812899999998
-> 43.98226
-> 10.0
-> 212.0
+### 🐍  Example 6 — @lru_cache, @property, @staticmethod, @classmethod
+\`\`\`python
+from functools import lru_cache, cached_property
+# ── @lru_cache — Memoisation (cache results) ─────────────────
+# LRU = Least Recently Used. Caches the last maxsize results.
+# Calling fib(50) without caching: ~2^50 recursive calls
+# Calling fib(50) with @lru_cache: only 50 unique calls (rest are cache hits)
+@lru_cache(maxsize=128)
+def fib(n):
+    if n <= 1: return n
+    return fib(n-1) + fib(n-2)
+print(fib(50))            # 12586269025  — instant!
+print(fib.cache_info())   # CacheInfo(hits=48, misses=51, maxsize=128, currsize=51)
+fib.cache_clear()         # clear the cache if needed
+# ── @property — attribute-style access with logic ────────────
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+    @property
+    def area(self):                # accessed as c.area, not c.area()
+        return 3.14159 * self.radius ** 2
+    @property
+    def circumference(self):
+        return 2 * 3.14159 * self.radius
+    @area.setter
+    def area(self, value):         # c.area = 100 → sets radius
+        import math
+        self.radius = math.sqrt(value / 3.14159)
+c = Circle(7)
+print(c.area)              # 153.938  ← no () needed!
+print(c.circumference)     # 43.982
+c.area = 314.159           # setter adjusts the radius
+print(c.radius)            # ~10.0
+# ── @staticmethod and @classmethod ──────────────────────────
+class Temperature:
+    @staticmethod
+    def celsius_to_fahrenheit(c):
+        return (c * 9/5) + 32
+    @classmethod
+    def from_fahrenheit(cls, f):
+        return cls((f - 32) * 5/9)   # create instance from Fahrenheit
+print(Temperature.celsius_to_fahrenheit(100))   # 212.0
+t = Temperature.from_fahrenheit(212)
+\`\`\`
+
+\`\`\`output
+12586269025
+CacheInfo(hits=48, misses=51, maxsize=128, currsize=51)
+153.93812899999998
+43.98226
+10.0
+212.0
+\`\`\`
 
   Example 7: Real-World: Input Validation Decorator
 
->   🐍  Example 7 — Input validation decorator
-> import functools
-> def validate_types(**expected_types):
->     """
->     Parameterised decorator: validate argument types before running the function.
->     Usage: @validate_types(name=str, age=int, score=float)
->     """
->     def decorator(func):
->         @functools.wraps(func)
->         def wrapper(**kwargs):   # keyword-only args for clarity
->             for param, expected in expected_types.items():
->                 if param in kwargs and not isinstance(kwargs[param], expected):
->                     raise TypeError(
->                         f"{param} must be {expected.__name__}, "
->                         f"got {type(kwargs[param]).__name__}"
->                     )
->             return func(**kwargs)
->         return wrapper
->     return decorator
-> @validate_types(name=str, age=int, score=float)
-> def register_student(name, age, score):
->     return f"Registered {name}, age {age}, score {score}"
-> # Valid call:
-> print(register_student(name="Alice", age=20, score=98.5))
-> # Invalid call — wrong type for age:
-> try:
->     register_student(name="Bob", age="twenty", score=90.0)
-> except TypeError as e:
->     print(f"TypeError: {e}")
-> ▶  Expected Output
-> Registered Alice, age 20, score 98.5
-> TypeError: age must be int, got str
+### 🐍  Example 7 — Input validation decorator
+\`\`\`python
+import functools
+def validate_types(**expected_types):
+    """
+    Parameterised decorator: validate argument types before running the function.
+    Usage: @validate_types(name=str, age=int, score=float)
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(**kwargs):   # keyword-only args for clarity
+            for param, expected in expected_types.items():
+                if param in kwargs and not isinstance(kwargs[param], expected):
+                    raise TypeError(
+                        f"{param} must be {expected.__name__}, "
+                        f"got {type(kwargs[param]).__name__}"
+                    )
+            return func(**kwargs)
+        return wrapper
+    return decorator
+@validate_types(name=str, age=int, score=float)
+def register_student(name, age, score):
+    return f"Registered {name}, age {age}, score {score}"
+# Valid call:
+print(register_student(name="Alice", age=20, score=98.5))
+# Invalid call — wrong type for age:
+try:
+    register_student(name="Bob", age="twenty", score=90.0)
+except TypeError as e:
+    print(f"TypeError: {e}")
+\`\`\`
 
-# 💡  Lesson Recap — Key Takeaways
+\`\`\`output
+Registered Alice, age 20, score 98.5
+TypeError: age must be int, got str
+\`\`\`
+
+## 💡  Lesson Recap — Key Takeaways
 ## Decorator = function that wraps another function: dec(func) → wrapper
 @dec is shorthand for: func = dec(func)  — Python does this substitution automatically
 Always use @functools.wraps(func) inside — preserves __name__, __doc__, __module__
@@ -7768,7 +8158,7 @@ Real-world uses: logging, timing, retry, rate limiting, validation, caching, aut
 ## Multithreading & Multiprocessing
 Concurrency, Parallelism, the GIL & Async I/O
 
-# 📌  Concurrency vs Parallelism — The Critical Distinction
+## 📌  Concurrency vs Parallelism — The Critical Distinction
 
 These two terms are often confused. Understanding the difference determines which Python tool to use for your task.
 
@@ -7785,7 +8175,7 @@ Async / await | Many concurrent I/O tasks (web servers) | asyncio, aiohttp, aiof
 None | Simple sequential scripts | Just regular Python | N/A
 🔑  The Golden Rule I/O-bound  → Use threading or asyncio             (waiting for network, disk, database) CPU-bound  → Use multiprocessing             (number crunching, ML, image/video processing) Massive concurrency → Use asyncio             (thousands of simultaneous connections) |  |  |
 
-# 1️⃣  Threading — Concurrent I/O
+## 1️⃣  Threading — Concurrent I/O
 
   Example 1: Basic Thread Creation and Joining
 
@@ -7799,63 +8189,71 @@ Create a Thread by passing a target function and its arguments. Start it with .s
 
 ThreadPoolExecutor manages a pool of threads automatically. It is simpler than creating threads manually and handles the join() calls for you.
 
->   🐍  Example 2 — ThreadPoolExecutor
-> from concurrent.futures import ThreadPoolExecutor, as_completed
-> import requests, time
-> def fetch_url(url):
->     """Fetch a URL and return a summary string."""
->     resp = requests.get(url, timeout=5)
->     return f"{url}: {resp.status_code} ({len(resp.content)} bytes)"
-> urls = [
->     "https://httpbin.org/get",
->     "https://httpbin.org/ip",
->     "https://httpbin.org/uuid",
->     "https://httpbin.org/user-agent",
-> ]
-> start = time.perf_counter()
-> # max_workers=4: up to 4 threads in the pool
-> with ThreadPoolExecutor(max_workers=4) as executor:
->     # Submit all tasks, get Future objects
->     futures = {executor.submit(fetch_url, url): url for url in urls}
->     # as_completed yields futures as they FINISH (not in submission order)
->     for future in as_completed(futures):
->         print(future.result())
-> print(f"4 requests in {time.perf_counter()-start:.2f}s")
-> # Sequential would take ~4× longer!
-> ▶  Expected Output
-> https://httpbin.org/uuid: 200 (172 bytes)
-> https://httpbin.org/ip: 200 (32 bytes)
-> https://httpbin.org/get: 200 (429 bytes)
-> https://httpbin.org/user-agent: 200 (55 bytes)
-> 4 requests in 0.42s   (sequential would be ~1.6s)
+### 🐍  Example 2 — ThreadPoolExecutor
+\`\`\`python
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import requests, time
+def fetch_url(url):
+    """Fetch a URL and return a summary string."""
+    resp = requests.get(url, timeout=5)
+    return f"{url}: {resp.status_code} ({len(resp.content)} bytes)"
+urls = [
+    "https://httpbin.org/get",
+    "https://httpbin.org/ip",
+    "https://httpbin.org/uuid",
+    "https://httpbin.org/user-agent",
+]
+start = time.perf_counter()
+# max_workers=4: up to 4 threads in the pool
+with ThreadPoolExecutor(max_workers=4) as executor:
+    # Submit all tasks, get Future objects
+    futures = {executor.submit(fetch_url, url): url for url in urls}
+    # as_completed yields futures as they FINISH (not in submission order)
+    for future in as_completed(futures):
+        print(future.result())
+print(f"4 requests in {time.perf_counter()-start:.2f}s")
+# Sequential would take ~4× longer!
+\`\`\`
+
+\`\`\`output
+https://httpbin.org/uuid: 200 (172 bytes)
+https://httpbin.org/ip: 200 (32 bytes)
+https://httpbin.org/get: 200 (429 bytes)
+https://httpbin.org/user-agent: 200 (55 bytes)
+4 requests in 0.42s   (sequential would be ~1.6s)
+\`\`\`
 
   Example 3: Thread Safety with Lock
 
 When multiple threads share mutable data, a race condition can corrupt it: thread A reads the value, thread B reads the same value, thread A writes back, thread B writes back — one update is lost. A Lock prevents this.
 
->   🐍  Example 3 — Thread lock for safety
-> import threading
-> counter = 0
-> lock    = threading.Lock()
-> def safe_increment():
->     global counter
->     for _ in range(100_000):
->         with lock:       # acquire → only ONE thread can be here at a time
->             counter += 1 # critical section — read-modify-write is now atomic
->                          # lock releases automatically when with block exits
-> threads = [threading.Thread(target=safe_increment) for _ in range(5)]
-> for t in threads: t.start()
-> for t in threads: t.join()
-> print(f"Counter: {counter}")   # always 500,000 (safe!)
-> # Without the lock, result is unpredictable (race condition)
-> ▶  Expected Output
-> Counter: 500000
+### 🐍  Example 3 — Thread lock for safety
+\`\`\`python
+import threading
+counter = 0
+lock    = threading.Lock()
+def safe_increment():
+    global counter
+    for _ in range(100_000):
+        with lock:       # acquire → only ONE thread can be here at a time
+            counter += 1 # critical section — read-modify-write is now atomic
+                         # lock releases automatically when with block exits
+threads = [threading.Thread(target=safe_increment) for _ in range(5)]
+for t in threads: t.start()
+for t in threads: t.join()
+print(f"Counter: {counter}")   # always 500,000 (safe!)
+# Without the lock, result is unpredictable (race condition)
+\`\`\`
 
-# 2️⃣  The GIL — Global Interpreter Lock
+\`\`\`output
+Counter: 500000
+\`\`\`
+
+## 2️⃣  The GIL — Global Interpreter Lock
 
 The GIL is a mutex (mutual exclusion lock) in CPython that allows only ONE thread to execute Python bytecode at any moment. It was introduced to protect Python's internal memory management (reference counting) from race conditions.
 
-# 🔒  GIL Key Facts
+## 🔒  GIL Key Facts
 ## • Exists ONLY in CPython (the standard Python) — not in Jython, IronPython, PyPy
 • The GIL is RELEASED during I/O operations (network, file, sleep)
 → Threads still help for I/O-bound work because threads run while others wait
@@ -7871,76 +8269,85 @@ The GIL is a mutex (mutual exclusion lock) in CPython that allows only ONE threa
 ▶  Expected Output Sequential:   2.14s 2 Threads:    2.18s  ← same as sequential (GIL!) 2 Processes:  1.12s  ← ~2× faster (true parallel!) |
 📝 | Explanation:  Two CPU-bound threads are SLOWER than sequential because they contend for the GIL. Two processes have INDEPENDENT GILs, so they genuinely run in parallel on separate CPU cores. Always use multiprocessing for CPU-intensive work.
 
-# 3️⃣  Multiprocessing — True Parallelism
+## 3️⃣  Multiprocessing — True Parallelism
 
 The multiprocessing module creates separate OS processes, each with its own Python interpreter and GIL. This allows true parallel execution on multi-core CPUs. The trade-off: processes have more overhead than threads (separate memory space, startup cost, serialisation for data passing).
 
   Example 5: ProcessPoolExecutor — Distribute CPU Work
 
->   🐍  Example 5 — ProcessPoolExecutor
-> from concurrent.futures import ProcessPoolExecutor
-> import time
-> def compute(n):
->     """CPU-intensive: sum of squares up to n."""
->     return sum(i**2 for i in range(n))
-> numbers = [1_000_000, 2_000_000, 1_500_000, 500_000]
-> # ── Sequential ───────────────────────────────────────────────
-> start = time.perf_counter()
-> results = [compute(n) for n in numbers]
-> seq_time = time.perf_counter() - start
-> print(f"Sequential: {seq_time:.2f}s")
-> # ── Parallel with ProcessPoolExecutor ────────────────────────
-> # if __name__ == "__main__":  ← required on Windows/macOS!
-> start = time.perf_counter()
-> with ProcessPoolExecutor() as executor:
->     # executor.map applies compute to each number in parallel
->     results = list(executor.map(compute, numbers))
-> par_time = time.perf_counter() - start
-> print(f"Parallel:   {par_time:.2f}s  (speedup: {seq_time/par_time:.1f}×)")
-> print(f"Results:    {results}",)
-> ▶  Expected Output
-> Sequential: 0.84s
-> Parallel:   0.31s  (speedup: 2.7×)
-> Results: [333332833333500000, ...]
+### 🐍  Example 5 — ProcessPoolExecutor
+\`\`\`python
+from concurrent.futures import ProcessPoolExecutor
+import time
+def compute(n):
+    """CPU-intensive: sum of squares up to n."""
+    return sum(i**2 for i in range(n))
+numbers = [1_000_000, 2_000_000, 1_500_000, 500_000]
+# ── Sequential ───────────────────────────────────────────────
+start = time.perf_counter()
+results = [compute(n) for n in numbers]
+seq_time = time.perf_counter() - start
+print(f"Sequential: {seq_time:.2f}s")
+# ── Parallel with ProcessPoolExecutor ────────────────────────
+# if __name__ == "__main__":  ← required on Windows/macOS!
+start = time.perf_counter()
+with ProcessPoolExecutor() as executor:
+    # executor.map applies compute to each number in parallel
+    results = list(executor.map(compute, numbers))
+par_time = time.perf_counter() - start
+print(f"Parallel:   {par_time:.2f}s  (speedup: {seq_time/par_time:.1f}×)")
+print(f"Results:    {results}",)
+\`\`\`
+
+\`\`\`output
+Sequential: 0.84s
+Parallel:   0.31s  (speedup: 2.7×)
+Results: [333332833333500000, ...]
+\`\`\`
+
 > 💡  On Windows and macOS, ProcessPoolExecutor code MUST be inside if __name__ == "__main__": to prevent recursive process spawning. This is not required on Linux.
 
   Example 6: multiprocessing.Pool and Queue
 
->   🐍  Example 6 — Pool.map() and Queue
-> from multiprocessing import Pool, Queue, Process
-> # ── Pool.map() — simplest parallel map ──────────────────────
-> def square(n): return n ** 2
-> with Pool(processes=4) as pool:
->     # Distributes range(1,11) across 4 worker processes
->     results = pool.map(square, range(1, 11))
-> print(results)   # [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
-> # ── Inter-process communication via Queue ────────────────────
-> def producer(q, items):
->     for item in items:
->         q.put(item)        # put items into the shared queue
->     q.put(None)            # sentinel: tell consumer we are done
-> def consumer(q):
->     while True:
->         item = q.get()     # blocks until an item is available
->         if item is None:
->             break          # sentinel received — stop
->         print(f"  Consumed: {item}")
-> q  = Queue()
-> p1 = Process(target=producer, args=(q, ["alpha","beta","gamma"]))
-> p2 = Process(target=consumer, args=(q,))
-> p1.start(); p2.start()
-> p1.join();  p2.join()
-> ▶  Expected Output
-> [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
->   Consumed: alpha
->   Consumed: beta
->   Consumed: gamma
+### 🐍  Example 6 — Pool.map() and Queue
+\`\`\`python
+from multiprocessing import Pool, Queue, Process
+# ── Pool.map() — simplest parallel map ──────────────────────
+def square(n): return n ** 2
+with Pool(processes=4) as pool:
+    # Distributes range(1,11) across 4 worker processes
+    results = pool.map(square, range(1, 11))
+print(results)   # [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+# ── Inter-process communication via Queue ────────────────────
+def producer(q, items):
+    for item in items:
+        q.put(item)        # put items into the shared queue
+    q.put(None)            # sentinel: tell consumer we are done
+def consumer(q):
+    while True:
+        item = q.get()     # blocks until an item is available
+        if item is None:
+            break          # sentinel received — stop
+        print(f"  Consumed: {item}")
+q  = Queue()
+p1 = Process(target=producer, args=(q, ["alpha","beta","gamma"]))
+p2 = Process(target=consumer, args=(q,))
+p1.start(); p2.start()
+p1.join();  p2.join()
+\`\`\`
 
-# 4️⃣  Async / Await — asyncio
+\`\`\`output
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+  Consumed: alpha
+  Consumed: beta
+  Consumed: gamma
+\`\`\`
+
+## 4️⃣  Async / Await — asyncio
 
 asyncio is Python's asynchronous I/O framework. Unlike threads (which use OS-managed context switching), asyncio uses cooperative switching — a task explicitly yields control when it is waiting for I/O. A single event loop manages many coroutines on ONE thread.
 
-# ⚡  asyncio Key Concepts
+## ⚡  asyncio Key Concepts
 ## Coroutine:   async def function — can be paused and resumed
 await:       suspends the current coroutine until the awaited thing completes
 Event loop:  one thread that runs many coroutines by switching between them
@@ -7955,7 +8362,7 @@ switches between tables (coroutines) whenever one is waiting (await).
 ▶  Expected Output   → Starting Alice   → Starting Bob   → Starting Carol   ← Done: Bob after 0.5s   ← Done: Carol after 0.8s   ← Done: Alice after 1.0s All done in 1.01s Sequential would have taken: 2.3s |
 📝 | Explanation:  All three coroutines START at the same time. Bob finishes first (0.5s), Carol next (0.8s), Alice last (1.0s). Total wall time is just 1.01s instead of 2.3s sequential. The event loop never blocks — when one coroutine hits "await", it switches to another that is ready to run.
 
-# 💡  Lesson Recap — Key Takeaways
+## 💡  Lesson Recap — Key Takeaways
 ## I/O-bound → use threading or asyncio; CPU-bound → use multiprocessing
 The GIL prevents true parallel execution of CPU code in CPython threads
 The GIL IS released during I/O → threads still help for network/file tasks
@@ -7971,7 +8378,7 @@ Rule: threads for I/O, processes for CPU, asyncio for massive concurrency`,
 ## Working with APIs
 HTTP Methods, requests library, JSON, Authentication & Real-World Projects
 
-# 📌  What Is a REST API?
+## 📌  What Is a REST API?
 
 An API (Application Programming Interface) is a defined set of rules that lets two programs talk to each other. A REST API uses HTTP — the same protocol browsers use — to exchange data in JSON format.
 
@@ -7979,7 +8386,7 @@ When you check the weather on your phone, the app calls a weather API. When you 
 
 ![Image 35](/pyimages/pimg35.png)
 
-# 🌐  HTTP Methods — CRUD Mapping
+## 🌐  HTTP Methods — CRUD Mapping
 ## GET    → Read     — Retrieve data. No body. Idempotent (safe to repeat).
 POST   → Create   — Send new data to the server. Has a request body.
 PUT    → Replace  — Replace an entire resource with new data.
@@ -7988,39 +8395,43 @@ DELETE → Delete   — Remove a resource.
 Status codes: 2xx=success, 4xx=client error (your fault), 5xx=server error
 200=OK  201=Created  400=Bad Request  401=Unauthorized  404=Not Found  429=Rate Limited
 
-# 1️⃣  The requests Library
+## 1️⃣  The requests Library
 
   Example 1: GET Request — Retrieve Data
 
 A GET request fetches data from a URL. You can pass query parameters as a dictionary — requests handles URL encoding automatically.
 
->   🐍  Example 1 — GET request
-> import requests
-> # ── Basic GET ────────────────────────────────────────────────
-> response = requests.get("https://httpbin.org/json")
-> # Response attributes:
-> print(f"Status:       {response.status_code}")       # 200
-> print(f"Content-Type: {response.headers['Content-Type']}")  # application/json
-> print(f"URL:          {response.url}")
-> print(f"Time taken:   {response.elapsed}")
-> # Automatically parse JSON response into a Python dict:
-> data = response.json()
-> print(f"Type: {type(data)}")    # <class 'dict'>
-> # ── GET with query parameters ────────────────────────────────
-> # Passing a dict auto-encodes it: ?q=python&language=Python&...
-> params = {"q": "python programming", "language": "Python",
->           "sort": "stars", "per_page": 5}
-> resp  = requests.get("https://api.github.com/search/repositories",
->                      params=params)
-> repos = resp.json()["items"]
-> for r in repos:
->     print(f"{r['full_name']:45} ⭐{r['stargazers_count']:>8,}")
-> ▶  Expected Output
-> Status:       200
-> Content-Type: application/json
-> Type: <class 'dict'>
-> psf/cpython                                    ⭐ 62,000
-> TheAlgorithms/Python                           ⭐215,000
+### 🐍  Example 1 — GET request
+\`\`\`python
+import requests
+# ── Basic GET ────────────────────────────────────────────────
+response = requests.get("https://httpbin.org/json")
+# Response attributes:
+print(f"Status:       {response.status_code}")       # 200
+print(f"Content-Type: {response.headers['Content-Type']}")  # application/json
+print(f"URL:          {response.url}")
+print(f"Time taken:   {response.elapsed}")
+# Automatically parse JSON response into a Python dict:
+data = response.json()
+print(f"Type: {type(data)}")    # <class 'dict'>
+# ── GET with query parameters ────────────────────────────────
+# Passing a dict auto-encodes it: ?q=python&language=Python&...
+params = {"q": "python programming", "language": "Python",
+          "sort": "stars", "per_page": 5}
+resp  = requests.get("https://api.github.com/search/repositories",
+                     params=params)
+repos = resp.json()["items"]
+for r in repos:
+    print(f"{r['full_name']:45} ⭐{r['stargazers_count']:>8,}")
+\`\`\`
+
+\`\`\`output
+Status:       200
+Content-Type: application/json
+Type: <class 'dict'>
+psf/cpython                                    ⭐ 62,000
+TheAlgorithms/Python                           ⭐215,000
+\`\`\`
 
   Example 2: POST Request — Send Data to the Server
 
@@ -8028,7 +8439,7 @@ A GET request fetches data from a URL. You can pass query parameters as a dictio
 ▶  Expected Output Server received: {'name': 'Alice', 'score': 98.5, 'tags': ['python', 'developer']} Status: 200 HTTP Error: 404 Client Error: NOT FOUND Request timed out! |
 📝 | Explanation:  Always set timeout=N. Without it, if the server hangs, your program hangs too — potentially forever. Always call raise_for_status() or check response.status_code — don't silently assume success. ConnectionError means the server is unreachable; Timeout means it took too long.
 
-# 2️⃣  JSON Handling — The Universal Format
+## 2️⃣  JSON Handling — The Universal Format
 
 JSON is the standard data format for APIs. Python's json module converts between Python objects and JSON strings. The requests library handles JSON automatically with .json() and json= parameter — but understanding the raw module is important for file caching and other tasks.
 
@@ -8042,55 +8453,60 @@ JSON is the standard data format for APIs. Python's json module converts between
 
   Example 3: JSON Serialisation and Safe Extraction
 
->   🐍  Example 3 — JSON handling
-> import json
-> # ── Python → JSON string ─────────────────────────────────────
-> student = {
->     "name":    "Alice",
->     "age":     22,
->     "scores":  [95, 88, 92],
->     "active":  True,
->     "address": {"city": "Hyderabad", "pin": "500001"}
-> }
-> json_str = json.dumps(student, indent=2)
-> print(json_str)
-> # ── JSON string → Python ─────────────────────────────────────
-> raw    = '{"status":"ok","count":3,"data":[1,2,3]}'
-> parsed = json.loads(raw)
-> print(parsed["status"])    # ok
-> print(parsed["data"])      # [1, 2, 3]
-> # ── Safe extraction using .get() — NEVER crash on missing keys
-> # Real APIs sometimes omit optional fields
-> github_user = {"login":"torvalds","name":"Linus Torvalds",
->                "public_repos":7,"followers":186000}
-> name     = github_user.get("name",     "Unknown")       # key exists
-> location = github_user.get("location", "Not specified") # key MISSING
-> company  = github_user.get("company",  "Not specified") # key MISSING
-> print(f"{name} — {location} — {company}")
-> # ── Cache API response to file / load from file ──────────────
-> with open("user_cache.json", "w") as f:
->     json.dump(github_user, f, indent=2)
-> with open("user_cache.json", "r") as f:
->     loaded = json.load(f)
-> print(f"Loaded: {loaded['login']}")
-> ▶  Expected Output
-> {
->   "name": "Alice",
->   "age": 22,
->   "scores": [95, 88, 92],
->  ...
-> }
->  ok
-> [1, 2, 3]
-> Linus Torvalds — Not specified — Not specified
-> Loaded: torvalds
+### 🐍  Example 3 — JSON handling
+\`\`\`python
+import json
+# ── Python → JSON string ─────────────────────────────────────
+student = {
+    "name":    "Alice",
+    "age":     22,
+    "scores":  [95, 88, 92],
+    "active":  True,
+    "address": {"city": "Hyderabad", "pin": "500001"}
+}
+json_str = json.dumps(student, indent=2)
+print(json_str)
+# ── JSON string → Python ─────────────────────────────────────
+raw    = '{"status":"ok","count":3,"data":[1,2,3]}'
+parsed = json.loads(raw)
+print(parsed["status"])    # ok
+print(parsed["data"])      # [1, 2, 3]
+# ── Safe extraction using .get() — NEVER crash on missing keys
+# Real APIs sometimes omit optional fields
+github_user = {"login":"torvalds","name":"Linus Torvalds",
+               "public_repos":7,"followers":186000}
+name     = github_user.get("name",     "Unknown")       # key exists
+location = github_user.get("location", "Not specified") # key MISSING
+company  = github_user.get("company",  "Not specified") # key MISSING
+print(f"{name} — {location} — {company}")
+# ── Cache API response to file / load from file ──────────────
+with open("user_cache.json", "w") as f:
+    json.dump(github_user, f, indent=2)
+with open("user_cache.json", "r") as f:
+    loaded = json.load(f)
+print(f"Loaded: {loaded['login']}")
+\`\`\`
 
-# 3️⃣  Authentication — Headers & API Keys
+\`\`\`output
+{
+  "name": "Alice",
+  "age": 22,
+  "scores": [95, 88, 92],
+ ...
+}
+ ok
+[1, 2, 3]
+Linus Torvalds — Not specified — Not specified
+Loaded: torvalds
+\`\`\`
+
+## 3️⃣  Authentication — Headers & API Keys
 
   Example 4: Bearer Token, API Key, Basic Auth, Sessions
 
-# 🐍  Example 4 — Authentication methods
-## import requests, os
+### 🐍  Example 4 — Authentication methods
+\`\`\`python
+import requests, os
 # ── Method 1: API Key in Authorization header (most common) ──
 API_KEY = os.getenv("MY_API_KEY", "your-key-here")  # NEVER hardcode!
 headers = {
@@ -8124,135 +8540,144 @@ if resp.status_code == 200:
 user = resp.json()
 print(f"Org:    {user['name']}")
 print(f"Repos:  {user['public_repos']}")
+\`\`\`
 
-# 4️⃣  Complete REST API CRUD — Full Pattern
+## 4️⃣  Complete REST API CRUD — Full Pattern
 
   Example 5: CREATE, READ, UPDATE, DELETE with JSONPlaceholder
 
 JSONPlaceholder is a free fake REST API for testing. This example shows all five HTTP operations with proper error handling.
 
->   🐍  Example 5 — Full CRUD with JSONPlaceholder
-> import requests
-> BASE = "https://jsonplaceholder.typicode.com"
-> # ── CREATE — POST ────────────────────────────────────────────
-> new_post = {
->     "title":  "Learning Python APIs",
->     "body":   "Python makes HTTP requests easy with requests library.",
->     "userId": 1
-> }
-> resp    = requests.post(f"{BASE}/posts", json=new_post)
-> created = resp.json()
-> print(f"Created post ID: {created['id']}")   # 101
-> # ── READ — GET (single item) ─────────────────────────────────
-> resp = requests.get(f"{BASE}/posts/1")
-> post = resp.json()
-> print(f"Post title: {post['title'][:40]}...")
-> # ── READ — GET (filtered list) ───────────────────────────────
-> resp  = requests.get(f"{BASE}/posts", params={"userId": 1})
-> posts = resp.json()
-> print(f"User 1 has {len(posts)} posts")
-> # ── UPDATE — PUT (replace entire resource) ───────────────────
-> updated = {"title": "New Title", "body": "New body", "userId": 1}
-> resp = requests.put(f"{BASE}/posts/1", json=updated)
-> print(f"PUT status: {resp.status_code}")    # 200
-> # ── UPDATE — PATCH (partial update, only changed fields) ─────
-> resp = requests.patch(f"{BASE}/posts/1", json={"title": "Patched"})
-> print(f"Patched title: {resp.json()['title']}")
-> # ── DELETE ───────────────────────────────────────────────────
-> resp = requests.delete(f"{BASE}/posts/1")
-> print(f"DELETE status: {resp.status_code}")  # 200
-> # ── Pagination — fetch all pages ──────────────────────────────
-> def get_all_posts(page_size=10):
->     """Fetch all posts page by page until no more results."""
->     all_posts, page = [], 1
->     while True:
->         resp  = requests.get(f"{BASE}/posts",
->                              params={"_page": page, "_limit": page_size})
->         batch = resp.json()
->         if not batch: break         # empty page → we are done
->         all_posts.extend(batch)
->         page += 1
->         if len(batch) < page_size:  # partial page → last page
->             break
->     return all_posts
-> posts = get_all_posts()
-> print(f"Total posts fetched: {len(posts)}")
-> ▶  Expected Output
-> Created post ID: 101
-> Post title: sunt aut facere repellat provident occaec...
-> User 1 has 10 posts
-> PUT status: 200
-> Patched title: Patched
-> DELETE status: 200
-> Total posts fetched: 100
+### 🐍  Example 5 — Full CRUD with JSONPlaceholder
+\`\`\`python
+import requests
+BASE = "https://jsonplaceholder.typicode.com"
+# ── CREATE — POST ────────────────────────────────────────────
+new_post = {
+    "title":  "Learning Python APIs",
+    "body":   "Python makes HTTP requests easy with requests library.",
+    "userId": 1
+}
+resp    = requests.post(f"{BASE}/posts", json=new_post)
+created = resp.json()
+print(f"Created post ID: {created['id']}")   # 101
+# ── READ — GET (single item) ─────────────────────────────────
+resp = requests.get(f"{BASE}/posts/1")
+post = resp.json()
+print(f"Post title: {post['title'][:40]}...")
+# ── READ — GET (filtered list) ───────────────────────────────
+resp  = requests.get(f"{BASE}/posts", params={"userId": 1})
+posts = resp.json()
+print(f"User 1 has {len(posts)} posts")
+# ── UPDATE — PUT (replace entire resource) ───────────────────
+updated = {"title": "New Title", "body": "New body", "userId": 1}
+resp = requests.put(f"{BASE}/posts/1", json=updated)
+print(f"PUT status: {resp.status_code}")    # 200
+# ── UPDATE — PATCH (partial update, only changed fields) ─────
+resp = requests.patch(f"{BASE}/posts/1", json={"title": "Patched"})
+print(f"Patched title: {resp.json()['title']}")
+# ── DELETE ───────────────────────────────────────────────────
+resp = requests.delete(f"{BASE}/posts/1")
+print(f"DELETE status: {resp.status_code}")  # 200
+# ── Pagination — fetch all pages ──────────────────────────────
+def get_all_posts(page_size=10):
+    """Fetch all posts page by page until no more results."""
+    all_posts, page = [], 1
+    while True:
+        resp  = requests.get(f"{BASE}/posts",
+                             params={"_page": page, "_limit": page_size})
+        batch = resp.json()
+        if not batch: break         # empty page → we are done
+        all_posts.extend(batch)
+        page += 1
+        if len(batch) < page_size:  # partial page → last page
+            break
+    return all_posts
+posts = get_all_posts()
+print(f"Total posts fetched: {len(posts)}")
+\`\`\`
 
-# 5️⃣  Real-World Project — Weather CLI
+\`\`\`output
+Created post ID: 101
+Post title: sunt aut facere repellat provident occaec...
+User 1 has 10 posts
+PUT status: 200
+Patched title: Patched
+DELETE status: 200
+Total posts fetched: 100
+\`\`\`
+
+## 5️⃣  Real-World Project — Weather CLI
 
   Example 6: WeatherAPI Class — Production-Grade API Client
 
 A complete, production-quality API client with session reuse, structured methods, proper error handling, and environment variable key storage.
 
->   🐍  Example 6 — WeatherAPI complete project
-> import requests, json, os
-> from datetime import datetime
-> class WeatherAPI:
->     """Production-grade wrapper around OpenWeatherMap API."""
->     BASE = "https://api.openweathermap.org/data/2.5"
->     def __init__(self, api_key):
->         self.key     = api_key
->         self.session = requests.Session()
->         # Attach common params to ALL requests in this session:
->         self.session.params = {"appid": api_key, "units": "metric"}
->     def current(self, city):
->         """Get current weather for a city."""
->         resp = self.session.get(f"{self.BASE}/weather", params={"q": city})
->         resp.raise_for_status()
->         return resp.json()
->     def forecast(self, city, days=3):
->         """Get N-day forecast (every 3 hours)."""
->         resp = self.session.get(f"{self.BASE}/forecast",
->                                params={"q": city, "cnt": days * 8})
->         resp.raise_for_status()
->         return resp.json()
->     def format_current(self, data):
->         """Format raw API dict into a clean display dict."""
->         return {
->             "City":       f"{data['name']}, {data['sys']['country']}",
->             "Temp":       f"{data['main']['temp']:.1f}°C",
->             "Feels like": f"{data['main']['feels_like']:.1f}°C",
->             "Humidity":   f"{data['main']['humidity']}%",
->             "Condition":  data["weather"][0]["description"].title(),
->             "Wind":       f"{data['wind']['speed']} m/s",
->             "Sunrise":    datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M"),
->             "Sunset":     datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M"),
->         }
-> # ── Usage ────────────────────────────────────────────────────
-> API_KEY = os.getenv("OPENWEATHER_API_KEY", "demo")
-> api     = WeatherAPI(API_KEY)
-> try:
->     raw  = api.current("Hyderabad")
->     info = api.format_current(raw)
->     print(f"\\n{'='*40}")
->     for key, val in info.items():
->         print(f"  {key:15}: {val}")
->     print(f"{'='*40}\\n")
-> except requests.HTTPError as e:
->     print(f"API Error: {e}")
-> except requests.ConnectionError:
->     print("No internet connection!")
-> except KeyError as e:
->     print(f"Unexpected API response: missing key {e}")
-> ▶  Expected Output
-> ========================================
->   City           : Hyderabad, IN
->   Temp           : 32.5°C
->   Feels like     : 36.2°C
->   Humidity       : 52%
->   Condition      : Few Clouds
->   Wind           : 3.2 m/s
->   Sunrise        : 06:14
->   Sunset         : 18:28
-> ========================================
+### 🐍  Example 6 — WeatherAPI complete project
+\`\`\`python
+import requests, json, os
+from datetime import datetime
+class WeatherAPI:
+    """Production-grade wrapper around OpenWeatherMap API."""
+    BASE = "https://api.openweathermap.org/data/2.5"
+    def __init__(self, api_key):
+        self.key     = api_key
+        self.session = requests.Session()
+        # Attach common params to ALL requests in this session:
+        self.session.params = {"appid": api_key, "units": "metric"}
+    def current(self, city):
+        """Get current weather for a city."""
+        resp = self.session.get(f"{self.BASE}/weather", params={"q": city})
+        resp.raise_for_status()
+        return resp.json()
+    def forecast(self, city, days=3):
+        """Get N-day forecast (every 3 hours)."""
+        resp = self.session.get(f"{self.BASE}/forecast",
+                               params={"q": city, "cnt": days * 8})
+        resp.raise_for_status()
+        return resp.json()
+    def format_current(self, data):
+        """Format raw API dict into a clean display dict."""
+        return {
+            "City":       f"{data['name']}, {data['sys']['country']}",
+            "Temp":       f"{data['main']['temp']:.1f}°C",
+            "Feels like": f"{data['main']['feels_like']:.1f}°C",
+            "Humidity":   f"{data['main']['humidity']}%",
+            "Condition":  data["weather"][0]["description"].title(),
+            "Wind":       f"{data['wind']['speed']} m/s",
+            "Sunrise":    datetime.fromtimestamp(data["sys"]["sunrise"]).strftime("%H:%M"),
+            "Sunset":     datetime.fromtimestamp(data["sys"]["sunset"]).strftime("%H:%M"),
+        }
+# ── Usage ────────────────────────────────────────────────────
+API_KEY = os.getenv("OPENWEATHER_API_KEY", "demo")
+api     = WeatherAPI(API_KEY)
+try:
+    raw  = api.current("Hyderabad")
+    info = api.format_current(raw)
+    print(f"\\n{'='*40}")
+    for key, val in info.items():
+        print(f"  {key:15}: {val}")
+    print(f"{'='*40}\\n")
+except requests.HTTPError as e:
+    print(f"API Error: {e}")
+except requests.ConnectionError:
+    print("No internet connection!")
+except KeyError as e:
+    print(f"Unexpected API response: missing key {e}")
+\`\`\`
+
+\`\`\`output
+========================================
+  City           : Hyderabad, IN
+  Temp           : 32.5°C
+  Feels like     : 36.2°C
+  Humidity       : 52%
+  Condition      : Few Clouds
+  Wind           : 3.2 m/s
+  Sunrise        : 06:14
+  Sunset         : 18:28
+========================================
+\`\`\`
 
 Best Practice | Why It Matters
 Always set timeout=N | Prevents your program hanging if the server is slow or unreachable
@@ -8266,7 +8691,7 @@ Catch ConnectionError and Timeout | Always handle network failures gracefully
 Log requests and responses | Essential for debugging production integration issues
 💡  Lesson Recap — Key Takeaways REST API: stateless HTTP interface — GET(read), POST(create), PUT(replace), PATCH(update), DELETE Status codes: 2xx=success, 4xx=client error, 5xx=server error, 429=rate limited requests.get(url, params={}, headers={}, timeout=5) — always set timeout! resp.json() → dict | resp.status_code | resp.raise_for_status() Authentication: Bearer token in header, API key in params, Basic auth tuple requests.Session() — reuse connections and default headers across multiple requests JSON: json.dumps(obj) → string | json.loads(str) → dict | json.dump/load for files Store API keys in environment variables: os.getenv("MY_KEY") — never in source code! Always handle: HTTPError, ConnectionError, Timeout, JSONDecodeError, KeyError Use .get(key, default) on response dicts — API responses sometimes omit optional keys |
 
-# 🏆  Advanced Level — Complete!
+## 🏆  Advanced Level — Complete!
 ## You are now Industry & Project Ready
 Advanced OOP  •  Iterators & Generators  •  Decorators  •  Threads & Processes  •  REST APIs
 🚀  You can now build: web scrapers, API clients, concurrent servers, data pipelines & production Python systems`,
