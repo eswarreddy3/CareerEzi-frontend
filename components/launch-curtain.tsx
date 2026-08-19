@@ -56,7 +56,7 @@ const SCALE = {
   "--lc-eyebrow":    "clamp(10px, 1.45vmin, 30px)",
   "--lc-occasion":   "clamp(11px, 1.7vmin, 34px)",
   "--lc-rule":       "clamp(28px, 5vmin, 100px)",
-  "--lc-logo":       "clamp(60px, 23vmin, 480px)",
+  "--lc-logo":       "clamp(58px, 21.5vmin, 460px)",
   "--lc-tagline":    "clamp(24px, 5.8vmin, 120px)",
   "--lc-brief":      "clamp(13px, 2.3vmin, 46px)",
   "--lc-brief-max":  "clamp(280px, 92vmin, 1700px)",
@@ -73,11 +73,11 @@ const SCALE = {
   "--lc-fyn-mark":   "clamp(32px, 5.4vmin, 108px)",
   "--lc-fyn-text":   "clamp(15px, 2.6vmin, 52px)",
   // Vertical rhythm
-  "--lc-gap-logo":   "clamp(22px, 4.2vmin, 84px)",
-  "--lc-gap-tag":    "clamp(20px, 3.8vmin, 76px)",
+  "--lc-gap-logo":   "clamp(18px, 3.4vmin, 74px)",
+  "--lc-gap-tag":    "clamp(16px, 2.8vmin, 64px)",
   "--lc-gap-brief":  "clamp(12px, 2.1vmin, 42px)",
   "--lc-gap-pills":  "clamp(20px, 3.6vmin, 72px)",
-  "--lc-gap-btn":    "clamp(24px, 4.6vmin, 92px)",
+  "--lc-gap-btn":    "clamp(22px, 4vmin, 84px)",
   "--lc-gap-hint":   "clamp(16px, 2.9vmin, 58px)",
   "--lc-gap-fyn":    "clamp(8px, 1.5vmin, 30px)",
   // Frame + safe areas
@@ -85,7 +85,7 @@ const SCALE = {
   "--lc-frame-bar":  "clamp(4px, 0.5vmin, 10px)",
   "--lc-corner":     "clamp(16px, 2.3vmin, 46px)",
   "--lc-corner-w":   "clamp(2px, 0.22vmin, 5px)",
-  "--lc-bottom-pad": "clamp(96px, 14vmin, 280px)",
+  "--lc-bottom-pad": "clamp(110px, 17vmin, 320px)",
   "--lc-bottom-fyn": "clamp(22px, 3.6vmin, 72px)",
   "--lc-shock":      "clamp(140px, 20vmin, 420px)",
 } as React.CSSProperties
