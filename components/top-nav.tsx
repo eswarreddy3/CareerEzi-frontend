@@ -13,6 +13,8 @@ interface TopNavProps {
 
 const navLinks = [
   { label: "Features",     id: "features" },
+  { label: "AI Coach",     id: "ai" },
+  { label: "Everything",   id: "capabilities" },
   { label: "For Colleges", id: "how-it-works" },
   { label: "Gamification", id: "gamification" },
   { label: "Contact",      id: "contact" },

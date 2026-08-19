@@ -30,7 +30,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'CareerEzi - Placement Preparation Platform',
-  description: 'CareerEzi — Placement preparation platform by Finity Innovations',
+  description: 'CareerEzi — Placement preparation platform by Fynity Innovations',
   generator: 'v0.app',
   icons: {
     icon: [

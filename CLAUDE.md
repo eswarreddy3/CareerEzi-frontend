@@ -31,9 +31,13 @@ frontend/
 │   │   └── super-admin/  # Overview, colleges, students, courses, domains, aptitude, coding, jobs
 │   ├── globals.css       # Design tokens + utility classes
 │   ├── layout.tsx        # Root layout (fonts, Toaster)
-│   └── page.tsx          # Auth-routing redirect (client component)
+│   └── page.tsx          # Public landing page + auth-routing redirect for logged-in users
 ├── components/
 │   ├── ui/               # shadcn components (do not edit)
+│   ├── landing/          # Landing-page sections (imported by app/page.tsx)
+│   │   ├── primitives.tsx      # Shared FadeIn / TiltCard / Orb
+│   │   ├── ai-showcase.tsx     # Saarthi section — interview room, readiness ring, study plan
+│   │   └── capability-grid.tsx # Full shipped-feature inventory, grouped by audience
 │   ├── sidebar.tsx       # Role-aware nav, reads from authStore
 │   ├── glass-card.tsx    # GlassCard wrapper
 │   ├── top-bar.tsx       # Page title + user dropdown
@@ -229,6 +233,8 @@ Utility classes:
 
 ## Key Rules
 
+- **Landing page claims must stay true.** `components/landing/capability-grid.tsx` is the public inventory of shipped features — every entry maps to a real route. When you ship or remove a student/admin surface, update that list (the headline count is computed from it, so it self-corrects). `ai-showcase.tsx` mirrors `lib/ai.ts`; if the AI contract changes, change the copy too.
+- Landing accent colours use `text-<hue>-600 dark:text-<hue>-400` — the bare `-400` shades fail contrast on the light theme.
 - Tailwind v4 syntax: use `@import 'tailwindcss'` not `@tailwind` directives.
 - `next.config.mjs` has `typescript.ignoreBuildErrors: true` — TS errors won't fail the build but should still be fixed.
 - The Sidebar reads role from the auth store directly — no props needed.

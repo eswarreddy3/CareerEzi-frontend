@@ -22,6 +22,9 @@ import {
 import Link from "next/link"
 import { TopNav } from "@/components/top-nav"
 import { Logo } from "@/components/logo"
+import { LaunchCurtain } from "@/components/launch-curtain"
+import { AIShowcase } from "@/components/landing/ai-showcase"
+import { CapabilityGrid } from "@/components/landing/capability-grid"
 
 // ─── Scroll progress bar ───────────────────────────────────────────────────────
 function ScrollProgress() {
@@ -173,14 +176,6 @@ function FAQItem({ q, a, idx }: { q: string; a: string; idx: number }) {
 }
 
 // ─── Data ───────────────────────────────────────────────────────────────────────
-const heroStats = [
-  { value: 2400,  suffix: "+", label: "Active Students",        color: "text-cyan-400" },
-  { value: 361,   suffix: "%", label: "Placement Rate Growth",  color: "text-amber-400" },
-  { value: 15000, suffix: "+", label: "Practice Questions",     color: "text-violet-400" },
-  { value: 50,    suffix: "+", label: "Colleges",               color: "text-pink-400" },
-  { value: 120,   suffix: "+", label: "Companies Supported",    color: "text-emerald-400" },
-]
-
 const problems = [
   {
     icon: AlertTriangle,
@@ -199,63 +194,6 @@ const problems = [
     color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20",
     title: "Fragmented Tools",
     desc: "Separate apps for coding, MCQ, and resume. Students waste time context-switching and never build the compound habit that drives real placement results.",
-  },
-]
-
-const features = [
-  {
-    icon: BookOpen, color: "text-violet-400", bg: "bg-violet-500/10", border: "border-violet-500/20",
-    title: "Structured Learning",
-    desc: "8+ courses from Python to Web Dev, broken into bite-sized lessons with points per completion.",
-    tag: "Courses & Lessons",
-  },
-  {
-    icon: Brain, color: "text-pink-400", bg: "bg-pink-500/10", border: "border-pink-500/20",
-    title: "MCQ Practice Banks",
-    desc: "15,000+ questions spanning aptitude, reasoning, and core CS — with instant explanations.",
-    tag: "Aptitude & Technical",
-  },
-  {
-    icon: Code2, color: "text-cyan-400", bg: "bg-cyan-500/10", border: "border-cyan-500/20",
-    title: "Live Coding IDE",
-    desc: "Monaco editor (VS Code in browser) with multi-language support, real test cases, and a free playground.",
-    tag: "Monaco Editor",
-  },
-  {
-    icon: Building2, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20",
-    title: "Company Preparation",
-    desc: "120+ companies with detailed hiring round breakdowns, past patterns, and insider tips.",
-    tag: "TCS · Zoho · Infosys",
-  },
-  {
-    icon: Globe, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20",
-    title: "Domain Mentorship Paths",
-    desc: "Curated learning paths for Data Analysis and Web Development aligned to real job requirements.",
-    tag: "Data · Web Dev",
-  },
-  {
-    icon: ScrollText, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20",
-    title: "AI Resume Builder",
-    desc: "Build, preview, and export a professional resume with guided sections and PDF export.",
-    tag: "PDF Export",
-  },
-  {
-    icon: Trophy, color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-500/20",
-    title: "Gamification Engine",
-    desc: "Daily streaks, XP points, leaderboards, and rewards that make students compete to learn more.",
-    tag: "Streaks · Leaderboard",
-  },
-  {
-    icon: MessageSquare, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20",
-    title: "College Social Feed",
-    desc: "Campus-scoped feed for posts, blogs, placement announcements, and peer motivation.",
-    tag: "College Community",
-  },
-  {
-    icon: BarChart2, color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20",
-    title: "Admin Analytics Suite",
-    desc: "Real-time dashboards showing lesson completion, MCQ scores, and 1-click student reminders.",
-    tag: "Live Insights",
   },
 ]
 
@@ -788,6 +726,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <LaunchCurtain />
       <ScrollProgress />
       <TopNav onScrollTo={scrollTo} />
       <MobileBottomCTA />
@@ -893,10 +832,10 @@ export default function LandingPage() {
               className="flex flex-wrap items-center gap-5"
             >
               {[
-                { icon: BookOpen,  label: "8+ Courses",          color: "text-primary" },
+                { icon: Sparkles,  label: "AI Mock Interviews",   color: "text-primary" },
                 { icon: Brain,     label: "15,000+ Questions",    color: "text-violet-400" },
                 { icon: Code2,     label: "Live Coding IDE",      color: "text-cyan-400" },
-                { icon: Building2, label: "Company Prep Guides",  color: "text-amber-400" },
+                { icon: Award,     label: "Verified Certificates", color: "text-amber-400" },
               ].map((s, i) => (
                 <motion.div
                   key={s.label}
@@ -1000,7 +939,8 @@ export default function LandingPage() {
               <span className="gradient-text">One powerful platform.</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              9 deeply integrated features built specifically for campus placement. No more juggling tools.
+              Nine headline features built specifically for campus placement — backed by an AI
+              coach and a further two dozen shipped capabilities below.
             </p>
           </FadeIn>
 
@@ -1467,6 +1407,12 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Saarthi AI layer ──────────────────────────────────────────────────── */}
+      <AIShowcase />
+
+      {/* ── Full shipped inventory ────────────────────────────────────────────── */}
+      <CapabilityGrid />
 
       {/* ── Quote ─────────────────────────────────────────────────────────────── */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 relative overflow-hidden">
