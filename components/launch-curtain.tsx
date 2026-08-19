@@ -3,28 +3,100 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
-import { Logo } from "@/components/logo"
+import { GraduationCap, Code2, Bot, BadgeCheck, BarChart3 } from "lucide-react"
 
 /**
  * Inauguration curtain for launch day.
  *
- * Enabled only when NEXT_PUBLIC_LAUNCH_MODE === "true". Visitors land on a
- * full-screen brand cover with a LAUNCH button; pressing it fires the
- * ceremony (shockwaves + confetti + curtain split) and reveals the home page.
+ * This page holds the screen for the whole function before anyone presses
+ * anything, so it is built as a poster rather than a splash: it states what
+ * CareerEzi is, carries the Fynity endorsement, and animates calmly enough to
+ * loop for an hour without wearing on the room.
  *
- * Controls
+ * Palette is deliberately LIGHT — the CareerEzi mark is deep teal and coral,
+ * drawn for light grounds, and projectors wash out dark backgrounds. It sets
+ * its own colours and ignores the app theme.
+ *
+ * Enabled only when NEXT_PUBLIC_LAUNCH_MODE === "true".
  *   ?launch=1   force the curtain back (rehearsals, second take)
- *   ?launch=0   bypass it entirely (escape hatch if anything misbehaves)
- *   Enter/Space trigger the launch  ·  Esc skips it
- * Once launched, localStorage keeps it down so refreshes go straight to the site.
+ *   ?launch=0   bypass it entirely (escape hatch)
+ *   Enter/Space launch  ·  Esc skips
  */
 
-const ENABLED = process.env.NEXT_PUBLIC_LAUNCH_MODE === "true"
-const EVENT_LABEL = process.env.NEXT_PUBLIC_LAUNCH_EVENT || "GRAND LAUNCH"
+const ENABLED  = process.env.NEXT_PUBLIC_LAUNCH_MODE === "true"
+const EYEBROW  = process.env.NEXT_PUBLIC_LAUNCH_EVENT || "INAUGURAL LAUNCH"
+const OCCASION = process.env.NEXT_PUBLIC_LAUNCH_OCCASION || ""
+const TAGLINE  = process.env.NEXT_PUBLIC_LAUNCH_TAGLINE || "Every student, placement-ready."
+const FYNITY_LOGO = process.env.NEXT_PUBLIC_FYNITY_LOGO || "/fynity.png"
 const STORAGE_KEY = "careerezi-launched-v1"
 
-// Logo palette — teal → indigo → coral → amber
-const BRAND = ["#00D4C8", "#0891B2", "#6366F1", "#E8825A", "#F59E0B", "#FFFFFF"]
+// Straight from the logo: deep teal wordmark, coral "Ezi", gold tassel.
+const TEAL  = "#124F5C"
+const TEAL2 = "#0E6E7A"
+const CORAL = "#F1613E"
+const GOLD  = "#F2A93B"
+const INK   = "#0B2F38"
+
+// Fynity's own palette, sampled from /fynity.png — the endorsement is set in
+// their colours rather than CareerEzi's so the two marks read as two brands.
+const FYN_NAVY   = "#1B125F"
+const FYN_PURPLE = "#892C9D"
+const FYN_BLUE   = "#0096E1"
+
+const CONFETTI_COLORS = [TEAL, TEAL2, CORAL, GOLD, "#1D8A96", "#FFFFFF"]
+
+/**
+ * Every size on this page is driven off `vmin` (the smaller viewport edge) so
+ * the composition scales itself to whatever it is projected on — 720p, 1080p,
+ * a 4K panel or a phone — instead of sitting at fixed pixel sizes. The clamp()
+ * floors keep it readable on small screens; the ceilings stop it exploding on
+ * very large ones.
+ */
+const SCALE = {
+  "--lc-eyebrow":    "clamp(10px, 1.45vmin, 30px)",
+  "--lc-occasion":   "clamp(11px, 1.7vmin, 34px)",
+  "--lc-rule":       "clamp(28px, 5vmin, 100px)",
+  "--lc-logo":       "clamp(60px, 23vmin, 480px)",
+  "--lc-tagline":    "clamp(24px, 5.8vmin, 120px)",
+  "--lc-brief":      "clamp(13px, 2.3vmin, 46px)",
+  "--lc-brief-max":  "clamp(280px, 92vmin, 1700px)",
+  "--lc-pill":       "clamp(11px, 1.85vmin, 37px)",
+  "--lc-pill-px":    "clamp(14px, 2.4vmin, 48px)",
+  "--lc-pill-py":    "clamp(8px, 1.35vmin, 27px)",
+  "--lc-pill-gap":   "clamp(6px, 1.15vmin, 23px)",
+  "--lc-pill-icon":  "clamp(14px, 2.15vmin, 43px)",
+  "--lc-btn":        "clamp(15px, 2.85vmin, 57px)",
+  "--lc-btn-px":     "clamp(36px, 6.8vmin, 136px)",
+  "--lc-btn-py":     "clamp(14px, 2.5vmin, 50px)",
+  "--lc-hint":       "clamp(9px, 1.3vmin, 26px)",
+  "--lc-initiative": "clamp(9px, 1.35vmin, 27px)",
+  "--lc-fyn-mark":   "clamp(32px, 5.4vmin, 108px)",
+  "--lc-fyn-text":   "clamp(15px, 2.6vmin, 52px)",
+  // Vertical rhythm
+  "--lc-gap-logo":   "clamp(22px, 4.2vmin, 84px)",
+  "--lc-gap-tag":    "clamp(20px, 3.8vmin, 76px)",
+  "--lc-gap-brief":  "clamp(12px, 2.1vmin, 42px)",
+  "--lc-gap-pills":  "clamp(20px, 3.6vmin, 72px)",
+  "--lc-gap-btn":    "clamp(24px, 4.6vmin, 92px)",
+  "--lc-gap-hint":   "clamp(16px, 2.9vmin, 58px)",
+  "--lc-gap-fyn":    "clamp(8px, 1.5vmin, 30px)",
+  // Frame + safe areas
+  "--lc-frame":      "clamp(14px, 2.1vmin, 42px)",
+  "--lc-frame-bar":  "clamp(4px, 0.5vmin, 10px)",
+  "--lc-corner":     "clamp(16px, 2.3vmin, 46px)",
+  "--lc-corner-w":   "clamp(2px, 0.22vmin, 5px)",
+  "--lc-bottom-pad": "clamp(96px, 14vmin, 280px)",
+  "--lc-bottom-fyn": "clamp(22px, 3.6vmin, 72px)",
+  "--lc-shock":      "clamp(140px, 20vmin, 420px)",
+} as React.CSSProperties
+
+const CAPABILITIES = [
+  { icon: GraduationCap, label: "Structured Learning" },
+  { icon: Code2,         label: "Live Coding Practice" },
+  { icon: Bot,           label: "AI Mock Interviews" },
+  { icon: BadgeCheck,    label: "Verified Certificates" },
+  { icon: BarChart3,     label: "Placement Analytics" },
+]
 
 type Phase = "boot" | "idle" | "igniting" | "done"
 
@@ -32,11 +104,8 @@ export function LaunchCurtain() {
   const [phase, setPhase] = useState<Phase>(ENABLED ? "boot" : "done")
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
-  const after = (ms: number, fn: () => void) => {
-    timers.current.push(setTimeout(fn, ms))
-  }
+  const after = (ms: number, fn: () => void) => { timers.current.push(setTimeout(fn, ms)) }
 
-  // ── Decide on the client whether the curtain is still owed ──────────────────
   useEffect(() => {
     if (!ENABLED) return
     const forced = new URLSearchParams(window.location.search).get("launch")
@@ -45,7 +114,6 @@ export function LaunchCurtain() {
     setPhase(localStorage.getItem(STORAGE_KEY) === "1" ? "done" : "idle")
   }, [])
 
-  // ── Lock the page behind the curtain ────────────────────────────────────────
   useEffect(() => {
     if (phase === "done") return
     const prev = document.body.style.overflow
@@ -56,7 +124,7 @@ export function LaunchCurtain() {
   useEffect(() => () => { timers.current.forEach(clearTimeout) }, [])
 
   const fire = useCallback((opts: confetti.Options) => {
-    confetti({ colors: BRAND, disableForReducedMotion: true, ...opts })
+    confetti({ colors: CONFETTI_COLORS, disableForReducedMotion: true, ...opts })
   }, [])
 
   const launch = useCallback(() => {
@@ -64,27 +132,22 @@ export function LaunchCurtain() {
     setPhase("igniting")
     localStorage.setItem(STORAGE_KEY, "1")
 
-    // Corner cannons
     after(120, () => {
       fire({ particleCount: 90, angle: 60, spread: 70, startVelocity: 62, origin: { x: 0, y: 1 } })
       fire({ particleCount: 90, angle: 120, spread: 70, startVelocity: 62, origin: { x: 1, y: 1 } })
     })
-    // Centre burst on the logo
     after(420, () => {
-      fire({ particleCount: 160, spread: 110, startVelocity: 45, scalar: 1.1, origin: { x: 0.5, y: 0.52 } })
+      fire({ particleCount: 160, spread: 110, startVelocity: 45, scalar: 1.1, origin: { x: 0.5, y: 0.5 } })
     })
-    // Wide volley as the curtain opens
     after(1050, () => {
       fire({ particleCount: 130, spread: 160, startVelocity: 55, decay: 0.92, origin: { x: 0.5, y: 0.35 } })
     })
-    // Falling ribbons over the revealed home page
     after(1700, () => {
       fire({ particleCount: 120, spread: 180, startVelocity: 30, gravity: 0.55, scalar: 1.3, ticks: 260, origin: { x: 0.5, y: 0 } })
     })
     after(2500, () => setPhase("done"))
   }, [phase, fire])
 
-  // ── Keyboard: Enter/Space launches, Esc skips ───────────────────────────────
   useEffect(() => {
     if (phase !== "idle") return
     const onKey = (e: KeyboardEvent) => {
@@ -98,181 +161,350 @@ export function LaunchCurtain() {
   if (!ENABLED || phase === "done") return null
 
   const opening = phase === "igniting"
+  const rise = (delay: number) => ({
+    initial: { opacity: 0, y: 18 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as const },
+  })
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[200] overflow-hidden" aria-label="CareerEzi launch">
+    <div className="fixed inset-0 z-[200] overflow-hidden" style={SCALE} aria-label="CareerEzi launch">
 
-        {/* ── Curtain halves — split apart on ignition ────────────────────────── */}
-        {(["left", "right"] as const).map((side) => (
-          <motion.div
-            key={side}
-            className="absolute inset-y-0 w-1/2"
-            style={{
-              [side]: 0,
-              background:
-                "radial-gradient(120% 100% at 50% 40%, #16203C 0%, #0A0F1E 55%, #05070F 100%)",
-            }}
-            animate={opening ? { x: side === "left" ? "-100%" : "100%" } : { x: 0 }}
-            transition={{ delay: 1.05, duration: 1.15, ease: [0.76, 0, 0.24, 1] }}
-          >
-            {/* Seam light */}
-            <div
-              className={`absolute inset-y-0 w-px ${side === "left" ? "right-0" : "left-0"}`}
-              style={{ background: "linear-gradient(to bottom, transparent, rgba(0,212,200,0.45), transparent)" }}
-            />
-          </motion.div>
-        ))}
-
-        {/* ── Ambient orbs ───────────────────────────────────────────────────── */}
+      {/* ── Curtain halves — split apart on ignition ──────────────────────────── */}
+      {(["left", "right"] as const).map((side) => (
         <motion.div
-          className="absolute inset-0 pointer-events-none"
-          animate={opening ? { opacity: 0 } : { opacity: 1 }}
-          transition={{ duration: 0.5, delay: opening ? 0.75 : 0 }}
+          key={side}
+          className="absolute inset-y-0 w-1/2"
+          style={{
+            [side]: 0,
+            background:
+              "radial-gradient(115% 90% at 50% 30%, #FFFFFF 0%, #F4F9F9 38%, #E3EDEE 72%, #D2E0E2 100%)",
+          }}
+          animate={opening ? { x: side === "left" ? "-100%" : "100%" } : { x: 0 }}
+          transition={{ delay: 1.05, duration: 1.15, ease: [0.76, 0, 0.24, 1] }}
         >
-          <motion.div
-            className="absolute w-[560px] h-[560px] rounded-full blur-3xl -top-40 -left-32"
-            style={{ background: "rgba(99,102,241,0.20)" }}
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          <div
+            className={`absolute inset-y-0 w-px ${side === "left" ? "right-0" : "left-0"}`}
+            style={{ background: `linear-gradient(to bottom, transparent, ${TEAL}0D, transparent)` }}
           />
-          <motion.div
-            className="absolute w-[520px] h-[520px] rounded-full blur-3xl -bottom-40 -right-24"
-            style={{ background: "rgba(0,212,200,0.16)" }}
-            animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        </motion.div>
+      ))}
+
+      {/* ── Ambient wash ─────────────────────────────────────────────────────── */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={opening ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.5, delay: opening ? 0.75 : 0 }}
+      >
+        <motion.div
+          className="absolute rounded-full blur-3xl"
+          style={{ background: `${TEAL2}1F`, width: "58vmin", height: "58vmin", left: "-18vmin", top: "-18vmin" }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
+          transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute rounded-full blur-3xl"
+          style={{ background: `${CORAL}18`, width: "52vmin", height: "52vmin", right: "-14vmin", bottom: "-20vmin" }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
+        <motion.div
+          className="absolute left-1/2 top-0 -translate-x-1/2 rounded-full blur-3xl"
+          style={{ background: `${GOLD}14`, width: "40vmin", height: "40vmin" }}
+          animate={{ opacity: [0.4, 0.75, 0.4] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+        {/* Fine dot texture — gives the ground substance without reading as pattern */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(${TEAL}14 1px, transparent 1px)`,
+            backgroundSize: "2.6vmin 2.6vmin",
+            maskImage: "radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 100%)",
+            WebkitMaskImage: "radial-gradient(70% 60% at 50% 45%, #000 0%, transparent 100%)",
+          }}
+        />
+      </motion.div>
+
+      {/* ── Ceremonial frame ─────────────────────────────────────────────────── */}
+      <motion.div
+        className="pointer-events-none absolute inset-0"
+        animate={opening ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.4, delay: opening ? 0.55 : 0 }}
+      >
+        <motion.div
+          className="absolute inset-x-0 top-0 origin-left"
+          style={{
+            height: "var(--lc-frame-bar)",
+            background: `linear-gradient(90deg, ${TEAL} 0%, ${TEAL2} 35%, ${CORAL} 72%, ${GOLD} 100%)`,
+          }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        />
+        <motion.div
+          className="absolute rounded-[2px] border"
+          style={{ inset: "var(--lc-frame)", borderColor: `${TEAL}1F` }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
+        />
+        {([
+          ["top", "left"], ["top", "right"], ["bottom", "left"], ["bottom", "right"],
+        ] as const).map(([v, h], i) => (
+          <motion.span
+            key={i}
+            className="absolute"
+            style={{
+              [v]: "calc(var(--lc-frame) - var(--lc-corner-w))",
+              [h]: "calc(var(--lc-frame) - var(--lc-corner-w))",
+              width: "var(--lc-corner)",
+              height: "var(--lc-corner)",
+              [v === "top" ? "borderTop" : "borderBottom"]: `var(--lc-corner-w) solid ${GOLD}`,
+              [h === "left" ? "borderLeft" : "borderRight"]: `var(--lc-corner-w) solid ${GOLD}`,
+            }}
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 0.75, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 + i * 0.08 }}
+          />
+        ))}
+      </motion.div>
+
+      {/* ── Content ──────────────────────────────────────────────────────────── */}
+      <motion.div
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
+        style={{ paddingBottom: "var(--lc-bottom-pad)" }}
+        animate={opening ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.55, delay: opening ? 0.62 : 0, ease: "easeIn" }}
+      >
+        {/* Eyebrow */}
+        <motion.div {...rise(0.05)} className="flex flex-col items-center">
+          <div className="flex items-center" style={{ gap: "var(--lc-gap-brief)" }}>
+            <span
+              className="h-px"
+              style={{ width: "var(--lc-rule)", background: `linear-gradient(to right, transparent, ${GOLD})` }}
+            />
+            <span
+              className="font-semibold tracking-[0.5em] whitespace-nowrap"
+              style={{ fontSize: "var(--lc-eyebrow)", color: CORAL }}
+            >
+              {EYEBROW}
+            </span>
+            <span
+              className="h-px"
+              style={{ width: "var(--lc-rule)", background: `linear-gradient(to left, transparent, ${GOLD})` }}
+            />
+          </div>
+          {OCCASION && (
+            <p
+              className="tracking-[0.2em]"
+              style={{ marginTop: "var(--lc-gap-brief)", fontSize: "var(--lc-occasion)", color: `${INK}99` }}
+            >
+              {OCCASION}
+            </p>
+          )}
+        </motion.div>
+
+        {/* Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: 22, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          className="relative"
+          style={{ marginTop: "var(--lc-gap-logo)" }}
+        >
+          {/* Sized off the scale tokens, so <Logo>'s own inline height is bypassed. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/careerezi_logo.png" alt="CareerEzi"
+            className="w-auto object-contain"
+            style={{ height: "var(--lc-logo)" }}
           />
         </motion.div>
 
-        {/* ── Centre stage ───────────────────────────────────────────────────── */}
-        <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
-          animate={opening ? { opacity: 0, scale: 1.12 } : { opacity: 1, scale: 1 }}
-          transition={{ duration: 0.55, delay: opening ? 0.62 : 0, ease: "easeIn" }}
+        {/* Tagline */}
+        <motion.h1
+          {...rise(0.34)}
+          className="font-serif font-bold leading-[1.12] tracking-tight"
+          style={{ marginTop: "var(--lc-gap-tag)", fontSize: "var(--lc-tagline)", color: INK }}
         >
-          {/* Event eyebrow */}
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="mb-10 text-[11px] sm:text-xs font-semibold tracking-[0.42em] text-white/45"
-          >
-            {EVENT_LABEL}
-          </motion.p>
+          {TAGLINE}
+        </motion.h1>
 
-          {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, y: 22, scale: 0.94 }}
-            animate={
-              opening
-                ? { opacity: 1, y: 0, scale: 1.14 }
-                : { opacity: 1, y: 0, scale: 1 }
-            }
-            transition={{ duration: opening ? 0.7 : 0.9, delay: opening ? 0 : 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="relative"
-          >
-            <div className="absolute inset-0 -z-10 blur-3xl" style={{ background: "rgba(99,102,241,0.30)" }} />
-            <Logo size={104} className="h-[68px] sm:h-[92px] lg:h-[104px] drop-shadow-2xl" />
-          </motion.div>
+        {/* Brief — what the guests are looking at */}
+        <motion.p
+          {...rise(0.46)}
+          className="leading-relaxed"
+          style={{
+            marginTop: "var(--lc-gap-brief)",
+            maxWidth: "var(--lc-brief-max)",
+            fontSize: "var(--lc-brief)",
+            color: `${INK}B3`,
+          }}
+        >
+          A complete placement-preparation platform for colleges — structured learning,
+          live coding practice, AI mock interviews and independently verifiable
+          certificates, with real-time placement analytics for every institution.
+        </motion.p>
 
-          {/* by Fynity Innovations */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.75 }}
-            className="mt-7 flex items-center gap-3"
-          >
-            <span className="h-px w-8 sm:w-12" style={{ background: "linear-gradient(to right, transparent, rgba(255,255,255,0.35))" }} />
-            <span className="text-[13px] sm:text-base tracking-[0.16em] text-white/60">
-              by{" "}
-              <span
-                className="font-semibold"
-                style={{
-                  background: "linear-gradient(135deg, #00D4C8 0%, #6366F1 55%, #E8825A 100%)",
-                  WebkitBackgroundClip: "text",
-                  backgroundClip: "text",
-                  color: "transparent",
-                }}
-              >
-                Fynity Innovations
-              </span>
-            </span>
-            <span className="h-px w-8 sm:w-12" style={{ background: "linear-gradient(to left, transparent, rgba(255,255,255,0.35))" }} />
-          </motion.div>
-
-          {/* Launch button */}
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={opening ? { opacity: 0, scale: 0.7 } : { opacity: 1, y: 0 }}
-            transition={{ duration: opening ? 0.35 : 0.8, delay: opening ? 0 : 1.15 }}
-            className="relative mt-16 sm:mt-20"
-          >
-            {/* Pulsing halo rings */}
-            {!opening && [0, 1, 2].map((i) => (
-              <motion.span
-                key={i}
-                className="absolute inset-0 rounded-full border pointer-events-none"
-                style={{ borderColor: "rgba(0,212,200,0.5)" }}
-                animate={{ scale: [1, 1.75], opacity: [0.55, 0] }}
-                transition={{ duration: 2.6, repeat: Infinity, delay: i * 0.85, ease: "easeOut" }}
-              />
-            ))}
-
-            <button
-              onClick={launch}
-              className="relative rounded-full px-14 sm:px-20 py-5 sm:py-6 text-base sm:text-xl font-bold tracking-[0.22em] text-white
-                         transition-transform duration-200 hover:scale-[1.04] active:scale-[0.98] focus:outline-none
-                         focus-visible:ring-4 focus-visible:ring-white/30"
+        {/* Capability row */}
+        <motion.div
+          {...rise(0.58)}
+          className="flex max-w-3xl flex-wrap items-center justify-center lg:max-w-none lg:flex-nowrap"
+          style={{ marginTop: "var(--lc-gap-pills)", gap: "var(--lc-pill-gap)" }}
+        >
+          {CAPABILITIES.map(({ icon: Icon, label }, i) => (
+            <motion.span
+              key={label}
+              className="inline-flex items-center whitespace-nowrap rounded-full border bg-white font-semibold"
               style={{
-                background: "linear-gradient(135deg, #00D4C8 0%, #6366F1 52%, #E8825A 100%)",
-                boxShadow: "0 0 60px rgba(99,102,241,0.55), 0 12px 40px rgba(0,0,0,0.45)",
+                gap: "calc(var(--lc-pill-gap) * 0.8)",
+                paddingInline: "var(--lc-pill-px)",
+                paddingBlock: "var(--lc-pill-py)",
+                fontSize: "var(--lc-pill)",
+                borderColor: `${TEAL}2E`,
+                color: TEAL,
+                boxShadow: `0 6px 18px ${TEAL}14, 0 1px 2px ${TEAL}12`,
               }}
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.45 }}
             >
-              LAUNCH
-            </button>
-          </motion.div>
+              <Icon style={{ width: "var(--lc-pill-icon)", height: "var(--lc-pill-icon)", color: CORAL }} />
+              {label}
+            </motion.span>
+          ))}
+        </motion.div>
 
-          {/* Shockwaves on ignition */}
-          <AnimatePresence>
-            {opening && [0, 1, 2, 3].map((i) => (
-              <motion.span
-                key={i}
-                className="absolute rounded-full border-2 pointer-events-none"
-                style={{
-                  width: 220, height: 220,
-                  borderColor: BRAND[i % 4],
-                  top: "50%", left: "50%", marginTop: -110, marginLeft: -110,
-                }}
-                initial={{ scale: 0.2, opacity: 0.9 }}
-                animate={{ scale: 11, opacity: 0 }}
-                transition={{ duration: 1.5, delay: i * 0.13, ease: "easeOut" }}
-              />
-            ))}
-          </AnimatePresence>
+        {/* Launch button */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={opening ? { opacity: 0, scale: 0.72 } : { opacity: 1, y: 0 }}
+          transition={{ duration: opening ? 0.35 : 0.6, delay: opening ? 0 : 0.72, ease: [0.22, 1, 0.36, 1] }}
+          className="relative"
+          style={{ marginTop: "var(--lc-gap-btn)" }}
+        >
+          {!opening && [0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="pointer-events-none absolute inset-0 rounded-full border"
+              style={{ borderColor: `${CORAL}66` }}
+              animate={{ scale: [1, 1.7], opacity: [0.5, 0] }}
+              transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
+            />
+          ))}
 
-          {/* Flash */}
-          <AnimatePresence>
-            {opening && (
-              <motion.div
-                className="fixed inset-0 bg-white pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 0.85, 0] }}
-                transition={{ duration: 0.7, delay: 0.35, times: [0, 0.25, 1] }}
-              />
-            )}
-          </AnimatePresence>
+          <button
+            onClick={launch}
+            className="relative rounded-full font-bold tracking-[0.3em] text-white
+                       transition-transform duration-200 hover:scale-[1.035] active:scale-[0.98]
+                       focus:outline-none focus-visible:ring-4"
+            style={{
+              paddingInline: "var(--lc-btn-px)",
+              paddingBlock: "var(--lc-btn-py)",
+              fontSize: "var(--lc-btn)",
+              background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL2} 45%, ${CORAL} 100%)`,
+              boxShadow: `0 22px 50px ${TEAL}4D, 0 8px 20px ${CORAL}38`,
+            }}
+          >
+            LAUNCH
+          </button>
 
-          {/* Hint */}
           <motion.p
+            className="absolute inset-x-0 top-full whitespace-nowrap text-center tracking-[0.32em]"
+            style={{ marginTop: "var(--lc-gap-hint)", fontSize: "var(--lc-hint)", color: `${INK}59` }}
             initial={{ opacity: 0 }}
-            animate={opening ? { opacity: 0 } : { opacity: 1 }}
-            transition={{ duration: 0.6, delay: opening ? 0 : 1.9 }}
-            className="absolute bottom-10 text-[11px] tracking-[0.28em] text-white/30"
+            animate={opening ? { opacity: 0 } : { opacity: [0.35, 1, 0.35] }}
+            transition={
+              opening
+                ? { duration: 0.3 }
+                : { duration: 3.6, delay: 1.15, repeat: Infinity, ease: "easeInOut" }
+            }
           >
             PRESS THE BUTTON TO GO LIVE
           </motion.p>
         </motion.div>
-      </div>
-    </AnimatePresence>
+
+        {/* Shockwaves */}
+        <AnimatePresence>
+          {opening && [0, 1, 2, 3].map((i) => (
+            <motion.span
+              key={i}
+              className="pointer-events-none absolute rounded-full border-2"
+              style={{
+                width: "var(--lc-shock)", height: "var(--lc-shock)",
+                borderColor: [TEAL, CORAL, GOLD, TEAL2][i],
+                top: "50%", left: "50%",
+                marginTop: "calc(var(--lc-shock) / -2)",
+                marginLeft: "calc(var(--lc-shock) / -2)",
+              }}
+              initial={{ scale: 0.2, opacity: 0.85 }}
+              animate={{ scale: 14, opacity: 0 }}
+              transition={{ duration: 1.5, delay: i * 0.13, ease: "easeOut" }}
+            />
+          ))}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {opening && (
+            <motion.div
+              className="pointer-events-none fixed inset-0 bg-white"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.9, 0] }}
+              transition={{ duration: 0.7, delay: 0.35, times: [0, 0.25, 1] }}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* ── Fynity endorsement, pinned bottom ────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={opening ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.7, delay: opening ? 0 : 0.9 }}
+        className="absolute inset-x-0 flex flex-col items-center"
+        style={{ bottom: "var(--lc-bottom-fyn)", gap: "var(--lc-gap-fyn)" }}
+      >
+        <span
+          className="font-medium tracking-[0.4em]"
+          style={{ fontSize: "var(--lc-initiative)", color: `${INK}80` }}
+        >
+          AN INITIATIVE BY
+        </span>
+        <motion.div
+          className="flex items-center"
+          style={{ gap: "calc(var(--lc-gap-fyn) * 1.2)" }}
+          animate={{ y: [0, -2.5, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <motion.div
+            className="relative"
+            initial={{ opacity: 0, scale: 0.4, rotate: -35 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ duration: 1, delay: 1.05, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            {/* Soft halo in Fynity's blue/purple, breathing slowly */}
+            <motion.span
+              className="absolute inset-0 -z-10 rounded-full blur-xl"
+              style={{ background: `linear-gradient(135deg, ${FYN_BLUE}59, ${FYN_PURPLE}59)` }}
+              animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={FYNITY_LOGO} alt="Fynity Innovations"
+              className="object-contain"
+              style={{ width: "var(--lc-fyn-mark)", height: "var(--lc-fyn-mark)" }}
+            />
+          </motion.div>
+          <span
+            className="font-semibold tracking-[0.06em]"
+            style={{ fontSize: "var(--lc-fyn-text)", color: FYN_NAVY }}
+          >
+            Fynity Innovations
+          </span>
+        </motion.div>
+      </motion.div>
+
+    </div>
   )
 }
