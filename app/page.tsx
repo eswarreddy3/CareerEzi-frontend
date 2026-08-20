@@ -22,7 +22,7 @@ import {
 import Link from "next/link"
 import { TopNav } from "@/components/top-nav"
 import { Logo } from "@/components/logo"
-import { LaunchCurtain } from "@/components/launch-curtain"
+import { LaunchCurtain, LaunchModeButton } from "@/components/launch-curtain"
 import { AIShowcase } from "@/components/landing/ai-showcase"
 import { CapabilityGrid } from "@/components/landing/capability-grid"
 
@@ -1907,7 +1907,8 @@ export default function LandingPage() {
                 </a>
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <LaunchModeButton />
               <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                 Student Login
               </Link>

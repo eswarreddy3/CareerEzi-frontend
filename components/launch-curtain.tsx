@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
-import { GraduationCap, Code2, Bot, BadgeCheck, BarChart3 } from "lucide-react"
+import { GraduationCap, Code2, Bot, BadgeCheck, BarChart3, Rocket } from "lucide-react"
 
 /**
  * Inauguration curtain for launch day.
@@ -99,6 +99,38 @@ const CAPABILITIES = [
 ]
 
 type Phase = "boot" | "idle" | "igniting" | "done"
+
+/**
+ * Footer control that puts the curtain back up — the way to get to the launch
+ * screen on the day without typing a URL.
+ *
+ * Uses a hard navigation rather than the Next router on purpose: the curtain
+ * reads `?launch=` once on mount, and a client-side push to the same route
+ * would not remount it. A full reload also guarantees a clean slate on stage.
+ *
+ * Renders nothing unless launch mode is on, so it disappears with the rest of
+ * the launch machinery once NEXT_PUBLIC_LAUNCH_MODE is turned off.
+ */
+export function LaunchModeButton({ className = "" }: { className?: string }) {
+  if (!ENABLED) return null
+  return (
+    <button
+      onClick={() => { window.location.href = "/?launch=1" }}
+      title="Open the inauguration launch screen"
+      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold
+                  transition-transform duration-200 hover:scale-[1.04] active:scale-[0.98]
+                  focus:outline-none focus-visible:ring-2 ${className}`}
+      style={{
+        borderColor: `${CORAL}59`,
+        color: CORAL,
+        background: `linear-gradient(135deg, ${TEAL}14, ${CORAL}1A)`,
+      }}
+    >
+      <Rocket className="h-3.5 w-3.5" />
+      Launch Mode
+    </button>
+  )
+}
 
 export function LaunchCurtain() {
   const [phase, setPhase] = useState<Phase>(ENABLED ? "boot" : "done")
