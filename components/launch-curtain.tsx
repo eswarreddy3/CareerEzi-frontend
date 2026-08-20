@@ -159,6 +159,21 @@ export function LaunchCurtain() {
     confetti({ colors: CONFETTI_COLORS, disableForReducedMotion: true, ...opts })
   }, [])
 
+  /**
+   * Ignition runs as a staged sequence rather than one burst, so the reveal
+   * says something rather than just ending:
+   *
+   *   0.00s  button collapses, shockwaves burst
+   *   0.12s  corner cannons
+   *   0.25s  the five capability pills launch outward at the room — the beat
+   *          that actually shows the audience what the platform does
+   *   0.55s  supporting copy clears, logo takes the screen alone
+   *   0.75s  burst on the logo
+   *   1.15s  curtain opens like doors, light pours through the seam
+   *   1.35s  wide volley over the opening
+   *   2.10s  ribbons fall across the revealed site
+   *   3.40s  curtain unmounts
+   */
   const launch = useCallback(() => {
     if (phase !== "idle") return
     setPhase("igniting")
@@ -168,16 +183,22 @@ export function LaunchCurtain() {
       fire({ particleCount: 90, angle: 60, spread: 70, startVelocity: 62, origin: { x: 0, y: 1 } })
       fire({ particleCount: 90, angle: 120, spread: 70, startVelocity: 62, origin: { x: 1, y: 1 } })
     })
-    after(420, () => {
-      fire({ particleCount: 160, spread: 110, startVelocity: 45, scalar: 1.1, origin: { x: 0.5, y: 0.5 } })
+    // Rides out with the pills
+    after(300, () => {
+      fire({ particleCount: 70, spread: 180, startVelocity: 38, scalar: 0.9, origin: { x: 0.5, y: 0.62 } })
     })
-    after(1050, () => {
-      fire({ particleCount: 130, spread: 160, startVelocity: 55, decay: 0.92, origin: { x: 0.5, y: 0.35 } })
+    // The logo's moment
+    after(750, () => {
+      fire({ particleCount: 170, spread: 120, startVelocity: 48, scalar: 1.15, origin: { x: 0.5, y: 0.45 } })
     })
-    after(1700, () => {
-      fire({ particleCount: 120, spread: 180, startVelocity: 30, gravity: 0.55, scalar: 1.3, ticks: 260, origin: { x: 0.5, y: 0 } })
+    // Doors opening
+    after(1350, () => {
+      fire({ particleCount: 140, spread: 160, startVelocity: 58, decay: 0.92, origin: { x: 0.5, y: 0.35 } })
     })
-    after(2500, () => setPhase("done"))
+    after(2100, () => {
+      fire({ particleCount: 130, spread: 180, startVelocity: 30, gravity: 0.55, scalar: 1.3, ticks: 280, origin: { x: 0.5, y: 0 } })
+    })
+    after(3400, () => setPhase("done"))
   }, [phase, fire])
 
   useEffect(() => {
@@ -211,9 +232,14 @@ export function LaunchCurtain() {
             [side]: 0,
             background:
               "radial-gradient(115% 90% at 50% 30%, #FFFFFF 0%, #F4F9F9 38%, #E3EDEE 72%, #D2E0E2 100%)",
+            boxShadow: "0 0 0px 0px rgba(18,79,92,0)",
           }}
-          animate={opening ? { x: side === "left" ? "-100%" : "100%" } : { x: 0 }}
-          transition={{ delay: 1.05, duration: 1.15, ease: [0.76, 0, 0.24, 1] }}
+          animate={
+            opening
+              ? { x: side === "left" ? "-100%" : "100%", boxShadow: `0 0 90px 30px ${TEAL}33` }
+              : { x: 0 }
+          }
+          transition={{ delay: 1.15, duration: 1.35, ease: [0.7, 0, 0.2, 1] }}
         >
           <div
             className={`absolute inset-y-0 w-px ${side === "left" ? "right-0" : "left-0"}`}
@@ -221,6 +247,24 @@ export function LaunchCurtain() {
           />
         </motion.div>
       ))}
+
+      {/* ── Light through the opening doors ──────────────────────────────────── */}
+      <AnimatePresence>
+        {opening && (
+          <motion.div
+            className="pointer-events-none absolute inset-y-0"
+            style={{
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: `linear-gradient(90deg, transparent, ${GOLD}99 25%, #FFFFFF 50%, ${GOLD}99 75%, transparent)`,
+              filter: "blur(2px)",
+            }}
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: ["0vmin", "30vmin", "72vmin"], opacity: [0, 0.95, 0] }}
+            transition={{ duration: 1.4, delay: 1.15, times: [0, 0.3, 1], ease: "easeOut" }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Ambient wash ─────────────────────────────────────────────────────── */}
       <motion.div
@@ -306,11 +350,16 @@ export function LaunchCurtain() {
       <motion.div
         className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
         style={{ paddingBottom: "var(--lc-bottom-pad)" }}
-        animate={opening ? { opacity: 0, scale: 1.1 } : { opacity: 1, scale: 1 }}
-        transition={{ duration: 0.55, delay: opening ? 0.62 : 0, ease: "easeIn" }}
+        animate={opening ? { opacity: 0 } : { opacity: 1, scale: 1 }}
+        transition={{ duration: 0.45, delay: opening ? 1.15 : 0, ease: "easeIn" }}
       >
         {/* Eyebrow */}
-        <motion.div {...rise(0.05)} className="flex flex-col items-center">
+        <motion.div
+          {...rise(0.05)}
+          animate={opening ? { opacity: 0, y: -24 } : { opacity: 1, y: 0 }}
+          transition={opening ? { duration: 0.3 } : { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center"
+        >
           <div className="flex items-center" style={{ gap: "var(--lc-gap-brief)" }}>
             <span
               className="h-px"
@@ -340,11 +389,27 @@ export function LaunchCurtain() {
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: 22, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          animate={opening ? { opacity: 1, y: 0, scale: 1.32 } : { opacity: 1, y: 0, scale: 1 }}
+          transition={
+            opening
+              ? { duration: 1.05, delay: 0.5, ease: [0.16, 1, 0.3, 1] }
+              : { duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }
+          }
           className="relative"
           style={{ marginTop: "var(--lc-gap-logo)" }}
         >
+          {/* Bloom behind the mark as it takes over */}
+          <AnimatePresence>
+            {opening && (
+              <motion.span
+                className="pointer-events-none absolute -inset-[35%] -z-10 rounded-full blur-3xl"
+                style={{ background: `radial-gradient(circle, ${GOLD}5C 0%, ${CORAL}33 45%, transparent 72%)` }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: [0, 1, 0.85], scale: [0.5, 1.25, 1.5] }}
+                transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+              />
+            )}
+          </AnimatePresence>
           {/* Sized off the scale tokens, so <Logo>'s own inline height is bypassed. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -357,6 +422,8 @@ export function LaunchCurtain() {
         {/* Tagline */}
         <motion.h1
           {...rise(0.34)}
+          animate={opening ? { opacity: 0, y: 34, filter: "blur(6px)" } : { opacity: 1, y: 0 }}
+          transition={opening ? { duration: 0.45, delay: 0.3 } : { duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
           className="font-serif font-bold leading-[1.12] tracking-tight"
           style={{ marginTop: "var(--lc-gap-tag)", fontSize: "var(--lc-tagline)", color: INK }}
         >
@@ -366,6 +433,8 @@ export function LaunchCurtain() {
         {/* Brief — what the guests are looking at */}
         <motion.p
           {...rise(0.46)}
+          animate={opening ? { opacity: 0, y: 30, filter: "blur(6px)" } : { opacity: 1, y: 0 }}
+          transition={opening ? { duration: 0.45, delay: 0.38 } : { duration: 0.6, delay: 0.46, ease: [0.22, 1, 0.36, 1] }}
           className="leading-relaxed"
           style={{
             marginTop: "var(--lc-gap-brief)",
@@ -385,26 +454,42 @@ export function LaunchCurtain() {
           className="flex max-w-3xl flex-wrap items-center justify-center lg:max-w-none lg:flex-nowrap"
           style={{ marginTop: "var(--lc-gap-pills)", gap: "var(--lc-pill-gap)" }}
         >
-          {CAPABILITIES.map(({ icon: Icon, label }, i) => (
-            <motion.span
-              key={label}
-              className="inline-flex items-center whitespace-nowrap rounded-full border bg-white font-semibold"
-              style={{
-                gap: "calc(var(--lc-pill-gap) * 0.8)",
-                paddingInline: "var(--lc-pill-px)",
-                paddingBlock: "var(--lc-pill-py)",
-                fontSize: "var(--lc-pill)",
-                borderColor: `${TEAL}2E`,
-                color: TEAL,
-                boxShadow: `0 6px 18px ${TEAL}14, 0 1px 2px ${TEAL}12`,
-              }}
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.45 }}
-            >
-              <Icon style={{ width: "var(--lc-pill-icon)", height: "var(--lc-pill-icon)", color: CORAL }} />
-              {label}
-            </motion.span>
-          ))}
+          {CAPABILITIES.map(({ icon: Icon, label }, i) => {
+            // On ignition each capability is thrown outward past the audience —
+            // fanned from the centre so all five read as they fly.
+            const angle = ((-90 + (i - 2) * 30) * Math.PI) / 180
+            const flight = {
+              x: `${Math.cos(angle) * 62}vmin`,
+              y: `${Math.sin(angle) * 62}vmin`,
+              scale: 2.4,
+              opacity: 0,
+              rotate: (i - 2) * 9,
+            }
+            return (
+              <motion.span
+                key={label}
+                className="inline-flex items-center whitespace-nowrap rounded-full border bg-white font-semibold"
+                style={{
+                  gap: "calc(var(--lc-pill-gap) * 0.8)",
+                  paddingInline: "var(--lc-pill-px)",
+                  paddingBlock: "var(--lc-pill-py)",
+                  fontSize: "var(--lc-pill)",
+                  borderColor: `${TEAL}2E`,
+                  color: TEAL,
+                  boxShadow: `0 6px 18px ${TEAL}14, 0 1px 2px ${TEAL}12`,
+                }}
+                animate={opening ? flight : { y: [0, -4, 0] }}
+                transition={
+                  opening
+                    ? { duration: 1.15, delay: 0.25 + i * 0.055, ease: [0.3, 0, 0.2, 1] }
+                    : { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.45 }
+                }
+              >
+                <Icon style={{ width: "var(--lc-pill-icon)", height: "var(--lc-pill-icon)", color: CORAL }} />
+                {label}
+              </motion.span>
+            )
+          })}
         </motion.div>
 
         {/* Launch button */}
@@ -481,8 +566,8 @@ export function LaunchCurtain() {
             <motion.div
               className="pointer-events-none fixed inset-0 bg-white"
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.9, 0] }}
-              transition={{ duration: 0.7, delay: 0.35, times: [0, 0.25, 1] }}
+              animate={{ opacity: [0, 0.55, 0] }}
+              transition={{ duration: 0.6, delay: 0.72, times: [0, 0.2, 1] }}
             />
           )}
         </AnimatePresence>
