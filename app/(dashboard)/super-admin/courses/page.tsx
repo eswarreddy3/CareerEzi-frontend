@@ -310,24 +310,28 @@ function LevelModal({ initial, onSave, onClose }: {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const name = form.name.trim()
+    if (!name) { toast.error("Level name is required"); return }
     setSaving(true)
-    try { await onSave(form) } finally { setSaving(false) }
+    try { await onSave({ ...form, name }) } finally { setSaving(false) }
   }
 
   return (
     <Modal title={initial ? "Edit Level" : "Add Level"} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field label="Level Name *">
-          <Select value={form.name} onValueChange={v => setForm(p => ({ ...p, name: v }))}>
-            <SelectTrigger className="bg-secondary/50">
-              <SelectValue placeholder="Select level name" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Basics">Basics</SelectItem>
-              <SelectItem value="Intermediate">Intermediate</SelectItem>
-              <SelectItem value="Advanced">Advanced</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input required maxLength={100} list="level-name-suggestions"
+            placeholder="e.g. Basics, Intermediate, Advanced, Expert…"
+            className="bg-secondary/50" value={form.name}
+            onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+          <datalist id="level-name-suggestions">
+            <option value="Basics" />
+            <option value="Intermediate" />
+            <option value="Advanced" />
+          </datalist>
+          <p className="text-xs text-muted-foreground mt-1">
+            Pick a suggestion or type any custom level name.
+          </p>
         </Field>
         <Field label="Description">
           <Input placeholder="Optional description"

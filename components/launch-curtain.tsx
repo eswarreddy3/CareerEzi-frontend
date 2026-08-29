@@ -45,6 +45,31 @@ const FYN_BLUE   = "#0096E1"
 
 const CONFETTI_COLORS = [TEAL, TEAL2, CORAL, GOLD, "#1D8A96", "#FFFFFF"]
 
+// Stage-curtain velvet, kept in the CareerEzi teal family so the ceremony reads
+// as this brand's rather than generic theatre red.
+const VELVET_DEEP = "#08262E"
+const VELVET_MID  = "#0F414C"
+const VELVET_LIT  = "#1A6270"
+const VELVET_BASE = `linear-gradient(90deg, ${VELVET_DEEP} 0%, ${VELVET_MID} 30%, ${VELVET_LIT} 50%, ${VELVET_MID} 70%, ${VELVET_DEEP} 100%)`
+// Vertical pleats. Sized in vmin so the folds scale with the projector.
+const VELVET_PLEATS =
+  `repeating-linear-gradient(90deg,` +
+  ` rgba(0,0,0,0.50) 0,` +
+  ` rgba(0,0,0,0.12) 0.7vmin,` +
+  ` rgba(255,255,255,0.13) 1.4vmin,` +
+  ` rgba(0,0,0,0.12) 2.1vmin,` +
+  ` rgba(0,0,0,0.50) 2.8vmin)`
+// A second, wider band layer — real velvet folds are not evenly spaced, and
+// one repeating gradient on its own reads as corrugation rather than cloth.
+const VELVET_PLEATS_WIDE =
+  `repeating-linear-gradient(90deg,` +
+  ` rgba(0,0,0,0.26) 0,` +
+  ` rgba(255,255,255,0.06) 3.9vmin,` +
+  ` rgba(0,0,0,0.26) 7.8vmin)`
+const VELVET_SHADE =
+  "linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 20%," +
+  " rgba(0,0,0,0) 68%, rgba(0,0,0,0.55) 100%)"
+
 /**
  * Every size on this page is driven off `vmin` (the smaller viewport edge) so
  * the composition scales itself to whatever it is projected on — 720p, 1080p,
@@ -88,6 +113,10 @@ const SCALE = {
   "--lc-bottom-pad": "clamp(110px, 17vmin, 320px)",
   "--lc-bottom-fyn": "clamp(22px, 3.6vmin, 72px)",
   "--lc-shock":      "clamp(140px, 20vmin, 420px)",
+  // Stage curtain
+  "--lc-valance":    "clamp(52px, 11vmin, 220px)",
+  "--lc-trim":       "clamp(6px, 1vmin, 20px)",
+  "--lc-fringe":     "clamp(8px, 1.5vmin, 30px)",
 } as React.CSSProperties
 
 const CAPABILITIES = [
@@ -163,16 +192,22 @@ export function LaunchCurtain() {
    * Ignition runs as a staged sequence rather than one burst, so the reveal
    * says something rather than just ending:
    *
+   * Paced slowly on purpose — a real inauguration curtain takes its time, and
+   * the room needs a beat to react to each stage.
+   *
    *   0.00s  button collapses, shockwaves burst
    *   0.12s  corner cannons
-   *   0.25s  the five capability pills launch outward at the room — the beat
+   *   0.30s  the five capability pills drift outward at the room — the beat
    *          that actually shows the audience what the platform does
-   *   0.55s  supporting copy clears, logo takes the screen alone
-   *   0.75s  burst on the logo
-   *   1.15s  curtain opens like doors, light pours through the seam
-   *   1.35s  wide volley over the opening
-   *   2.10s  ribbons fall across the revealed site
-   *   3.40s  curtain unmounts
+   *   0.60s  supporting copy clears, logo takes the screen alone
+   *   0.95s  burst on the logo
+   *   1.40s  the poster dissolves onto the velvet stage curtain behind it
+   *   2.30s  the curtain draws apart over nearly three seconds, swinging out
+   *          on its hinge, pleats gathering, light widening through the seam
+   *   2.60s  wide volley over the opening
+   *   3.80s  ribbons fall across the revealed site
+   *   4.20s  the valance flies out
+   *   6.20s  curtain unmounts
    */
   const launch = useCallback(() => {
     if (phase !== "idle") return
@@ -184,21 +219,21 @@ export function LaunchCurtain() {
       fire({ particleCount: 90, angle: 120, spread: 70, startVelocity: 62, origin: { x: 1, y: 1 } })
     })
     // Rides out with the pills
-    after(300, () => {
+    after(360, () => {
       fire({ particleCount: 70, spread: 180, startVelocity: 38, scalar: 0.9, origin: { x: 0.5, y: 0.62 } })
     })
     // The logo's moment
-    after(750, () => {
+    after(950, () => {
       fire({ particleCount: 170, spread: 120, startVelocity: 48, scalar: 1.15, origin: { x: 0.5, y: 0.45 } })
     })
-    // Doors opening
-    after(1350, () => {
+    // Curtain parting
+    after(2600, () => {
       fire({ particleCount: 140, spread: 160, startVelocity: 58, decay: 0.92, origin: { x: 0.5, y: 0.35 } })
     })
-    after(2100, () => {
-      fire({ particleCount: 130, spread: 180, startVelocity: 30, gravity: 0.55, scalar: 1.3, ticks: 280, origin: { x: 0.5, y: 0 } })
+    after(3800, () => {
+      fire({ particleCount: 140, spread: 180, startVelocity: 28, gravity: 0.5, scalar: 1.35, ticks: 380, origin: { x: 0.5, y: 0 } })
     })
-    after(3400, () => setPhase("done"))
+    after(6200, () => setPhase("done"))
   }, [phase, fire])
 
   useEffect(() => {
@@ -223,6 +258,151 @@ export function LaunchCurtain() {
   return (
     <div className="fixed inset-0 z-[200] overflow-hidden" style={SCALE} aria-label="CareerEzi launch">
 
+      {/* ── Ceremonial stage curtain ───────────────────────────────────────────
+          Sits underneath the poster and is invisible until the poster dissolves
+          onto it. Then the two panels draw apart, their pleats gathering toward
+          the wings, and the valance flies out — the way a real inauguration
+          curtain opens. Everything is sized in vmin so the folds scale with the
+          projector. */}
+      <div
+        className="absolute inset-0 overflow-hidden"
+        style={{ perspective: "1900px", transformStyle: "preserve-3d" }}
+      >
+        {(["left", "right"] as const).map((side) => (
+          <motion.div
+            key={side}
+            className="absolute inset-y-0 overflow-hidden"
+            style={{
+              [side]: 0,
+              width: "50.5%",
+              background: VELVET_BASE,
+              // Hinged at the wing, so the panel swings out toward the room as
+              // it draws rather than sliding flat — that swing is what gives
+              // the reveal its depth.
+              transformOrigin: side === "left" ? "left center" : "right center",
+              transformStyle: "preserve-3d",
+              // Cast onto whatever is behind, so the site is revealed out of
+              // the curtain's shadow instead of appearing beside it.
+              boxShadow:
+                side === "left"
+                  ? "26px 0 64px -22px rgba(0,0,0,0.5), inset -18px 0 40px -22px rgba(0,0,0,0.6)"
+                  : "-26px 0 64px -22px rgba(0,0,0,0.5), inset 18px 0 40px -22px rgba(0,0,0,0.6)",
+            }}
+            animate={
+              opening
+                ? { x: side === "left" ? "-101%" : "101%", rotateY: side === "left" ? -19 : 19 }
+                : { x: 0, rotateY: 0 }
+            }
+            transition={{ delay: 2.3, duration: 2.9, ease: [0.5, 0, 0.18, 1] }}
+          >
+            {/* Pleats compress toward the wings as the panel draws off — the
+                gather that makes it read as cloth rather than a sliding block. */}
+            <motion.div
+              className="absolute top-0 bottom-0"
+              style={{
+                [side]: 0,
+                width: "200%",
+                backgroundImage: VELVET_PLEATS,
+                transformOrigin: side === "left" ? "left center" : "right center",
+              }}
+              animate={opening ? { scaleX: 0.26 } : { scaleX: 0.5 }}
+              transition={{ delay: 2.3, duration: 2.9, ease: [0.5, 0, 0.18, 1] }}
+            />
+            <motion.div
+              className="absolute top-0 bottom-0"
+              style={{
+                [side]: 0,
+                width: "200%",
+                backgroundImage: VELVET_PLEATS_WIDE,
+                transformOrigin: side === "left" ? "left center" : "right center",
+              }}
+              animate={opening ? { scaleX: 0.26 } : { scaleX: 0.5 }}
+              transition={{ delay: 2.3, duration: 2.9, ease: [0.5, 0, 0.18, 1] }}
+            />
+            {/* Top and floor shading */}
+            <div className="absolute inset-0" style={{ background: VELVET_SHADE }} />
+            {/* Gold trim down the meeting edge */}
+            <div
+              className={`absolute inset-y-0 ${side === "left" ? "right-0" : "left-0"}`}
+              style={{
+                width: "var(--lc-trim)",
+                background: `linear-gradient(${side === "left" ? "90deg" : "270deg"}, ${GOLD}00, ${GOLD}CC 55%, #FFF3D6 100%)`,
+              }}
+            />
+          </motion.div>
+        ))}
+
+        {/* Valance — stays put while the panels draw, then flies out */}
+        <motion.div
+          className="absolute inset-x-0 top-0"
+          style={{
+            height: "var(--lc-valance)",
+            background: VELVET_BASE,
+            boxShadow: "0 26px 60px -12px rgba(0,0,0,0.7)",
+            zIndex: 2,
+          }}
+          animate={opening ? { y: "-115%" } : { y: 0 }}
+          transition={{ delay: 4.2, duration: 1.35, ease: [0.5, 0, 0.75, 0] }}
+        >
+          {/* Shadow cast onto the panels behind */}
+          <div
+            className="absolute inset-x-0"
+            style={{
+              top: "100%",
+              height: "calc(var(--lc-valance) * 0.45)",
+              background: "linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0))",
+            }}
+          />
+          <div className="absolute inset-0" style={{ backgroundImage: VELVET_PLEATS }} />
+          <div className="absolute inset-0" style={{ backgroundImage: VELVET_PLEATS_WIDE }} />
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.45) 100%)" }}
+          />
+          {/* Gold fringe along the hem */}
+          <div
+            className="absolute inset-x-0 bottom-0"
+            style={{
+              height: "var(--lc-fringe)",
+              background: `linear-gradient(180deg, ${GOLD}, #C98B23)`,
+              maskImage: "repeating-linear-gradient(90deg, #000 0 60%, transparent 60% 100%)",
+              WebkitMaskImage: "repeating-linear-gradient(90deg, #000 0 60%, transparent 60% 100%)",
+              maskSize: "1.1vmin 100%",
+              WebkitMaskSize: "1.1vmin 100%",
+            }}
+          />
+          <div
+            className="absolute inset-x-0"
+            style={{ bottom: "var(--lc-fringe)", height: "var(--lc-trim)", background: `linear-gradient(180deg, #FFF3D6, ${GOLD})` }}
+          />
+        </motion.div>
+
+        {/* Light pouring through the parting panels */}
+        <AnimatePresence>
+          {opening && (
+            <motion.div
+              className="pointer-events-none absolute inset-y-0"
+              style={{
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: `linear-gradient(90deg, transparent, ${GOLD}99 25%, #FFFFFF 50%, ${GOLD}99 75%, transparent)`,
+                filter: "blur(3px)",
+              }}
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: ["0vmin", "20vmin", "70vmin"], opacity: [0, 0.9, 0] }}
+              transition={{ duration: 3.1, delay: 2.3, times: [0, 0.25, 1], ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Poster layer — dissolves onto the curtain behind it ──────────────── */}
+      <motion.div
+        className="absolute inset-0"
+        animate={opening ? { opacity: 0 } : { opacity: 1 }}
+        transition={{ duration: 0.9, delay: opening ? 1.4 : 0, ease: "easeInOut" }}
+      >
+
       {/* ── Curtain halves — split apart on ignition ──────────────────────────── */}
       {(["left", "right"] as const).map((side) => (
         <motion.div
@@ -234,12 +414,7 @@ export function LaunchCurtain() {
               "radial-gradient(115% 90% at 50% 30%, #FFFFFF 0%, #F4F9F9 38%, #E3EDEE 72%, #D2E0E2 100%)",
             boxShadow: "0 0 0px 0px rgba(18,79,92,0)",
           }}
-          animate={
-            opening
-              ? { x: side === "left" ? "-100%" : "100%", boxShadow: `0 0 90px 30px ${TEAL}33` }
-              : { x: 0 }
-          }
-          transition={{ delay: 1.15, duration: 1.35, ease: [0.7, 0, 0.2, 1] }}
+          animate={{ x: 0 }}
         >
           <div
             className={`absolute inset-y-0 w-px ${side === "left" ? "right-0" : "left-0"}`}
@@ -247,24 +422,6 @@ export function LaunchCurtain() {
           />
         </motion.div>
       ))}
-
-      {/* ── Light through the opening doors ──────────────────────────────────── */}
-      <AnimatePresence>
-        {opening && (
-          <motion.div
-            className="pointer-events-none absolute inset-y-0"
-            style={{
-              left: "50%",
-              transform: "translateX(-50%)",
-              background: `linear-gradient(90deg, transparent, ${GOLD}99 25%, #FFFFFF 50%, ${GOLD}99 75%, transparent)`,
-              filter: "blur(2px)",
-            }}
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: ["0vmin", "30vmin", "72vmin"], opacity: [0, 0.95, 0] }}
-            transition={{ duration: 1.4, delay: 1.15, times: [0, 0.3, 1], ease: "easeOut" }}
-          />
-        )}
-      </AnimatePresence>
 
       {/* ── Ambient wash ─────────────────────────────────────────────────────── */}
       <motion.div
@@ -357,7 +514,7 @@ export function LaunchCurtain() {
         <motion.div
           {...rise(0.05)}
           animate={opening ? { opacity: 0, y: -24 } : { opacity: 1, y: 0 }}
-          transition={opening ? { duration: 0.3 } : { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+          transition={opening ? { duration: 0.5 } : { duration: 0.6, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col items-center"
         >
           <div className="flex items-center" style={{ gap: "var(--lc-gap-brief)" }}>
@@ -392,7 +549,7 @@ export function LaunchCurtain() {
           animate={opening ? { opacity: 1, y: 0, scale: 1.32 } : { opacity: 1, y: 0, scale: 1 }}
           transition={
             opening
-              ? { duration: 1.05, delay: 0.5, ease: [0.16, 1, 0.3, 1] }
+              ? { duration: 1.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }
               : { duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }
           }
           className="relative"
@@ -406,7 +563,7 @@ export function LaunchCurtain() {
                 style={{ background: `radial-gradient(circle, ${GOLD}5C 0%, ${CORAL}33 45%, transparent 72%)` }}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: [0, 1, 0.85], scale: [0.5, 1.25, 1.5] }}
-                transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+                transition={{ duration: 1.9, delay: 0.6, ease: "easeOut" }}
               />
             )}
           </AnimatePresence>
@@ -423,7 +580,7 @@ export function LaunchCurtain() {
         <motion.h1
           {...rise(0.34)}
           animate={opening ? { opacity: 0, y: 34, filter: "blur(6px)" } : { opacity: 1, y: 0 }}
-          transition={opening ? { duration: 0.45, delay: 0.3 } : { duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
+          transition={opening ? { duration: 0.7, delay: 0.35 } : { duration: 0.6, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
           className="font-serif font-bold leading-[1.12] tracking-tight"
           style={{ marginTop: "var(--lc-gap-tag)", fontSize: "var(--lc-tagline)", color: INK }}
         >
@@ -434,7 +591,7 @@ export function LaunchCurtain() {
         <motion.p
           {...rise(0.46)}
           animate={opening ? { opacity: 0, y: 30, filter: "blur(6px)" } : { opacity: 1, y: 0 }}
-          transition={opening ? { duration: 0.45, delay: 0.38 } : { duration: 0.6, delay: 0.46, ease: [0.22, 1, 0.36, 1] }}
+          transition={opening ? { duration: 0.7, delay: 0.45 } : { duration: 0.6, delay: 0.46, ease: [0.22, 1, 0.36, 1] }}
           className="leading-relaxed"
           style={{
             marginTop: "var(--lc-gap-brief)",
@@ -481,7 +638,7 @@ export function LaunchCurtain() {
                 animate={opening ? flight : { y: [0, -4, 0] }}
                 transition={
                   opening
-                    ? { duration: 1.15, delay: 0.25 + i * 0.055, ease: [0.3, 0, 0.2, 1] }
+                    ? { duration: 1.7, delay: 0.3 + i * 0.08, ease: [0.32, 0, 0.24, 1] }
                     : { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.45 }
                 }
               >
@@ -567,7 +724,7 @@ export function LaunchCurtain() {
               className="pointer-events-none fixed inset-0 bg-white"
               initial={{ opacity: 0 }}
               animate={{ opacity: [0, 0.55, 0] }}
-              transition={{ duration: 0.6, delay: 0.72, times: [0, 0.2, 1] }}
+              transition={{ duration: 0.9, delay: 0.9, times: [0, 0.2, 1] }}
             />
           )}
         </AnimatePresence>
@@ -620,6 +777,8 @@ export function LaunchCurtain() {
             Fynity Innovations
           </span>
         </motion.div>
+      </motion.div>
+
       </motion.div>
 
     </div>
