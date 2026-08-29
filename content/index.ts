@@ -11,6 +11,7 @@ import numpyContent from "./courses/numpy"
 import statisticsContent from "./courses/statistics"
 import edaContent from "./courses/eda"
 import genaiFundamentalsContent from "./courses/genai-fundamentals"
+import llmTransformersContent from "./courses/llm-transformers"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -22,6 +23,7 @@ const courseContent: Record<string, Record<number, string>> = {
   statistics: statisticsContent,
   eda: edaContent,
   "genai-fundamentals": genaiFundamentalsContent,
+  "llm-transformers": llmTransformersContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
