@@ -13,6 +13,7 @@ import edaContent from "./courses/eda"
 import genaiFundamentalsContent from "./courses/genai-fundamentals"
 import llmTransformersContent from "./courses/llm-transformers"
 import promptEngineeringContent from "./courses/prompt-engineering"
+import embeddingsRagContent from "./courses/embeddings-vectordb-rag"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -26,6 +27,7 @@ const courseContent: Record<string, Record<number, string>> = {
   "genai-fundamentals": genaiFundamentalsContent,
   "llm-transformers": llmTransformersContent,
   "prompt-engineering": promptEngineeringContent,
+  "embeddings-vectordb-rag": embeddingsRagContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
