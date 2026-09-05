@@ -56,17 +56,40 @@ const difficultyConfig = {
   Advanced:     { cls: "chip chip-danger",  dot: "bg-danger"  },
 }
 
-// ── Per-domain color tokens (used for glow, borders, SVG strokes) ─────────────
-const DOMAIN_THEME: Record<string, {
-  hex: string; textCls: string; bgCls: string; borderCls: string
-  glowCss: string; gradFrom: string; gradTo: string
-}> = {
-  "data-analysis":   { hex: "#34d399", textCls: "text-emerald-400", bgCls: "bg-emerald-500/10", borderCls: "border-emerald-400/40", glowCss: "rgba(52,211,153,0.25)",  gradFrom: "#34d399", gradTo: "#059669" },
-  "data-science":    { hex: "#60a5fa", textCls: "text-blue-400",    bgCls: "bg-blue-500/10",    borderCls: "border-blue-400/40",    glowCss: "rgba(96,165,250,0.25)",  gradFrom: "#60a5fa", gradTo: "#2563eb" },
-  "machine-learning":{ hex: "#c084fc", textCls: "text-purple-400",  bgCls: "bg-purple-500/10",  borderCls: "border-purple-400/40",  glowCss: "rgba(192,132,252,0.25)", gradFrom: "#c084fc", gradTo: "#7c3aed" },
-  "web-development": { hex: "#22d3ee", textCls: "text-cyan-400",    bgCls: "bg-cyan-500/10",    borderCls: "border-cyan-400/40",    glowCss: "rgba(34,211,238,0.25)",  gradFrom: "#22d3ee", gradTo: "#0891b2" },
+// ── Per-domain color tokens (used for card gradients, glow, SVG strokes) ──────
+const defaultTheme = {
+  hex: "#00d4c8", textCls: "text-primary", bgCls: "bg-primary/10", borderCls: "border-primary/40",
+  glowCss: "rgba(0,212,200,0.25)", gradFrom: "#2dd4bf", gradVia: "#00d4c8", gradTo: "#0f766e",
 }
-const defaultTheme = { hex: "#00d4c8", textCls: "text-primary", bgCls: "bg-primary/10", borderCls: "border-primary/40", glowCss: "rgba(0,212,200,0.25)", gradFrom: "#00d4c8", gradTo: "#00b4aa" }
+type DomainTheme = typeof defaultTheme
+
+const DOMAIN_THEME: Record<string, DomainTheme> = {
+  "data-analysis":   { hex: "#34d399", textCls: "text-emerald-400", bgCls: "bg-emerald-500/10", borderCls: "border-emerald-400/40", glowCss: "rgba(52,211,153,0.25)",  gradFrom: "#34d399", gradVia: "#10b981", gradTo: "#047857" },
+  "data-science":    { hex: "#60a5fa", textCls: "text-blue-400",    bgCls: "bg-blue-500/10",    borderCls: "border-blue-400/40",    glowCss: "rgba(96,165,250,0.25)",  gradFrom: "#60a5fa", gradVia: "#3b82f6", gradTo: "#1d4ed8" },
+  "machine-learning":{ hex: "#c084fc", textCls: "text-purple-400",  bgCls: "bg-purple-500/10",  borderCls: "border-purple-400/40",  glowCss: "rgba(192,132,252,0.25)", gradFrom: "#c084fc", gradVia: "#a855f7", gradTo: "#6d28d9" },
+  "web-development": { hex: "#22d3ee", textCls: "text-cyan-400",    bgCls: "bg-cyan-500/10",    borderCls: "border-cyan-400/40",    glowCss: "rgba(34,211,238,0.25)",  gradFrom: "#22d3ee", gradVia: "#06b6d4", gradTo: "#0e7490" },
+}
+
+// Domains created in super-admin that aren't in the map above still get a
+// distinct hue instead of every one of them falling back to the same teal.
+const FALLBACK_THEMES: DomainTheme[] = [
+  { hex: "#fb923c", textCls: "text-orange-400",  bgCls: "bg-orange-500/10",  borderCls: "border-orange-400/40",  glowCss: "rgba(251,146,60,0.25)",  gradFrom: "#fbbf24", gradVia: "#f97316", gradTo: "#c2410c" },
+  { hex: "#f472b6", textCls: "text-pink-400",    bgCls: "bg-pink-500/10",    borderCls: "border-pink-400/40",    glowCss: "rgba(244,114,182,0.25)", gradFrom: "#fb7185", gradVia: "#ec4899", gradTo: "#be185d" },
+  { hex: "#818cf8", textCls: "text-indigo-400",  bgCls: "bg-indigo-500/10",  borderCls: "border-indigo-400/40",  glowCss: "rgba(129,140,248,0.25)", gradFrom: "#818cf8", gradVia: "#6366f1", gradTo: "#4338ca" },
+  { hex: "#e879f9", textCls: "text-fuchsia-400", bgCls: "bg-fuchsia-500/10", borderCls: "border-fuchsia-400/40", glowCss: "rgba(232,121,249,0.25)", gradFrom: "#e879f9", gradVia: "#c026d3", gradTo: "#7e22ce" },
+  { hex: "#4ade80", textCls: "text-green-400",   bgCls: "bg-green-500/10",   borderCls: "border-green-400/40",   glowCss: "rgba(74,222,128,0.25)",  gradFrom: "#a3e635", gradVia: "#4ade80", gradTo: "#15803d" },
+  { hex: "#38bdf8", textCls: "text-sky-400",     bgCls: "bg-sky-500/10",     borderCls: "border-sky-400/40",     glowCss: "rgba(56,189,248,0.25)",  gradFrom: "#38bdf8", gradVia: "#0ea5e9", gradTo: "#0369a1" },
+]
+
+// Hashed off the id (not the list index) so a domain keeps the same colour in
+// the list and in its detail view, whatever order the API returns.
+function themeFor(id: string): DomainTheme {
+  const known = DOMAIN_THEME[id]
+  if (known) return known
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+  return FALLBACK_THEMES[h % FALLBACK_THEMES.length]
+}
 
 // ── Domain rich metadata (add new domains here — no other code changes needed) ─
 const DOMAIN_META: Record<string, {
@@ -202,7 +225,7 @@ function NodeCircle({
 }: {
   idx: number
   status: "completed" | "active" | "next" | "locked"
-  theme: typeof defaultTheme
+  theme: DomainTheme
   pct: number
   isActive: boolean
 }) {
@@ -269,7 +292,7 @@ function RoadmapStep({
   course, idx, totalCourses, theme, isFirst, isLast,
 }: {
   course: Course; idx: number; totalCourses: number
-  theme: typeof defaultTheme; isFirst: boolean; isLast: boolean
+  theme: DomainTheme; isFirst: boolean; isLast: boolean
 }) {
   const router = useRouter()
   const ref = useRef(null)
@@ -360,7 +383,7 @@ function RoadmapStep({
 function CourseCard({
   course, theme, status, pct, ctaLabel, hovered, onHover, onGo, align,
 }: {
-  course: Course; theme: typeof defaultTheme
+  course: Course; theme: DomainTheme
   status: "completed" | "active" | "next" | "locked"
   pct: number; ctaLabel: string; hovered: boolean
   onHover: (v: boolean) => void; onGo: () => void; align: "left" | "right"
@@ -488,7 +511,7 @@ function DomainDetail({ data, onBack }: { data: DomainDetail; onBack: () => void
   const { domain, courses } = data
   const router = useRouter()
   const DomainIcon = iconMap[domain.icon] ?? Database
-  const theme = DOMAIN_THEME[domain.id] ?? defaultTheme
+  const theme = themeFor(domain.id)
   const meta  = DOMAIN_META[domain.id]
 
   const totalUnits     = courses.reduce((s, c) => s + courseUnits(c).total, 0)
@@ -745,12 +768,173 @@ function DomainDetail({ data, onBack }: { data: DomainDetail; onBack: () => void
   )
 }
 
+// ── Domain card (list view) ──────────────────────────────────────────────────
+function DomainCard({
+  domain, index, loading, onOpen,
+}: { domain: Domain; index: number; loading: boolean; onOpen: () => void }) {
+  const Icon  = iconMap[domain.icon] ?? Database
+  const theme = themeFor(domain.id)
+  const meta  = DOMAIN_META[domain.id]
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // Pointer-following spotlight. Written straight to CSS vars on the node so the
+  // highlight tracks the cursor without re-rendering the card on every mousemove.
+  const trackPointer = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = cardRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`)
+    el.style.setProperty("--my", `${e.clientY - r.top}px`)
+  }
+
+  if (domain.is_locked) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.07 }}
+      >
+        <div
+          className="relative h-full select-none overflow-hidden rounded-2xl p-5 shadow-lg"
+          style={{ background: `linear-gradient(140deg, ${theme.gradFrom}, ${theme.gradVia} 55%, ${theme.gradTo})` }}
+        >
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/45 backdrop-blur-[2px]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+              <Lock className="h-4 w-4 text-white" />
+            </div>
+            <p className="text-xs font-medium text-white/90">Not available in your plan</p>
+          </div>
+          <div className="opacity-60">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+              <Icon className="h-6 w-6 text-white" />
+            </div>
+            <h3 className="mb-1 font-serif text-base font-semibold text-white">{domain.title}</h3>
+            <p className="line-clamp-2 text-xs text-white/75">{domain.description}</p>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
+  const extraSkills = Math.max(0, domain.skills.length - 3)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07 }}
+      className="h-full"
+    >
+      <motion.div
+        ref={cardRef}
+        role="button"
+        tabIndex={0}
+        aria-label={`Explore ${domain.title}`}
+        aria-busy={loading}
+        onMouseMove={trackPointer}
+        onClick={onOpen}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen() }
+        }}
+        whileHover={{ y: -6, boxShadow: `0 20px 44px -10px ${theme.hex}cc` }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ type: "spring", stiffness: 320, damping: 24 }}
+        className={cn(
+          "group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl p-5",
+          "outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+          "focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        )}
+        style={{
+          background: `linear-gradient(140deg, ${theme.gradFrom}, ${theme.gradVia} 55%, ${theme.gradTo})`,
+          boxShadow: `0 10px 30px -12px ${theme.hex}99`,
+        } as React.CSSProperties}
+      >
+        {/* Cursor spotlight — fades in on hover, follows the pointer */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+          style={{ background: "radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.28), transparent 65%)" }}
+        />
+        {/* Decorative circles — drift outward slightly on hover */}
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-125" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110" />
+        {/* Top highlight rule — wipes in from the left on hover */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-white/70 transition-transform duration-500 group-hover:scale-x-100"
+        />
+
+        <div className="relative flex flex-1 flex-col">
+          {/* Header — icon tile tilts, points chip sits opposite */}
+          <div className="mb-3 flex items-start justify-between">
+            <div className={cn(
+              "flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 shadow-inner",
+              "transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
+            )}>
+              <Icon className="h-6 w-6 text-white" />
+            </div>
+            <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white">
+              <Star className="h-3 w-3 fill-yellow-300 text-yellow-300" />{domain.total_points} pts
+            </span>
+          </div>
+
+          {/* Title & copy */}
+          <h3 className="mb-0.5 font-serif text-base font-bold text-white">{domain.title}</h3>
+          {meta && (
+            <p className="mb-1.5 line-clamp-1 text-[11px] font-medium text-white/90">{meta.tagline}</p>
+          )}
+          <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-white/70">{domain.description}</p>
+
+          {/* Skills — chips lift in sequence as the card is hovered */}
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {domain.skills.slice(0, 3).map((skill, s) => (
+              <span
+                key={skill}
+                className={cn(
+                  "rounded-full border border-white/30 bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white",
+                  "transition-transform duration-300 group-hover:-translate-y-0.5"
+                )}
+                style={{ transitionDelay: `${s * 60}ms` }}
+              >
+                {skill}
+              </span>
+            ))}
+            {extraSkills > 0 && (
+              <span className="rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/80">
+                +{extraSkills}
+              </span>
+            )}
+          </div>
+
+          {/* Footer — mt-auto keeps the CTA on the card floor for every card */}
+          <div className="mt-auto flex items-center justify-between border-t border-white/25 pt-3">
+            <span className="flex items-center gap-1.5 text-xs text-white/80">
+              <BookOpen className="h-3.5 w-3.5" />{domain.total_courses} courses
+            </span>
+            <span
+              className={cn(
+                "flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold shadow-md",
+                "transition-all duration-200 group-hover:bg-white/90"
+              )}
+              style={{ color: theme.gradTo }}
+            >
+              {loading ? (
+                <><Loader2 className="h-3.5 w-3.5 animate-spin" />Opening</>
+              ) : (
+                <>Explore<ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" /></>
+              )}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ── Domain list view ──────────────────────────────────────────────────────────
 export default function DomainProgramsPage() {
   const [domains,       setDomains]       = useState<Domain[]>([])
   const [selected,      setSelected]      = useState<DomainDetail | null>(null)
   const [loading,       setLoading]       = useState(true)
-  const [detailLoading, setDetailLoading] = useState(false)
+  const [openingId,     setOpeningId]     = useState<string | null>(null)
 
   useEffect(() => {
     api.get("/domain-programs/")
@@ -760,12 +944,12 @@ export default function DomainProgramsPage() {
   }, [])
 
   const openDomain = (domain: Domain) => {
-    if (domain.is_locked) return
-    setDetailLoading(true)
+    if (domain.is_locked || openingId) return
+    setOpeningId(domain.id)
     api.get(`/domain-programs/${domain.id}/courses`)
       .then(r => setSelected(r.data))
       .catch(() => toast.error("Failed to load courses"))
-      .finally(() => setDetailLoading(false))
+      .finally(() => setOpeningId(null))
   }
 
   // ── Detail view ────────────────────────────────────────────────────────────
@@ -792,91 +976,26 @@ export default function DomainProgramsPage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[...Array(4)].map((_, i) => (
-              <GlassCard key={i}>
-                <Skeleton className="h-14 w-14 rounded-2xl mb-4" />
-                <Skeleton className="h-5 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-full mb-1" /><Skeleton className="h-4 w-2/3 mb-4" />
-                <div className="flex gap-2 mb-4"><Skeleton className="h-5 w-16 rounded-full" /><Skeleton className="h-5 w-16 rounded-full" /></div>
-                <Skeleton className="h-9 w-full rounded-md" />
+              <GlassCard key={i} className="p-5">
+                <Skeleton className="h-12 w-12 rounded-xl mb-3" />
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-3 w-full mb-1" /><Skeleton className="h-3 w-2/3 mb-3" />
+                <div className="flex gap-1.5 mb-4"><Skeleton className="h-4 w-14 rounded-full" /><Skeleton className="h-4 w-14 rounded-full" /></div>
+                <Skeleton className="h-8 w-full rounded-md" />
               </GlassCard>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[...domains].sort((a, b) => Number(a.is_locked) - Number(b.is_locked)).map((domain, i) => {
-              const Icon  = iconMap[domain.icon] ?? Database
-              const theme = DOMAIN_THEME[domain.id] ?? defaultTheme
-
-              if (domain.is_locked) {
-                return (
-                  <motion.div key={domain.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-                    <GlassCard className="relative opacity-50 select-none">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl z-10 bg-background/80">
-                        <Lock className="h-8 w-8 text-muted-foreground mb-2" />
-                        <p className="text-xs text-muted-foreground font-medium">Not available in your plan</p>
-                      </div>
-                      <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-4", domain.bg_color)}>
-                        <Icon className={cn("h-7 w-7", domain.icon_color)} />
-                      </div>
-                      <h3 className="font-semibold text-lg font-serif mb-2">{domain.title}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{domain.description}</p>
-                    </GlassCard>
-                  </motion.div>
-                )
-              }
-
-              return (
-                <motion.div key={domain.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-                  <motion.div
-                    whileHover={{ y: -5, scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                    onClick={() => openDomain(domain)}
-                    className="glass-card rounded-2xl border p-5 cursor-pointer group h-full"
-                    style={{ borderColor: `${theme.hex}28` }}
-                  >
-                    <div className={cn(
-                      "w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110",
-                      domain.bg_color
-                    )} style={{ boxShadow: `0 0 20px ${theme.glowCss}` }}>
-                      <Icon className={cn("h-7 w-7", domain.icon_color)} />
-                    </div>
-
-                    <h3 className="font-bold text-lg font-serif mb-1">{domain.title}</h3>
-                    {DOMAIN_META[domain.id] && (
-                      <p className={cn("text-xs font-medium mb-2", theme.textCls)}>{DOMAIN_META[domain.id].tagline}</p>
-                    )}
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{domain.description}</p>
-
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {domain.skills.slice(0, 4).map(skill => (
-                        <span key={skill} className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border", theme.bgCls, theme.borderCls, theme.textCls)}>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span>{domain.total_courses} courses</span>
-                        <span className={cn("flex items-center gap-1 font-semibold", theme.textCls)}>
-                          <Star className="h-3.5 w-3.5" />{domain.total_points} pts
-                        </span>
-                      </div>
-                      <button
-                        disabled={detailLoading}
-                        className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all",
-                          "hover:brightness-110"
-                        )}
-                        style={{ background: `linear-gradient(135deg, ${theme.gradFrom}, ${theme.gradTo})`, boxShadow: `0 4px 12px ${theme.glowCss}` }}
-                      >
-                        {detailLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><span>Explore</span><ArrowRight className="h-3 w-3" /></>}
-                      </button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )
-            })}
+            {[...domains].sort((a, b) => Number(a.is_locked) - Number(b.is_locked)).map((domain, i) => (
+              <DomainCard
+                key={domain.id}
+                domain={domain}
+                index={i}
+                loading={openingId === domain.id}
+                onOpen={() => openDomain(domain)}
+              />
+            ))}
           </div>
         )}
       </motion.div>

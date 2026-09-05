@@ -19,6 +19,7 @@ import pythonForGenAIContent from "./courses/python-for-ai"
 import finetuningLLMContent from "./courses/finetuning-llm"
 import multimodalGenAIContent from "./courses/multimodal-genai"
 import genaiEvalProductionContent from "./courses/genai-evaluation-production"
+import powerBIContent from "./courses/power-bi"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -38,6 +39,7 @@ const courseContent: Record<string, Record<number, string>> = {
   "finetuning-llm": finetuningLLMContent,
   "multimodal-genai": multimodalGenAIContent,
   "genai-evaluation-production": genaiEvalProductionContent,
+  "power-bi": powerBIContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {

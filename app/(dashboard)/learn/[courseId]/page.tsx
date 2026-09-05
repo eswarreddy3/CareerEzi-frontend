@@ -667,8 +667,20 @@ function renderContent(content: string): React.ReactNode[] {
       const tableLines: string[] = [line]
       i++
       while (i < lines.length && lines[i].startsWith('|')) { tableLines.push(lines[i]); i++ }
-      const headers = tableLines[0].split('|').filter(Boolean).map(h => h.trim())
-      const rows = tableLines.slice(2).map(r => r.split('|').filter(Boolean).map(c => c.trim()))
+      // Split on cell delimiters, treating a backslash-escaped \| as literal text.
+      // Needed for content that documents pipe characters (e.g. DAX's || operator).
+      const splitRow = (r: string) =>
+        r.split('|')
+          .reduce<string[]>((acc, part) => {
+            const prev = acc[acc.length - 1]
+            if (prev !== undefined && prev.endsWith('\\')) acc[acc.length - 1] = prev.slice(0, -1) + '|' + part
+            else acc.push(part)
+            return acc
+          }, [])
+          .filter(Boolean)
+          .map(c => c.trim())
+      const headers = splitRow(tableLines[0])
+      const rows = tableLines.slice(2).map(splitRow)
       elements.push(
         <div key={key++} className="overflow-x-auto my-5 rounded-2xl border border-border shadow-sm">
           <table className="w-full text-sm border-collapse">
