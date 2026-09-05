@@ -15,6 +15,10 @@ import llmTransformersContent from "./courses/llm-transformers"
 import promptEngineeringContent from "./courses/prompt-engineering"
 import embeddingsRagContent from "./courses/embeddings-vectordb-rag"
 import llmAppDevContent from "./courses/llm-application-dev"
+import pythonForGenAIContent from "./courses/python-for-genai"
+import finetuningLLMContent from "./courses/finetuning-llm"
+import multimodalGenAIContent from "./courses/multimodal-genai"
+import genaiEvalProductionContent from "./courses/genai-evaluation-production"
 
 const courseContent: Record<string, Record<number, string>> = {
   python: pythonContent,
@@ -30,6 +34,10 @@ const courseContent: Record<string, Record<number, string>> = {
   "prompt-engineering": promptEngineeringContent,
   "embeddings-vectordb-rag": embeddingsRagContent,
   "llm-application-dev": llmAppDevContent,
+  "python-for-genai": pythonForGenAIContent,
+  "finetuning-llm": finetuningLLMContent,
+  "multimodal-genai": multimodalGenAIContent,
+  "genai-evaluation-production": genaiEvalProductionContent,
 }
 
 export function getLessonContent(courseId: string, lessonOrder: number): string | null {
