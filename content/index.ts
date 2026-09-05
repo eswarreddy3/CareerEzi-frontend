@@ -34,7 +34,7 @@ const courseContent: Record<string, Record<number, string>> = {
   "prompt-engineering": promptEngineeringContent,
   "embeddings-vectordb-rag": embeddingsRagContent,
   "llm-application-dev": llmAppDevContent,
-  "python-for-genai": pythonForGenAIContent,
+  "python-for-ai": pythonForGenAIContent,
   "finetuning-llm": finetuningLLMContent,
   "multimodal-genai": multimodalGenAIContent,
   "genai-evaluation-production": genaiEvalProductionContent,

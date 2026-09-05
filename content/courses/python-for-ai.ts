@@ -1,7 +1,7 @@
 // Python & Foundations for Generative AI — Basic → Intermediate → Advanced (19 topics)
 // Extracted verbatim from python_for_AI.docx (Course 1 of 9, Generative AI domain).
 // Diagrams served from /public/python_for_AI_images/image_*.png
-// Course id: "python-for-genai"  →  registered in content/index.ts
+// Course id: "python-for-ai"  →  registered in content/index.ts
 //
 // Create these in the super-admin UI (/super-admin/courses); lesson `order` is
 // global across the course, so it must match the keys below exactly.
