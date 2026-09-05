@@ -983,6 +983,7 @@ export default function ResumePage() {
   const [template, setTemplate] = useState<TemplateId>("modern")
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved")
   const [zoom, setZoom] = useState(0.68)
+  const [downloading, setDownloading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const initialLoad = useRef(true)
 
@@ -991,26 +992,80 @@ export default function ResumePage() {
 
   const downloadPDF = async () => {
     const el = document.getElementById("resume-print-area")
-    if (!el) return
+    if (!el || downloading) return
+
+    // A4 at 96 CSS px/inch — the geometry every template is authored against.
+    const PAGE_W = 794
+    const PAGE_H = 1123
+
+    setDownloading(true)
     el.style.display = "block"
     el.style.position = "absolute"
     el.style.left = "-9999px"
     el.style.top = "0"
+    el.style.width = `${PAGE_W}px`
     try {
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import("html2canvas"),
         import("jspdf"),
       ])
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" })
-      const imgData = canvas.toDataURL("image/jpeg", 1.0)
-      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [794, 1123] })
-      pdf.addImage(imgData, "JPEG", 0, 0, 794, 1123)
+
+      // Rasterise only once the web fonts have resolved, otherwise glyphs are
+      // captured in a fallback face and come out smeared.
+      if (document.fonts?.ready) await document.fonts.ready
+
+      const cssH = Math.max(el.scrollHeight, PAGE_H)
+      // Render well above the page's own pixel grid so text stays crisp, backing
+      // off on very long resumes to stay inside the browser's canvas limits.
+      const scale = cssH > 3 * PAGE_H ? 2 : 3
+
+      const canvas = await html2canvas(el, {
+        scale,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        width: PAGE_W,
+        height: cssH,
+      })
+
+      // Real A4 in points. jsPDF's "px" unit is 4/3 pt, so the old [794, 1123] page
+      // was emitted at ~14.7in x 20.8in and every viewer shrank it back down — part
+      // of why the download looked soft next to the on-screen preview.
+      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4", compress: true })
+      const ptW = pdf.internal.pageSize.getWidth()
+      const ptH = pdf.internal.pageSize.getHeight()
+      const sliceH = Math.round(PAGE_H * scale)   // one A4 page, in canvas pixels
+      const pages = Math.max(1, Math.ceil(canvas.height / sliceH))
+
+      // Slice the tall capture into A4-sized pages instead of squashing the whole
+      // resume onto one — squashing was what distorted and blurred longer resumes.
+      const slice = document.createElement("canvas")
+      const ctx = slice.getContext("2d")!
+
+      for (let page = 0; page < pages; page++) {
+        const srcY = page * sliceH
+        const srcH = Math.min(sliceH, canvas.height - srcY)
+        slice.width = canvas.width
+        slice.height = sliceH
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(0, 0, slice.width, slice.height)
+        ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH)
+
+        if (page > 0) pdf.addPage("a4", "portrait")
+        // PNG keeps small type and hairlines free of the JPEG ringing that reads as blur.
+        pdf.addImage(slice.toDataURL("image/png"), "PNG", 0, 0, ptW, ptH, undefined, "FAST")
+      }
+
       pdf.save(`${data.personal.name || "resume"}.pdf`)
+    } catch {
+      toast.error("Could not generate the PDF. Please try again.")
     } finally {
       el.style.display = "none"
       el.style.position = ""
       el.style.left = ""
       el.style.top = ""
+      el.style.width = ""
+      setDownloading(false)
     }
   }
 
@@ -1134,8 +1189,9 @@ export default function ResumePage() {
               size="sm"
               className="bg-primary hover:brightness-110 text-primary-foreground"
               onClick={downloadPDF}
+              disabled={downloading}
             >
-              <Printer className="h-4 w-4 mr-1.5" /> Download PDF
+              <Printer className="h-4 w-4 mr-1.5" /> {downloading ? "Preparing…" : "Download PDF"}
             </Button>
           </div>
         </div>
