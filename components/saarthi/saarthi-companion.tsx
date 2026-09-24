@@ -9,7 +9,7 @@
  * submission on /coding, a finished lesson on /learn — instantly, with no
  * model call and no latency.
  *
- * THE CLIPPY RULE (AI_Intigration.md):
+ * THE CLIPPY RULE (CareerEzi-backend/docs/AI_Intigration.md):
  *   - never interrupts unprompted — she only speaks when the student DID something
  *   - never covers content — small, corner-docked, pointer-events only on herself
  *   - permanently dismissible, remembered per user across sessions

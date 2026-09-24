@@ -32,7 +32,7 @@ import {
   Users, Search, Flame, Mail, Loader2, Download,
   ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle,
   CheckCircle, ExternalLink, FileDown, Pencil, Columns3,
-  GraduationCap, Activity, Filter,
+  GraduationCap, Activity, Filter, UserCheck,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -52,6 +52,7 @@ interface Student {
   streak: number
   last_active: string | null
   is_inactive: boolean
+  onboarded: boolean
   // Academic profile (separate table — may be null if never filled)
   cgpa: number | null
   tenth_percent: number | null
@@ -67,7 +68,7 @@ interface ExportStudent {
   id: number; name: string; email: string; roll_number: string
   branch: string; section: string; passout_year: number | string
   phone: string; linkedin: string; github: string
-  status: string; points: number; streak: number; last_active: string | null
+  status: string; onboarding: string; points: number; streak: number; last_active: string | null
   mcq_attempts: number; mcq_correct: number; mcq_accuracy: number
   coding_submissions: number; coding_solved: number
   assignments_completed: number; assignment_avg_score: number
@@ -89,6 +90,7 @@ const OPTIONAL_COLUMNS = [
   { key: "gap_years",       label: "Gap Years" },
   { key: "category",        label: "Category" },
   { key: "placement_status", label: "Placement" },
+  { key: "onboarded",       label: "Onboarding" },
   { key: "status",          label: "Status" },
   { key: "points",          label: "Points" },
   { key: "streak",          label: "Streak" },
@@ -109,6 +111,7 @@ const DEFAULT_VISIBLE: Record<ColKey, boolean> = {
   gap_years: false,
   category: false,
   placement_status: false,
+  onboarded: true,
   status: true,
   points: true,
   streak: true,
@@ -303,14 +306,14 @@ export default function AdminStudentsPage() {
       const all: ExportStudent[] = res.data.students
       const headers = [
         "Roll No", "Name", "Email", "Branch", "Section", "Batch Year",
-        "Phone", "LinkedIn", "GitHub", "Status", "Points", "Streak", "Last Active",
+        "Phone", "LinkedIn", "GitHub", "Status", "Onboarding", "Points", "Streak", "Last Active",
         "MCQ Attempts", "MCQ Correct", "MCQ Accuracy (%)",
         "Coding Submissions", "Coding Problems Solved",
         "Assignments Completed", "Assignment Avg Score (%)", "Lessons Completed",
       ]
       const rows = all.map(s => [
         s.roll_number, s.name, s.email, s.branch, s.section, s.passout_year,
-        s.phone, s.linkedin, s.github, s.status, s.points, s.streak,
+        s.phone, s.linkedin, s.github, s.status, s.onboarding, s.points, s.streak,
         s.last_active ? new Date(s.last_active).toLocaleDateString("en-IN") : "Never",
         s.mcq_attempts, s.mcq_correct, s.mcq_accuracy,
         s.coding_submissions, s.coding_solved,
@@ -345,6 +348,8 @@ export default function AdminStudentsPage() {
     let list = [...students]
     if (statusFilter === "active") list = list.filter(s => !s.is_inactive)
     if (statusFilter === "inactive") list = list.filter(s => s.is_inactive)
+    if (statusFilter === "onboarded") list = list.filter(s => s.onboarded)
+    if (statusFilter === "pending") list = list.filter(s => !s.onboarded)
     list.sort((a, b) => {
       let av: string | number, bv: string | number
       if (sortKey === "name") { av = a.name.toLowerCase(); bv = b.name.toLowerCase() }
@@ -367,6 +372,7 @@ export default function AdminStudentsPage() {
 
   const inactiveCount = students.filter(s => s.is_inactive).length
   const activeCount = students.length - inactiveCount
+  const onboardedCount = students.filter(s => s.onboarded).length
 
   const allVisibleIds = sortedStudents.map(s => s.id)
   const allSelected = allVisibleIds.length > 0 && allVisibleIds.every(id => selectedIds.has(id))
@@ -391,6 +397,7 @@ export default function AdminStudentsPage() {
     { label: "Total Students", value: total,            icon: GraduationCap },
     { label: "Active",         value: activeCount,       icon: CheckCircle },
     { label: "Inactive",       value: inactiveCount,     icon: AlertTriangle },
+    { label: "Onboarded",      value: onboardedCount,    icon: UserCheck },
     { label: "Selected",       value: selectedIds.size,  icon: Activity },
   ]
 
@@ -431,7 +438,7 @@ export default function AdminStudentsPage() {
       />
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {statCards.map((s, i) => (
           <AdminStatCard
             key={s.label}
@@ -513,6 +520,8 @@ export default function AdminStudentsPage() {
                   <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="onboarded">Onboarded</SelectItem>
+                  <SelectItem value="pending">Not Onboarded</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -700,6 +709,11 @@ export default function AdminStudentsPage() {
                         Placement
                       </th>
                     )}
+                    {show("onboarded") && (
+                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                        Onboarding
+                      </th>
+                    )}
                     {show("status") && (
                       <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Status
@@ -846,6 +860,15 @@ export default function AdminStudentsPage() {
                                 {PLACEMENT_META[student.placement_status]?.label ?? student.placement_status}
                               </span>
                             ) : <span className="text-muted-foreground/40">—</span>}
+                          </td>
+                        )}
+                        {show("onboarded") && (
+                          <td className="py-3 px-3 whitespace-nowrap">
+                            {student.onboarded ? (
+                              <span className="chip chip-success">Onboarded</span>
+                            ) : (
+                              <span className="chip chip-warning">Not Onboarded</span>
+                            )}
                           </td>
                         )}
                         {show("status") && (

@@ -5,7 +5,7 @@
  * sees text. A voice interview costs exactly the same as a typed one (~$0.004).
  * OpenAI's realtime audio API would be ~$0.40–0.50 for the same session.
  *
- * SUPPORT REALITY (AI_Intigration.md finding #5):
+ * SUPPORT REALITY (CareerEzi-backend/docs/AI_Intigration.md finding #5):
  *   SpeechSynthesis  — everywhere, including Firefox
  *   SpeechRecognition — Chrome / Edge / Safari only. FIREFOX HAS NEVER SHIPPED IT.
  * Lab machines also frequently have no working microphone. So the listening

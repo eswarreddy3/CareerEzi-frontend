@@ -75,7 +75,7 @@ type StudentNavSection = {
 }
 type StudentNavItemBlock = {
   type: "item"; item: NavItem; color: NavColor; highlight?: boolean
-  /** Hide unless the college holds this AI pack. See AI_Intigration.md §C3. */
+  /** Hide unless the college holds this AI pack. See CareerEzi-backend/docs/AI_Intigration.md §C3. */
   requires?: PackKey
 }
 type StudentNavBlock = StudentNavItemBlock | StudentNavSection

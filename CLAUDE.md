@@ -288,4 +288,4 @@ See memory file `feedback_course_content_from_docx.md` for the full extraction w
 
 - Domains: managed via super-admin UI — full CRUD + course mapping with up/down arrow reordering. Domain `id` is a permanent slug set at creation and **cannot be changed**. `bg_color` is auto-derived from `icon_color`. Course mapping uses `PUT /super-admin/domains/<id>/courses` (replaces full mapping atomically).
 - Aptitude questions: super-admin UI (`/super-admin/aptitude`) — CSV bulk upload only.
-- Coding problems: super-admin UI (`/super-admin/coding`) — CRUD form + JSON bulk import. `seed_coding.py` for initial bulk data. Bulk import upserts by slug.
+- Coding problems: super-admin UI (`/super-admin/coding`) — CRUD form + JSON bulk import. Bulk import upserts by slug. (There is no coding seeder — `seed_coding.py` was removed; recover it from git history if the initial bulk data is needed again.)

@@ -38,6 +38,9 @@ interface Student {
   branch: string | null
   roll_number: string | null
   is_active: boolean
+  onboarded: boolean
+  last_active: string | null
+  is_inactive: boolean
   streak: number
   points: number
 }
@@ -48,6 +51,20 @@ interface College {
 }
 
 type StudentAction = { type: "activate" | "deactivate" | "delete"; student: Student }
+
+function formatLastActive(iso: string | null): string {
+  if (!iso) return "Never"
+  const d = new Date(iso)
+  const now = new Date()
+  const diffMs = now.getTime() - d.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  if (diffMins < 60) return diffMins <= 1 ? "Just now" : `${diffMins}m ago`
+  const diffHrs = Math.floor(diffMins / 60)
+  if (diffHrs < 24) return `${diffHrs}h ago`
+  const diffDays = Math.floor(diffHrs / 24)
+  if (diffDays === 1) return "Yesterday"
+  return `${diffDays}d ago`
+}
 
 export default function SuperAdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
@@ -226,8 +243,39 @@ export default function SuperAdminStudentsPage() {
       render: (row) => <span className="text-sm text-foreground">{row.points.toLocaleString()}</span>,
     },
     {
+      key: "onboarded",
+      header: "Onboarding",
+      render: (row) => (
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-xs whitespace-nowrap",
+            row.onboarded
+              ? "bg-success/20 text-success border-success/30"
+              : "bg-warning/20 text-warning border-warning/30"
+          )}
+        >
+          {row.onboarded ? "Onboarded" : "Not Onboarded"}
+        </Badge>
+      ),
+    },
+    {
+      key: "is_inactive",
+      header: "Activity",
+      render: (row) => (
+        <span
+          className={cn(
+            "text-sm whitespace-nowrap",
+            row.is_inactive ? "text-danger" : "text-success"
+          )}
+        >
+          {formatLastActive(row.last_active)}
+        </span>
+      ),
+    },
+    {
       key: "is_active",
-      header: "Status",
+      header: "Account",
       render: (row) => (
         <Badge
           variant="outline"
@@ -238,7 +286,7 @@ export default function SuperAdminStudentsPage() {
               : "bg-danger/20 text-danger border-danger/30"
           )}
         >
-          {row.is_active ? "Active" : "Inactive"}
+          {row.is_active ? "Enabled" : "Disabled"}
         </Badge>
       ),
     },
