@@ -48,7 +48,12 @@ function setCookie(name: string, value: string, days = 7) {
 
 function deleteCookie(name: string) {
   if (typeof document === "undefined") return
-  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax`
+}
+
+function hasCookie(name: string): boolean {
+  if (typeof document === "undefined") return true
+  return document.cookie.split("; ").some((c) => c.startsWith(`${name}=`) && c.length > name.length + 1)
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -87,6 +92,15 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         user: state.user,
       }),
+      // The proxy trusts the cookie, so the cookie is the source of truth.
+      // If it's gone (expired / cleared) but localStorage still holds a token,
+      // drop the stale session — otherwise "/" redirects to /dashboard, the
+      // proxy bounces to /login, and the user can never reach the landing page.
+      onRehydrateStorage: () => (state) => {
+        if (state?.token && !hasCookie("careerezi_token")) {
+          state.clearAuth()
+        }
+      },
     }
   )
 )

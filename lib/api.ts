@@ -1,4 +1,5 @@
 import axios from "axios"
+import { useAuthStore } from "@/store/authStore"
 
 const TOKEN_KEY = "careerezi_access_token"
 const AUTH_KEY = "careerezi-auth"
@@ -44,10 +45,11 @@ function updateTokens(accessToken: string, refreshToken: string) {
 
 function clearAuth() {
   if (typeof window === "undefined") return
-  localStorage.removeItem(TOKEN_KEY)
+  // Clear through the store so in-memory state is wiped too — otherwise any
+  // later store write (e.g. updateUser) re-persists the old token.
+  useAuthStore.getState().clearAuth()
   localStorage.removeItem(AUTH_KEY)
-  document.cookie = "careerezi_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
-  window.location.href = "/login"
+  if (window.location.pathname !== "/login") window.location.href = "/login"
 }
 
 const api = axios.create({
@@ -101,6 +103,11 @@ api.interceptors.response.use(
       try {
         const res = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken })
         const { token: newAccess, refreshToken: newRefresh } = res.data
+        // User logged out while the refresh was in flight — don't resurrect the session
+        if (!getRefreshToken()) {
+          refreshQueue = []
+          return Promise.reject(error)
+        }
         updateTokens(newAccess, newRefresh)
 
         // Flush queued requests
