@@ -22,7 +22,6 @@ import {
 import Link from "next/link"
 import { TopNav } from "@/components/top-nav"
 import { Logo } from "@/components/logo"
-import { LaunchCurtain, LaunchModeButton } from "@/components/launch-curtain"
 import { AIShowcase } from "@/components/landing/ai-showcase"
 import { CapabilityGrid } from "@/components/landing/capability-grid"
 
@@ -726,7 +725,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <LaunchCurtain />
       <ScrollProgress />
       <TopNav onScrollTo={scrollTo} />
       <MobileBottomCTA />
@@ -1908,7 +1906,6 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <LaunchModeButton />
               <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                 Student Login
               </Link>
