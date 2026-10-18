@@ -90,6 +90,7 @@ frontend/
 | /certificates | student | ✅ Fynity certificates list + download |
 | /u/[username] | public | ✅ Public portfolio (cert chips link to /verify) |
 | /verify/[uid] | public | ✅ Certificate authenticity check (QR target) |
+| /privacy, /terms, /cookies | public | ✅ Legal pages (`app/(public)/`, shell in `components/legal-page.tsx`) |
 | /admin | college_admin | ✅ |
 | /admin/students | college_admin | ✅ |
 | /admin/analytics | college_admin | ✅ |
@@ -245,6 +246,14 @@ Utility classes:
 - Domain programs page is fully API-driven — no mock data.
 - Job postings are **global** — not college-scoped. Posted by super_admin, visible to all students.
 - Assignment "Review" button routes directly to `/assignments/[id]/results` (not through the exam page).
+
+## Legal & consent
+
+- Operator details, contact emails and `TERMS_VERSION` live **only** in `lib/legal.ts` — never inline them in page copy.
+- Legal pages must describe what the code actually does. When you add a data field, a third-party processor (e.g. a new AI/email provider) or a new browser-storage key, update `/privacy` (data + processor tables) and `/cookies` (storage table).
+- Onboarding requires the consent checkbox; the backend rejects `complete-onboarding` without `accept_terms: true`. Bump `TERMS_VERSION` on material changes.
+- Google Analytics loads only after opt-in via `components/cookie-consent.tsx` — never add tracking scripts directly to `app/layout.tsx`.
+- New public routes must also be added to `PUBLIC_ROUTES` in `proxy.ts`.
 
 ## Key gotchas
 - `api.ts` has `Content-Type: application/json` as instance default. The request interceptor deletes it for `FormData` payloads so Flask's `request.files` is populated correctly. If file uploads return "No file provided", check that this interceptor logic is intact.

@@ -21,6 +21,9 @@ import { Label } from "@/components/ui/label"
 import { useAuthStore } from "@/store/authStore"
 import api from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { TERMS_VERSION } from "@/lib/legal"
+import Link from "next/link"
+import type { UseFormReturn } from "react-hook-form"
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 const step1Schema = z.object({
@@ -39,6 +42,9 @@ const step2Schema = z
       .regex(/[A-Z]/, "Must contain an uppercase letter")
       .regex(/[0-9]/, "Must contain a number"),
     confirm_password: z.string(),
+    accept_terms: z.literal(true, {
+      errorMap: () => ({ message: "You must accept the Terms and Privacy Policy to continue" }),
+    }),
   })
   .refine((d) => d.new_password === d.confirm_password, {
     message: "Passwords do not match",
@@ -99,6 +105,30 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
   )
 }
 
+// ── Consent (DPDP Act notice + consent; version is recorded server-side) ──────
+function ConsentCheckbox({ form }: { form: UseFormReturn<Step2> }) {
+  const error = form.formState.errors.accept_terms
+  return (
+    <div className="space-y-1.5">
+      <label className="flex items-start gap-2.5 text-xs text-muted-foreground leading-relaxed cursor-pointer">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 flex-shrink-0 accent-[var(--primary)] cursor-pointer"
+          {...form.register("accept_terms")}
+        />
+        <span>
+          I am 18 or older (or have my parent or guardian&apos;s consent), and I agree to the{" "}
+          <Link href="/terms" target="_blank" className="text-primary hover:underline">Terms of Service</Link> and
+          consent to the processing of my personal data as described in the{" "}
+          <Link href="/privacy" target="_blank" className="text-primary hover:underline">Privacy Policy</Link>.
+          I can withdraw consent at any time.
+        </span>
+      </label>
+      {error && <p className="text-xs text-destructive">{error.message}</p>}
+    </div>
+  )
+}
+
 // ── Simple set-password form for branch_admin / college_admin ─────────────────
 function SetPasswordOnboarding({ user }: { user: any }) {
   const router = useRouter()
@@ -114,7 +144,11 @@ function SetPasswordOnboarding({ user }: { user: any }) {
   const onSubmit = async (data: Step2) => {
     setIsSubmitting(true)
     try {
-      await api.patch("/auth/complete-onboarding", { new_password: data.new_password })
+      await api.patch("/auth/complete-onboarding", {
+        new_password: data.new_password,
+        accept_terms: true,
+        terms_version: TERMS_VERSION,
+      })
       updateUser({ first_login: false })
       toast.success("Password set! Please log in with your new password.")
       clearAuth()
@@ -205,6 +239,8 @@ function SetPasswordOnboarding({ user }: { user: any }) {
               )}
             </div>
 
+            <ConsentCheckbox form={form} />
+
             <Button
               type="submit"
               disabled={isSubmitting}
@@ -272,6 +308,8 @@ export default function OnboardingPage() {
         new_password: data.new_password,
         avatar: selectedAvatar || undefined,
         username: username.trim() || undefined,
+        accept_terms: true,
+        terms_version: TERMS_VERSION,
       })
       updateUser({ first_login: false })
       toast.success("Setup complete! Welcome to CareerEzi 🎉")
@@ -282,7 +320,7 @@ export default function OnboardingPage() {
       setTimeout(() => router.replace(dest), 2500)
     } catch (err: any) {
       toast.error("Setup failed", {
-        description: err?.response?.data?.message || "Please try again",
+        description: err?.response?.data?.error || err?.response?.data?.message || "Please try again",
       })
     } finally {
       setIsSubmitting(false)
@@ -641,6 +679,8 @@ export default function OnboardingPage() {
                         <p className="text-xs text-destructive">{form2.formState.errors.confirm_password.message}</p>
                       )}
                     </div>
+
+                    <ConsentCheckbox form={form2} />
 
                     <div className="flex gap-3 pt-1">
                       <Button

@@ -20,6 +20,7 @@ import {
   Award, Users2, Cpu, PieChart, Activity, Briefcase,
 } from "lucide-react"
 import Link from "next/link"
+import { LEGAL_LINKS } from "@/lib/legal"
 import { TopNav } from "@/components/top-nav"
 import { Logo } from "@/components/logo"
 import { AIShowcase } from "@/components/landing/ai-showcase"
@@ -1771,7 +1772,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 sm:gap-10">
             <FadeIn className="lg:col-span-2 space-y-5">
               {[
-                { icon: Mail,   label: "Email",    value: "hello@careerezi.in" },
+                { icon: Mail,   label: "Email",    value: "hello@careerezi.com" },
                 { icon: Phone,  label: "Phone",    value: "+91 98765 43210" },
                 { icon: MapPin, label: "Location", value: "Chennai, Tamil Nadu, India" },
               ].map((item) => (
@@ -1878,9 +1879,9 @@ export default function LandingPage() {
             <div>
               <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Legal</h4>
               <ul className="space-y-3">
-                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item}</a>
+                {LEGAL_LINKS.map(({ href, label }) => (
+                  <li key={href}>
+                    <Link href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
                   </li>
                 ))}
               </ul>
@@ -2008,6 +2009,10 @@ function ContactForm() {
           </motion.button>
         )}
       </AnimatePresence>
+      <p className="text-xs text-muted-foreground text-center">
+        We use these details only to reply to your enquiry. See our{" "}
+        <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+      </p>
     </form>
   )
 }
