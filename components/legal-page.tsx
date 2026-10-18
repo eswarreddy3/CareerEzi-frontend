@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Logo } from "@/components/logo"
-import { LEGAL, LEGAL_LINKS } from "@/lib/legal"
+import { LEGAL, SITE_PAGES } from "@/lib/legal"
 
 interface LegalPageProps {
   title: string
@@ -24,8 +24,8 @@ export function LegalPage({ title, summary, current, children }: LegalPageProps)
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        <nav aria-label="Legal documents" className="flex flex-wrap gap-2 mb-8">
-          {LEGAL_LINKS.map((l) => (
+        <nav aria-label="About and legal pages" className="flex flex-wrap gap-2 mb-8">
+          {SITE_PAGES.map((l) => (
             <Link
               key={l.href}
               href={l.href}

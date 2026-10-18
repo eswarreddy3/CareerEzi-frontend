@@ -35,6 +35,7 @@ frontend/
 ├── components/
 │   ├── ui/               # shadcn components (do not edit)
 │   ├── landing/          # Landing-page sections (imported by app/page.tsx)
+│   │   ├── site-footer.tsx     # Public footer shared by / and /about (pass onScrollTo on /)
 │   │   ├── primitives.tsx      # Shared FadeIn / TiltCard / Orb
 │   │   ├── ai-showcase.tsx     # Saarthi section — interview room, readiness ring, study plan
 │   │   └── capability-grid.tsx # Full shipped-feature inventory, grouped by audience
@@ -90,6 +91,7 @@ frontend/
 | /certificates | student | ✅ Fynity certificates list + download |
 | /u/[username] | public | ✅ Public portfolio (cert chips link to /verify) |
 | /verify/[uid] | public | ✅ Certificate authenticity check (QR target) |
+| /about | public | ✅ Interactive About page — landing-styled (`components/landing/about-content.tsx`, shares `TopNav` + `SiteFooter`) |
 | /privacy, /terms, /cookies | public | ✅ Legal pages (`app/(public)/`, shell in `components/legal-page.tsx`) |
 | /admin | college_admin | ✅ |
 | /admin/students | college_admin | ✅ |

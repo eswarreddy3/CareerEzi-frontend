@@ -20,8 +20,8 @@ import {
   Award, Users2, Cpu, PieChart, Activity, Briefcase,
 } from "lucide-react"
 import Link from "next/link"
-import { LEGAL_LINKS } from "@/lib/legal"
 import { TopNav } from "@/components/top-nav"
+import { SiteFooter } from "@/components/landing/site-footer"
 import { Logo } from "@/components/logo"
 import { AIShowcase } from "@/components/landing/ai-showcase"
 import { CapabilityGrid } from "@/components/landing/capability-grid"
@@ -805,7 +805,7 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 22 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.52, duration: 0.6 }}
-              className="flex flex-col sm:flex-row items-start gap-3 mb-10"
+              className="flex flex-col sm:flex-row sm:flex-wrap items-start gap-3 mb-10"
             >
               <MagneticWrap>
                 <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
@@ -819,6 +819,13 @@ export default function LandingPage() {
                   <button onClick={() => scrollTo("features")} className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all">
                     Explore Features <ChevronDown className="w-4 h-4" />
                   </button>
+                </motion.div>
+              </MagneticWrap>
+              <MagneticWrap>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 380, damping: 20 }}>
+                  <Link href="/about" className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-border hover:border-primary/40 hover:bg-secondary/40 text-sm sm:text-base font-semibold transition-all">
+                    About Us <ChevronRight className="w-4 h-4" />
+                  </Link>
                 </motion.div>
               </MagneticWrap>
             </motion.div>
@@ -1732,7 +1739,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
+      <section id="faq" className="scroll-mt-20 py-16 sm:py-20 px-4 sm:px-6 relative overflow-hidden">
         <div className="max-w-3xl mx-auto relative z-10">
           <FadeIn className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-400 text-xs sm:text-sm mb-4 font-medium">
@@ -1811,116 +1818,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border bg-background pt-14 pb-8 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-
-          {/* Top grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-8 sm:gap-10 mb-12">
-
-            {/* Brand col */}
-            <div className="col-span-2 sm:col-span-4 lg:col-span-2">
-              <div className="mb-4"><Logo size={32} /></div>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
-                India's campus placement preparation platform. Structured learning, practice, and community — all in one place.
-              </p>
-              <div className="flex gap-2.5">
-                {[
-                  { icon: Twitter,  href: "#", label: "Twitter" },
-                  { icon: Linkedin, href: "#", label: "LinkedIn" },
-                  { icon: Github,   href: "#", label: "GitHub" },
-                ].map(({ icon: Icon, href, label }) => (
-                  <motion.a
-                    key={label} href={href} title={label}
-                    whileHover={{ scale: 1.12, y: -2 }}
-                    className="w-9 h-9 rounded-lg border border-border hover:border-primary/40 hover:bg-primary/10 flex items-center justify-center text-muted-foreground hover:text-primary transition-all"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </motion.a>
-                ))}
-              </div>
-            </div>
-
-            {/* Platform links */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Platform</h4>
-              <ul className="space-y-3">
-                {[
-                  { label: "Features",     id: "features" },
-                  { label: "For Colleges", id: "how-it-works" },
-                  { label: "Gamification", id: "gamification" },
-                  { label: "Contact",      id: "contact" },
-                ].map(({ label, id }) => (
-                  <li key={label}>
-                    <button
-                      onClick={() => scrollTo(id)}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Resources */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Resources</h4>
-              <ul className="space-y-3">
-                {["Blog", "Case Studies", "Help Centre", "Status"].map((item) => (
-                  <li key={item}>
-                    <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{item}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Legal</h4>
-              <ul className="space-y-3">
-                {LEGAL_LINKS.map(({ href, label }) => (
-                  <li key={href}>
-                    <Link href={href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">{label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-muted-foreground">
-                © 2026 CareerEzi. All rights reserved.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Developed by{" "}
-                <a
-                  href="https://www.fynityinnovations.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-primary hover:underline transition-colors"
-                >
-                  Fynity Innovations
-                </a>
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                Student Login
-              </Link>
-              <span className="text-border">·</span>
-              <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                College Admin
-              </Link>
-              <span className="text-border">·</span>
-              <p className="text-xs text-muted-foreground">Made with ❤️ in India</p>
-            </div>
-          </div>
-
-        </div>
-      </footer>
+      <SiteFooter onScrollTo={scrollTo} />
 
       <div className="h-20 md:hidden" />
     </div>

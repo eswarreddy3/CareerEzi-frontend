@@ -51,7 +51,8 @@ export function TopNav({ onScrollTo }: TopNavProps) {
 
   const handleLink = (id: string) => {
     setMenuOpen(false)
-    setTimeout(() => onScrollTo?.(id), 300)
+    if (!onScrollTo) { window.location.href = `/#${id}`; return }
+    setTimeout(() => onScrollTo(id), 300)
   }
 
   return (

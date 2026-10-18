@@ -29,3 +29,6 @@ export const LEGAL_LINKS = [
   { href: "/terms", label: "Terms of Service" },
   { href: "/cookies", label: "Cookie Policy" },
 ] as const
+
+// Tabs shown at the top of the info/legal page shell.
+export const SITE_PAGES = [{ href: "/about", label: "About CareerEzi" }, ...LEGAL_LINKS] as const
