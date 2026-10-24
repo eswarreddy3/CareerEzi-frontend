@@ -14,24 +14,8 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { companyGradient, companyLetter, companyLogoSrc } from "@/lib/company-logos"
 import { SurfaceTexture } from "@/components/admin-stat-card"
-
-const LOCAL_LOGOS: Record<string, string> = {
-  tcs:       '/Company_logos/tcs_logo.png',
-  wipro:     '/Company_logos/wipro_logo.png',
-  accenture: '/Company_logos/accenture_logo.png',
-  infosys: '/Company_logos/infosys_logo.png',
-  amazon:    '/Company_logos/amazon_logo.png',
-}
-
-const COMPANY_COLORS: Record<string, string> = {
-  tcs:        'from-blue-700 to-blue-900',
-  wipro:      'from-teal-500 to-emerald-600',
-  accenture:  'from-purple-600 to-violet-700',
-  infosys:    'from-cyan-500 to-blue-500',
-  amazon:     'from-orange-400 to-orange-600',
-}
-const companyColor = (slug: string, fallback: string) => COMPANY_COLORS[slug] ?? fallback
 
 interface Company {
   id: number
@@ -50,62 +34,34 @@ interface Company {
   packages_count: number
 }
 
-// ── Smart logo: local file → DB logo_url → name-based Clearbit → website Clearbit → letter ─
-
-function buildLogoSources(company: Company): string[] {
-  const srcs: string[] = []
-  if (LOCAL_LOGOS[company.slug]) srcs.push(LOCAL_LOGOS[company.slug])
-  if (company.logo_url) srcs.push(company.logo_url)
-  // Derive domain from company name (most reliable for well-known brands)
-  const nameDomain = company.name.toLowerCase()
-    .replace(/\s+(limited|ltd|inc|llc|corp(?:oration)?|plc|pte|pvt)\.?\s*$/i, "")
-    .trim().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
-  if (nameDomain) srcs.push(`https://logo.clearbit.com/${nameDomain}.com`)
-  // Also try the website domain (may differ from name, e.g. amazon.jobs → amazon.com)
-  if (company.website) {
-    try {
-      const websiteDomain = new URL(company.website).hostname
-        .replace(/^www\./, "").split(".").slice(-2).join(".")
-      const websiteUrl = `https://logo.clearbit.com/${websiteDomain}`
-      if (!srcs.includes(websiteUrl)) srcs.push(websiteUrl)
-    } catch {}
-  }
-  return srcs
-}
+// ── Logo: local file when we have one, otherwise the company's letter ─────────
 
 function CompanyLogoBox({ company, size = 48 }: { company: Company; size?: number }) {
-  const sources = buildLogoSources(company)
-  const [srcIndex, setSrcIndex] = useState(0)
-  const [allFailed, setAllFailed]  = useState(false)
-
-  const currentSrc = sources[srcIndex]
+  const src = companyLogoSrc(company)
+  const [failed, setFailed] = useState(false)
   const inset = Math.round(size * 0.72) // logo inset is 72% of box — gradient always frames it
 
   // The gradient outer is ALWAYS visible (never grey), logo floats inside as a smaller white inset
   return (
     <div
-      className={cn("rounded-xl bg-gradient-to-br flex-shrink-0 flex items-center justify-center", companyColor(company.slug, company.logo_color))}
+      className={cn("rounded-xl bg-gradient-to-br flex-shrink-0 flex items-center justify-center", companyGradient(company))}
       style={{ width: size, height: size }}
     >
-      {currentSrc && !allFailed ? (
+      {src && !failed ? (
         <div
           className="rounded-lg bg-white flex items-center justify-center overflow-hidden"
           style={{ width: inset, height: inset }}
         >
           <img
-            key={currentSrc}
-            src={currentSrc}
+            src={src}
             alt={company.name}
             style={{ width: inset * 0.8, height: inset * 0.8, objectFit: "contain" }}
-            onError={() => {
-              if (srcIndex + 1 < sources.length) setSrcIndex(srcIndex + 1)
-              else setAllFailed(true)
-            }}
+            onError={() => setFailed(true)}
           />
         </div>
       ) : (
-        <span className="font-black text-white" style={{ fontSize: size * 0.38 }}>
-          {company.logo_letter}
+        <span className="font-black text-white drop-shadow-sm" style={{ fontSize: size * 0.42 }}>
+          {companyLetter(company)}
         </span>
       )}
     </div>
@@ -132,7 +88,7 @@ export default function CompanyPrepPage() {
 
   const filtered = companies.filter(c => {
     const q = search.toLowerCase()
-    return (c.name.toLowerCase().includes(q) || c.industry.toLowerCase().includes(q))
+    return (c.name.toLowerCase().includes(q) || (c.industry ?? "").toLowerCase().includes(q))
         && (industry === "All" || c.industry === industry)
   })
 
@@ -317,7 +273,7 @@ export default function CompanyPrepPage() {
                   <div className="h-full flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-all duration-300 group-hover:border-primary/35 group-hover:shadow-lg group-hover:shadow-primary/8 group-hover:-translate-y-0.5">
 
                     {/* Top gradient accent bar */}
-                    <div className={cn("h-1 bg-gradient-to-r", companyColor(company.slug, company.logo_color))} />
+                    <div className={cn("h-1 bg-gradient-to-r", companyGradient(company))} />
 
                     <div className="flex flex-col flex-1 p-4">
 

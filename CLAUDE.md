@@ -260,6 +260,9 @@ Utility classes:
 ## Key gotchas
 - `api.ts` has `Content-Type: application/json` as instance default. The request interceptor deletes it for `FormData` payloads so Flask's `request.files` is populated correctly. If file uploads return "No file provided", check that this interceptor logic is intact.
 - **Sticky sidebar in flex layout**: put `lg:sticky lg:top-4` on the column div (direct flex child), NOT on an inner `GlassCard`. Also add `lg:items-start` to the flex row — without it, flex stretches the column to full row height and sticky has nothing to pin against.
+- **Tailwind classes stored in the DB** (e.g. `companies.logo_color` gradients) never appear in source, so Tailwind won't generate them. The gradient stops are safelisted with `@source inline(...)` at the top of `globals.css` — extend that list if seed data uses a new colour or shade.
+- **Company-prep logos** go through `lib/company-logos.ts`: a local file from `/public/Company_logos` (matched by slug prefix) or else the single-letter fallback. There is no remote logo service — Clearbit's logo API is gone and name-guessed domains showed wrong logos.
+- **Company-prep text is Markdown** rendered by `components/rich-text.tsx` (bold/italic/inline code, bullets, numbered lists, fenced code blocks, pipe tables). Keep content within that subset.
 - **Windowed pagination**: for lists with 1,000+ pages (e.g. aptitude has 10,000+ questions = 2,000 pages), never render all page buttons. Use a sliding window: show page 1, ellipsis, current±delta, ellipsis, last. Rendering 2,000 buttons freezes the UI.
 - **Practice MCQ page** (`/practice-mcq`): aptitude left panel uses `aptSidebarOpen` state for mobile collapse. On mobile, selecting a subtopic auto-closes the panel (`if (window.innerWidth < 1024) setAptSidebarOpen(false)`). The `fireStars()` + `answerFeedback` flash is shared between programming and aptitude views — `answerFeedback` state lives at the top of `PracticeMCQContent`.
 

@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+/* Company-prep brand gradients come from the DB (companies.logo_color), so the
+   class names never appear in source and Tailwind would not generate them.
+   Safelist the gradient stops for the palette used by the seed data. */
+@source inline("{from,via,to}-{slate,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{400,500,600,700,800,900,950}");
+
 @custom-variant dark (&:is(.dark *));
 
 /* â”€â”€ Light theme (:root) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

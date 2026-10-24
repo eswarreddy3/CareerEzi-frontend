@@ -15,25 +15,10 @@ import {
   FileQuestion,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const LOCAL_LOGOS: Record<string, string> = {
-  tcs:       '/Company_logos/tcs_logo.png',
-  wipro:     '/Company_logos/wipro_logo.png',
-  accenture: '/Company_logos/accenture_logo.png',
-  infosys:   '/Company_logos/infosys_logo.png',
-  amazon:    '/Company_logos/amazon_logo.png',
-}
-
-const COMPANY_COLORS: Record<string, string> = {
-  tcs:        'from-blue-700 to-blue-900',
-  wipro:      'from-teal-500 to-emerald-600',
-  accenture:  'from-purple-600 to-violet-700',
-  infosys:    'from-cyan-500 to-blue-500',
-  amazon:     'from-orange-400 to-orange-600',
-}
-const companyColor = (slug: string, fallback: string) => COMPANY_COLORS[slug] ?? fallback
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { companyGradient, companyLetter, companyLogoSrc } from "@/lib/company-logos"
+import { RichText } from "@/components/rich-text"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -99,34 +84,12 @@ function formatCTC(min: number | null, max: number | null) {
   return `₹${max} LPA`
 }
 
-// ─── Hero Banner (with real logo + clearbit fallback) ─────────────────────────
-
-function buildLogoSources(logoUrl: string | null, website: string, name: string, slug: string): string[] {
-  const srcs: string[] = []
-  if (LOCAL_LOGOS[slug]) srcs.push(LOCAL_LOGOS[slug])
-  if (logoUrl) srcs.push(logoUrl)
-  const nameDomain = name.toLowerCase()
-    .replace(/\s+(limited|ltd|inc|llc|corp(?:oration)?|plc|pte|pvt)\.?\s*$/i, "")
-    .trim().replace(/\s+/g, "").replace(/[^a-z0-9]/g, "")
-  if (nameDomain) srcs.push(`https://logo.clearbit.com/${nameDomain}.com`)
-  if (website) {
-    try {
-      const websiteDomain = new URL(website).hostname
-        .replace(/^www\./, "").split(".").slice(-2).join(".")
-      const u = `https://logo.clearbit.com/${websiteDomain}`
-      if (!srcs.includes(u)) srcs.push(u)
-    } catch {}
-  }
-  return srcs
-}
+// ─── Hero Banner (local logo, otherwise the company's letter) ─────────────────
 
 function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () => void }) {
-  const sources = buildLogoSources(company.logo_url, company.website, company.name, company.slug)
-  const [srcIndex, setSrcIndex] = useState(0)
-  const [allFailed, setAllFailed] = useState(false)
-
-  const currentSrc = sources[srcIndex]
-  const hasImg = !!currentSrc && !allFailed
+  const logoSrc = companyLogoSrc(company)
+  const [logoFailed, setLogoFailed] = useState(false)
+  const hasImg = !!logoSrc && !logoFailed
 
   const resourceStats = [
     { icon: Shield,       label: `${company.hiring_rounds.length} Rounds`,              show: company.hiring_rounds.length > 0 },
@@ -137,7 +100,7 @@ function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () =>
   ].filter(s => s.show)
 
   return (
-    <div className={cn("relative rounded-3xl overflow-hidden bg-gradient-to-br", companyColor(company.slug, company.logo_color))}>
+    <div className={cn("relative rounded-3xl overflow-hidden bg-gradient-to-br", companyGradient(company))}>
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.15),transparent_55%)]" />
 
@@ -157,18 +120,14 @@ function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () =>
             {hasImg ? (
               <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden">
                 <img
-                  key={currentSrc}
-                  src={currentSrc}
+                  src={logoSrc!}
                   alt={company.name}
                   className="w-11 h-11 object-contain"
-                  onError={() => {
-                    if (srcIndex + 1 < sources.length) setSrcIndex(srcIndex + 1)
-                    else setAllFailed(true)
-                  }}
+                  onError={() => setLogoFailed(true)}
                 />
               </div>
             ) : (
-              <span className="text-4xl font-black text-white">{company.logo_letter}</span>
+              <span className="text-4xl font-black text-white drop-shadow">{companyLetter(company)}</span>
             )}
           </div>
 
@@ -216,6 +175,12 @@ function HeroBanner({ company, onBack }: { company: CompanyDetail; onBack: () =>
 // ─── Overview Tab ─────────────────────────────────────────────────────────────
 
 function OverviewTab({ company }: { company: CompanyDetail }) {
+  // When every role shares the same criteria, show them once above the grid
+  // instead of repeating the same block on every package card.
+  const eligibilities = company.packages.map(p => p.eligibility?.trim() || "")
+  const sharedEligibility = company.packages.length > 1 && eligibilities[0] &&
+    eligibilities.every(e => e === eligibilities[0]) ? eligibilities[0] : null
+
   return (
     <div className="space-y-6">
 
@@ -311,7 +276,7 @@ function OverviewTab({ company }: { company: CompanyDetail }) {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{round.description}</p>
+                  <RichText text={round.description} className="text-sm text-muted-foreground leading-relaxed" />
                 </div>
               </motion.div>
             ))}
@@ -328,6 +293,14 @@ function OverviewTab({ company }: { company: CompanyDetail }) {
             </div>
             Salary & Packages
           </h2>
+          {sharedEligibility && (
+            <div className="rounded-xl border border-border bg-secondary/20 px-4 py-3">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
+                Eligibility · all roles
+              </p>
+              <RichText text={sharedEligibility} className="text-xs text-muted-foreground leading-relaxed" />
+            </div>
+          )}
           <div className="grid sm:grid-cols-2 gap-3">
             {company.packages.map((pkg, i) => (
               <motion.div
@@ -350,7 +323,9 @@ function OverviewTab({ company }: { company: CompanyDetail }) {
                         {pkg.type}
                       </span>
                     </div>
-                    {pkg.eligibility && <p className="text-xs text-muted-foreground">{pkg.eligibility}</p>}
+                    {pkg.eligibility && !sharedEligibility && (
+                      <RichText text={pkg.eligibility} className="text-xs text-muted-foreground leading-relaxed" />
+                    )}
                     {pkg.location && (
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="h-3 w-3" />{pkg.location}
@@ -442,7 +417,7 @@ function AptitudeTab({ slug }: { slug: string }) {
                       <Badge className={cn("text-[10px] border", difficultyColors[q.difficulty])}>{q.difficulty}</Badge>
                       {q.year && <span className="text-[10px] text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full border border-border">{q.year}</span>}
                     </div>
-                    <p className="text-sm text-foreground leading-relaxed">{q.question}</p>
+                    <RichText text={q.question} className="text-sm text-foreground leading-relaxed" />
                   </div>
                   <div className="flex-shrink-0 mt-0.5 text-muted-foreground">
                     {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -450,7 +425,7 @@ function AptitudeTab({ slug }: { slug: string }) {
                 </div>
 
                 {isOpen && (
-                  <div className="mt-4 space-y-4 border-t border-border/50 pt-4">
+                  <div className="mt-4 space-y-4 border-t border-border/50 pt-4 cursor-auto" onClick={e => e.stopPropagation()}>
                     <div className="space-y-2">
                       {q.options.map((opt, idx) => (
                         <div
@@ -470,7 +445,7 @@ function AptitudeTab({ slug }: { slug: string }) {
                           )}>
                             {String.fromCharCode(65 + idx)}
                           </span>
-                          <span className="flex-1">{opt}</span>
+                          <RichText text={opt} className="flex-1" />
                           {idx === q.correct_answer && <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />}
                         </div>
                       ))}
@@ -478,7 +453,7 @@ function AptitudeTab({ slug }: { slug: string }) {
                     {q.explanation && (
                       <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
                         <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1.5">Explanation</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{q.explanation}</p>
+                        <RichText text={q.explanation} className="text-sm text-muted-foreground leading-relaxed" />
                       </div>
                     )}
                   </div>
@@ -568,10 +543,8 @@ function CodingTab({ slug }: { slug: string }) {
                 </div>
 
                 {isOpen && (
-                  <div className="mt-4 border-t border-border/50 pt-4 space-y-4">
-                    <pre className="text-sm text-foreground/85 whitespace-pre-wrap font-mono bg-[#0d1117] dark:bg-secondary/30 rounded-xl p-4 border border-border leading-relaxed text-[13px] overflow-x-auto">
-                      {q.description}
-                    </pre>
+                  <div className="mt-4 border-t border-border/50 pt-4 space-y-4 cursor-auto" onClick={e => e.stopPropagation()}>
+                    <RichText text={q.description} className="text-sm text-foreground/85 leading-relaxed space-y-2" />
                     {q.solution_hint && (
                       showHint !== q.id ? (
                         <Button
@@ -586,7 +559,7 @@ function CodingTab({ slug }: { slug: string }) {
                           <p className="text-[10px] font-bold text-warning uppercase tracking-widest mb-1.5 flex items-center gap-1">
                             <Lightbulb className="h-3.5 w-3.5" /> Approach Hint
                           </p>
-                          <p className="text-sm text-muted-foreground leading-relaxed">{q.solution_hint}</p>
+                          <RichText text={q.solution_hint} className="text-sm text-muted-foreground leading-relaxed" />
                         </div>
                       )
                     )}
@@ -664,7 +637,7 @@ function TipsTab({ slug }: { slug: string }) {
                     </div>
                     <p className="font-semibold text-foreground text-sm leading-snug">{tip.title}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed pl-7">{tip.content}</p>
+                  <RichText text={tip.content} className="text-xs text-muted-foreground leading-relaxed pl-7" />
                 </motion.div>
               ))}
             </div>
