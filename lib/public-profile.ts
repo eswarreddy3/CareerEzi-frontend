@@ -34,6 +34,8 @@ export interface Achievement { title: string; icon_color: string | null; complet
 export interface PublicCertificate {
   certificate_uid: string; kind: "course" | "domain"; title: string
   issuer: string; issued_at: string | null; pdf_url: string | null
+  /** Certificate image for the gallery; append ?w=480 or ?w=1200. Optional for older API. */
+  image_url?: string | null
 }
 export interface PublicProfile {
   username: string; name: string; avatar: string | null
@@ -60,6 +62,10 @@ export interface PublicProfile {
   skills?: PublicSkill[]
   achievements?: Pub<CareerAchievement>[]
   external_certifications?: Pub<Certification>[]
+  /** Sections switched off (the owner's preview still includes their data). */
+  hidden_sections?: string[]
+  /** Page design; absent on older API → defaults. */
+  design?: import("@/lib/portfolio-design").Design
 }
 
 

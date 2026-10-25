@@ -72,7 +72,11 @@ export interface CareerProfile {
 export type PublicSection =
   | "about" | "projects" | "experience" | "education" | "skills"
   | "achievements" | "certifications" | "coding" | "contact"
-export interface PublicSettings { hidden_sections: PublicSection[] }
+export interface PublicSettings {
+  hidden_sections: PublicSection[]
+  /** Full design spec (lib/portfolio-design.ts). Optional when only toggling sections. */
+  design?: import("@/lib/portfolio-design").Design
+}
 
 export const PUBLIC_SECTIONS: { value: PublicSection; label: string; hint?: string }[] = [
   { value: "about", label: "About" },
@@ -103,7 +107,7 @@ export async function fetchCareerProfile(): Promise<CareerProfile> {
 export async function saveAbout(data: Partial<About>): Promise<About> {
   return (await api.patch("/student/career-profile/about", data)).data.about
 }
-export async function savePublicSettings(data: PublicSettings): Promise<PublicSettings> {
+export async function savePublicSettings(data: Partial<PublicSettings>): Promise<PublicSettings> {
   return (await api.put("/student/career-profile/public-settings", data)).data.public_settings
 }
 export async function createItem<S extends Section>(section: S, data: Partial<SectionItems[S]>): Promise<SectionItems[S]> {

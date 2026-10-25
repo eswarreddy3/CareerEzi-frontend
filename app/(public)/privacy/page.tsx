@@ -49,6 +49,7 @@ export default function PrivacyPolicyPage() {
           skills; achievements; and certificates from other providers. Each item can be shown on or hidden from your
           public portfolio, and education scores have their own show/hide setting.
         </li>
+        <li>Public portfolio design choices (layout, colour, font, section order and visibility) and, if you upload one, a cover banner image (cropped and stored at 1600&times;400 pixels; replaced or deleted when you change it).</li>
         <li>Resume Builder settings: the template, your career objective, which Career Profile items to include and in what order, any wording you change for a resume only, and items you add to a resume only. Your existing resume content is copied into your Career Profile the first time you open it, hidden from your public portfolio until you choose to show it.</li>
         <li>Usernames for coding platforms you choose to connect (GitHub, LeetCode, HackerRank).</li>
         <li>Posts, comments and likes on your college feed; feedback you send us; off-campus offers and profile-correction requests you submit to your Institution; placement-drive registrations.</li>

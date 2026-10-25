@@ -6,10 +6,12 @@
    Safelist the gradient stops for the palette used by the seed data. */
 @source inline("{from,via,to}-{slate,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{400,500,600,700,800,900,950}");
 
-@custom-variant dark (&:is(.dark *));
+/* dark: utilities skip a portfolio forced to light (.pf-force-light) inside a dark app */
+@custom-variant dark (&:is(.dark *):not(.pf-force-light, .pf-force-light *));
 
 /* â”€â”€ Light theme (:root) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-:root {
+/* .pf-force-light: a public portfolio set to "Always light" re-applies these inside a dark app */
+:root, .pf-force-light {
   --background:              #FFFFFF;
   --foreground:              #09090B;
   --card:                    #FAFAFA;
@@ -204,7 +206,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
-.dark .card-hover:hover {
+.dark .card-hover:hover:not(.pf-force-light *) {
   box-shadow: 0 4px 20px rgba(0,0,0,0.35);
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
 }
@@ -237,7 +239,7 @@
 }
 
 /* Dark mode: use brighter stops so the gradient is clearly visible */
-.dark .gradient-text {
+.dark .gradient-text:not(.pf-force-light *) {
   background: linear-gradient(135deg, #6366F1 0%, #E8825A 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -631,3 +633,31 @@
     margin: 0;
   }
 }
+
+/* ── Public portfolio design (lib/portfolio-design.ts) ─────────────────────────
+   Scoped to the portfolio root, the same way .app-sidebar pins tokens. Each
+   accent has a light shade (≥4.5:1 with white button text) and a dark-theme
+   shade; where white text would fail on the dark shade, the foreground flips. */
+.pf-accent-indigo  { --primary: #4F46E5; --ring: #4F46E5; }
+.pf-accent-emerald { --primary: #047857; --ring: #047857; }
+.pf-accent-teal    { --primary: #0F766E; --ring: #0F766E; }
+.pf-accent-sky     { --primary: #0369A1; --ring: #0369A1; }
+.pf-accent-violet  { --primary: #6D28D9; --ring: #6D28D9; }
+.pf-accent-rose    { --primary: #BE123C; --ring: #BE123C; }
+.pf-accent-amber   { --primary: #B45309; --ring: #B45309; }
+.pf-accent-slate   { --primary: #334155; --ring: #334155; }
+:is(.dark .pf-accent-indigo, .dark.pf-accent-indigo):not(.pf-force-light)  { --primary: #818CF8; --ring: #818CF8; --primary-foreground: #0B0B2A; }
+:is(.dark .pf-accent-emerald, .dark.pf-accent-emerald):not(.pf-force-light) { --primary: #10B981; --ring: #10B981; --primary-foreground: #04130D; }
+:is(.dark .pf-accent-teal, .dark.pf-accent-teal):not(.pf-force-light)    { --primary: #14B8A6; --ring: #14B8A6; --primary-foreground: #04120F; }
+:is(.dark .pf-accent-sky, .dark.pf-accent-sky):not(.pf-force-light)     { --primary: #38BDF8; --ring: #38BDF8; --primary-foreground: #04111A; }
+:is(.dark .pf-accent-violet, .dark.pf-accent-violet):not(.pf-force-light)  { --primary: #A78BFA; --ring: #A78BFA; --primary-foreground: #160B33; }
+:is(.dark .pf-accent-rose, .dark.pf-accent-rose):not(.pf-force-light)    { --primary: #FB7185; --ring: #FB7185; --primary-foreground: #1A0509; }
+:is(.dark .pf-accent-amber, .dark.pf-accent-amber):not(.pf-force-light)   { --primary: #F59E0B; --ring: #F59E0B; --primary-foreground: #1A1004; }
+:is(.dark .pf-accent-slate, .dark.pf-accent-slate):not(.pf-force-light)   { --primary: #94A3B8; --ring: #94A3B8; --primary-foreground: #0F172A; }
+
+/* Forced light also needs light form controls/scrollbars. */
+.pf-force-light { color-scheme: light; }
+
+/* Heading font. font-serif is compiled to a literal family, so override it here. */
+.pf-heading-jakarta .font-serif { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+.pf-heading-mono    .font-serif { font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', monospace; letter-spacing: -0.02em; }

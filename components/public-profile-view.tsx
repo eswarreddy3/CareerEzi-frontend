@@ -1,24 +1,27 @@
 "use client"
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { Fragment, createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react"
 import { motion, useInView, useReducedMotion, animate, type Variants } from "framer-motion"
 import {
   Github, Linkedin, Code2, Terminal, ExternalLink, Star, Users, FolderGit2,
   Trophy, Target, Award, Flame, GraduationCap, BadgeCheck, MapPin, ShieldCheck,
-  Share2, Check, FileText, Briefcase, User, Globe, Languages, Sparkles,
+  Share2, Check, Briefcase, User, Globe, Languages, Sparkles,
   Medal, Megaphone, BookOpen, CalendarDays, School,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { getLevel } from "@/lib/levels"
 import {
-  media, type CodingProfile, type PublicCertificate, type PublicProfile, type PublicEducation, type PublicSkill,
+  media, type CodingProfile, type PublicProfile, type PublicEducation, type PublicSkill,
 } from "@/lib/public-profile"
 import { formatRange, formatDuration, formatYM } from "@/lib/ym"
 import {
   EDUCATION_LEVEL_SHORT, EMPLOYMENT_TYPES, SKILL_CATEGORIES, ACHIEVEMENT_KINDS, OPEN_TO,
 } from "@/lib/career-profile-labels"
-import type { Project, Experience, Achievement as CareerAchievement, Certification } from "@/lib/career-profile"
+import type { Project, Experience, Achievement as CareerAchievement } from "@/lib/career-profile"
 import { cn } from "@/lib/utils"
+import { CertificateGallery } from "@/components/certificate-gallery"
+import { normalizeDesign, designClasses, type Design, type BannerPattern } from "@/lib/portfolio-design"
+import type { PublicSection } from "@/lib/career-profile"
 
 // ─── Motion presets ─────────────────────────────────────────────────────────
 const container: Variants = {
@@ -121,99 +124,15 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
     "border-t border-l border-border sm:border-t-0",
   ]
 
-  return (
-    <main className="min-h-screen bg-background">
-      {/* ── Hero — formal blueprint-grid backdrop ── */}
-      <div className="relative overflow-hidden border-b border-border">
-        <div aria-hidden className="absolute inset-0 opacity-40 dark:opacity-25 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)",
-            backgroundSize: "36px 36px",
-            maskImage: "radial-gradient(ellipse 85% 75% at 50% 0%, black 25%, transparent 78%)",
-            WebkitMaskImage: "radial-gradient(ellipse 85% 75% at 50% 0%, black 25%, transparent 78%)",
-          }} />
-        <div aria-hidden className="absolute -top-36 left-1/2 -translate-x-1/2 w-[580px] h-[320px] rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+  const design = normalizeDesign(p.design)
+  const minimal = design.layout === "minimal"
+  const width = minimal ? "max-w-3xl" : "max-w-4xl"
+  const bannerImage = design.banner.kind === "image" ? media(design.banner.value) : undefined
 
-        <motion.div
-          variants={container} initial="hidden" animate="visible"
-          className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-12 pb-10">
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
-            {/* Avatar */}
-            <motion.div
-              variants={item}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300, damping: 18 }}
-              className="relative flex-shrink-0">
-              <div className="absolute inset-0 rounded-full bg-primary/30 blur-xl opacity-50" aria-hidden />
-              <div className="relative w-24 h-24 rounded-full bg-primary/10 ring-2 ring-primary/50 ring-offset-4 ring-offset-background flex items-center justify-center overflow-hidden shadow-xl">
-                {p.avatar
-                  ? <img src={media(p.avatar)} alt={p.name} className="w-full h-full object-cover" />
-                  : <span className="text-3xl font-bold font-serif text-primary">{initials}</span>}
-              </div>
-            </motion.div>
-
-            <motion.div variants={item} className="flex-1 min-w-0">
-              <h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground">{p.name}</h1>
-              <p className="text-sm text-primary/90 font-medium">@{p.username}</p>
-              {p.headline && <p className="text-base text-foreground/90 mt-1.5">{p.headline}</p>}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 mt-2 text-sm text-muted-foreground">
-                {p.branch && <span className="inline-flex items-center gap-1"><GraduationCap className="h-3.5 w-3.5" />{p.branch}</span>}
-                {p.college_name && (
-                  <span className="inline-flex items-center gap-1.5">
-                    {p.college_logo_url
-                      ? <img src={media(p.college_logo_url)} alt="" className="h-4 w-4 rounded-sm object-contain" />
-                      : <School className="h-3.5 w-3.5" />}
-                    {p.college_name}
-                  </span>
-                )}
-                {p.passout_year && <span>Batch {p.passout_year}</span>}
-                {p.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{p.location}</span>}
-              </div>
-              {openTo && (
-                <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-success/10 border border-success/25 text-xs font-semibold text-success">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success" aria-hidden /> Open to {openTo.toLowerCase()}
-                </span>
-              )}
-            </motion.div>
-
-            {/* Level + streak chips + share */}
-            <motion.div variants={item} className="flex flex-wrap items-center justify-center gap-2 flex-shrink-0">
-              <motion.span
-                whileHover={{ scale: 1.05 }}
-                style={{ boxShadow: level.glow }}
-                className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-sm font-medium", level.color)}>
-                {level.emoji} {level.name}
-              </motion.span>
-              {p.streak > 0 && (
-                <motion.span whileHover={{ scale: 1.05 }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak/10 border border-streak/20 text-sm font-medium text-streak">
-                  <Flame className="h-3.5 w-3.5 flame-pulse" /> {p.streak}d
-                </motion.span>
-              )}
-              <ShareButton />
-            </motion.div>
-          </div>
-
-          {/* Credential stat band */}
-          <motion.div variants={item}
-            className="grid grid-cols-2 sm:grid-cols-4 mt-8 rounded-2xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
-            {stats.map((s, i) => (
-              <div key={s.label} className={cn("px-3 py-4 text-center transition-colors hover:bg-primary/5", statBorders[i])}>
-                <s.icon className="h-4 w-4 mx-auto text-primary mb-1.5" />
-                <p className="text-2xl font-bold font-serif text-foreground leading-none tabular-nums">
-                  <CountUp value={s.value} suffix={s.suffix} />
-                </p>
-                <p className="text-[11px] text-muted-foreground mt-1.5 uppercase tracking-wider">{s.label}</p>
-              </div>
-            ))}
-          </motion.div>
-        </motion.div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-5 sm:px-8 py-10 space-y-12">
-        {/* ── About ── */}
-        {(aboutText || p.about?.languages) && (
+  // Each section as a block so the student's section_order decides the sequence.
+  const blocks: Record<PublicSection, ReactNode> = {
+    about: (
+      (aboutText || p.about?.languages) && (
           <Section eyebrow="Introduction" title="About">
             <motion.div variants={item} className="space-y-3">
               {aboutText && <p className="text-[15px] leading-relaxed text-foreground/90 whitespace-pre-line">{aboutText}</p>}
@@ -224,54 +143,54 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
               )}
             </motion.div>
           </Section>
-        )}
-
-        {/* ── Projects ── */}
-        {projects.length > 0 && (
+        )
+    ),
+    projects: (
+      projects.length > 0 && (
           <Section eyebrow="Portfolio" title="Projects" subtitle="Things built — solo and in teams">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className={cn("grid grid-cols-1 gap-4", !minimal && "sm:grid-cols-2")}>
               {projects.map((pr) => <ProjectCard key={pr.id} p={pr} />)}
             </div>
           </Section>
-        )}
-
-        {/* ── Experience ── */}
-        {experience.length > 0 && (
+        )
+    ),
+    experience: (
+      experience.length > 0 && (
           <Section eyebrow="Work" title="Experience">
             <Timeline>
               {experience.map((x) => <ExperienceEntry key={x.id} x={x} />)}
             </Timeline>
           </Section>
-        )}
-
-        {/* ── Education ── */}
-        {education.length > 0 && (
+        )
+    ),
+    education: (
+      education.length > 0 && (
           <Section eyebrow="Academics" title="Education">
             <Timeline>
               {education.map((e) => <EducationEntry key={e.id} e={e} />)}
             </Timeline>
           </Section>
-        )}
-
-        {/* ── Skills ── */}
-        {skills.length > 0 && (
+        )
+    ),
+    skills: (
+      skills.length > 0 && (
           <Section eyebrow="Toolkit" title="Skills"
             subtitle={skills.some((sk) => sk.verified_by) ? "✓ marks skills CareerEzi has evidence for — hover or tap to see why" : undefined}>
             <SkillGroups skills={skills} />
           </Section>
-        )}
-
-        {/* ── Verified credentials — the certificate wall ── */}
-        {hasAchievements && (
+        )
+    ),
+    certifications: (
+      hasAchievements && (
           <Section eyebrow={certificates.length ? "Verified by Fynity" : "Learning"} title="Credentials"
-            subtitle={certificates.length ? "CareerEzi certificates are independently verifiable" : undefined}>
-            {certificates.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {certificates.map((c) => <CertificateCard key={c.certificate_uid} c={c} />)}
-              </div>
+            subtitle={certificates.length ? "Tap a certificate to view it — CareerEzi certificates can be verified by anyone" : undefined}>
+            {(certificates.length > 0 || externalCerts.length > 0) && (
+              <motion.div variants={item}>
+                <CertificateGallery certificates={certificates} external={externalCerts} />
+              </motion.div>
             )}
             {uncertified.length > 0 && (
-              <motion.div variants={item} className={cn("space-y-2", certificates.length > 0 && "mt-5")}>
+              <motion.div variants={item} className={cn("space-y-2", (certificates.length > 0 || externalCerts.length > 0) && "mt-6")}>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Also completed</p>
                 <div className="flex flex-wrap gap-2">
                   {uncertified.map((a) => (
@@ -286,28 +205,20 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
                 </div>
               </motion.div>
             )}
-            {externalCerts.length > 0 && (
-              <motion.div variants={item} className={cn("space-y-2", (certificates.length > 0 || uncertified.length > 0) && "mt-5")}>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Other certifications</p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {externalCerts.map((c) => <ExternalCertRow key={c.id} c={c} />)}
-                </ul>
-              </motion.div>
-            )}
           </Section>
-        )}
-
-        {/* ── Achievements ── */}
-        {careerAchievements.length > 0 && (
+        )
+    ),
+    achievements: (
+      careerAchievements.length > 0 && (
           <Section eyebrow="Recognition" title="Achievements">
             <ul className="space-y-3">
               {careerAchievements.map((a) => <AchievementEntry key={a.id} a={a} />)}
             </ul>
           </Section>
-        )}
-
-        {/* ── Coding — solved summary + synced platform cards ── */}
-        {(totalSolved > 0 || connected.length > 0) && (
+        )
+    ),
+    coding: (
+      (totalSolved > 0 || connected.length > 0) && (
           <Section eyebrow="Practice record" title="Coding" subtitle="CareerEzi practice and synced external platforms">
             {totalSolved > 0 && (
               <motion.div variants={item}
@@ -346,10 +257,10 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
               </div>
             )}
           </Section>
-        )}
-
-        {/* ── Contact ── */}
-        {hasContact && (
+        )
+    ),
+    contact: (
+      hasContact && (
           <Section eyebrow="Get in touch" title="Connect">
             <motion.div variants={item} className="flex flex-wrap gap-3">
               {p.linkedin && <ContactLink href={p.linkedin} icon={Linkedin} iconClass="text-primary" label="LinkedIn" />}
@@ -357,7 +268,125 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
               {p.about?.website && <ContactLink href={p.about.website} icon={Globe} iconClass="text-primary" label="Website" />}
             </motion.div>
           </Section>
-        )}
+        )
+    ),
+  }
+
+  return (
+    <DesignContext.Provider value={design}>
+    <main className={cn("min-h-screen bg-background text-foreground", designClasses(design))}>
+      {/* Uploaded cover banner — same column as the content, at the upload's 4:1 ratio. It
+          fades into the page at the bottom (behind the avatar) and softly at the sides, so it
+          blends in rather than sitting as a hard-edged card. */}
+      {bannerImage && (
+        <div className={cn("mx-auto px-5 sm:px-8 pt-5 sm:pt-8", width)}>
+          <div className="relative aspect-[3/1] sm:aspect-[4/1]" style={{
+            maskImage: BANNER_FADE, WebkitMaskImage: BANNER_FADE,
+            maskComposite: "intersect", WebkitMaskComposite: "source-in",
+          }}>
+            <img src={bannerImage} alt="" className="absolute inset-0 w-full h-full object-cover rounded-t-2xl" />
+          </div>
+        </div>
+      )}
+      {/* ── Hero ── */}
+      {/* overflow-hidden clips the backdrop pattern; with a banner the avatar must overlap it instead */}
+      <div className={cn("relative border-b border-border", !bannerImage && "overflow-hidden")}>
+        {!bannerImage && <HeroBackdrop pattern={design.banner.kind === "pattern" ? design.banner.value : "none"} />}
+
+        <motion.div
+          variants={container} initial="hidden" animate="visible"
+          className={cn("relative mx-auto px-5 sm:px-8 pb-10", width, bannerImage ? "pt-0" : "pt-12")}>
+          {/* With a cover banner the hero stacks (avatar overlapping the banner, LinkedIn-style); otherwise it is one row. */}
+          <div className={cn("flex flex-col items-center gap-5 text-center",
+            !minimal && (bannerImage ? "sm:items-start sm:text-left gap-3" : "sm:flex-row sm:items-center sm:text-left sm:gap-7"))}>
+            {/* Avatar */}
+            <motion.div
+              variants={item}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 18 }}
+              className={cn("relative flex-shrink-0", bannerImage && "-mt-14 sm:-mt-16", bannerImage && !minimal && "sm:ml-6")}>
+              <div className="absolute inset-0 rounded-full bg-primary/30 blur-xl opacity-50" aria-hidden />
+              {/* Sized to balance the name/details block beside it (row layout) or below it */}
+              <div className={cn("relative rounded-full bg-primary/10 ring-2 ring-primary/50 ring-offset-4 ring-offset-background flex items-center justify-center overflow-hidden shadow-xl",
+                minimal ? "w-28 h-28" : bannerImage ? "w-28 h-28 sm:w-32 sm:h-32" : "w-28 h-28 sm:w-36 sm:h-36")}>
+                {p.avatar
+                  ? <img src={media(p.avatar)} alt={p.name} className="w-full h-full object-cover" />
+                  : <span className={cn("font-bold font-serif text-primary", minimal ? "text-4xl" : "text-4xl sm:text-5xl")}>{initials}</span>}
+              </div>
+            </motion.div>
+
+
+            <motion.div variants={item} className="flex-1 min-w-0">
+              <h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground">{p.name}</h1>
+              <p className="text-sm text-primary/90 font-medium">@{p.username}</p>
+              {p.headline && <p className="text-base text-foreground/90 mt-1.5">{p.headline}</p>}
+              <div className={cn("flex flex-wrap items-center gap-x-3", minimal ? "justify-center" : "justify-center sm:justify-start", "gap-y-1 mt-2 text-sm text-muted-foreground")}>
+                {p.branch && <span className="inline-flex items-center gap-1"><GraduationCap className="h-3.5 w-3.5" />{p.branch}</span>}
+                {p.college_name && (
+                  <span className="inline-flex items-center gap-1.5">
+                    {p.college_logo_url
+                      ? <img src={media(p.college_logo_url)} alt="" className="h-4 w-4 rounded-sm object-contain" />
+                      : <School className="h-3.5 w-3.5" />}
+                    {p.college_name}
+                  </span>
+                )}
+                {p.passout_year && <span>Batch {p.passout_year}</span>}
+                {p.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{p.location}</span>}
+              </div>
+              {openTo && (
+                <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-success/10 border border-success/25 text-xs font-semibold text-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" aria-hidden /> Open to {openTo.toLowerCase()}
+                </span>
+              )}
+            </motion.div>
+
+            {/* Level + streak chips + share */}
+            <motion.div variants={item} className={cn("flex flex-wrap items-center justify-center gap-2 flex-shrink-0", !minimal && bannerImage && "sm:justify-start")}>
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                style={{ boxShadow: level.glow }}
+                /* level colours are -400 shades tuned for dark backgrounds; text-foreground keeps the chip
+                   readable in light/forced-light pages while the coloured glow still marks the level */
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-sm font-medium text-foreground">
+                {level.emoji} {level.name}
+              </motion.span>
+              {p.streak > 0 && (
+                <motion.span whileHover={{ scale: 1.05 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak/10 border border-streak/20 text-sm font-medium text-streak">
+                  <Flame className="h-3.5 w-3.5 flame-pulse" /> {p.streak}d
+                </motion.span>
+              )}
+              <ShareButton />
+            </motion.div>
+          </div>
+
+          {minimal ? (
+            <motion.p variants={item} className="mt-6 text-center text-sm text-muted-foreground">
+              {stats.filter((s) => s.value > 0).map((s, i) => (
+                <span key={s.label}>{i > 0 && <span aria-hidden> · </span>}
+                  <span className="font-semibold text-foreground tabular-nums">{s.value.toLocaleString()}{s.suffix}</span> {s.label.toLowerCase()}
+                </span>
+              ))}
+            </motion.p>
+          ) : (
+            <motion.div variants={item}
+              className="grid grid-cols-2 sm:grid-cols-4 mt-8 rounded-2xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden shadow-sm">
+              {stats.map((s, i) => (
+                <div key={s.label} className={cn("px-3 py-4 text-center transition-colors hover:bg-primary/5", statBorders[i])}>
+                  <s.icon className="h-4 w-4 mx-auto text-primary mb-1.5" />
+                  <p className="text-2xl font-bold font-serif text-foreground leading-none tabular-nums">
+                    <CountUp value={s.value} suffix={s.suffix} />
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-1.5 uppercase tracking-wider">{s.label}</p>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+
+      <div className={cn("mx-auto px-5 sm:px-8 py-10 space-y-12", width)}>
+        {design.section_order.map((section) => <Fragment key={section}>{blocks[section]}</Fragment>)}
 
         {/* Empty state */}
         {connected.length === 0 && !hasAchievements && !hasContact && totalSolved === 0 && !hasCareer && (
@@ -375,20 +404,60 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
         </div>
       </div>
     </main>
+    </DesignContext.Provider>
   )
 }
 
 // ─── Presentational helpers ─────────────────────────────────────────────────
+// Two masks intersected: soft left/right edges, and a long fade to transparent at the bottom.
+const BANNER_FADE = [
+  "linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%)",
+  "linear-gradient(to bottom, black 45%, transparent 100%)",
+].join(", ")
+
+const DesignContext = createContext<Design>(normalizeDesign(null))
+
+// Hero backdrop patterns — all drawn from tokens, so they follow the accent and theme.
+function HeroBackdrop({ pattern }: { pattern: BannerPattern }) {
+  const fade = "radial-gradient(ellipse 85% 75% at 50% 0%, black 25%, transparent 78%)"
+  if (pattern === "none") return null
+  if (pattern === "aurora") {
+    return (
+      <div aria-hidden className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -left-24 w-[520px] h-[360px] rounded-full blur-3xl opacity-60"
+          style={{ background: "color-mix(in oklab, var(--primary) 28%, transparent)" }} />
+        <div className="absolute -top-32 right-[-120px] w-[480px] h-[340px] rounded-full blur-3xl opacity-50"
+          style={{ background: "color-mix(in oklab, var(--coding) 24%, transparent)" }} />
+      </div>
+    )
+  }
+  const backgroundImage = pattern === "dots"
+    ? "radial-gradient(color-mix(in oklab, var(--primary) 45%, transparent) 1.2px, transparent 1.6px)"
+    : "linear-gradient(to right, var(--border) 1px, transparent 1px), linear-gradient(to bottom, var(--border) 1px, transparent 1px)"
+  return (
+    <>
+      <div aria-hidden className={cn("absolute inset-0 pointer-events-none", pattern === "grid" ? "opacity-40 dark:opacity-25" : "opacity-60")}
+        style={{ backgroundImage, backgroundSize: pattern === "dots" ? "18px 18px" : "36px 36px", maskImage: fade, WebkitMaskImage: fade }} />
+      <div aria-hidden className="absolute -top-36 left-1/2 -translate-x-1/2 w-[580px] h-[320px] rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+    </>
+  )
+}
+
 function Section({ eyebrow, title, subtitle, children }: {
   eyebrow: string; title: string; subtitle?: string; children: ReactNode
 }) {
+  const { layout } = useContext(DesignContext)
   return (
     <motion.section {...reveal}>
       <motion.div variants={item} className="mb-5">
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
-            <h2 className="text-xl font-bold font-serif text-foreground leading-tight mt-0.5">{title}</h2>
+            {layout === "developer" ? (
+              <p className="text-[12px] font-mono text-primary">{"// "}{eyebrow.toLowerCase()}</p>
+            ) : layout === "classic" ? (
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>
+            ) : null}
+            <h2 className={cn("font-bold font-serif text-foreground leading-tight", layout === "minimal" ? "text-lg" : "text-xl mt-0.5")}>{title}</h2>
           </div>
           <div className="flex-1 h-px bg-border" aria-hidden />
         </div>
@@ -396,65 +465,6 @@ function Section({ eyebrow, title, subtitle, children }: {
       </motion.div>
       {children}
     </motion.section>
-  )
-}
-
-// Certificate card — a formal, verifiable credential. Signature element of the page.
-function CertificateCard({ c }: { c: PublicCertificate }) {
-  const isDomain = c.kind === "domain"
-  const issued = c.issued_at
-    ? new Date(c.issued_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-    : null
-  return (
-    <motion.article
-      variants={item}
-      whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 280, damping: 20 }}
-      className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-xl hover:border-primary/40 transition-[box-shadow,border-color] flex flex-col">
-      {/* Accent rule — domain certificates carry the purple track colour */}
-      <div className={cn("h-1 flex-shrink-0", isDomain
-        ? "bg-gradient-to-r from-coding to-primary"
-        : "bg-gradient-to-r from-primary to-coding/50")} aria-hidden />
-      {/* Sheen sweep on hover */}
-      <div aria-hidden
-        className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out bg-gradient-to-r from-transparent via-foreground/5 to-transparent motion-reduce:hidden" />
-
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              {isDomain ? "Domain certificate" : "Course certificate"}
-            </p>
-            <h3 className="font-serif font-bold text-lg text-foreground mt-1 leading-snug">{c.title}</h3>
-          </div>
-          {/* Seal */}
-          <div className={cn(
-            "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ring-2 ring-offset-2 ring-offset-card",
-            isDomain ? "bg-coding/10 ring-coding/20" : "bg-primary/10 ring-primary/20")}>
-            <ShieldCheck className={cn("h-5 w-5", isDomain ? "text-coding" : "text-primary")} />
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground/80">{c.issuer}</span>
-          {issued && <span>· Issued {issued}</span>}
-        </div>
-        <p className="font-mono text-[10px] text-muted-foreground/70 mt-1 truncate">ID {c.certificate_uid}</p>
-
-        <div className="mt-auto pt-4 flex flex-wrap gap-2">
-          <a href={`/verify/${c.certificate_uid}`} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/25 hover:bg-primary/15 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-            <ShieldCheck className="h-3.5 w-3.5" /> Verify
-          </a>
-          {c.pdf_url && (
-            <a href={media(c.pdf_url)} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-secondary/60 text-foreground border border-border hover:border-primary/30 transition-colors focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
-              <FileText className="h-3.5 w-3.5" /> View certificate
-            </a>
-          )}
-        </div>
-      </div>
-    </motion.article>
   )
 }
 
@@ -760,24 +770,6 @@ function SkillGroups({ skills }: { skills: PublicSkill[] }) {
         </motion.div>
       ))}
     </div>
-  )
-}
-
-function ExternalCertRow({ c }: { c: Omit<Certification, "is_public" | "sort_order"> }) {
-  return (
-    <li className="rounded-xl border border-border bg-card px-4 py-3 flex items-start gap-3">
-      <Award className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden />
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-foreground">{c.name}</p>
-        <p className="text-xs text-muted-foreground">{[c.issuer, formatYM(c.issue_date)].filter(Boolean).join(" · ")}</p>
-        {c.credential_url && (
-          <a href={c.credential_url} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1">
-            Show credential <ExternalLink className="h-3 w-3" />
-          </a>
-        )}
-      </div>
-    </li>
   )
 }
 

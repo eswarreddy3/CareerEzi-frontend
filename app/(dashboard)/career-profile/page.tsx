@@ -25,7 +25,6 @@ import { UserAvatar } from "@/components/user-avatar"
 import { PhotoPicker } from "@/components/photo-picker"
 import { ItemDialog, AboutDialog } from "@/components/career-profile/item-forms"
 import { SkillsEditor } from "@/components/career-profile/skills-editor"
-import { PublicSettingsDialog } from "@/components/career-profile/public-settings-dialog"
 import { useAuthStore } from "@/store/authStore"
 import {
   fetchCareerProfile, updateItem, deleteItem, reorderItems, apiError, formatRange, formatYM,
@@ -48,7 +47,6 @@ export default function CareerProfilePage() {
   const [dialog, setDialog] = useState<DialogState>(null)
   const [aboutOpen, setAboutOpen] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
-  const [publicOpen, setPublicOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{ section: ListSection; id: number; label: string } | null>(null)
   const [revealing, setRevealing] = useState(false)
   const [bannerDismissed, setBannerDismissed] = useState(true)
@@ -217,9 +215,9 @@ export default function CareerProfilePage() {
                 ) : (
                   <Link href="/profile"><Button variant="outline" size="sm"><Globe className="h-3.5 w-3.5 mr-1.5" /> Turn on public profile</Button></Link>
                 )}
-                <Button variant="outline" size="sm" onClick={() => setPublicOpen(true)}>
-                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" /> Public page sections
-                </Button>
+                <Link href="/career-profile/customize">
+                  <Button variant="outline" size="sm"><SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" /> Customize public page</Button>
+                </Link>
                 <Link href="/resume"><Button variant="outline" size="sm">Open resume builder</Button></Link>
               </div>
             </div>
@@ -357,12 +355,6 @@ export default function CareerProfilePage() {
       {aboutOpen && (
         <AboutDialog open about={profile.about} onClose={() => setAboutOpen(false)}
           onSaved={(about) => { setProfile((p) => (p ? { ...p, about } : p)); refreshCompleteness() }} />
-      )}
-      {publicOpen && (
-        <PublicSettingsDialog open settings={profile.public_settings ?? { hidden_sections: [] }}
-          isPublic={!!user?.is_public} username={user?.username}
-          onClose={() => setPublicOpen(false)}
-          onSaved={(public_settings) => setProfile((p) => (p ? { ...p, public_settings } : p))} />
       )}
       <PhotoPicker open={photoOpen} onClose={() => setPhotoOpen(false)} current={user?.avatar}
         onChange={(url) => { updateUser({ avatar: url }); refreshCompleteness() }} />
