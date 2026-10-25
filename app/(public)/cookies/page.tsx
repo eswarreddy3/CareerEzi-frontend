@@ -44,7 +44,6 @@ export default function CookiePolicyPage() {
             <tr><td><code>careerezi-theme</code></td><td>Local storage</td><td>Light or dark mode</td><td>Until cleared</td></tr>
             <tr><td><code>careerezi-theme-*</code>, <code>careerezi-seen-themes-*</code>, <code>careerezi-mascot-seen-*</code></td><td>Local storage</td><td>Lesson-reader theme and which tips you have already seen</td><td>Until cleared</td></tr>
             <tr><td><code>careerezi-cp-hidden-banner</code></td><td>Local storage</td><td>Remembers that you dismissed the &ldquo;hidden items&rdquo; notice on your Career Profile</td><td>Until cleared</td></tr>
-            <tr><td><code>careerezi-resume</code></td><td>Local storage</td><td>Offline backup of your resume draft if saving to the server fails</td><td>Until cleared or you reset the resume</td></tr>
             <tr><td>Saarthi panel settings</td><td>Local storage</td><td>Whether the AI assistant panel is open, dismissed or moved</td><td>Until cleared</td></tr>
           </tbody>
         </table>

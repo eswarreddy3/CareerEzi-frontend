@@ -20,6 +20,8 @@ interface ModalFormProps {
   isLoading?: boolean
   submitLabel?: string
   submitClassName?: string
+  /** Optional second action that also submits (validated by the caller), e.g. "Only this resume". */
+  secondarySubmit?: { label: string; onClick: () => void }
   children: ReactNode
 }
 
@@ -32,6 +34,7 @@ export function ModalForm({
   isLoading = false,
   submitLabel = "Submit",
   submitClassName,
+  secondarySubmit,
   children,
 }: ModalFormProps) {
   return (
@@ -49,7 +52,7 @@ export function ModalForm({
         <form onSubmit={onSubmit} className="space-y-4 mt-2">
           {children}
 
-          <div className="flex gap-3 pt-2">
+          <div className={secondarySubmit ? "flex flex-col-reverse sm:flex-row gap-3 pt-2" : "flex gap-3 pt-2"}>
             <Button
               type="button"
               variant="outline"
@@ -59,6 +62,12 @@ export function ModalForm({
             >
               Cancel
             </Button>
+            {secondarySubmit && (
+              <Button type="button" variant="outline" className="flex-1 border-primary/40 text-primary"
+                onClick={secondarySubmit.onClick} disabled={isLoading}>
+                {secondarySubmit.label}
+              </Button>
+            )}
             <Button
               type="submit"
               className={submitClassName ?? "flex-1 bg-primary hover:brightness-110 text-primary-foreground"}

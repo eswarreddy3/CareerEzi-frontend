@@ -3,7 +3,7 @@
 // The ONE set of Career Profile forms. The Career Profile page and the resume
 // builder both open these dialogs, so every fact is entered in one place.
 
-import { useForm, Controller, type Control, type FieldValues, type Path } from "react-hook-form"
+import { useForm, Controller, type Control, type FieldValues, type Path, type UseFormHandleSubmit } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
@@ -41,6 +41,14 @@ function toBody(values: Record<string, unknown>) {
   return out
 }
 
+/** Opening a form from the resume builder. */
+export interface ResumeMode {
+  /** Save the cleaned values to this resume only (an override, or a resume-only item). */
+  onLocal: (body: Record<string, unknown>) => void
+  /** The item exists only on this resume — there is no profile copy to update. */
+  localOnly?: boolean
+}
+
 interface DialogProps<S extends Section> {
   open: boolean
   onClose: () => void
@@ -49,19 +57,41 @@ interface DialogProps<S extends Section> {
   /** Pre-filled values when creating (e.g. degree from the college record). */
   initial?: Partial<SectionItems[S]>
   onSaved: (item: SectionItems[S]) => void
+  /** Set by the resume builder: adds "Only this resume" next to "Save to profile". */
+  resume?: ResumeMode
 }
 
-function useSave<S extends Section>(section: S, { item, onSaved, onClose }: DialogProps<S>) {
-  return async (values: Record<string, unknown>) => {
+/** Submit wiring shared by every item form → spread onto <ModalForm>.
+ *  `prep` turns form values into the request body (e.g. clears end_date when ongoing). */
+function useSubmit<S extends Section, V extends FieldValues>(
+  section: S, props: DialogProps<S>,
+  handleSubmit: UseFormHandleSubmit<V>, prep: (v: V) => Record<string, unknown> = (v) => v,
+) {
+  const { item, onSaved, onClose, resume } = props
+  const save = async (values: Record<string, unknown>, local: boolean) => {
+    const body = toBody(values)
+    if (local) {
+      resume!.onLocal(body)
+      onClose()
+      return
+    }
     try {
-      const body = toBody(values) as Partial<SectionItems[S]>
-      const saved = item ? await updateItem(section, item.id, body) : await createItem(section, body)
+      const typed = body as Partial<SectionItems[S]>
+      const saved = item ? await updateItem(section, item.id, typed) : await createItem(section, typed)
       onSaved(saved)
       toast.success(item ? "Saved" : "Added")
       onClose()
     } catch (err) {
       toast.error(apiError(err, "Couldn't save"))
     }
+  }
+  const localOnly = !!resume?.localOnly
+  return {
+    onSubmit: handleSubmit((v) => save(prep(v), localOnly)),
+    submitLabel: resume ? (localOnly ? "Save" : item ? "Save to profile" : "Add to profile") : "Save",
+    secondarySubmit: resume && !localOnly
+      ? { label: "Only this resume", onClick: handleSubmit((v) => save(prep(v), true)) }
+      : undefined,
   }
 }
 
@@ -116,14 +146,14 @@ export function EducationDialog(props: DialogProps<"education">) {
       show_score: e?.show_score ?? true,
     },
   })
-  const save = useSave("education", props)
+  const form = useSubmit("education", props, handleSubmit,
+    (v) => ({ ...v, end_date: v.is_current ? "" : v.end_date, score_type: v.score ? v.score_type : "" }))
   const level = watch("level"), current = watch("is_current"), score = watch("score")
   const hints = FIELD_HINTS[level]
 
   return (
     <ModalForm title={props.item ? "Edit education" : "Add education"} isOpen={props.open} onClose={props.onClose}
-      onSubmit={handleSubmit((v) => save({ ...v, end_date: v.is_current ? "" : v.end_date, score_type: v.score ? v.score_type : "" }))}
-      isLoading={isSubmitting} submitLabel="Save">
+      {...form} isLoading={isSubmitting}>
       <Field label="Level" required>
         <NativeSelect {...register("level")}>
           {EDUCATION_LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
@@ -192,17 +222,16 @@ export function ProjectDialog(props: DialogProps<"projects">) {
       live_url: p?.live_url ?? "", repo_url: p?.repo_url ?? "", is_featured: p?.is_featured ?? false,
     },
   })
-  const save = useSave("projects", props)
+  const form = useSubmit("projects", props, handleSubmit, (v) => ({
+    ...v,
+    team_size: v.is_team && v.team_size ? Number(v.team_size) : null,
+    end_date: v.is_ongoing ? "" : v.end_date,
+  }))
   const team = watch("is_team"), ongoing = watch("is_ongoing")
 
   return (
     <ModalForm title={p ? "Edit project" : "Add project"} isOpen={props.open} onClose={props.onClose}
-      onSubmit={handleSubmit((v) => save({
-        ...v,
-        team_size: v.is_team && v.team_size ? Number(v.team_size) : null,
-        end_date: v.is_ongoing ? "" : v.end_date,
-      }))}
-      isLoading={isSubmitting} submitLabel="Save">
+      {...form} isLoading={isSubmitting}>
       <Field label="Project title" required error={errors.title?.message}>
         <Input className={inputClass} placeholder="Campus Connect – event app" {...register("title")} />
       </Field>
@@ -262,13 +291,12 @@ export function ExperienceDialog(props: DialogProps<"experience">) {
       is_current: x?.is_current ?? false, description: x?.description ?? "",
     },
   })
-  const save = useSave("experience", props)
+  const form = useSubmit("experience", props, handleSubmit, (v) => ({ ...v, end_date: v.is_current ? "" : v.end_date }))
   const current = watch("is_current")
 
   return (
     <ModalForm title={x ? "Edit experience" : "Add experience"} isOpen={props.open} onClose={props.onClose}
-      onSubmit={handleSubmit((v) => save({ ...v, end_date: v.is_current ? "" : v.end_date }))}
-      isLoading={isSubmitting} submitLabel="Save">
+      {...form} isLoading={isSubmitting}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Role" required error={errors.role?.message}>
           <Input className={inputClass} placeholder="Web Development Intern" {...register("role")} />
@@ -317,11 +345,11 @@ export function AchievementDialog(props: DialogProps<"achievements">) {
       date: a?.date ?? "", url: a?.url ?? "", description: a?.description ?? "",
     },
   })
-  const save = useSave("achievements", props)
+  const form = useSubmit("achievements", props, handleSubmit)
 
   return (
     <ModalForm title={a ? "Edit achievement" : "Add achievement"} isOpen={props.open} onClose={props.onClose}
-      onSubmit={handleSubmit((v) => save(v))} isLoading={isSubmitting} submitLabel="Save">
+      {...form} isLoading={isSubmitting}>
       <Field label="Title" required error={errors.title?.message}>
         <Input className={inputClass} placeholder="Smart India Hackathon – Finalist" {...register("title")} />
       </Field>
@@ -365,13 +393,13 @@ export function CertificationDialog(props: DialogProps<"certifications">) {
       credential_id: c?.credential_id ?? "", credential_url: c?.credential_url ?? "",
     },
   })
-  const save = useSave("certifications", props)
+  const form = useSubmit("certifications", props, handleSubmit)
 
   return (
     <ModalForm title={c ? "Edit certification" : "Add certification"}
       description="Certificates from outside CareerEzi. Your CareerEzi certificates are added automatically."
       isOpen={props.open} onClose={props.onClose}
-      onSubmit={handleSubmit((v) => save(v))} isLoading={isSubmitting} submitLabel="Save">
+      {...form} isLoading={isSubmitting}>
       <Field label="Certificate name" required error={errors.name?.message}>
         <Input className={inputClass} placeholder="AWS Certified Cloud Practitioner" {...register("name")} />
       </Field>
