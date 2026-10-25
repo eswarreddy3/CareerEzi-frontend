@@ -5,8 +5,10 @@
 // components/resume/more-templates.tsx) only render.
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
+import { createPortal } from "react-dom"
 import Link from "next/link"
-import { Printer, RotateCcw, Cloud, CloudOff, ZoomIn, ZoomOut, FileCheck2, AlertTriangle, PencilLine, Gauge } from "lucide-react"
+import { Printer, RotateCcw, Cloud, CloudOff, ZoomIn, ZoomOut, FileCheck2, AlertTriangle, PencilLine, Gauge, Mail, Phone, MapPin, Linkedin, Github, Globe } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -15,11 +17,12 @@ import { useAuthStore } from "@/store/authStore"
 import { cn } from "@/lib/utils"
 import { fetchCareerProfile, type CareerProfile } from "@/lib/career-profile"
 import {
-  buildResumeData, loadStore, newResume, pruneDoc, TEXT_PDF_TEMPLATES,
+  buildResumeData, loadStore, newResume, pruneDoc, layoutOf,
   type ResumeData, type ResumeDoc, type ResumeStore, type TemplateId,
 } from "@/lib/resume"
 import { ResumeEditor } from "@/components/resume/resume-editor"
 import { AtsTemplate } from "@/components/resume/ats-template"
+import { ResumeLink, hrefOf, contactItems, ProjectLinks, CertLink, projectLinks } from "@/components/resume/links"
 import { AtsPanel } from "@/components/resume/ats-panel"
 import { downloadTextPdf, type FixTarget } from "@/lib/resume-ats"
 import { AzurillTemplate, DitgarTemplate, PikachuTemplate, PorygonTemplate, Photo } from "@/components/resume/more-templates"
@@ -60,12 +63,14 @@ function ModernTemplate({ data }: { data: ResumeData }) {
         </div>
 
         <SideSection title="Contact" color="#0E7070">
-          {personal.email    && <SideRow icon="✉"  text={personal.email} />}
-          {personal.phone    && <SideRow icon="📱" text={personal.phone} />}
-          {personal.location && <SideRow icon="📍" text={personal.location} />}
-          {personal.linkedin && <SideRow icon="in" text={personal.linkedin.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//,"").replace(/\/$/,"")} />}
-          {personal.github   && <SideRow icon="gh" text={personal.github.replace(/https?:\/\/(www\.)?github\.com\//,"").replace(/\/$/,"")} />}
-          {personal.website  && <SideRow icon="🌐" text={personal.website} />}
+          {/* SVG icons, not emoji: emoji turn into stray characters in the PDF's text layer.
+              Links are printed in full (linkedin.com/in/…) so ATS software recognises them. */}
+          {personal.email    && <SideRow icon={Mail} text={<ResumeLink href={`mailto:${personal.email}`} style={{ textDecoration: "none" }}>{personal.email}</ResumeLink>} />}
+          {personal.phone    && <SideRow icon={Phone} text={personal.phone} />}
+          {personal.location && <SideRow icon={MapPin} text={personal.location} />}
+          {personal.linkedin && <SideRow icon={Linkedin} text={hrefOf(personal.linkedin) ? <ResumeLink href={hrefOf(personal.linkedin)}>LinkedIn</ResumeLink> : personal.linkedin} />}
+          {personal.github   && <SideRow icon={Github} text={hrefOf(personal.github) ? <ResumeLink href={hrefOf(personal.github)}>GitHub</ResumeLink> : personal.github} />}
+          {personal.website  && <SideRow icon={Globe} text={hrefOf(personal.website) ? <ResumeLink href={hrefOf(personal.website)}>{personal.website}</ResumeLink> : personal.website} />}
         </SideSection>
 
         {skillList.length > 0 && (
@@ -84,7 +89,7 @@ function ModernTemplate({ data }: { data: ResumeData }) {
             {certifications.map(c => c.name ? (
               <div key={c.id} style={{ marginBottom: 7 }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: "#e2e8f0" }}>{c.name}</div>
-                <div style={{ fontSize: 10, color: "#94a3b8" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>
+                <div style={{ fontSize: 10, color: "#94a3b8" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}<CertLink cert={c} prefix={c.issuer || c.year ? " · " : ""} /></div>
               </div>
             ) : null)}
           </SideSection>
@@ -117,7 +122,7 @@ function ModernTemplate({ data }: { data: ResumeData }) {
           </BodySection>
         )}
         {summary && (
-          <BodySection title="Profile" borderColor="#0E7070">
+          <BodySection title="Summary" borderColor="#0E7070">
             <p style={{ fontSize: 12, lineHeight: 1.75, color: "#475569" }}>{summary}</p>
           </BodySection>
         )}
@@ -163,7 +168,7 @@ function ModernTemplate({ data }: { data: ResumeData }) {
               <div key={proj.id} style={{ marginBottom: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                   <div style={{ fontWeight: 700, fontSize: 13 }}>{proj.name}</div>
-                  {proj.link && <div style={{ fontSize: 9, color: "#0E7070", wordBreak: "break-all", maxWidth: 180 }}>{proj.link}</div>}
+                  {projectLinks(proj).length > 0 && <div style={{ fontSize: 9.5, color: "#0E7070" }}><ProjectLinks proj={proj} /></div>}
                 </div>
                 {proj.tech && <div style={{ fontSize: 10, color: "#0E7070", fontWeight: 600, marginBottom: 2 }}>{proj.tech}</div>}
                 {proj.description && <div style={{ fontSize: 11, color: "#475569", lineHeight: 1.65 }}>{proj.description}</div>}
@@ -178,15 +183,15 @@ function ModernTemplate({ data }: { data: ResumeData }) {
 function SideSection({ title, color, children }: { title: string; color: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 7, paddingBottom: 4, borderBottom: `1px solid ${color}40` }}>{title}</div>
+      <div style={{ fontSize: 10, fontWeight: 700, color, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 7, paddingBottom: 4, borderBottom: `1px solid ${color}40` }}>{title}</div>
       {children}
     </div>
   )
 }
-function SideRow({ icon, text }: { icon: string; text: string }) {
+function SideRow({ icon: Icon, text }: { icon: LucideIcon; text: React.ReactNode }) {
   return (
     <div style={{ display: "flex", gap: 6, marginBottom: 4, alignItems: "flex-start" }}>
-      <span style={{ fontSize: 10, flexShrink: 0, opacity: 0.8 }}>{icon}</span>
+      <Icon aria-hidden size={11} strokeWidth={2} style={{ flexShrink: 0, opacity: 0.8, marginTop: 1.5, color: "#cbd5e1" }} />
       <span style={{ fontSize: 10, color: "#cbd5e1", wordBreak: "break-all", lineHeight: 1.4 }}>{text}</span>
     </div>
   )
@@ -194,7 +199,7 @@ function SideRow({ icon, text }: { icon: string; text: string }) {
 function BodySection({ title, borderColor, children }: { title: string; borderColor: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#18181b", marginBottom: 8, paddingBottom: 4, borderBottom: `2px solid ${borderColor}` }}>{title}</div>
+      <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#18181b", marginBottom: 8, paddingBottom: 4, borderBottom: `2px solid ${borderColor}` }}>{title}</div>
       {children}
     </div>
   )
@@ -214,7 +219,7 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
   const strengthList   = strengths.split(",").map(s => s.trim()).filter(Boolean)
   const languageList   = languages.split(",").map(s => s.trim()).filter(Boolean)
   const hobbyList      = hobbies.split(",").map(s => s.trim()).filter(Boolean)
-  const contactParts = [personal.email, personal.phone, personal.location, personal.linkedin && `linkedin: ${personal.linkedin.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//,"").replace(/\/$/,"")}`, personal.github && `github: ${personal.github.replace(/https?:\/\/(www\.)?github\.com\//,"").replace(/\/$/,"")}`].filter(Boolean)
+  const contactParts = contactItems(personal)
 
   return (
     <div style={{ width: 794, minHeight: 1123, fontFamily: "Georgia, 'Times New Roman', serif", background: "white", color: "#1a1a1a", padding: "44px 52px", fontSize: 12, boxSizing: "border-box" }}>
@@ -223,8 +228,7 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
         <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>{personal.name || "YOUR NAME"}</div>
         <div style={{ height: 2, background: "#1a1a1a", margin: "8px 0 6px" }} />
         <div style={{ fontSize: 10.5, color: "#555", display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "3px 14px" }}>
-          {contactParts.map((p, i) => <span key={i}>{p}</span>)}
-          {personal.website && <span>{personal.website}</span>}
+          {contactParts.map((c) => <span key={c.kind}>{c.node}</span>)}
         </div>
         <div style={{ height: 1, background: "#1a1a1a", marginTop: 8 }} />
       </div>
@@ -270,7 +274,7 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
               <div style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "0 8px" }}>
                 <span style={{ fontWeight: 700, fontSize: 13 }}>{proj.name}</span>
                 {proj.tech && <span style={{ fontSize: 11, color: "#555", fontStyle: "italic" }}>{proj.tech}</span>}
-                {proj.link && <span style={{ fontSize: 10, color: "#777" }}>{proj.link}</span>}
+                {projectLinks(proj).length > 0 && <span style={{ fontSize: 10, color: "#555" }}><ProjectLinks proj={proj} /></span>}
               </div>
               {proj.description && <div style={{ fontSize: 11.5, lineHeight: 1.7, color: "#333", marginTop: 2 }}>{proj.description}</div>}
             </div>
@@ -281,18 +285,19 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
       <div style={{ display: "flex", gap: 36, marginTop: 4 }}>
         {skillList.length > 0 && (
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Skills</div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Skills</div>
             <div style={{ fontSize: 11.5, lineHeight: 1.8, color: "#333" }}>{skillList.join(" · ")}</div>
           </div>
         )}
         {certifications.length > 0 && (
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Certifications</div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Certifications</div>
             {certifications.map(c => c.name ? (
               <div key={c.id} style={{ fontSize: 11.5, marginBottom: 3 }}>
                 <span style={{ fontWeight: 600 }}>{c.name}</span>
                 {c.issuer && <span style={{ color: "#555" }}> — {c.issuer}</span>}
                 {c.year && <span style={{ color: "#777" }}> ({c.year})</span>}
+                <span style={{ color: "#555" }}><CertLink cert={c} prefix=" · " /></span>
               </div>
             ) : null)}
           </div>
@@ -317,19 +322,19 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
         <div style={{ display: "flex", gap: 36, marginTop: 4 }}>
           {strengthList.length > 0 && (
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Strengths</div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Strengths</div>
               <div style={{ fontSize: 11.5, lineHeight: 1.8, color: "#333" }}>{strengthList.join(" · ")}</div>
             </div>
           )}
           {languageList.length > 0 && (
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Languages</div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Languages</div>
               <div style={{ fontSize: 11.5, lineHeight: 1.8, color: "#333" }}>{languageList.join(" · ")}</div>
             </div>
           )}
           {hobbyList.length > 0 && (
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Interests</div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 5, borderBottom: "1px solid #1a1a1a", paddingBottom: 4 }}>Interests</div>
               <div style={{ fontSize: 11.5, lineHeight: 1.8, color: "#333" }}>{hobbyList.join(" · ")}</div>
             </div>
           )}
@@ -341,7 +346,7 @@ function ClassicTemplate({ data }: { data: ResumeData }) {
 function ClassicSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{title}</div>
+      <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>{title}</div>
       <div style={{ borderTop: "1px solid #1a1a1a", paddingTop: 8 }}>{children}</div>
     </div>
   )
@@ -362,12 +367,7 @@ function MinimalTemplate({ data }: { data: ResumeData }) {
         <div style={{ fontSize: 30, fontWeight: 300, letterSpacing: "-0.01em", color: "#111" }}>{personal.name || "Your Name"}</div>
         {experience[0]?.role && <div style={{ fontSize: 13, color: "#6366f1", marginTop: 3, fontWeight: 500 }}>{experience[0].role}</div>}
         <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: "2px 18px", fontSize: 10.5, color: "#888" }}>
-          {personal.email    && <span>{personal.email}</span>}
-          {personal.phone    && <span>{personal.phone}</span>}
-          {personal.location && <span>{personal.location}</span>}
-          {personal.linkedin && <span>{personal.linkedin.replace(/https?:\/\/(www\.)?/,"")}</span>}
-          {personal.github   && <span>{personal.github.replace(/https?:\/\/(www\.)?/,"")}</span>}
-          {personal.website  && <span>{personal.website}</span>}
+          {contactItems(personal).map((c) => <span key={c.kind}>{c.node}</span>)}
         </div>
       </div>
 
@@ -377,7 +377,7 @@ function MinimalTemplate({ data }: { data: ResumeData }) {
         </MinSection>
       )}
       {summary && (
-        <MinSection title="About">
+        <MinSection title="Summary">
           <p style={{ fontSize: 12, lineHeight: 1.85, color: "#444", maxWidth: "95%" }}>{summary}</p>
         </MinSection>
       )}
@@ -425,7 +425,7 @@ function MinimalTemplate({ data }: { data: ResumeData }) {
               <div>
                 <div style={{ fontWeight: 600, fontSize: 13 }}>
                   {proj.name}
-                  {proj.link && <span style={{ fontWeight: 400, fontSize: 9.5, color: "#aaa", marginLeft: 8 }}>{proj.link}</span>}
+                  {projectLinks(proj).length > 0 && <span style={{ fontWeight: 400, fontSize: 10, color: "#888", marginLeft: 8 }}><ProjectLinks proj={proj} /></span>}
                 </div>
                 {proj.description && <div style={{ fontSize: 11, color: "#444", lineHeight: 1.7, marginTop: 2 }}>{proj.description}</div>}
               </div>
@@ -451,6 +451,7 @@ function MinimalTemplate({ data }: { data: ResumeData }) {
               <span style={{ fontWeight: 600 }}>{c.name}</span>
               {c.issuer && <span style={{ color: "#666" }}>, {c.issuer}</span>}
               {c.year && <span style={{ color: "#999" }}> ({c.year})</span>}
+              <span style={{ color: "#888" }}><CertLink cert={c} prefix=" · " /></span>
             </div>
           ) : null)}
         </MinSection>
@@ -500,7 +501,7 @@ function MinimalTemplate({ data }: { data: ResumeData }) {
 function MinSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 22 }}>
-      <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: "#bbb", marginBottom: 10, paddingBottom: 5, borderBottom: "1px solid #ebebeb" }}>{title}</div>
+      <div style={{ fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#bbb", marginBottom: 10, paddingBottom: 5, borderBottom: "1px solid #ebebeb" }}>{title}</div>
       {children}
     </div>
   )
@@ -513,29 +514,27 @@ function SharpTemplate({ data }: { data: ResumeData }) {
   const strengthList   = strengths.split(",").map(s => s.trim()).filter(Boolean)
   const languageList   = languages.split(",").map(s => s.trim()).filter(Boolean)
   const hobbyList      = hobbies.split(",").map(s => s.trim()).filter(Boolean)
-  const contactParts = [personal.phone, personal.location, personal.email].filter(Boolean)
+  const contactParts = contactItems(personal, ["phone", "location", "email"])
 
   return (
-    <div style={{ width: 794, minHeight: 1123, fontFamily: "Arial, Helvetica, sans-serif", background: "white", color: "#111", fontSize: 12, boxSizing: "border-box" }}>
+    <div style={{ width: 794, minHeight: 1123, fontFamily: "Arial, Helvetica, sans-serif", background: "white", color: "#111", fontSize: 12, boxSizing: "border-box", display: "flex", flexDirection: "column" }}>
       {/* Full-width header */}
       <div style={{ background: "#0d1f1a", padding: "28px 36px 22px" }}>
         <div style={{ fontSize: 28, fontWeight: 700, color: "white", letterSpacing: "0.02em" }}>{personal.name || "Your Name"}</div>
         {experience[0]?.role && <div style={{ fontSize: 13, color: "#34d399", marginTop: 4, fontWeight: 500 }}>{experience[0].role}</div>}
         <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: "3px 20px", fontSize: 10.5, color: "#94a3b8" }}>
-          {contactParts.map((p, i) => (
-            <span key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {contactParts.map((c) => (
+            <span key={c.kind} style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#059669", display: "inline-block" }} />
-              {p}
+              {c.node}
             </span>
           ))}
-          {personal.linkedin && <span style={{ color: "#94a3b8" }}>{personal.linkedin.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//,"").replace(/\/$/,"")}</span>}
-          {personal.github   && <span style={{ color: "#94a3b8" }}>{personal.github.replace(/https?:\/\/(www\.)?github\.com\//,"").replace(/\/$/,"")}</span>}
-          {personal.website  && <span style={{ color: "#94a3b8" }}>{personal.website}</span>}
+          {contactItems(personal, ["linkedin", "github", "website"]).map((c) => <span key={c.kind} style={{ color: "#94a3b8" }}>{c.node}</span>)}
         </div>
       </div>
 
-      {/* Two-column body */}
-      <div style={{ display: "flex", minHeight: 1000 }}>
+      {/* Two-column body — fills the rest of the page (a fixed minHeight plus the header overflowed A4 onto a blank page 2) */}
+      <div style={{ display: "flex", flex: 1 }}>
         {/* Left column */}
         <div style={{ width: 220, background: "#f0faf6", padding: "24px 18px", borderRight: "3px solid #059669", flexShrink: 0 }}>
           {skillList.length > 0 && (
@@ -565,7 +564,7 @@ function SharpTemplate({ data }: { data: ResumeData }) {
               {certifications.map(c => c.name ? (
                 <div key={c.id} style={{ marginBottom: 8 }}>
                   <div style={{ fontWeight: 600, fontSize: 11, color: "#111" }}>{c.name}</div>
-                  <div style={{ fontSize: 10, color: "#666" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>
+                  <div style={{ fontSize: 10, color: "#666" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}<CertLink cert={c} prefix={c.issuer || c.year ? " · " : ""} /></div>
                 </div>
               ) : null)}
             </SharpSection>
@@ -598,7 +597,7 @@ function SharpTemplate({ data }: { data: ResumeData }) {
             </SharpSection>
           )}
           {summary && (
-            <SharpSection title="Profile" accent="#059669">
+            <SharpSection title="Summary" accent="#059669">
               <p style={{ fontSize: 12, lineHeight: 1.75, color: "#333" }}>{summary}</p>
             </SharpSection>
           )}
@@ -628,7 +627,7 @@ function SharpTemplate({ data }: { data: ResumeData }) {
                     <span style={{ fontWeight: 700, fontSize: 13 }}>{proj.name}</span>
                     {proj.tech && <span style={{ fontSize: 10, color: "#059669", fontWeight: 600 }}>{proj.tech}</span>}
                   </div>
-                  {proj.link && <div style={{ fontSize: 9.5, color: "#888", marginBottom: 2 }}>{proj.link}</div>}
+                  {projectLinks(proj).length > 0 && <div style={{ fontSize: 10, color: "#059669", marginBottom: 2 }}><ProjectLinks proj={proj} /></div>}
                   {proj.description && <div style={{ fontSize: 11.5, color: "#444", lineHeight: 1.65 }}>{proj.description}</div>}
                 </div>
               ))}
@@ -656,7 +655,7 @@ function SharpTemplate({ data }: { data: ResumeData }) {
 function SharpSection({ title, accent, children }: { title: string; accent: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: accent, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: accent, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ width: 16, height: 2, background: accent }} />
         {title}
       </div>
@@ -689,12 +688,7 @@ function ElegantTemplate({ data }: { data: ResumeData }) {
         <div style={{ width: 60, height: 2, background: "#d97706", margin: "12px 0" }} />
         {/* Contact row */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 22px", fontSize: 10.5, color: "#cbd5e1" }}>
-          {personal.email    && <span>{personal.email}</span>}
-          {personal.phone    && <span>{personal.phone}</span>}
-          {personal.location && <span>{personal.location}</span>}
-          {personal.linkedin && <span>{personal.linkedin.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//,"").replace(/\/$/,"")}</span>}
-          {personal.github   && <span>{personal.github.replace(/https?:\/\/(www\.)?github\.com\//,"").replace(/\/$/,"")}</span>}
-          {personal.website  && <span>{personal.website}</span>}
+          {contactItems(personal).map((c) => <span key={c.kind}>{c.node}</span>)}
         </div>
       </div>
 
@@ -706,7 +700,7 @@ function ElegantTemplate({ data }: { data: ResumeData }) {
           </ElegantSection>
         )}
         {summary && (
-          <ElegantSection title="About Me">
+          <ElegantSection title="Summary">
             <p style={{ fontSize: 12.5, lineHeight: 1.85, color: "#444", fontStyle: "italic" }}>{summary}</p>
           </ElegantSection>
         )}
@@ -738,7 +732,7 @@ function ElegantTemplate({ data }: { data: ResumeData }) {
                 {projects.map(proj => !proj.name ? null : (
                   <div key={proj.id} style={{ marginBottom: 11 }}>
                     <div style={{ fontWeight: 700, fontSize: 13 }}>{proj.name}{proj.tech && <span style={{ fontWeight: 400, fontSize: 10.5, color: "#888", marginLeft: 8, fontFamily: "Arial, sans-serif" }}>{proj.tech}</span>}</div>
-                    {proj.link && <div style={{ fontSize: 9.5, color: "#aaa", fontFamily: "Arial, sans-serif" }}>{proj.link}</div>}
+                    {projectLinks(proj).length > 0 && <div style={{ fontSize: 10, color: "#b45309", fontFamily: "Arial, sans-serif" }}><ProjectLinks proj={proj} /></div>}
                     {proj.description && <div style={{ fontSize: 11.5, color: "#444", lineHeight: 1.7, marginTop: 2 }}>{proj.description}</div>}
                   </div>
                 ))}
@@ -777,7 +771,7 @@ function ElegantTemplate({ data }: { data: ResumeData }) {
                 {certifications.map(c => c.name ? (
                   <div key={c.id} style={{ marginBottom: 8 }}>
                     <div style={{ fontWeight: 600, fontSize: 11.5 }}>{c.name}</div>
-                    <div style={{ fontSize: 10.5, color: "#666", fontFamily: "Arial, sans-serif" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>
+                    <div style={{ fontSize: 10.5, color: "#666", fontFamily: "Arial, sans-serif" }}>{[c.issuer, c.year].filter(Boolean).join(" · ")}<CertLink cert={c} prefix={c.issuer || c.year ? " · " : ""} /></div>
                   </div>
                 ) : null)}
               </ElegantSection>
@@ -831,7 +825,7 @@ function ElegantSection({ title, children }: { title: string; children: React.Re
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#1a1a2e" }}>{title}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#1a1a2e" }}>{title}</span>
         <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, #d97706, transparent)" }} />
       </div>
       {children}
@@ -858,6 +852,8 @@ export default function ResumePage() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dirty = useRef(false)
   const [tab, setTab] = useState<"edit" | "ats">("edit")
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
   const [openSections, setOpenSections] = useState<string[]>(["personal", "projects"])
 
   const zoomIn  = () => setZoom(z => Math.min(+(z + 0.1).toFixed(1), 1.2))
@@ -911,93 +907,25 @@ export default function ResumePage() {
     () => (profile && doc ? buildResumeData(profile, account, doc) : null), [profile, doc, account])
 
   const downloadPDF = async () => {
-    // The ATS template is rendered as real text by the backend (ATS software can read it);
-    // every other template is screenshotted below, which ATS software reads as an empty page.
-    if (doc && TEXT_PDF_TEMPLATES.has(doc.template) && data) {
-      if (downloading) return
+    if (!doc || !data || downloading) return
+    // ATS template: real-text PDF rendered by the backend, one click.
+    if (layoutOf(doc.template) === "ats") {
       setDownloading(true)
       try { await downloadTextPdf(data) } catch { toast.error("Could not generate the PDF. Please try again.") }
       finally { setDownloading(false) }
       return
     }
-    const el = document.getElementById("resume-print-area")
-    if (!el || downloading) return
-
-    // A4 at 96 CSS px/inch — the geometry every template is authored against.
-    const PAGE_W = 794
-    const PAGE_H = 1123
-
-    setDownloading(true)
-    el.style.display = "block"
-    el.style.position = "absolute"
-    el.style.left = "-9999px"
-    el.style.top = "0"
-    el.style.width = `${PAGE_W}px`
-    try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import("html2canvas"),
-        import("jspdf"),
-      ])
-
-      // Rasterise only once the web fonts have resolved, otherwise glyphs are
-      // captured in a fallback face and come out smeared.
-      if (document.fonts?.ready) await document.fonts.ready
-
-      const cssH = Math.max(el.scrollHeight, PAGE_H)
-      // Render well above the page's own pixel grid so text stays crisp, backing
-      // off on very long resumes to stay inside the browser's canvas limits.
-      const scale = cssH > 3 * PAGE_H ? 2 : 3
-
-      const canvas = await html2canvas(el, {
-        scale,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        width: PAGE_W,
-        height: cssH,
-      })
-
-      // Real A4 in points. jsPDF's "px" unit is 4/3 pt, so the old [794, 1123] page
-      // was emitted at ~14.7in x 20.8in and every viewer shrank it back down — part
-      // of why the download looked soft next to the on-screen preview.
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4", compress: true })
-      const ptW = pdf.internal.pageSize.getWidth()
-      const ptH = pdf.internal.pageSize.getHeight()
-      const sliceH = Math.round(PAGE_H * scale)   // one A4 page, in canvas pixels
-      const pages = Math.max(1, Math.ceil(canvas.height / sliceH))
-
-      // Slice the tall capture into A4-sized pages instead of squashing the whole
-      // resume onto one — squashing was what distorted and blurred longer resumes.
-      const slice = document.createElement("canvas")
-      const ctx = slice.getContext("2d")!
-
-      for (let page = 0; page < pages; page++) {
-        const srcY = page * sliceH
-        const srcH = Math.min(sliceH, canvas.height - srcY)
-        slice.width = canvas.width
-        slice.height = sliceH
-        ctx.fillStyle = "#ffffff"
-        ctx.fillRect(0, 0, slice.width, slice.height)
-        ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH)
-
-        if (page > 0) pdf.addPage("a4", "portrait")
-        // PNG keeps small type and hairlines free of the JPEG ringing that reads as blur.
-        pdf.addImage(slice.toDataURL("image/png"), "PNG", 0, 0, ptW, ptH, undefined, "FAST")
-      }
-
-      pdf.save(`${data?.personal.name || "resume"}.pdf`)
-    } catch {
-      toast.error("Could not generate the PDF. Please try again.")
-    } finally {
-      el.style.display = "none"
-      el.style.position = ""
-      el.style.left = ""
-      el.style.top = ""
-      el.style.width = ""
-      setDownloading(false)
-    }
+    // Designed templates: the browser's own "Save as PDF" writes the same design as
+    // REAL TEXT (selectable, ATS-readable). The old screenshot export produced an
+    // image that ATS software reads as an empty page, so it is gone.
+    if (document.fonts?.ready) await document.fonts.ready
+    const previousTitle = document.title
+    document.title = `${(data.personal.name || "Resume").replace(/[^A-Za-z0-9]+/g, "_")}_Resume`  // default file name
+    const restore = () => { document.title = previousTitle; window.removeEventListener("afterprint", restore) }
+    window.addEventListener("afterprint", restore)
+    toast.info("In the print window, choose “Save as PDF” as the destination.", { duration: 6000 })
+    window.print()
   }
-
 
   if (loadError) {
     return (
@@ -1018,7 +946,7 @@ export default function ResumePage() {
 
   const template = doc.template
   const ActiveTemplate = RENDERERS[template] ?? AtsTemplate
-  const textPdf = TEXT_PDF_TEMPLATES.has(template)
+  const layout = layoutOf(template)
 
   /** "Fix this" from the ATS check: switch template, or open + scroll to the editor section. */
   const onFix = (target: FixTarget) => {
@@ -1035,10 +963,14 @@ export default function ResumePage() {
 
   return (
     <>
-      {/* ── Full-size print target (hidden on screen) ── */}
-      <div id="resume-print-area" style={{ display: "none" }}>
-        <ActiveTemplate data={data} />
-      </div>
+      {/* ── Full-size print target (hidden on screen). Portalled into <body> so the
+            print stylesheet can show it alone — see @media print in globals.css. ── */}
+      {mounted && createPortal(
+        <div id="resume-print-area" style={{ display: "none" }}>
+          <ActiveTemplate data={data} />
+        </div>,
+        document.body,
+      )}
 
       {/* ── Main UI (hidden during print via CSS) ── */}
       <div className="resume-editor flex flex-col" style={{ height: "calc(100vh - 4rem)", margin: "-1.5rem", marginTop: "-0.5rem" }}>
@@ -1095,16 +1027,20 @@ export default function ResumePage() {
                 onClick={downloadPDF}
                 disabled={downloading}
               >
-                {textPdf ? <FileCheck2 className="h-4 w-4 mr-1.5" /> : <Printer className="h-4 w-4 mr-1.5" />}
+                {layout === "ats" ? <FileCheck2 className="h-4 w-4 mr-1.5" /> : <Printer className="h-4 w-4 mr-1.5" />}
                 {downloading ? "Preparing…" : "Download PDF"}
               </Button>
-              {textPdf ? (
-                <span className="text-[10px] text-success">ATS-readable text PDF</span>
+              {layout === "ats" ? (
+                <span className="text-[10px] text-success">ATS-safe text PDF</span>
+              ) : layout === "single" ? (
+                <span className="text-[10px] text-muted-foreground" title="Opens your browser's print window — choose “Save as PDF”">
+                  Text PDF · choose “Save as PDF”
+                </span>
               ) : (
                 <button type="button" onClick={() => onFix({ action: "template", value: "ats" })}
-                  title="This design downloads as an image, which ATS software reads as an empty page"
+                  title="Two-column layouts can be read out of order by some ATS software. Click to switch to the ATS template."
                   className="text-[10px] text-warning hover:underline inline-flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" /> Image PDF — ATS can't read it
+                  <AlertTriangle className="h-3 w-3" /> 2-column · ATS template is safer
                 </button>
               )}
             </div>

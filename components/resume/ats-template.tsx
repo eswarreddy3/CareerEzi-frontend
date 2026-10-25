@@ -4,7 +4,9 @@
 // Sizes are the PDF's points × 4/3 (pt → CSS px) on the 794px-wide A4 canvas.
 // Deliberately plain: one column, no photo, icons or colour — what ATS parsers read best.
 
+import { Fragment } from "react"
 import type { ResumeData } from "@/lib/resume"
+import { contactItems, ProjectLinks, CertLink, projectLinks } from "@/components/resume/links"
 
 const INK = "#111111", MUTED = "#444444", RULE = "#999999"
 const FONT = "'DejaVu Sans', 'Segoe UI', Arial, Helvetica, sans-serif"
@@ -44,14 +46,18 @@ const meta = { fontSize: 12.7, color: MUTED, lineHeight: "17.3px" } as const
 
 export function AtsTemplate({ data }: { data: ResumeData }) {
   const p = data.personal
-  const contact = join([p.email, p.phone, p.location, p.linkedin, p.github, p.website])
+  const contact = contactItems(p)
   const extra = ([["languages", "Languages"], ["strengths", "Strengths"], ["hobbies", "Interests"]] as const)
     .filter(([k]) => data[k].trim())
 
   return (
     <div style={{ width: 794, minHeight: 1123, background: "#fff", color: INK, fontFamily: FONT, fontSize: 13.3, lineHeight: "18.7px", padding: "53px 60px", boxSizing: "border-box" }}>
       <h1 style={{ fontSize: 25.3, fontWeight: 700, margin: 0, lineHeight: "30.7px" }}>{p.name || "Your Name"}</h1>
-      {contact && <p style={{ ...meta, margin: 0 }}>{contact}</p>}
+      {contact.length > 0 && (
+        <p style={{ ...meta, margin: 0 }}>
+          {contact.map((c, i) => <Fragment key={c.kind}>{i > 0 && " | "}{c.node}</Fragment>)}
+        </p>
+      )}
 
       {data.objective.trim() && <Section title="Career Objective"><p style={{ margin: 0 }}>{data.objective}</p></Section>}
       {data.summary.trim() && <Section title="Professional Summary"><p style={{ margin: 0 }}>{data.summary}</p></Section>}
@@ -84,7 +90,9 @@ export function AtsTemplate({ data }: { data: ResumeData }) {
           {data.projects.filter((pr) => pr.name).map((pr) => (
             <div key={pr.id} style={{ marginBottom: 5 }}>
               <div style={title}>{pr.name}</div>
-              {join([pr.tech, pr.link]) && <div style={meta}>{join([pr.tech, pr.link])}</div>}
+              {(pr.tech || projectLinks(pr).length > 0) && (
+                <div style={meta}>{pr.tech}{pr.tech && projectLinks(pr).length > 0 && " | "}<ProjectLinks proj={pr} /></div>
+              )}
               <Described text={pr.description} />
             </div>
           ))}
@@ -96,7 +104,7 @@ export function AtsTemplate({ data }: { data: ResumeData }) {
       {data.certifications.some((c) => c.name) && (
         <Section title="Certifications">
           {data.certifications.filter((c) => c.name).map((c) => (
-            <div key={c.id} style={{ paddingLeft: 16, textIndent: -13 }}>•&nbsp;&nbsp;{join([c.name, c.issuer, c.year], " — ")}</div>
+            <div key={c.id} style={{ paddingLeft: 16, textIndent: -13 }}>•&nbsp;&nbsp;{join([c.name, c.issuer, c.year], " — ")}<CertLink cert={c} prefix=" | " /></div>
           ))}
         </Section>
       )}

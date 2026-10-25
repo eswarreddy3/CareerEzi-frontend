@@ -18,7 +18,7 @@ import {
 } from "@/lib/resume-ats"
 import { createItem, apiError, type CareerProfile } from "@/lib/career-profile"
 import {
-  listRows, withOverride, TEXT_PDF_TEMPLATES,
+  listRows, withOverride, layoutOf,
   type ResumeData, type ResumeDoc, type TemplateId, type ListSection,
 } from "@/lib/resume"
 import { cn } from "@/lib/utils"
@@ -153,10 +153,10 @@ export function AtsPanel({ data, template, profile, setProfile, doc, updateDoc, 
             </div>
           ))}
         </div>
-        {!TEXT_PDF_TEMPLATES.has(template) && (
-          <div className="mt-3 rounded-lg border border-danger/30 bg-danger/10 p-2.5 text-xs text-foreground">
-            <p className="font-semibold flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5 text-danger" /> This design downloads as an image</p>
-            <p className="text-muted-foreground mt-0.5">ATS software reads it as an empty page. Use the ATS template for job portals.</p>
+        {layoutOf(template) === "two" && (
+          <div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 p-2.5 text-xs text-foreground">
+            <p className="font-semibold flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5 text-warning" /> Two-column design</p>
+            <p className="text-muted-foreground mt-0.5">It downloads as real text, but some ATS software reads the columns out of order. Use the ATS template for online applications.</p>
             <Button size="sm" className="mt-2 h-7 bg-primary text-primary-foreground hover:brightness-110"
               onClick={() => onFix({ action: "template", value: "ats" })}>
               <FileCheck2 className="h-3.5 w-3.5 mr-1" /> Switch to ATS template

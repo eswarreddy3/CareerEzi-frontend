@@ -606,22 +606,24 @@
 
 /* â”€â”€ Resume builder: print styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media print {
-  .resume-editor { display: none !important; }
-
+  /* The print area is portalled straight into <body> (resume/page.tsx), so hiding
+     every other top-level element leaves only the resume — no clipping by the
+     dashboard's scroll containers, and long resumes paginate normally. The browser
+     writes REAL TEXT here ("Save as PDF"), which ATS software can read. */
+  body > *:not(#resume-print-area) { display: none !important; }
+  html, body { background: white !important; height: auto !important; overflow: visible !important; }
   #resume-print-area {
     display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
     width: 794px !important;
-    background: white !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: white !important;
   }
-
-  body > * { visibility: hidden; }
-  #resume-print-area,
-  #resume-print-area * { visibility: visible !important; }
+  /* Templates are 1123px tall; A4 is 1122.5px at 96dpi, so the extra half pixel
+     spilled onto a blank second page. Content that is genuinely longer still flows on. */
+  #resume-print-area > * { min-height: 1122px !important; }
+  /* Initials placeholder (no photo uploaded): keep the circle, keep the letters out of the text layer. */
+  #resume-print-area .resume-initials { color: transparent !important; visibility: hidden; }
 
   * {
     -webkit-print-color-adjust: exact !important;

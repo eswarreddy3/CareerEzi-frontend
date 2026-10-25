@@ -3,8 +3,9 @@
 // Same contract as the five in app/(dashboard)/resume/page.tsx: an A4 page 794px
 // wide, inline styles only (html2canvas captures it for the PDF), render-only.
 
-import type { CSSProperties, ReactNode } from "react"
+import { Fragment, type CSSProperties, type ReactNode } from "react"
 import type { ResumeData } from "@/lib/resume"
+import { contactItems, ProjectLinks, CertLink, projectLinks } from "@/components/resume/links"
 
 // ─── Shared bits ──────────────────────────────────────────────────────────────
 
@@ -13,17 +14,10 @@ const initials = (name: string) => name ? name.split(" ").map(n => n[0]).join(""
 const range = (start: string, end: string, current = false) =>
   `${start}${start && (end || current) ? " – " : ""}${current ? "Present" : end}`
 const headline = (d: ResumeData) => d.experience[0]?.role || d.education[0]?.degree || ""
-const handle = (url: string, host: string) => url.replace(new RegExp(`^(www\\.)?${host}/(in/)?`), "").replace(/\/$/, "")
 
-function contacts(d: ResumeData): string[] {
-  const p = d.personal
-  return [
-    p.email, p.phone, p.location,
-    p.linkedin && `in/${handle(p.linkedin, "linkedin\\.com")}`,
-    p.github && `github.com/${handle(p.github, "github\\.com")}`,
-    p.website,
-  ].filter(Boolean) as string[]
-}
+/** Contact items as links ("LinkedIn" / "GitHub" text, full URL behind) — components/resume/links.tsx. */
+const contacts = (d: ResumeData): ReactNode[] =>
+  contactItems(d.personal).map((c) => <Fragment key={c.kind}>{c.node}</Fragment>)
 
 /** Photo slot. null = switched off (renders nothing); "" = no upload, so initials. */
 export function Photo({ data, size, radius, color, bg }: { data: ResumeData; size: number; radius: number | string; color: string; bg: string }) {
@@ -34,7 +28,8 @@ export function Photo({ data, size, radius, color, bg }: { data: ResumeData; siz
     return <img src={data.photo} crossOrigin="anonymous" alt="" style={{ ...box, objectFit: "cover", display: "block" }} />
   }
   return (
-    <div style={{ ...box, background: bg, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.36, fontWeight: 700 }}>
+    // resume-initials: hidden when printing so "PR" doesn't end up in the PDF's text
+    <div className="resume-initials" style={{ ...box, background: bg, color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.36, fontWeight: 700 }}>
       {initials(data.personal.name)}
     </div>
   )
@@ -74,7 +69,7 @@ function ProjectItems({ data, s, wrap }: { data: ResumeData; s: EntryStyles; wra
   return <>{data.projects.filter(p => p.name).map(p => {
     const n = (
       <div style={{ marginBottom: s.gap }}>
-        <Row left={<span style={s.title}>{p.name}</span>} right={p.link ? <span style={{ ...s.date, fontSize: 9.5 }}>{p.link}</span> : null} />
+        <Row left={<span style={s.title}>{p.name}</span>} right={projectLinks(p).length ? <span style={{ ...s.date, fontSize: 10 }}><ProjectLinks proj={p} /></span> : null} />
         {p.tech && <div style={s.sub}>{p.tech}</div>}
         {p.description && <Lines text={p.description} style={{ ...s.body, marginTop: 3 }} />}
       </div>
@@ -105,7 +100,7 @@ function CertItems({ data, s }: { data: ResumeData; s: EntryStyles }) {
   return <>{data.certifications.filter(c => c.name).map(c => (
     <div key={c.id} style={{ marginBottom: s.gap }}>
       <div style={s.title}>{c.name}</div>
-      <div style={s.sub}>{[c.issuer, c.year].filter(Boolean).join(" · ")}</div>
+      <div style={s.sub}>{[c.issuer, c.year].filter(Boolean).join(" · ")}<CertLink cert={c} prefix={c.issuer || c.year ? " · " : ""} /></div>
     </div>
   ))}</>
 }
@@ -146,9 +141,11 @@ export function AzurillTemplate({ data }: { data: ResumeData }) {
       <div style={{ borderLeft: `1.5px solid ${AZ}`, marginLeft: 7, paddingLeft: 18 }}>{children}</div>
     </div>
   )
+  // The ring is a float, not position:absolute — positioned wrappers make the PDF store
+  // all entry text after every heading, which scrambles the order ATS software reads.
   const ring = (n: ReactNode, key: string) => (
-    <div key={key} style={{ position: "relative" }}>
-      <div style={{ position: "absolute", left: -26, top: 3, width: 11, height: 11, borderRadius: "50%", border: `1.5px solid ${AZ}`, background: "white" }} />
+    <div key={key}>
+      <div aria-hidden style={{ float: "left", marginLeft: -26, marginTop: 3, width: 11, height: 11, boxSizing: "border-box", borderRadius: "50%", border: `1.5px solid ${AZ}`, background: "white" }} />
       {n}
     </div>
   )
@@ -322,7 +319,7 @@ export function PorygonTemplate({ data }: { data: ResumeData }) {
   // Every entry sits in its own ruled cell under a solid bar heading.
   const Sec = ({ title, children }: { title: string; children: ReactNode }) => (
     <div style={{ marginBottom: 14 }}>
-      <div style={{ background: PG, color: "white", fontFamily: serif, fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", padding: "4px 12px" }}>{title}</div>
+      <div style={{ background: PG, color: "white", fontFamily: serif, fontSize: 12, letterSpacing: "0.05em", textTransform: "uppercase", padding: "4px 12px" }}>{title}</div>
       <div style={{ border: `1px solid ${PG_LINE}`, borderTop: "none" }}>{children}</div>
     </div>
   )
@@ -365,7 +362,7 @@ export function PorygonTemplate({ data }: { data: ResumeData }) {
       {skills.length > 0 && <Sec title="Skills"><Cells items={skills} /></Sec>}
       {data.certifications.length > 0 && (
         <Sec title="Certifications">{data.certifications.filter(c => c.name).map(c => cell(
-          <><Row left={<span style={s.title}>{c.name}</span>} right={c.year ? <span style={s.date}>{c.year}</span> : null} />{c.issuer && <div style={s.sub}>{c.issuer}</div>}</>, c.id))}</Sec>
+          <><Row left={<span style={s.title}>{c.name}</span>} right={c.year ? <span style={s.date}>{c.year}</span> : null} />{(c.issuer || c.url) && <div style={s.sub}>{c.issuer}<CertLink cert={c} prefix={c.issuer ? " · " : ""} /></div>}</>, c.id))}</Sec>
       )}
       {data.achievements.length > 0 && (
         <Sec title="Achievements">{data.achievements.filter(a => a.title).map(a => cell(<AchievementItems data={{ ...data, achievements: [a] }} s={s} />, a.id))}</Sec>

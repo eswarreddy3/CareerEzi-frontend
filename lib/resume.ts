@@ -21,8 +21,13 @@ export interface PersonalInfo {
 }
 export interface EduItem { id: string; school: string; degree: string; field: string; start: string; end: string; gpa: string }
 export interface ExpItem { id: string; company: string; role: string; start: string; end: string; current: boolean; description: string }
-export interface ProjItem { id: string; name: string; tech: string; description: string; link: string }
-export interface CertItem { id: string; name: string; issuer: string; year: string }
+export interface ProjItem {
+  id: string; name: string; tech: string; description: string
+  /** live || repo — kept for older readers; templates use live_url / repo_url via ProjectLinks. */
+  link: string
+  live_url: string; repo_url: string
+}
+export interface CertItem { id: string; name: string; issuer: string; year: string; /** credential or CareerEzi verify page */ url: string }
 export interface AchieveItem { id: string; title: string; description: string; year: string }
 export interface ResumeData {
   personal: PersonalInfo
@@ -41,8 +46,16 @@ export interface ResumeData {
   achievements: AchieveItem[]
 }
 
-/** Templates that download as real text; every other one is a screenshot PDF ATS can't read. */
-export const TEXT_PDF_TEMPLATES: ReadonlySet<string> = new Set(["ats"])
+/** Every template downloads as REAL TEXT. "ats" is rendered by the backend in one click
+ *  (/student/resume/pdf); the designs use the browser's "Save as PDF". The layout decides
+ *  how safely an ATS reads it — keep in sync with TEMPLATE_LAYOUT in backend resume_ats.py. */
+export type TemplateLayout = "ats" | "single" | "two"
+export const TEMPLATE_LAYOUT: Record<string, TemplateLayout> = {
+  ats: "ats",
+  classic: "single", minimal: "single", porygon: "single",
+  modern: "two", sharp: "two", elegant: "two", azurill: "two", ditgar: "two", pikachu: "two",
+}
+export const layoutOf = (t: string): TemplateLayout => TEMPLATE_LAYOUT[t] ?? "two"
 
 export type TemplateId =
   | "ats"                                              // real-text PDF from the backend (app/services/resume_pdf.py)
@@ -100,6 +113,9 @@ export function loadStore(raw: unknown): ResumeStore {
   return { version: 2, active_id: "main", resumes: [newResume()] }
 }
 
+/** Where CareerEzi's public pages live — the verify link printed on resumes. */
+const siteOrigin = () => (typeof window !== "undefined" ? window.location.origin : "https://www.careerezi.com")
+
 export const extraId = () => `x_${Math.random().toString(36).slice(2, 10)}`
 
 // ─── Rows: one per item, as the editor and the templates see it ─────────────
@@ -153,7 +169,8 @@ export function listRows<S extends ListSection>(section: S, profile: CareerProfi
         key, source: "verified", included: !excluded.has(key), overridden: [], stale: false,
         item: {
           id: -1, sort_order: 0, is_public: true, name: c.title, issuer: c.issuer,
-          issue_date: c.issued_at ? c.issued_at.slice(0, 7) : null, credential_id: c.certificate_uid, credential_url: null,
+          issue_date: c.issued_at ? c.issued_at.slice(0, 7) : null, credential_id: c.certificate_uid,
+          credential_url: `${siteOrigin()}/verify/${c.certificate_uid}`,
         } as unknown as ItemTypes[S],
       })
     }
@@ -291,9 +308,10 @@ export function buildResumeData(profile: CareerProfile, account: AccountInfo, do
         .filter(Boolean).join(" · "),
       description: p.description ?? "",
       link: bare(p.live_url || p.repo_url),
+      live_url: bare(p.live_url), repo_url: bare(p.repo_url),
     })),
     certifications: inc(listRows("certifications", profile, doc)).map(({ key, item: c }) => ({
-      id: key, name: c.name, issuer: c.issuer ?? "", year: formatYM(c.issue_date),
+      id: key, name: c.name, issuer: c.issuer ?? "", year: formatYM(c.issue_date), url: bare(c.credential_url),
     })),
     achievements: inc(listRows("achievements", profile, doc)).map(({ key, item: a }) => ({
       id: key, title: a.title, description: a.description ?? "", year: formatYM(a.date),
