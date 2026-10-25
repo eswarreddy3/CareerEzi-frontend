@@ -1,7 +1,8 @@
 "use client"
 
 // Resume builder. The facts come from the Career Profile (lib/resume.ts merges
-// them with this resume's choices); the five templates below only render.
+// them with this resume's choices); the templates below (and the four in
+// components/resume/more-templates.tsx) only render.
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
@@ -18,6 +19,7 @@ import {
   type ResumeData, type ResumeDoc, type ResumeStore, type TemplateId,
 } from "@/lib/resume"
 import { ResumeEditor } from "@/components/resume/resume-editor"
+import { AzurillTemplate, DitgarTemplate, PikachuTemplate, PorygonTemplate, Photo } from "@/components/resume/more-templates"
 
 const TEMPLATES: { id: TemplateId; label: string; accent: string }[] = [
   { id: "modern",  label: "Modern",  accent: "#0E7070" },
@@ -25,6 +27,10 @@ const TEMPLATES: { id: TemplateId; label: string; accent: string }[] = [
   { id: "minimal", label: "Minimal", accent: "#6366f1" },
   { id: "sharp",   label: "Sharp",   accent: "#059669" },
   { id: "elegant", label: "Elegant", accent: "#d97706" },
+  { id: "azurill", label: "Timeline", accent: "#0f766e" },
+  { id: "ditgar",  label: "Bold",     accent: "#7155a0" },
+  { id: "pikachu", label: "Banner",   accent: "#9b4f68" },
+  { id: "porygon", label: "Boxed",    accent: "#8c5852" },
 ]
 
 // ─── Template 1: Modern (teal sidebar) ───────────────────────────────────────
@@ -34,17 +40,18 @@ function ModernTemplate({ data }: { data: ResumeData }) {
   const strengthList   = strengths.split(",").map(s => s.trim()).filter(Boolean)
   const languageList   = languages.split(",").map(s => s.trim()).filter(Boolean)
   const hobbyList      = hobbies.split(",").map(s => s.trim()).filter(Boolean)
-  const initials = personal.name ? personal.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "?"
 
   return (
     <div style={{ width: 794, minHeight: 1123, display: "flex", fontFamily: "Arial, Helvetica, sans-serif", background: "white", fontSize: 12 }}>
       {/* Sidebar */}
       <div style={{ width: 230, background: "#18181b", color: "white", padding: "36px 18px", display: "flex", flexDirection: "column", gap: 20, flexShrink: 0 }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#0E7070", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 700, color: "#18181b" }}>
-            {initials}
-          </div>
-          <div style={{ marginTop: 10, fontSize: 15, fontWeight: 700, color: "#0E7070", lineHeight: 1.3 }}>{personal.name || "Your Name"}</div>
+          {data.photo !== null && (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Photo data={data} size={72} radius="50%" color="#18181b" bg="#0E7070" />
+            </div>
+          )}
+          <div style={{ marginTop: data.photo === null ? 0 : 10, fontSize: 15, fontWeight: 700, color: "#0E7070", lineHeight: 1.3 }}>{personal.name || "Your Name"}</div>
           {experience[0]?.role && <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 3 }}>{experience[0].role}</div>}
         </div>
 
@@ -829,7 +836,10 @@ function ElegantSection({ title, children }: { title: string; children: React.Re
 }
 
 // ─── Template renderer map ────────────────────────────────────────────────────
-const RENDERERS = { modern: ModernTemplate, classic: ClassicTemplate, minimal: MinimalTemplate, sharp: SharpTemplate, elegant: ElegantTemplate }
+const RENDERERS: Record<TemplateId, (p: { data: ResumeData }) => React.ReactElement> = {
+  modern: ModernTemplate, classic: ClassicTemplate, minimal: MinimalTemplate, sharp: SharpTemplate, elegant: ElegantTemplate,
+  azurill: AzurillTemplate, ditgar: DitgarTemplate, pikachu: PikachuTemplate, porygon: PorygonTemplate,
+}
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ResumePage() {
@@ -888,7 +898,7 @@ export default function ResumePage() {
 
   const account = useMemo(() => ({
     name: user?.name, email: user?.email, phone: user?.phone,
-    linkedin: user?.linkedin, github: user?.github,
+    linkedin: user?.linkedin, github: user?.github, avatar: user?.avatar,
   }), [user])
   const data: ResumeData | null = useMemo(
     () => (profile && doc ? buildResumeData(profile, account, doc) : null), [profile, doc, account])
@@ -1041,7 +1051,7 @@ export default function ResumePage() {
               title="Include everything again and drop this resume's edits. Your Career Profile is not changed."
               onClick={() => {
                 if (!confirm("Reset this resume? Everything from your Career Profile is included again and resume-only edits are removed. Your Career Profile is not changed.")) return
-                updateDoc(d => ({ ...newResume(d.id, d.name), template: d.template }))
+                updateDoc(d => ({ ...newResume(d.id, d.name), template: d.template, show_photo: d.show_photo }))
                 toast.success("Resume reset")
               }}
             >

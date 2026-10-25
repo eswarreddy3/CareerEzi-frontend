@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import { ItemDialog } from "@/components/career-profile/item-forms"
 import { SkillsEditor } from "@/components/career-profile/skills-editor"
 import {
@@ -25,7 +26,7 @@ import {
 import { EDUCATION_LEVEL_SHORT } from "@/lib/career-profile-labels"
 import { formatRange, formatYM } from "@/lib/ym"
 import {
-  listRows, skillRows, profileText, profilePersonal, withOverride, withoutOverride, extraId,
+  listRows, skillRows, profileText, profilePersonal, withOverride, withoutOverride, extraId, uploadedPhoto,
   type ResumeDoc, type ListSection, type TextField, type Row, type PersonalInfo, type AccountInfo,
 } from "@/lib/resume"
 import { cn } from "@/lib/utils"
@@ -126,7 +127,8 @@ export function ResumeEditor({ profile, setProfile, doc, updateDoc, account }: P
 
       <Accordion type="multiple" defaultValue={["personal", "projects"]} className="space-y-2">
         <Panel value="personal" title="Personal Info">
-          <PersonalFields doc={doc} updateDoc={updateDoc} base={profilePersonal(account, profile.about)} />
+          <PersonalFields doc={doc} updateDoc={updateDoc} base={profilePersonal(account, profile.about)}
+            hasPhoto={!!uploadedPhoto(account.avatar)} />
         </Panel>
 
         <Panel value="summary" title="Professional Summary" badge={doc.text.summary !== undefined}>
@@ -301,8 +303,8 @@ const PERSONAL_LABELS: { key: keyof PersonalInfo; label: string; wide?: boolean 
   { key: "website", label: "Website / portfolio", wide: true },
 ]
 
-function PersonalFields({ doc, updateDoc, base }: {
-  doc: ResumeDoc; updateDoc: Props["updateDoc"]; base: PersonalInfo
+function PersonalFields({ doc, updateDoc, base, hasPhoto }: {
+  doc: ResumeDoc; updateDoc: Props["updateDoc"]; base: PersonalInfo; hasPhoto: boolean
 }) {
   const set = (k: keyof PersonalInfo, v: string) => updateDoc((d) => {
     const personal = { ...d.personal }
@@ -332,6 +334,18 @@ function PersonalFields({ doc, updateDoc, base }: {
       <p className="text-[11px] text-muted-foreground">
         Filled from your account and Career Profile. Changes here apply to this resume only — phone and email are never shown on your public page.
       </p>
+      <div className="flex items-start justify-between gap-3 pt-2 border-t border-border">
+        <div>
+          <Label htmlFor="resume-show-photo" className="text-sm text-foreground">Show photo</Label>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {hasPhoto
+              ? "Used by templates with a photo slot. Many recruiters and applicant tracking systems prefer resumes without one."
+              : <>No photo uploaded — templates show your initials. <Link href="/career-profile" className="text-primary hover:underline">Add a photo</Link></>}
+          </p>
+        </div>
+        <Switch id="resume-show-photo" checked={doc.show_photo}
+          onCheckedChange={(v) => updateDoc((d) => ({ ...d, show_photo: v }))} />
+      </div>
     </div>
   )
 }

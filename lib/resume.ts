@@ -11,6 +11,7 @@ import type {
 } from "@/lib/career-profile"
 import { EDUCATION_LEVEL_SHORT } from "@/lib/career-profile-labels"
 import { formatYM } from "@/lib/ym"
+import { media } from "@/lib/public-profile"
 
 // ─── What the templates render ──────────────────────────────────────────────
 
@@ -25,6 +26,8 @@ export interface CertItem { id: string; name: string; issuer: string; year: stri
 export interface AchieveItem { id: string; title: string; description: string; year: string }
 export interface ResumeData {
   personal: PersonalInfo
+  /** Uploaded photo URL; "" = photo on but none uploaded (templates show initials); null = switched off. */
+  photo: string | null
   objective: string
   summary: string
   experience: ExpItem[]
@@ -38,7 +41,9 @@ export interface ResumeData {
   achievements: AchieveItem[]
 }
 
-export type TemplateId = "modern" | "classic" | "minimal" | "sharp" | "elegant"
+export type TemplateId =
+  | "modern" | "classic" | "minimal" | "sharp" | "elegant"
+  | "azurill" | "ditgar" | "pikachu" | "porygon"     // designs after Reactive Resume (MIT)
 
 // ─── What is stored ─────────────────────────────────────────────────────────
 
@@ -60,6 +65,8 @@ export interface ResumeDoc {
   name: string
   template: TemplateId
   objective: string
+  /** Print the Career Profile photo on templates that have a photo slot. */
+  show_photo: boolean
   excluded: Partial<Record<ResumeSection, string[]>>
   order: Partial<Record<ResumeSection, string[]>>
   /** "projects:12" → only the changed fields, plus the profile values they replaced. */
@@ -72,7 +79,7 @@ export interface ResumeDoc {
 export interface ResumeStore { version: 2; active_id: string; resumes: ResumeDoc[] }
 
 export function newResume(id = "main", name = "My resume"): ResumeDoc {
-  return { id, name, template: "modern", objective: "", excluded: {}, order: {}, overrides: {}, extras: {}, text: {}, personal: {} }
+  return { id, name, template: "modern", objective: "", show_photo: true, excluded: {}, order: {}, overrides: {}, extras: {}, text: {}, personal: {} }
 }
 
 /** Anything that isn't a v2 store (old one-blob resumes, empty) starts fresh —
@@ -169,7 +176,10 @@ export function profileText(about: About, field: TextField): string {
   return (field === "summary" ? about.about : about[field]) ?? ""
 }
 
-export interface AccountInfo { name?: string; email?: string; phone?: string | null; linkedin?: string | null; github?: string | null }
+export interface AccountInfo {
+  name?: string; email?: string; phone?: string | null; linkedin?: string | null; github?: string | null
+  avatar?: string | null
+}
 
 export function profilePersonal(account: AccountInfo, about: About): PersonalInfo {
   return {
@@ -235,6 +245,10 @@ function eduScore(e: Education): string {
   if (!e.score) return ""
   return e.score_type === "cgpa" ? `${e.score} CGPA` : e.score_type === "percent" ? `${e.score}%` : e.score
 }
+/** Only uploaded photos go on a resume — the preset avatars are cartoons. */
+export const uploadedPhoto = (avatar: string | null | undefined) =>
+  avatar && avatar.includes("/static/uploads/") ? media(avatar)! : ""
+
 const bare = (url: string | null | undefined) => (url ?? "").replace(/^https?:\/\//, "").replace(/\/$/, "")
 
 export function buildResumeData(profile: CareerProfile, account: AccountInfo, doc: ResumeDoc): ResumeData {
@@ -245,6 +259,7 @@ export function buildResumeData(profile: CareerProfile, account: AccountInfo, do
 
   return {
     personal: { ...personal, linkedin: bare(personal.linkedin), github: bare(personal.github), website: bare(personal.website) },
+    photo: doc.show_photo ? uploadedPhoto(account.avatar) : null,
     objective: doc.objective,
     summary: text("summary"),
     strengths: text("strengths"),
