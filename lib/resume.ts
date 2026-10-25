@@ -41,7 +41,11 @@ export interface ResumeData {
   achievements: AchieveItem[]
 }
 
+/** Templates that download as real text; every other one is a screenshot PDF ATS can't read. */
+export const TEXT_PDF_TEMPLATES: ReadonlySet<string> = new Set(["ats"])
+
 export type TemplateId =
+  | "ats"                                              // real-text PDF from the backend (app/services/resume_pdf.py)
   | "modern" | "classic" | "minimal" | "sharp" | "elegant"
   | "azurill" | "ditgar" | "pikachu" | "porygon"     // designs after Reactive Resume (MIT)
 
@@ -79,7 +83,7 @@ export interface ResumeDoc {
 export interface ResumeStore { version: 2; active_id: string; resumes: ResumeDoc[] }
 
 export function newResume(id = "main", name = "My resume"): ResumeDoc {
-  return { id, name, template: "modern", objective: "", show_photo: true, excluded: {}, order: {}, overrides: {}, extras: {}, text: {}, personal: {} }
+  return { id, name, template: "ats", objective: "", show_photo: true, excluded: {}, order: {}, overrides: {}, extras: {}, text: {}, personal: {} }
 }
 
 /** Anything that isn't a v2 store (old one-blob resumes, empty) starts fresh —

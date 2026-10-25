@@ -60,7 +60,7 @@ export default function PrivacyPolicyPage() {
         <li>Lesson progress, quiz (MCQ), assignment and aptitude attempts and scores, coding submissions and results, certificates earned.</li>
         <li>Points, streaks, level, leaderboard rank and active-time statistics.</li>
         <li>
-          AI features (&quot;Saarthi&quot;): mock-interview transcripts, interview reports and scores, and
+          AI features (&quot;Saarthi&quot;): job descriptions you paste into the resume ATS check, mock-interview transcripts, interview reports and scores, and
           personalised study plans, together with usage records (feature used, time, token count).
         </li>
         <li>Technical data: IP address, browser and device type, log-in times and security logs.</li>
@@ -113,7 +113,7 @@ export default function PrivacyPolicyPage() {
           <thead><tr><th>Provider</th><th>Purpose</th><th>Data</th><th>Location</th></tr></thead>
           <tbody>
             <tr><td>Cloud hosting (Amazon Web Services; Vercel)</td><td>Running our servers, database and website</td><td>All platform data</td><td>India and/or outside India, depending on the hosting region</td></tr>
-            <tr><td>OpenAI</td><td>AI interviews and study plans</td><td>Interview answers, your first name and learning progress. Your email, phone and academic record are not sent</td><td>USA</td></tr>
+            <tr><td>OpenAI</td><td>AI interviews, study plans and the resume ATS check (job match and &ldquo;Improve with AI&rdquo;)</td><td>Interview answers, your first name and learning progress; for the resume tools, the job description you paste and your resume content (education, skills, projects, experience). Your name, email, phone and links are not sent with resume content</td><td>USA</td></tr>
             <tr><td>Brevo</td><td>Sending emails</td><td>Name and email address</td><td>EU</td></tr>
             <tr><td>Google Analytics; Vercel Analytics</td><td>Website usage statistics</td><td>Pages viewed, device and approximate location (see the <Link href="/cookies">Cookie Policy</Link>)</td><td>USA</td></tr>
             <tr><td>GitHub, LeetCode, HackerRank</td><td>Fetching your public coding statistics</td><td>Only the username you connect</td><td>USA / various</td></tr>

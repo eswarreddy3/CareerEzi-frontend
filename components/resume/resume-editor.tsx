@@ -37,6 +37,9 @@ interface Props {
   doc: ResumeDoc
   updateDoc: (fn: (d: ResumeDoc) => ResumeDoc) => void
   account: AccountInfo
+  /** Controlled open sections (the ATS check's "Fix" opens one). Uncontrolled when omitted. */
+  openSections?: string[]
+  onOpenSectionsChange?: (v: string[]) => void
 }
 
 type DialogState = { section: ListSection; row?: Row<SectionItems[ListSection]> } | null
@@ -59,7 +62,7 @@ function rowLabel(section: ListSection, item: any): { title: string; sub: string
   }
 }
 
-export function ResumeEditor({ profile, setProfile, doc, updateDoc, account }: Props) {
+export function ResumeEditor({ profile, setProfile, doc, updateDoc, account, openSections, onOpenSectionsChange }: Props) {
   const [dialog, setDialog] = useState<DialogState>(null)
   const [manageSkills, setManageSkills] = useState(false)
 
@@ -125,7 +128,8 @@ export function ResumeEditor({ profile, setProfile, doc, updateDoc, account }: P
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["personal", "projects"]} className="space-y-2">
+      <Accordion type="multiple" className="space-y-2"
+        {...(openSections ? { value: openSections, onValueChange: onOpenSectionsChange } : { defaultValue: ["personal", "projects"] })}>
         <Panel value="personal" title="Personal Info">
           <PersonalFields doc={doc} updateDoc={updateDoc} base={profilePersonal(account, profile.about)}
             hasPhoto={!!uploadedPhoto(account.avatar)} />
@@ -258,7 +262,7 @@ function Panel({ value, title, count, badge, children }: {
   value: string; title: string; count?: string; badge?: boolean; children: ReactNode
 }) {
   return (
-    <AccordionItem value={value} className="glass-card border-0 rounded-xl overflow-hidden">
+    <AccordionItem value={value} id={`resume-section-${value}`} className="glass-card border-0 rounded-xl overflow-hidden scroll-mt-4">
       <AccordionTrigger className="px-4 py-3 text-sm font-semibold hover:no-underline">
         <span className="flex items-center gap-2">
           {title}

@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import Link from "next/link"
-import { Printer, RotateCcw, Cloud, CloudOff, ZoomIn, ZoomOut } from "lucide-react"
+import { Printer, RotateCcw, Cloud, CloudOff, ZoomIn, ZoomOut, FileCheck2, AlertTriangle, PencilLine, Gauge } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -15,13 +15,17 @@ import { useAuthStore } from "@/store/authStore"
 import { cn } from "@/lib/utils"
 import { fetchCareerProfile, type CareerProfile } from "@/lib/career-profile"
 import {
-  buildResumeData, loadStore, newResume, pruneDoc,
+  buildResumeData, loadStore, newResume, pruneDoc, TEXT_PDF_TEMPLATES,
   type ResumeData, type ResumeDoc, type ResumeStore, type TemplateId,
 } from "@/lib/resume"
 import { ResumeEditor } from "@/components/resume/resume-editor"
+import { AtsTemplate } from "@/components/resume/ats-template"
+import { AtsPanel } from "@/components/resume/ats-panel"
+import { downloadTextPdf, type FixTarget } from "@/lib/resume-ats"
 import { AzurillTemplate, DitgarTemplate, PikachuTemplate, PorygonTemplate, Photo } from "@/components/resume/more-templates"
 
 const TEMPLATES: { id: TemplateId; label: string; accent: string }[] = [
+  { id: "ats",     label: "ATS",     accent: "#111111" },   // real-text PDF — the one to upload to job portals
   { id: "modern",  label: "Modern",  accent: "#0E7070" },
   { id: "classic", label: "Classic", accent: "#1a1a1a" },
   { id: "minimal", label: "Minimal", accent: "#6366f1" },
@@ -837,6 +841,7 @@ function ElegantSection({ title, children }: { title: string; children: React.Re
 
 // ─── Template renderer map ────────────────────────────────────────────────────
 const RENDERERS: Record<TemplateId, (p: { data: ResumeData }) => React.ReactElement> = {
+  ats: AtsTemplate,
   modern: ModernTemplate, classic: ClassicTemplate, minimal: MinimalTemplate, sharp: SharpTemplate, elegant: ElegantTemplate,
   azurill: AzurillTemplate, ditgar: DitgarTemplate, pikachu: PikachuTemplate, porygon: PorygonTemplate,
 }
@@ -852,6 +857,8 @@ export default function ResumePage() {
   const [downloading, setDownloading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dirty = useRef(false)
+  const [tab, setTab] = useState<"edit" | "ats">("edit")
+  const [openSections, setOpenSections] = useState<string[]>(["personal", "projects"])
 
   const zoomIn  = () => setZoom(z => Math.min(+(z + 0.1).toFixed(1), 1.2))
   const zoomOut = () => setZoom(z => Math.max(+(z - 0.1).toFixed(1), 0.3))
@@ -904,6 +911,15 @@ export default function ResumePage() {
     () => (profile && doc ? buildResumeData(profile, account, doc) : null), [profile, doc, account])
 
   const downloadPDF = async () => {
+    // The ATS template is rendered as real text by the backend (ATS software can read it);
+    // every other template is screenshotted below, which ATS software reads as an empty page.
+    if (doc && TEXT_PDF_TEMPLATES.has(doc.template) && data) {
+      if (downloading) return
+      setDownloading(true)
+      try { await downloadTextPdf(data) } catch { toast.error("Could not generate the PDF. Please try again.") }
+      finally { setDownloading(false) }
+      return
+    }
     const el = document.getElementById("resume-print-area")
     if (!el || downloading) return
 
@@ -1001,7 +1017,21 @@ export default function ResumePage() {
   }
 
   const template = doc.template
-  const ActiveTemplate = RENDERERS[template]
+  const ActiveTemplate = RENDERERS[template] ?? AtsTemplate
+  const textPdf = TEXT_PDF_TEMPLATES.has(template)
+
+  /** "Fix this" from the ATS check: switch template, or open + scroll to the editor section. */
+  const onFix = (target: FixTarget) => {
+    if (target.action === "template" && target.value) {
+      updateDoc(d => ({ ...d, template: target.value as TemplateId }))
+      toast.success("Switched to the ATS template")
+      return
+    }
+    if (!target.section) return
+    setTab("edit")
+    setOpenSections(s => (s.includes(target.section!) ? s : [...s, target.section!]))
+    setTimeout(() => document.getElementById(`resume-section-${target.section}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 120)
+  }
 
   return (
     <>
@@ -1014,10 +1044,11 @@ export default function ResumePage() {
       <div className="resume-editor flex flex-col" style={{ height: "calc(100vh - 4rem)", margin: "-1.5rem", marginTop: "-0.5rem" }}>
 
         {/* Top bar */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-border bg-background flex-shrink-0">
-          <div>
-            <h1 className="text-xl font-bold font-serif text-foreground">Resume Builder</h1>
-            <div className="flex items-center gap-1.5 mt-0.5">
+        {/* Title and actions keep their size; only the template row scrolls when space runs out. */}
+        <div className="flex items-center justify-between gap-4 px-6 py-3 border-b border-border bg-background flex-shrink-0 min-w-0">
+          <div className="flex-shrink-0">
+            <h1 className="text-xl font-bold font-serif text-foreground whitespace-nowrap">Resume Builder</h1>
+            <div className="flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
               {saveStatus === "saved"   && <><Cloud className="h-3 w-3 text-success" /><span className="text-xs text-success">Saved to cloud</span></>}
               {saveStatus === "saving"  && <><Cloud className="h-3 w-3 text-muted-foreground animate-pulse" /><span className="text-xs text-muted-foreground">Saving…</span></>}
               {saveStatus === "unsaved" && <><CloudOff className="h-3 w-3 text-warning" /><span className="text-xs text-warning">Unsaved changes</span></>}
@@ -1025,15 +1056,15 @@ export default function ResumePage() {
               <Link href="/career-profile" className="text-xs text-primary hover:underline">Edit Career Profile</Link>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {/* Template switcher */}
-            <div className="flex gap-1 overflow-x-auto">
+            <div className="flex gap-1 overflow-x-auto min-w-0 pb-1" role="group" aria-label="Template">
               {TEMPLATES.map(t => (
                 <button
                   key={t.id}
                   onClick={() => updateDoc(d => ({ ...d, template: t.id }))}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex-shrink-0 whitespace-nowrap",
                     template === t.id
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-muted-foreground hover:text-foreground"
@@ -1047,7 +1078,7 @@ export default function ResumePage() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-muted-foreground hover:text-destructive"
+              className="text-muted-foreground hover:text-destructive flex-shrink-0"
               title="Include everything again and drop this resume's edits. Your Career Profile is not changed."
               onClick={() => {
                 if (!confirm("Reset this resume? Everything from your Career Profile is included again and resume-only edits are removed. Your Career Profile is not changed.")) return
@@ -1057,14 +1088,26 @@ export default function ResumePage() {
             >
               <RotateCcw className="h-4 w-4 mr-1.5" /> Reset
             </Button>
-            <Button
-              size="sm"
-              className="bg-primary hover:brightness-110 text-primary-foreground"
-              onClick={downloadPDF}
-              disabled={downloading}
-            >
-              <Printer className="h-4 w-4 mr-1.5" /> {downloading ? "Preparing…" : "Download PDF"}
-            </Button>
+            <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+              <Button
+                size="sm"
+                className="bg-primary hover:brightness-110 text-primary-foreground"
+                onClick={downloadPDF}
+                disabled={downloading}
+              >
+                {textPdf ? <FileCheck2 className="h-4 w-4 mr-1.5" /> : <Printer className="h-4 w-4 mr-1.5" />}
+                {downloading ? "Preparing…" : "Download PDF"}
+              </Button>
+              {textPdf ? (
+                <span className="text-[10px] text-success">ATS-readable text PDF</span>
+              ) : (
+                <button type="button" onClick={() => onFix({ action: "template", value: "ats" })}
+                  title="This design downloads as an image, which ATS software reads as an empty page"
+                  className="text-[10px] text-warning hover:underline inline-flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" /> Image PDF — ATS can't read it
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -1073,7 +1116,22 @@ export default function ResumePage() {
 
           {/* ── Left: choose + override ── */}
           <div className="w-[390px] flex-shrink-0 overflow-y-auto border-r border-border p-4 space-y-2">
-            <ResumeEditor profile={profile} setProfile={updateProfile} doc={doc} updateDoc={updateDoc} account={account} />
+            <div className="flex gap-1 p-1 rounded-lg bg-secondary/60 mb-2" role="tablist" aria-label="Resume tools">
+              {([["edit", "Edit", PencilLine], ["ats", "ATS check", Gauge]] as const).map(([id, label, Icon]) => (
+                <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}
+                  className={cn("flex-1 inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-colors",
+                    tab === id ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}>
+                  <Icon className="h-3.5 w-3.5" /> {label}
+                </button>
+              ))}
+            </div>
+            {tab === "edit" ? (
+              <ResumeEditor profile={profile} setProfile={updateProfile} doc={doc} updateDoc={updateDoc} account={account}
+                openSections={openSections} onOpenSectionsChange={setOpenSections} />
+            ) : (
+              <AtsPanel data={data} template={template} profile={profile} setProfile={updateProfile}
+                doc={doc} updateDoc={updateDoc} onFix={onFix} />
+            )}
           </div>
           {/* ── Right: Live Preview ── */}
           <div className="flex-1 flex flex-col overflow-hidden">
