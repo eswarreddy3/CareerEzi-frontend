@@ -80,6 +80,16 @@ api.interceptors.response.use(
     const url = error.config?.url ?? ""
     const status = error.response?.status
 
+    // Backend refuses every student route until onboarding is done (covers
+    // stale persisted user state that still says first_login: false).
+    if (status === 403 && error.response?.data?.error === "onboarding_required") {
+      if (typeof window !== "undefined" && window.location.pathname !== "/onboarding") {
+        useAuthStore.getState().updateUser({ first_login: true })
+        window.location.href = "/onboarding"
+      }
+      return Promise.reject(error)
+    }
+
     if (status === 401 && !url.includes("/auth/login") && !url.includes("/auth/refresh")) {
       const refreshToken = getRefreshToken()
 

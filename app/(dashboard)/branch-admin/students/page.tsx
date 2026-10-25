@@ -7,7 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Users, Search, Mail, Flame, Star, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Users, Search, Mail, Flame, Star, ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react"
+import { PaginationBar } from "@/components/pagination-bar"
+import type { SortDir } from "@/components/sort-button"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { useAuthStore } from "@/store/authStore"
@@ -35,38 +44,59 @@ function formatLastActive(iso: string | null): string {
   return `${diffDays}d ago`
 }
 
+// [sort key, label, direction a fresh pick starts with]
+const SORT_OPTIONS: [string, string, SortDir][] = [
+  ["points", "Points", "desc"],
+  ["streak", "Streak", "desc"],
+  ["last_active", "Last active", "desc"],
+  ["name", "Name", "asc"],
+  ["roll_number", "Roll number", "asc"],
+  ["section", "Section", "asc"],
+  ["passout_year", "Batch", "asc"],
+]
+
 export default function BranchAdminStudentsPage() {
   const { user } = useAuthStore()
   const [students, setStudents] = useState<Student[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [pages, setPages] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [sortKey, setSortKey] = useState("points")
+  const [sortDir, setSortDir] = useState<SortDir>("desc")
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const [remindingId, setRemindingId] = useState<number | null>(null)
 
-  const fetchStudents = useCallback(async (p: number, s: string) => {
+  const fetchStudents = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ page: String(p), per_page: "20" })
-      if (s) params.set("search", s)
+      const params = new URLSearchParams({
+        page: String(page), per_page: String(pageSize), sort: sortKey, order: sortDir,
+      })
+      if (search) params.set("search", search)
       const res = await api.get(`/branch-admin/students?${params}`)
       setStudents(res.data.students)
       setTotal(res.data.total)
-      setPage(res.data.page)
       setPages(res.data.pages)
     } catch {
       toast.error("Failed to load students")
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [page, pageSize, sortKey, sortDir, search])
 
-  useEffect(() => { fetchStudents(1, search) }, [search, fetchStudents])
+  useEffect(() => { fetchStudents() }, [fetchStudents])
 
   const handleSearch = () => {
     setSearch(searchInput)
+    setPage(1)
+  }
+
+  function changeSort(key: string) {
+    setSortKey(key)
+    setSortDir(SORT_OPTIONS.find(([k]) => k === key)?.[2] ?? "asc")
     setPage(1)
   }
 
@@ -111,10 +141,33 @@ export default function BranchAdminStudentsPage() {
             Search
           </Button>
           {search && (
-            <Button variant="outline" className="border-border" onClick={() => { setSearchInput(""); setSearch("") }}>
+            <Button variant="outline" className="border-border" onClick={() => { setSearchInput(""); setSearch(""); setPage(1) }}>
               Clear
             </Button>
           )}
+        </div>
+        <div className="flex items-center gap-2 mt-3">
+          <span className="text-xs text-muted-foreground">Sort by</span>
+          <Select value={sortKey} onValueChange={changeSort}>
+            <SelectTrigger className="h-8 w-[150px] bg-secondary/40 border-border text-xs" aria-label="Sort by">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map(([key, label]) => (
+                <SelectItem key={key} value={key} className="text-xs">{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 border-border"
+            onClick={() => { setSortDir(d => d === "asc" ? "desc" : "asc"); setPage(1) }}
+            title={sortDir === "asc" ? "Ascending" : "Descending"}
+            aria-label={`Sort ${sortDir === "asc" ? "ascending" : "descending"} — click to reverse`}
+          >
+            {sortDir === "asc" ? <ArrowUpNarrowWide className="h-4 w-4" /> : <ArrowDownWideNarrow className="h-4 w-4" />}
+          </Button>
         </div>
       </GlassCard>
 
@@ -201,29 +254,16 @@ export default function BranchAdminStudentsPage() {
       </div>
 
       {/* Pagination */}
-      {pages > 1 && (
-        <div className="flex items-center justify-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border"
-            onClick={() => fetchStudents(page - 1, search)}
-            disabled={page === 1 || loading}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm text-muted-foreground">Page {page} of {pages}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-border"
-            onClick={() => fetchStudents(page + 1, search)}
-            disabled={page === pages || loading}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      <PaginationBar
+        page={page}
+        pages={pages}
+        total={total}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
+        disabled={loading}
+        itemLabel="students"
+      />
     </div>
   )
 }

@@ -1,8 +1,11 @@
 "use client"
 
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/sidebar"
 import { SaarthiMount } from "@/components/saarthi/saarthi-mount"
 import { useUIStore } from "@/store/uiStore"
+import { useAuthStore } from "@/store/authStore"
 import { cn } from "@/lib/utils"
 
 export default function DashboardLayout({
@@ -10,7 +13,16 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter()
   const isCollapsed = useUIStore((s) => s.sidebarCollapsed)
+  // Login only redirects once — without this, typing any dashboard URL skips onboarding.
+  const needsOnboarding = useAuthStore((s) => s.user?.role === "student" && !!s.user.first_login)
+
+  useEffect(() => {
+    if (needsOnboarding) router.replace("/onboarding")
+  }, [needsOnboarding, router])
+
+  if (needsOnboarding) return null
 
   return (
     <div className="min-h-screen mesh-bg">

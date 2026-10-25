@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { useMemo, useState } from "react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PaginationBar } from "@/components/pagination-bar"
+import { SortButton, ariaSort, compareValues, nextSort, type SortDir, type SortState } from "@/components/sort-button"
 import {
   Table,
   TableBody,
@@ -19,6 +20,28 @@ export interface Column<T> {
   header: string
   className?: string
   render?: (row: T) => React.ReactNode
+  /** Makes the header clickable. */
+  sortable?: boolean
+  /** Key sent to the server / used for comparison (defaults to `key`). */
+  sortKey?: string
+  /** Client-side sort value (defaults to `row[key]`). */
+  sortValue?: (row: T) => unknown
+  /** Direction of the first click — use "desc" for numbers where bigger is better. */
+  firstDir?: SortDir
+}
+
+/** Server-driven mode: `data` is already one page; the parent refetches on every change. */
+export interface ServerPaging {
+  page: number
+  pages: number
+  total: number
+  pageSize: number
+  onPageChange: (page: number) => void
+  onPageSizeChange?: (size: number) => void
+  sort?: SortState
+  onSortChange?: (sort: SortState) => void
+  /** Search box value changes (the parent should debounce before fetching). */
+  onSearchChange?: (query: string) => void
 }
 
 interface DataTableProps<T> {
@@ -32,6 +55,9 @@ interface DataTableProps<T> {
   emptyMessage?: string
   emptyIcon?: React.ReactNode
   actions?: (row: T) => React.ReactNode
+  defaultSort?: SortState
+  server?: ServerPaging
+  itemLabel?: string
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -45,30 +71,61 @@ export function DataTable<T extends Record<string, any>>({
   emptyMessage = "No data found",
   emptyIcon,
   actions,
+  defaultSort,
+  server,
+  itemLabel,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState("")
-  const [page, setPage] = useState(1)
+  const [localPage, setLocalPage] = useState(1)
+  const [localPageSize, setLocalPageSize] = useState(pageSize)
+  const [localSort, setLocalSort] = useState<SortState | null>(defaultSort ?? null)
 
-  const filtered = query
-    ? data.filter((row) =>
-        searchKeys.some((key) =>
-          String(row[key]).toLowerCase().includes(query.toLowerCase())
-        )
-      )
-    : data
+  const sortKeyOf = (col: Column<T>) => col.sortKey ?? String(col.key)
+  const sort = server ? server.sort ?? null : localSort
 
-  const totalPages = Math.ceil(filtered.length / pageSize)
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
+  const filtered = useMemo(() => {
+    if (server || !query) return data
+    const q = query.toLowerCase()
+    return data.filter((row) => searchKeys.some((key) => String(row[key] ?? "").toLowerCase().includes(q)))
+  }, [data, query, searchKeys, server])
+
+  const sorted = useMemo(() => {
+    if (server || !localSort) return filtered
+    const col = columns.find((c) => sortKeyOf(c) === localSort.key)
+    if (!col) return filtered
+    const value = col.sortValue ?? ((row: T) => row[col.key as keyof T])
+    return [...filtered].sort((a, b) => compareValues(value(a), value(b), localSort.dir))
+  }, [filtered, localSort, columns, server])
+
+  const size = server ? server.pageSize : localPageSize
+  const total = server ? server.total : sorted.length
+  const totalPages = server ? server.pages : Math.ceil(sorted.length / size)
+  // Clamp: data can shrink under the current page (deletes, new search)
+  const page = server ? server.page : Math.min(localPage, Math.max(totalPages, 1))
+  const paginated = server ? data : sorted.slice((page - 1) * size, page * size)
 
   const handleSearch = (value: string) => {
     setQuery(value)
-    setPage(1)
+    if (server) server.onSearchChange?.(value)
+    else setLocalPage(1)
   }
+
+  const handleSort = (key: string) => {
+    const col = columns.find((c) => sortKeyOf(c) === key)
+    const next = nextSort(sort ?? { key: "", dir: "asc" }, key, col?.firstDir)
+    if (server) server.onSortChange?.(next)
+    else { setLocalSort(next); setLocalPage(1) }
+  }
+
+  const goToPage = (p: number) => (server ? server.onPageChange(p) : setLocalPage(p))
+  const changePageSize = server
+    ? server.onPageSizeChange
+    : (n: number) => { setLocalPageSize(n); setLocalPage(1) }
 
   return (
     <div className="space-y-4">
       {/* Search */}
-      {searchKeys.length > 0 && (
+      {(searchKeys.length > 0 || server?.onSearchChange) && (
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -89,8 +146,18 @@ export function DataTable<T extends Record<string, any>>({
                 <TableHead
                   key={String(col.key)}
                   className={`text-muted-foreground ${col.className ?? ""}`}
+                  aria-sort={col.sortable && sort ? ariaSort(sort, sortKeyOf(col)) : undefined}
                 >
-                  {col.header}
+                  {col.sortable ? (
+                    <SortButton
+                      label={col.header}
+                      sortKey={sortKeyOf(col)}
+                      sort={sort ?? { key: "", dir: "asc" }}
+                      onSort={handleSort}
+                    />
+                  ) : (
+                    col.header
+                  )}
                 </TableHead>
               ))}
               {actions && (
@@ -157,36 +224,17 @@ export function DataTable<T extends Record<string, any>>({
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Showing {(page - 1) * pageSize + 1}–
-            {Math.min(page * pageSize, filtered.length)} of {filtered.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 border-border text-foreground"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span>
-              {page} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 border-border text-foreground"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      {(server || !isLoading) && (
+        <PaginationBar
+          disabled={isLoading}
+          page={page}
+          pages={totalPages}
+          total={total}
+          pageSize={size}
+          onPageChange={goToPage}
+          onPageSizeChange={changePageSize}
+          itemLabel={itemLabel}
+        />
       )}
     </div>
   )

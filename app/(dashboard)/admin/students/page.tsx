@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo, useCallback, type ReactNode } from "react"
+import { useEffect, useState, useCallback, type ReactNode } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { GlassCard } from "@/components/glass-card"
 import { AdminStatCard, AdminHero } from "@/components/admin-stat-card"
@@ -30,10 +30,12 @@ import {
 import { Label } from "@/components/ui/label"
 import {
   Users, Search, Flame, Mail, Loader2, Download,
-  ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle,
+  AlertTriangle,
   CheckCircle, ExternalLink, FileDown, Pencil, Columns3,
   GraduationCap, Activity, Filter, UserCheck,
 } from "lucide-react"
+import { PaginationBar } from "@/components/pagination-bar"
+import { SortButton, ariaSort, nextSort, type SortState } from "@/components/sort-button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
@@ -75,8 +77,15 @@ interface ExportStudent {
   lessons_completed: number
 }
 
-type SortKey = "name" | "points" | "streak" | "last_active"
-type SortDir = "asc" | "desc"
+interface ListStats { total: number; active: number; inactive: number; onboarded: number }
+interface FilterOptions { branches: string[]; sections: string[]; passout_years: number[] }
+
+// Columns where the first click should put the biggest / most recent values on top
+const DESC_FIRST = new Set([
+  "points", "streak", "last_active", "cgpa", "tenth_percent", "twelfth_percent",
+  "active_backlogs", "backlog_history", "gap_years",
+])
+const TH_LABEL = "text-xs font-semibold text-muted-foreground uppercase tracking-wider"
 
 const OPTIONAL_COLUMNS = [
   { key: "roll_no",         label: "Roll No" },
@@ -144,13 +153,6 @@ function formatLastActive(iso: string | null): string {
   return `${diffDays}d ago`
 }
 
-function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
-  if (col !== sortKey) return <ChevronsUpDown className="h-3 w-3 ml-1 opacity-30" />
-  return sortDir === "asc"
-    ? <ChevronUp className="h-3 w-3 ml-1 text-primary" />
-    : <ChevronDown className="h-3 w-3 ml-1 text-primary" />
-}
-
 const staggerContainer = {
   hidden: {},
   show: { transition: { staggerChildren: 0.03 } },
@@ -164,6 +166,9 @@ const rowVariant = {
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([])
   const [total, setTotal] = useState(0)
+  const [pages, setPages] = useState(1)
+  const [stats, setStats] = useState<ListStats | null>(null)
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ branches: [], sections: [], passout_years: [] })
   const [loading, setLoading] = useState(true)
   const [remindingId, setRemindingId] = useState<number | null>(null)
   const [remindingSelected, setRemindingSelected] = useState(false)
@@ -176,8 +181,13 @@ export default function AdminStudentsPage() {
   const [yearFilter, setYearFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  const [sortKey, setSortKey] = useState<SortKey>("points")
-  const [sortDir, setSortDir] = useState<SortDir>("desc")
+  const [sort, setSort] = useState<SortState>({ key: "points", dir: "desc" })
+  const [pageSize, setPageSize] = useState(25)
+  // The page belongs to one search/filter/sort combination; changing any of them goes back to page 1
+  const queryKey = JSON.stringify([searchQuery, branchFilter, sectionFilter, yearFilter, statusFilter, sort, pageSize])
+  const [pageState, setPageState] = useState({ key: queryKey, page: 1 })
+  const page = pageState.key === queryKey ? pageState.page : 1
+  const setPage = (p: number) => setPageState({ key: queryKey, page: p })
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
   const [visibleCols, setVisibleCols] = useState<Record<ColKey, boolean>>(DEFAULT_VISIBLE)
@@ -247,21 +257,30 @@ export default function AdminStudentsPage() {
     if (branchFilter !== "all") params.set("branch", branchFilter)
     if (sectionFilter !== "all") params.set("section", sectionFilter)
     if (yearFilter !== "all") params.set("passout_year", yearFilter)
-    params.set("per_page", "200")
+    if (statusFilter !== "all") params.set("status", statusFilter)
+    params.set("sort", sort.key)
+    params.set("order", sort.dir)
+    params.set("page", String(page))
+    params.set("per_page", String(pageSize))
 
     setLoading(true)
+    let cancelled = false
     const timeout = setTimeout(() => {
       api.get(`/admin/students?${params}`)
         .then((res) => {
+          if (cancelled) return
           setStudents(res.data.students)
           setTotal(res.data.total)
+          setPages(res.data.pages)
+          setStats(res.data.stats)
+          setFilterOptions(res.data.filter_options)
           setSelectedIds(new Set())
         })
-        .catch(() => toast.error("Failed to load students"))
-        .finally(() => setLoading(false))
+        .catch(() => { if (!cancelled) toast.error("Failed to load students") })
+        .finally(() => { if (!cancelled) setLoading(false) })
     }, 300)
-    return () => clearTimeout(timeout)
-  }, [searchQuery, branchFilter, sectionFilter, yearFilter])
+    return () => { cancelled = true; clearTimeout(timeout) }
+  }, [searchQuery, branchFilter, sectionFilter, yearFilter, statusFilter, sort, page, pageSize])
 
   async function handleRemind(student: Student) {
     setRemindingId(student.id)
@@ -335,46 +354,17 @@ export default function AdminStudentsPage() {
     }
   }
 
-  function toggleSort(key: SortKey) {
-    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc")
-    else { setSortKey(key); setSortDir("desc") }
+  function toggleSort(key: string) {
+    setSort(prev => nextSort(prev, key, DESC_FIRST.has(key) ? "desc" : "asc"))
   }
 
   function toggleCol(key: ColKey) {
     setVisibleCols(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const sortedStudents = useMemo(() => {
-    let list = [...students]
-    if (statusFilter === "active") list = list.filter(s => !s.is_inactive)
-    if (statusFilter === "inactive") list = list.filter(s => s.is_inactive)
-    if (statusFilter === "onboarded") list = list.filter(s => s.onboarded)
-    if (statusFilter === "pending") list = list.filter(s => !s.onboarded)
-    list.sort((a, b) => {
-      let av: string | number, bv: string | number
-      if (sortKey === "name") { av = a.name.toLowerCase(); bv = b.name.toLowerCase() }
-      else if (sortKey === "points") { av = a.points; bv = b.points }
-      else if (sortKey === "streak") { av = a.streak; bv = b.streak }
-      else {
-        av = a.last_active ? new Date(a.last_active).getTime() : 0
-        bv = b.last_active ? new Date(b.last_active).getTime() : 0
-      }
-      if (av < bv) return sortDir === "asc" ? -1 : 1
-      if (av > bv) return sortDir === "asc" ? 1 : -1
-      return 0
-    })
-    return list
-  }, [students, sortKey, sortDir, statusFilter])
+  const { branches, sections, passout_years: years } = filterOptions
 
-  const branches = useMemo(() => Array.from(new Set(students.map(s => s.branch).filter(Boolean))).sort(), [students])
-  const sections = useMemo(() => Array.from(new Set(students.map(s => s.section).filter(Boolean))).sort(), [students])
-  const years = useMemo(() => Array.from(new Set(students.map(s => s.passout_year).filter(Boolean))).sort(), [students])
-
-  const inactiveCount = students.filter(s => s.is_inactive).length
-  const activeCount = students.length - inactiveCount
-  const onboardedCount = students.filter(s => s.onboarded).length
-
-  const allVisibleIds = sortedStudents.map(s => s.id)
+  const allVisibleIds = students.map(s => s.id)
   const allSelected = allVisibleIds.length > 0 && allVisibleIds.every(id => selectedIds.has(id))
 
   function toggleSelectAll() {
@@ -394,10 +384,10 @@ export default function AdminStudentsPage() {
   const show = useCallback((key: ColKey) => visibleCols[key], [visibleCols])
 
   const statCards = [
-    { label: "Total Students", value: total,            icon: GraduationCap },
-    { label: "Active",         value: activeCount,       icon: CheckCircle },
-    { label: "Inactive",       value: inactiveCount,     icon: AlertTriangle },
-    { label: "Onboarded",      value: onboardedCount,    icon: UserCheck },
+    { label: "Total Students", value: stats?.total,      icon: GraduationCap },
+    { label: "Active",         value: stats?.active,     icon: CheckCircle },
+    { label: "Inactive",       value: stats?.inactive,   icon: AlertTriangle },
+    { label: "Onboarded",      value: stats?.onboarded,  icon: UserCheck },
     { label: "Selected",       value: selectedIds.size,  icon: Activity },
   ]
 
@@ -445,7 +435,7 @@ export default function AdminStudentsPage() {
             index={i}
             icon={s.icon}
             label={s.label}
-            value={loading ? "—" : s.value.toLocaleString()}
+            value={s.value === undefined ? "—" : s.value.toLocaleString()}
             delay={i * 0.07}
           />
         ))}
@@ -623,7 +613,7 @@ export default function AdminStudentsPage() {
           </div>
 
           {/* Table */}
-          {loading ? (
+          {loading && students.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <motion.div
                 animate={{ rotate: 360 }}
@@ -634,7 +624,10 @@ export default function AdminStudentsPage() {
               <p className="text-sm text-muted-foreground">Loading students…</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border/60">
+            <div className={cn(
+              "overflow-x-auto rounded-lg border border-border/60 transition-opacity",
+              loading && "opacity-60 pointer-events-none",
+            )}>
               <table className="w-full border-collapse" style={{ tableLayout: "auto" }}>
                 <thead>
                   <tr className="bg-secondary/40 border-b border-border">
@@ -646,107 +639,87 @@ export default function AdminStudentsPage() {
                       />
                     </th>
                     {/* Name — always visible */}
-                    <th className="text-left py-3 px-3 min-w-[180px]">
-                      <button
-                        onClick={() => toggleSort("name")}
-                        className="flex items-center text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
-                      >
-                        Student <SortIcon col="name" sortKey={sortKey} sortDir={sortDir} />
-                      </button>
+                    <th className="text-left py-3 px-3 min-w-[180px]" aria-sort={ariaSort(sort, "name")}>
+                      <SortButton label="Student" sortKey="name" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                     </th>
                     {show("roll_no") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Roll No
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "roll_number")}>
+                        <SortButton label="Roll No" sortKey="roll_number" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("branch_sec") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Branch / Sec
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "branch")}>
+                        <SortButton label="Branch / Sec" sortKey="branch" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("year") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Batch
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "passout_year")}>
+                        <SortButton label="Batch" sortKey="passout_year" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("cgpa") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        CGPA
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "cgpa")}>
+                        <SortButton label="CGPA" sortKey="cgpa" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("tenth_percent") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        10th %
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "tenth_percent")}>
+                        <SortButton label="10th %" sortKey="tenth_percent" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("twelfth_percent") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        12th %
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "twelfth_percent")}>
+                        <SortButton label="12th %" sortKey="twelfth_percent" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("active_backlogs") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Backlogs
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "active_backlogs")}>
+                        <SortButton label="Backlogs" sortKey="active_backlogs" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("backlog_history") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Backlog Hist.
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "backlog_history")}>
+                        <SortButton label="Backlog Hist." sortKey="backlog_history" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("gap_years") && (
-                      <th className="text-right py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Gap Yrs
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "gap_years")}>
+                        <SortButton label="Gap Yrs" sortKey="gap_years" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("category") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Category
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "category")}>
+                        <SortButton label="Category" sortKey="category" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("placement_status") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Placement
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "placement_status")}>
+                        <SortButton label="Placement" sortKey="placement_status" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("onboarded") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                        Onboarding
+                      <th className="text-left py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "onboarded")}>
+                        <SortButton label="Onboarding" sortKey="onboarded" sort={sort} onSort={toggleSort} className={TH_LABEL} />
                       </th>
                     )}
                     {show("status") && (
-                      <th className="text-left py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      <th className={cn("text-left py-3 px-3", TH_LABEL)}>
                         Status
                       </th>
                     )}
                     {show("points") && (
-                      <th className="text-right py-3 px-3 whitespace-nowrap">
-                        <button
-                          onClick={() => toggleSort("points")}
-                          className="flex items-center justify-end ml-auto text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
-                        >
-                          Points <SortIcon col="points" sortKey={sortKey} sortDir={sortDir} />
-                        </button>
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "points")}>
+                        <SortButton label="Points" sortKey="points" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("streak") && (
-                      <th className="text-right py-3 px-3 whitespace-nowrap">
-                        <button
-                          onClick={() => toggleSort("streak")}
-                          className="flex items-center justify-end ml-auto text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
-                        >
-                          Streak <SortIcon col="streak" sortKey={sortKey} sortDir={sortDir} />
-                        </button>
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "streak")}>
+                        <SortButton label="Streak" sortKey="streak" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     {show("last_active") && (
-                      <th className="text-right py-3 px-3 whitespace-nowrap">
-                        <button
-                          onClick={() => toggleSort("last_active")}
-                          className="flex items-center justify-end ml-auto text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
-                        >
-                          Last Active <SortIcon col="last_active" sortKey={sortKey} sortDir={sortDir} />
-                        </button>
+                      <th className="text-right py-3 px-3 whitespace-nowrap" aria-sort={ariaSort(sort, "last_active")}>
+                        <SortButton label="Last Active" sortKey="last_active" sort={sort} onSort={toggleSort} align="right" className={TH_LABEL} />
                       </th>
                     )}
                     <th className="py-3 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right whitespace-nowrap">
@@ -756,7 +729,7 @@ export default function AdminStudentsPage() {
                 </thead>
                 <motion.tbody variants={staggerContainer} initial="hidden" animate="show">
                   <AnimatePresence mode="popLayout">
-                    {sortedStudents.map((student, idx) => (
+                    {students.map((student, idx) => (
                       <motion.tr
                         key={student.id}
                         variants={rowVariant}
@@ -952,7 +925,7 @@ export default function AdminStudentsPage() {
                 </motion.tbody>
               </table>
 
-              {sortedStudents.length === 0 && (
+              {!loading && students.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -970,22 +943,33 @@ export default function AdminStudentsPage() {
             </div>
           )}
 
-          {!loading && sortedStudents.length > 0 && (
+          {students.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center justify-between mt-3"
+              className="mt-3 space-y-2"
             >
-              <p className="text-xs text-muted-foreground">
-                {selectedIds.size > 0
-                  ? <span className="text-primary font-medium">{selectedIds.size} selected · </span>
-                  : null}
-                Showing {sortedStudents.length} of {total} students
-              </p>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Filter className="h-3 w-3" />
-                {activeFilters > 0 ? `${activeFilters} filter${activeFilters > 1 ? "s" : ""} active` : "No filters"}
+              <PaginationBar
+                page={page}
+                pages={pages}
+                total={total}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                disabled={loading}
+                itemLabel="students"
+              />
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {selectedIds.size > 0 && (
+                    <span className="text-primary font-medium">{selectedIds.size} selected on this page</span>
+                  )}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Filter className="h-3 w-3" />
+                  {activeFilters > 0 ? `${activeFilters} filter${activeFilters > 1 ? "s" : ""} active` : "No filters"}
+                </span>
               </div>
             </motion.div>
           )}

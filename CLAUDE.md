@@ -42,7 +42,9 @@ frontend/
 │   ├── sidebar.tsx       # Role-aware nav, reads from authStore
 │   ├── glass-card.tsx    # GlassCard wrapper
 │   ├── top-bar.tsx       # Page title + user dropdown
-│   ├── data-table.tsx    # Reusable table with search + pagination
+│   ├── data-table.tsx    # Reusable table: search, sortable columns, pagination (client or `server` mode)
+│   ├── pagination-bar.tsx # Windowed page buttons + rows-per-page picker
+│   ├── sort-button.tsx   # SortButton header, nextSort, compareValues (nulls last)
 │   ├── modal-form.tsx    # Dialog wrapper for forms
 │   ├── points-burst.tsx  # Animated +N pts overlay (framer-motion)
 │   ├── activity-feed.tsx, course-card.tsx, stats-card.tsx
@@ -286,6 +288,7 @@ Utility classes:
 - **Tailwind classes stored in the DB** (e.g. `companies.logo_color` gradients) never appear in source, so Tailwind won't generate them. The gradient stops are safelisted with `@source inline(...)` at the top of `globals.css` — extend that list if seed data uses a new colour or shade.
 - **Company-prep logos** go through `lib/company-logos.ts`: a local file from `/public/Company_logos` (matched by slug prefix) or else the single-letter fallback. There is no remote logo service — Clearbit's logo API is gone and name-guessed domains showed wrong logos.
 - **Company-prep text is Markdown** rendered by `components/rich-text.tsx` (bold/italic/inline code, bullets, numbered lists, fenced code blocks, pipe tables). Keep content within that subset.
+- **Admin student lists are server-paginated.** `/admin/students`, `/branch-admin/students` and `/super-admin/students` take `page`, `per_page` (max 100), `sort`, `order`; never fetch "all" students into the browser. Stat cards and filter dropdowns on `/admin/students` come from the response's `stats` / `filter_options`, not from the loaded page. Use `PaginationBar` + `SortButton` (or `DataTable`'s `server` prop) for new lists.
 - **Windowed pagination**: for lists with 1,000+ pages (e.g. aptitude has 10,000+ questions = 2,000 pages), never render all page buttons. Use a sliding window: show page 1, ellipsis, current±delta, ellipsis, last. Rendering 2,000 buttons freezes the UI.
 - **Practice MCQ page** (`/practice-mcq`): aptitude left panel uses `aptSidebarOpen` state for mobile collapse. On mobile, selecting a subtopic auto-closes the panel (`if (window.innerWidth < 1024) setAptSidebarOpen(false)`). The `fireStars()` + `answerFeedback` flash is shared between programming and aptitude views — `answerFeedback` state lives at the top of `PracticeMCQContent`.
 

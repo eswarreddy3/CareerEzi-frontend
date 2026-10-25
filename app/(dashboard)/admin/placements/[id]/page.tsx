@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -24,6 +24,8 @@ import { motion } from "framer-motion"
 import {
   exportDriveCSV, exportEligibleCSV, generateDrivePDF, generateEligiblePDF,
 } from "@/lib/drive-report"
+import { PaginationBar } from "@/components/pagination-bar"
+import { SortButton, ariaSort, compareValues, nextSort, type SortState } from "@/components/sort-button"
 
 interface Drive {
   id: number
@@ -69,6 +71,17 @@ const statusChip: Record<string, string> = {
   rejected: "chip chip-danger",
 }
 
+// [sort key, header, first-click direction]
+const ELIGIBLE_COLUMNS: [keyof EligibleStudent, string, "asc" | "desc"][] = [
+  ["name", "Student", "asc"],
+  ["roll_number", "Roll No", "asc"],
+  ["branch", "Branch", "asc"],
+  ["cgpa", "CGPA", "desc"],
+  ["active_backlogs", "Backlogs", "asc"],
+  ["placement_status", "Placement", "asc"],
+  ["registration_status", "Drive Status", "asc"],
+]
+
 const placementStatusChip: Record<string, string> = {
   not_placed: "chip",
   selected: "chip chip-success",
@@ -83,6 +96,25 @@ export default function DriveDetailPage() {
   const [loading, setLoading] = useState(true)
   const [notifying, setNotifying] = useState(false)
   const [updatingId, setUpdatingId] = useState<number | null>(null)
+  // Whole list stays loaded (the CSV/PDF exports need it) — sort + page in the browser
+  const [sort, setSort] = useState<SortState>({ key: "name", dir: "asc" })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+
+  const sortedStudents = useMemo(
+    () => [...students].sort((a, b) =>
+      compareValues(a[sort.key as keyof EligibleStudent], b[sort.key as keyof EligibleStudent], sort.dir)),
+    [students, sort],
+  )
+  const pages = Math.max(1, Math.ceil(sortedStudents.length / pageSize))
+  const currentPage = Math.min(page, pages)
+  const pageStudents = sortedStudents.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+  function toggleSort(key: string) {
+    const first = ELIGIBLE_COLUMNS.find(([k]) => k === key)?.[2]
+    setSort(prev => nextSort(prev, key, first))
+    setPage(1)
+  }
 
   useEffect(() => { fetchAll() }, [id])
 
@@ -302,21 +334,20 @@ export default function DriveDetailPage() {
             No eligible students found for this drive's criteria.
           </div>
         ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-muted-foreground text-xs">
-                  <th className="text-left p-3 font-medium">Student</th>
-                  <th className="text-left p-3 font-medium">Roll No</th>
-                  <th className="text-left p-3 font-medium">Branch</th>
-                  <th className="text-left p-3 font-medium">CGPA</th>
-                  <th className="text-left p-3 font-medium">Backlogs</th>
-                  <th className="text-left p-3 font-medium">Placement</th>
-                  <th className="text-left p-3 font-medium">Drive Status</th>
+                  {ELIGIBLE_COLUMNS.map(([key, label]) => (
+                    <th key={key} className="text-left p-3 font-medium" aria-sort={ariaSort(sort, key)}>
+                      <SortButton label={label} sortKey={key} sort={sort} onSort={toggleSort} />
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {students.map((s, i) => (
+                {pageStudents.map((s, i) => (
                   <motion.tr
                     key={s.id}
                     initial={{ opacity: 0 }}
@@ -362,6 +393,17 @@ export default function DriveDetailPage() {
               </tbody>
             </table>
           </div>
+          <PaginationBar
+            className="p-3 border-t border-border"
+            page={currentPage}
+            pages={pages}
+            total={sortedStudents.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(n) => { setPageSize(n); setPage(1) }}
+            itemLabel="students"
+          />
+          </>
         )}
       </GlassCard>
     </div>

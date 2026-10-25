@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
 import { DataTable, type Column } from "@/components/data-table"
+import type { SortState } from "@/components/sort-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -71,6 +72,13 @@ export default function SuperAdminStudentsPage() {
   const [colleges, setColleges] = useState<College[]>([])
   const [loading, setLoading] = useState(true)
   const [collegeFilter, setCollegeFilter] = useState("all")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
+  const [pages, setPages] = useState(1)
+  const [total, setTotal] = useState(0)
+  const [sort, setSort] = useState<SortState>({ key: "created_at", dir: "desc" })
+  const [searchInput, setSearchInput] = useState("")
+  const [search, setSearch] = useState("")
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedCollegeId, setSelectedCollegeId] = useState("")
@@ -84,19 +92,32 @@ export default function SuperAdminStudentsPage() {
   const [confirm, setConfirm] = useState<StudentAction | null>(null)
   const csvRef = useRef<HTMLInputElement>(null)
 
+  // Debounce typing; any filter change goes back to page 1
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput.trim()); setPage(1) }, 300)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
   const fetchStudents = useCallback(async () => {
     setLoading(true)
     try {
-      const params: Record<string, string> = { per_page: "100" }
+      const params: Record<string, string | number> = {
+        page, per_page: pageSize, sort: sort.key, order: sort.dir,
+      }
       if (collegeFilter !== "all") params.college_id = collegeFilter
+      if (search) params.search = search
       const res = await api.get("/super-admin/students", { params })
       setStudents(res.data.students)
+      setTotal(res.data.total)
+      setPages(res.data.pages)
+      // A delete can empty the last page — step back instead of showing nothing
+      if (res.data.students.length === 0 && page > 1 && res.data.pages > 0) setPage(res.data.pages)
     } catch {
       toast.error("Failed to load students")
     } finally {
       setLoading(false)
     }
-  }, [collegeFilter])
+  }, [collegeFilter, page, pageSize, sort, search])
 
   useEffect(() => { fetchStudents() }, [fetchStudents])
 
@@ -181,7 +202,7 @@ export default function SuperAdminStudentsPage() {
       } else if (type === "delete") {
         await api.delete(`/super-admin/students/${student.id}`)
         toast.success(`${student.name} deleted`)
-        setStudents((prev) => prev.filter((s) => s.id !== student.id))
+        fetchStudents()
       }
     } catch {
       toast.error(`Failed to ${type} student`)
@@ -215,6 +236,7 @@ export default function SuperAdminStudentsPage() {
     {
       key: "name",
       header: "Name",
+      sortable: true,
       render: (row) => (
         <div>
           <p className="text-sm font-medium text-foreground">{row.name}</p>
@@ -225,26 +247,32 @@ export default function SuperAdminStudentsPage() {
     {
       key: "college_name",
       header: "College",
+      sortable: true,
       render: (row) => <span className="text-sm text-muted-foreground">{row.college_name || "—"}</span>,
     },
     {
       key: "branch",
       header: "Branch",
+      sortable: true,
       render: (row) => <span className="text-sm text-muted-foreground">{row.branch || "—"}</span>,
     },
     {
       key: "roll_number",
       header: "Roll No",
+      sortable: true,
       render: (row) => <span className="text-sm text-muted-foreground">{row.roll_number || "—"}</span>,
     },
     {
       key: "points",
       header: "Points",
+      sortable: true,
+      firstDir: "desc",
       render: (row) => <span className="text-sm text-foreground">{row.points.toLocaleString()}</span>,
     },
     {
       key: "onboarded",
       header: "Onboarding",
+      sortable: true,
       render: (row) => (
         <Badge
           variant="outline"
@@ -262,6 +290,9 @@ export default function SuperAdminStudentsPage() {
     {
       key: "is_inactive",
       header: "Activity",
+      sortable: true,
+      sortKey: "last_active",
+      firstDir: "desc",
       render: (row) => (
         <span
           className={cn(
@@ -276,6 +307,7 @@ export default function SuperAdminStudentsPage() {
     {
       key: "is_active",
       header: "Account",
+      sortable: true,
       render: (row) => (
         <Badge
           variant="outline"
@@ -346,7 +378,7 @@ export default function SuperAdminStudentsPage() {
 
       {/* College filter */}
       <GlassCard className="p-4">
-        <Select value={collegeFilter} onValueChange={setCollegeFilter}>
+        <Select value={collegeFilter} onValueChange={(v) => { setCollegeFilter(v); setPage(1) }}>
           <SelectTrigger className="w-64 bg-secondary/50 border-border text-foreground">
             <SelectValue placeholder="All Colleges" />
           </SelectTrigger>
@@ -365,11 +397,18 @@ export default function SuperAdminStudentsPage() {
           columns={columns}
           data={students}
           keyField="id"
-          searchPlaceholder="Search by name or email..."
-          searchKeys={["name", "email", "roll_number"]}
-          pageSize={10}
+          searchPlaceholder="Search by name, email or roll no..."
           isLoading={loading}
           emptyMessage="No students found"
+          itemLabel="students"
+          server={{
+            page, pages, total, pageSize,
+            onPageChange: setPage,
+            onPageSizeChange: (n) => { setPageSize(n); setPage(1) },
+            sort,
+            onSortChange: (next) => { setSort(next); setPage(1) },
+            onSearchChange: setSearchInput,
+          }}
           actions={(row) => (
             <div className="flex items-center gap-1">
               {row.is_active ? (

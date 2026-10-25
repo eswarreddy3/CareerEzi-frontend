@@ -86,7 +86,7 @@ export function ReadinessDashboard({ studentHref }: {
   const filters = data?.filters
   const columns: Column<ReadinessStudent>[] = useMemo(() => [
     {
-      key: "name", header: "Student",
+      key: "name", header: "Student", sortable: true,
       render: (r) => {
         const inner = (
           <div className="flex items-center gap-2.5 min-w-0">
@@ -101,11 +101,11 @@ export function ReadinessDashboard({ studentHref }: {
       },
     },
     {
-      key: "branch", header: "Branch",
+      key: "branch", header: "Branch", sortable: true,
       render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{[r.branch, r.section && `Sec ${r.section}`, r.passout_year].filter(Boolean).join(" · ")}</span>,
     },
     {
-      key: "ats_score", header: "ATS",
+      key: "ats_score", header: "ATS", sortable: true, firstDir: "desc",
       render: (r) => {
         const b = atsBand(r.ats_score)
         return (
@@ -117,7 +117,7 @@ export function ReadinessDashboard({ studentHref }: {
       },
     },
     {
-      key: "profile_strength", header: "Profile",
+      key: "profile_strength", header: "Profile", sortable: true, firstDir: "desc",
       render: (r) => (
         <div className="flex items-center gap-2 min-w-[90px]">
           <div className="h-1.5 w-14 rounded-full bg-secondary overflow-hidden">
@@ -127,9 +127,9 @@ export function ReadinessDashboard({ studentHref }: {
         </div>
       ),
     },
-    { key: "projects", header: "Projects", className: "text-center", render: (r) => <span className={cn("tabular-nums", r.projects === 0 && "text-danger")}>{r.projects}</span> },
+    { key: "projects", header: "Projects", sortable: true, firstDir: "desc", className: "text-center", render: (r) => <span className={cn("tabular-nums", r.projects === 0 && "text-danger")}>{r.projects}</span> },
     {
-      key: "skills", header: "Skills",
+      key: "skills", header: "Skills", sortable: true, firstDir: "desc", sortValue: (r) => r.skills.length,
       render: (r) => r.skills.length ? (
         <div className="flex flex-wrap gap-1 max-w-[260px]">
           {r.skills.slice(0, 4).map((sk) => {
@@ -145,15 +145,15 @@ export function ReadinessDashboard({ studentHref }: {
         </div>
       ) : <span className="text-xs text-muted-foreground">—</span>,
     },
-    { key: "certificates", header: "Certs", className: "text-center", render: (r) => <span className="tabular-nums">{r.certificates}</span> },
-    { key: "problems_solved", header: "Solved", className: "text-center", render: (r) => <span className="tabular-nums">{r.problems_solved}</span> },
+    { key: "certificates", header: "Certs", sortable: true, firstDir: "desc", className: "text-center", render: (r) => <span className="tabular-nums">{r.certificates}</span> },
+    { key: "problems_solved", header: "Solved", sortable: true, firstDir: "desc", className: "text-center", render: (r) => <span className="tabular-nums">{r.problems_solved}</span> },
     {
       key: "public_url", header: "Public",
       render: (r) => r.public_url
         ? <a href={r.public_url} target="_blank" rel="noopener noreferrer" aria-label={`${r.name}'s public profile`} className="text-primary hover:text-primary/80"><ExternalLink className="h-4 w-4" /></a>
         : <span className="text-xs text-muted-foreground">Off</span>,
     },
-    { key: "last_active", header: "Active", render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo(r.last_active)}</span> },
+    { key: "last_active", header: "Active", sortable: true, firstDir: "desc", render: (r) => <span className="text-xs text-muted-foreground whitespace-nowrap">{timeAgo(r.last_active)}</span> },
   ], [studentHref])
 
   return (
