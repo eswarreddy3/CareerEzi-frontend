@@ -15,7 +15,7 @@ import {
   FileText, Terminal, Briefcase, Trophy, Award, UserSquare2,
   ClipboardCheck, CalendarCheck, BarChart3, Users, Bell, MessageSquare,
   Layers, Upload, Code2, Globe2, FileSpreadsheet, KeyRound,
-  BookOpen, Brain, ScrollText, Building, LineChart, QrCode,
+  BookOpen, Brain, ScrollText, Building, LineChart, QrCode, IdCard,
 } from "lucide-react"
 import { FadeIn } from "./primitives"
 
@@ -62,6 +62,7 @@ const groups: {
     glow: "linear-gradient(160deg,rgba(6,182,212,0.08) 0%,transparent 70%)",
     items: [
       { icon: Building,      label: "Company prep guides",  desc: "Round-by-round breakdowns for the companies that visit." },
+      { icon: IdCard,        label: "Career profile",       desc: "Education, projects and skills entered once — feeds the resume and public portfolio." },
       { icon: ScrollText,    label: "Resume builder",       desc: "Guided sections with one-click PDF export." },
       { icon: FileText,      label: "Performance report",   desc: "Personal stats — lessons, accuracy, problems solved — as PDF." },
       { icon: Briefcase,     label: "Jobs board",           desc: "Live openings posted platform-wide, open to every college." },

@@ -87,6 +87,7 @@ frontend/
 | /feed, /feed/post/[id] | student, college_admin | ✅ |
 | /leaderboard | student | ✅ |
 | /profile | student | ✅ |
+| /career-profile | student | ✅ Single source of portfolio facts (education, projects, experience, skills, achievements, external certs) + photo upload/crop |
 | /resume | student | ✅ |
 | /certificates | student | ✅ Fynity certificates list + download |
 | /u/[username] | public | ✅ Public portfolio (cert chips link to /verify) |
@@ -256,6 +257,14 @@ Utility classes:
 - Onboarding requires the consent checkbox; the backend rejects `complete-onboarding` without `accept_terms: true`. Bump `TERMS_VERSION` on material changes.
 - Google Analytics loads only after opt-in via `components/cookie-consent.tsx` — never add tracking scripts directly to `app/layout.tsx`.
 - New public routes must also be added to `PUBLIC_ROUTES` in `proxy.ts`.
+
+## Career Profile
+
+- `/career-profile` is where students enter education, projects, experience, skills, achievements and outside certificates. The resume builder and the public page **read** this data; never add a second form for the same facts.
+- The forms are shared: `components/career-profile/item-forms.tsx` (`ItemDialog`, `AboutDialog`) and `skills-editor.tsx`. Reuse them anywhere a student edits these facts (the resume builder included). Types + API helpers: `lib/career-profile.ts`. Field rules mirror `SECTIONS` in the backend `app/services/career_profile.py`, which has the final say.
+- The public page (`components/public-profile-view.tsx`) renders the same data. It must import only pure modules — `lib/ym.ts` (dates) and `lib/career-profile-labels.ts` (labels) — never `lib/career-profile.ts` at runtime, which pulls in the logged-in API client. Section show/hide lives in `components/career-profile/public-settings-dialog.tsx`; the backend removes hidden sections from the payload.
+- Dates are `'YYYY'` or `'YYYY-MM'` strings. Use `YMInput` and `formatYM`/`formatRange`, never `<input type="month">` (it can't hold year-only and Safari desktop lacks it).
+- `components/photo-picker.tsx` uploads a cropped photo or picks a preset. Uploaded avatars are **relative** `/static/uploads/...` paths, so render user photos through `UserAvatar` or `media()` from `lib/public-profile.ts`, never a raw `<img src={user.avatar}>`.
 
 ## Key gotchas
 - `api.ts` has `Content-Type: application/json` as instance default. The request interceptor deletes it for `FormData` payloads so Flask's `request.files` is populated correctly. If file uploads return "No file provided", check that this interceptor logic is intact.

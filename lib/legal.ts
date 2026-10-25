@@ -19,7 +19,7 @@ export const LEGAL = {
   // Bump TERMS_VERSION whenever Terms or Privacy change materially — users who
   // accepted an older version are asked to accept again.
   effectiveDate: "18 October 2026",
-  lastUpdated: "18 October 2026",
+  lastUpdated: "25 October 2026",
 } as const
 
 export const TERMS_VERSION = "2026-10-18"

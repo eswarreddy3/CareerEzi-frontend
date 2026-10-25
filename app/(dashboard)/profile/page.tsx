@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Pencil, Loader2, Eye, EyeOff, Github, Linkedin, ExternalLink, MessageSquarePlus, Lock, Shield, GraduationCap, AlertCircle, Clock, CheckCircle2, XCircle, Phone, Calendar } from "lucide-react"
-import { AvatarPicker } from "@/components/avatar-picker"
+import { PhotoPicker } from "@/components/photo-picker"
+import { media } from "@/lib/public-profile"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
@@ -111,16 +112,6 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
     defaultValues: defaults,
   })
 
-  const handleAvatarSelect = async (url: string) => {
-    try {
-      await api.patch("/student/profile", { avatar: url })
-      updateUser({ avatar: url } as any)
-      toast.success("Avatar updated")
-    } catch {
-      toast.error("Failed to update avatar")
-    }
-  }
-
   const onSave = async (data: PersonalForm) => {
     try {
       await api.patch("/student/profile", {
@@ -162,7 +153,7 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
         <div className="relative">
           <div className="w-14 h-14 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center overflow-hidden">
             {photoUrl
-              ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
+              ? <img src={media(photoUrl)} alt="avatar" className="w-full h-full object-cover" />
               : <span className="text-xl font-bold text-primary font-serif">{initials}</span>}
           </div>
           {editing && (
@@ -176,15 +167,15 @@ function PersonalInfoSection({ user, updateUser }: { user: any; updateUser: (u: 
           <p className="text-sm font-medium text-foreground">{user?.name}</p>
           {editing && (
             <button type="button" onClick={() => setAvatarPickerOpen(true)} className="text-xs text-primary hover:underline mt-0.5">
-              Change avatar
+              Change photo
             </button>
           )}
         </div>
       </div>
-      <AvatarPicker
+      <PhotoPicker
         open={avatarPickerOpen}
         onClose={() => setAvatarPickerOpen(false)}
-        onSelect={handleAvatarSelect}
+        onChange={(url) => updateUser({ avatar: url } as any)}
         current={photoUrl}
       />
 

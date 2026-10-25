@@ -27,9 +27,9 @@ export async function generateMetadata(
   if (!p) return { title: "Profile not found · CareerEzi" }
 
   const title = `${p.name} · CareerEzi`
-  const bits = [p.branch, p.college_name].filter(Boolean).join(" · ")
+  const bits = [p.headline, p.branch, p.college_name].filter(Boolean).join(" · ")
   const description = bits
-    ? `${p.name} — ${bits}. View coding stats, achievements and contact on CareerEzi.`
+    ? `${p.name} — ${bits}. View projects, skills, education and certificates on CareerEzi.`
     : `${p.name}'s placement portfolio on CareerEzi.`
   const image = media(p.avatar)
 

@@ -5,11 +5,19 @@ import { motion, useInView, useReducedMotion, animate, type Variants } from "fra
 import {
   Github, Linkedin, Code2, Terminal, ExternalLink, Star, Users, FolderGit2,
   Trophy, Target, Award, Flame, GraduationCap, BadgeCheck, MapPin, ShieldCheck,
-  Share2, Check, FileText,
+  Share2, Check, FileText, Briefcase, User, Globe, Languages, Sparkles,
+  Medal, Megaphone, BookOpen, CalendarDays, School,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { getLevel } from "@/lib/levels"
-import { media, type CodingProfile, type PublicCertificate, type PublicProfile } from "@/lib/public-profile"
+import {
+  media, type CodingProfile, type PublicCertificate, type PublicProfile, type PublicEducation, type PublicSkill,
+} from "@/lib/public-profile"
+import { formatRange, formatDuration, formatYM } from "@/lib/ym"
+import {
+  EDUCATION_LEVEL_SHORT, EMPLOYMENT_TYPES, SKILL_CATEGORIES, ACHIEVEMENT_KINDS, OPEN_TO,
+} from "@/lib/career-profile-labels"
+import type { Project, Experience, Achievement as CareerAchievement, Certification } from "@/lib/career-profile"
 import { cn } from "@/lib/utils"
 
 // ─── Motion presets ─────────────────────────────────────────────────────────
@@ -87,8 +95,17 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
     ...p.completed_domains.filter((d) => !d.certificate_uid).map((d) => ({ ...d, kind: "domain" as const })),
     ...p.completed_courses.filter((c) => !c.certificate_uid).map((c) => ({ ...c, kind: "course" as const })),
   ]
-  const hasAchievements = certificates.length > 0 || uncertified.length > 0
-  const hasContact = !!(p.linkedin || p.github)
+  const externalCerts = p.external_certifications ?? []
+  const hasAchievements = certificates.length > 0 || uncertified.length > 0 || externalCerts.length > 0
+  const hasContact = !!(p.linkedin || p.github || p.about?.website)
+  const projects = p.projects ?? []
+  const experience = p.experience ?? []
+  const education = p.education ?? []
+  const skills = p.skills ?? []
+  const careerAchievements = p.achievements ?? []
+  const aboutText = p.about?.about
+  const openTo = p.open_to && p.open_to !== "not_looking" ? OPEN_TO.find((o) => o.value === p.open_to)?.label : null
+  const hasCareer = !!(aboutText || projects.length || experience.length || education.length || skills.length || careerAchievements.length)
 
   const stats = [
     { icon: Target, label: "Problems Solved", value: totalSolved },
@@ -139,18 +156,25 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
             <motion.div variants={item} className="flex-1 min-w-0">
               <h1 className="text-3xl sm:text-4xl font-bold font-serif text-foreground">{p.name}</h1>
               <p className="text-sm text-primary/90 font-medium">@{p.username}</p>
+              {p.headline && <p className="text-base text-foreground/90 mt-1.5">{p.headline}</p>}
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1 mt-2 text-sm text-muted-foreground">
                 {p.branch && <span className="inline-flex items-center gap-1"><GraduationCap className="h-3.5 w-3.5" />{p.branch}</span>}
                 {p.college_name && (
                   <span className="inline-flex items-center gap-1.5">
                     {p.college_logo_url
                       ? <img src={media(p.college_logo_url)} alt="" className="h-4 w-4 rounded-sm object-contain" />
-                      : <MapPin className="h-3.5 w-3.5" />}
+                      : <School className="h-3.5 w-3.5" />}
                     {p.college_name}
                   </span>
                 )}
                 {p.passout_year && <span>Batch {p.passout_year}</span>}
+                {p.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{p.location}</span>}
               </div>
+              {openTo && (
+                <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-success/10 border border-success/25 text-xs font-semibold text-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" aria-hidden /> Open to {openTo.toLowerCase()}
+                </span>
+              )}
             </motion.div>
 
             {/* Level + streak chips + share */}
@@ -188,9 +212,59 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
       </div>
 
       <div className="max-w-4xl mx-auto px-5 sm:px-8 py-10 space-y-12">
+        {/* ── About ── */}
+        {(aboutText || p.about?.languages) && (
+          <Section eyebrow="Introduction" title="About">
+            <motion.div variants={item} className="space-y-3">
+              {aboutText && <p className="text-[15px] leading-relaxed text-foreground/90 whitespace-pre-line">{aboutText}</p>}
+              {p.about?.languages && (
+                <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
+                  <Languages className="h-4 w-4" /> Speaks {p.about.languages}
+                </p>
+              )}
+            </motion.div>
+          </Section>
+        )}
+
+        {/* ── Projects ── */}
+        {projects.length > 0 && (
+          <Section eyebrow="Portfolio" title="Projects" subtitle="Things built — solo and in teams">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {projects.map((pr) => <ProjectCard key={pr.id} p={pr} />)}
+            </div>
+          </Section>
+        )}
+
+        {/* ── Experience ── */}
+        {experience.length > 0 && (
+          <Section eyebrow="Work" title="Experience">
+            <Timeline>
+              {experience.map((x) => <ExperienceEntry key={x.id} x={x} />)}
+            </Timeline>
+          </Section>
+        )}
+
+        {/* ── Education ── */}
+        {education.length > 0 && (
+          <Section eyebrow="Academics" title="Education">
+            <Timeline>
+              {education.map((e) => <EducationEntry key={e.id} e={e} />)}
+            </Timeline>
+          </Section>
+        )}
+
+        {/* ── Skills ── */}
+        {skills.length > 0 && (
+          <Section eyebrow="Toolkit" title="Skills"
+            subtitle={skills.some((sk) => sk.verified_by) ? "✓ marks skills CareerEzi has evidence for — hover or tap to see why" : undefined}>
+            <SkillGroups skills={skills} />
+          </Section>
+        )}
+
         {/* ── Verified credentials — the certificate wall ── */}
         {hasAchievements && (
-          <Section eyebrow="Verified by Fynity" title="Credentials" subtitle="Every certificate is independently verifiable">
+          <Section eyebrow={certificates.length ? "Verified by Fynity" : "Learning"} title="Credentials"
+            subtitle={certificates.length ? "CareerEzi certificates are independently verifiable" : undefined}>
             {certificates.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {certificates.map((c) => <CertificateCard key={c.certificate_uid} c={c} />)}
@@ -212,6 +286,23 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
                 </div>
               </motion.div>
             )}
+            {externalCerts.length > 0 && (
+              <motion.div variants={item} className={cn("space-y-2", (certificates.length > 0 || uncertified.length > 0) && "mt-5")}>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Other certifications</p>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {externalCerts.map((c) => <ExternalCertRow key={c.id} c={c} />)}
+                </ul>
+              </motion.div>
+            )}
+          </Section>
+        )}
+
+        {/* ── Achievements ── */}
+        {careerAchievements.length > 0 && (
+          <Section eyebrow="Recognition" title="Achievements">
+            <ul className="space-y-3">
+              {careerAchievements.map((a) => <AchievementEntry key={a.id} a={a} />)}
+            </ul>
           </Section>
         )}
 
@@ -263,12 +354,13 @@ export function PublicProfileView({ p }: { p: PublicProfile }) {
             <motion.div variants={item} className="flex flex-wrap gap-3">
               {p.linkedin && <ContactLink href={p.linkedin} icon={Linkedin} iconClass="text-primary" label="LinkedIn" />}
               {p.github && <ContactLink href={p.github} icon={Github} label="GitHub" />}
+              {p.about?.website && <ContactLink href={p.about.website} icon={Globe} iconClass="text-primary" label="Website" />}
             </motion.div>
           </Section>
         )}
 
         {/* Empty state */}
-        {connected.length === 0 && !hasAchievements && !hasContact && totalSolved === 0 && (
+        {connected.length === 0 && !hasAchievements && !hasContact && totalSolved === 0 && !hasCareer && (
           <div className="text-center py-12 text-muted-foreground">
             <Code2 className="h-10 w-10 mx-auto mb-3 opacity-40" />
             <p className="text-sm">This portfolio is just getting started.</p>
@@ -529,5 +621,190 @@ function HackerrankCard({ p }: { p: CodingProfile }) {
         </div>
       )}
     </CardShell>
+  )
+}
+
+// ─── Career Profile sections ────────────────────────────────────────────────
+
+function ProjectCard({ p }: { p: Omit<Project, "is_public" | "sort_order"> }) {
+  const range = formatRange(p.start_date, p.end_date, p.is_ongoing)
+  return (
+    <motion.article variants={item} whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 280, damping: 20 }}
+      className={cn("rounded-2xl border bg-card p-5 flex flex-col hover:shadow-lg transition-shadow",
+        p.is_featured ? "sm:col-span-2 border-primary/30" : "border-border")}>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-serif font-bold text-lg text-foreground leading-snug">{p.title}</h3>
+        {p.is_featured && (
+          <span className="flex-shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning/15 text-warning text-[11px] font-semibold">
+            <Star className="h-3 w-3 fill-warning" /> Featured
+          </span>
+        )}
+      </div>
+      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+        {p.is_team
+          ? <span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5" />Team{p.team_size ? ` of ${p.team_size}` : ""}{p.role ? ` · ${p.role}` : ""}</span>
+          : <span className="inline-flex items-center gap-1"><User className="h-3.5 w-3.5" />Solo project</span>}
+        {range && <span className="inline-flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" />{range}</span>}
+      </p>
+      {p.description && (
+        <p className={cn("mt-3 text-sm leading-relaxed text-foreground/85 whitespace-pre-line", !p.is_featured && "line-clamp-5")}>
+          {p.description}
+        </p>
+      )}
+      {p.skills.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {p.skills.map((sk) => (
+            <span key={sk} className="px-2 py-0.5 rounded-md bg-secondary/70 text-xs font-medium text-foreground/80">{sk}</span>
+          ))}
+        </div>
+      )}
+      {(p.live_url || p.repo_url) && (
+        <div className="mt-auto pt-4 flex flex-wrap gap-2">
+          {p.live_url && (
+            <a href={p.live_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:brightness-110 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+              <ExternalLink className="h-3.5 w-3.5" /> Live demo
+            </a>
+          )}
+          {p.repo_url && (
+            <a href={p.repo_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-secondary/60 text-foreground border border-border hover:border-primary/30 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+              <Github className="h-3.5 w-3.5" /> Source code
+            </a>
+          )}
+        </div>
+      )}
+    </motion.article>
+  )
+}
+
+function Timeline({ children }: { children: ReactNode }) {
+  return <ol className="relative border-l border-border ml-2 space-y-6">{children}</ol>
+}
+
+function TimelineEntry({ icon: Icon, title, org, badge, meta, range, duration, children }: {
+  icon: LucideIcon; title: string; org?: string | null; badge?: ReactNode; meta?: (string | null | undefined)[]
+  range?: string; duration?: string; children?: ReactNode
+}) {
+  const metaText = (meta ?? []).filter(Boolean).join(" · ")
+  return (
+    <motion.li variants={item} className="pl-7 relative">
+      <span className="absolute -left-[13px] top-0.5 w-6 h-6 rounded-full bg-card border border-border flex items-center justify-center" aria-hidden>
+        <Icon className="h-3.5 w-3.5 text-primary" />
+      </span>
+      <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-x-4 gap-y-0.5">
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        {range && (
+          <p className="text-xs text-muted-foreground tabular-nums flex-shrink-0">
+            {range}{duration && <span className="text-muted-foreground/70"> · {duration}</span>}
+          </p>
+        )}
+      </div>
+      {org && <p className="text-sm text-foreground/80 flex flex-wrap items-center gap-2">{org}{badge}</p>}
+      {metaText && <p className="text-xs text-muted-foreground mt-0.5">{metaText}</p>}
+      {children}
+    </motion.li>
+  )
+}
+
+function ExperienceEntry({ x }: { x: Omit<Experience, "is_public" | "sort_order"> }) {
+  return (
+    <TimelineEntry icon={Briefcase} title={x.role} org={x.company}
+      meta={[EMPLOYMENT_TYPES.find((t) => t.value === x.employment_type)?.label, x.location]}
+      range={formatRange(x.start_date, x.end_date, x.is_current)}
+      duration={formatDuration(x.start_date, x.end_date, x.is_current)}>
+      {x.description && <p className="mt-2 text-sm leading-relaxed text-foreground/85 whitespace-pre-line">{x.description}</p>}
+    </TimelineEntry>
+  )
+}
+
+function EducationEntry({ e }: { e: PublicEducation }) {
+  const score = e.score
+    ? e.score_type === "cgpa" ? `CGPA ${e.score}` : e.score_type === "percent" ? `${e.score}%` : e.score
+    : null
+  return (
+    <TimelineEntry icon={GraduationCap}
+      title={e.field ? `${e.field}` : EDUCATION_LEVEL_SHORT[e.level]}
+      org={e.institution}
+      badge={e.college_verified && (
+        <span title="This student is enrolled at this college on CareerEzi"
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[11px] font-semibold">
+          <ShieldCheck className="h-3 w-3" /> Verified college
+        </span>
+      )}
+      meta={[e.field ? EDUCATION_LEVEL_SHORT[e.level] : null, e.board, score]}
+      range={formatRange(e.start_date, e.end_date, e.is_current)} />
+  )
+}
+
+function SkillGroups({ skills }: { skills: PublicSkill[] }) {
+  const groups = SKILL_CATEGORIES
+    .map((c) => ({ ...c, items: skills.filter((sk) => sk.category === c.value) }))
+    .filter((g) => g.items.length)
+  return (
+    <div className="space-y-4">
+      {groups.map((g) => (
+        <motion.div key={g.value} variants={item}>
+          {groups.length > 1 && <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{g.label}</p>}
+          <ul className="flex flex-wrap gap-2">
+            {g.items.map((sk) => (
+              <li key={sk.id}>
+                <Chip className={sk.verified_by ? "bg-success/10 border-success/25" : "bg-secondary/40 border-border"}>
+                  {sk.verified_by && <BadgeCheck className="h-3.5 w-3.5 text-success" aria-hidden />}
+                  <span title={sk.verified_by ?? undefined} tabIndex={sk.verified_by ? 0 : undefined}>{sk.name}</span>
+                  {sk.verified_by && <span className="sr-only"> — verified: {sk.verified_by}</span>}
+                </Chip>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+function ExternalCertRow({ c }: { c: Omit<Certification, "is_public" | "sort_order"> }) {
+  return (
+    <li className="rounded-xl border border-border bg-card px-4 py-3 flex items-start gap-3">
+      <Award className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" aria-hidden />
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-foreground">{c.name}</p>
+        <p className="text-xs text-muted-foreground">{[c.issuer, formatYM(c.issue_date)].filter(Boolean).join(" · ")}</p>
+        {c.credential_url && (
+          <a href={c.credential_url} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1">
+            Show credential <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+      </div>
+    </li>
+  )
+}
+
+const ACHIEVEMENT_ICON: Record<string, LucideIcon> = {
+  hackathon: Trophy, award: Medal, leadership: Megaphone, publication: BookOpen,
+  extracurricular: Sparkles, other: Star,
+}
+
+function AchievementEntry({ a }: { a: Omit<CareerAchievement, "is_public" | "sort_order"> }) {
+  const Icon = ACHIEVEMENT_ICON[a.kind] ?? Star
+  return (
+    <motion.li variants={item} className="rounded-2xl border border-border bg-card p-4 flex gap-3">
+      <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0" aria-hidden>
+        <Icon className="h-4 w-4 text-primary" />
+      </span>
+      <div className="min-w-0">
+        <h3 className="font-semibold text-foreground">{a.title}</h3>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {[ACHIEVEMENT_KINDS.find((k) => k.value === a.kind)?.label, a.organization, formatYM(a.date)].filter(Boolean).join(" · ")}
+        </p>
+        {a.description && <p className="mt-1.5 text-sm text-foreground/85 whitespace-pre-line">{a.description}</p>}
+        {a.url && (
+          <a href={a.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1.5">
+            Learn more <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+      </div>
+    </motion.li>
   )
 }

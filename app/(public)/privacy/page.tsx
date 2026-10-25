@@ -41,8 +41,15 @@ export default function PrivacyPolicyPage() {
       <h3>2.2 Provided by you</h3>
       <ul>
         <li>Password (stored only as a one-way bcrypt hash; we cannot read it).</li>
-        <li>Optional profile details: phone number, date of birth, gender, profile picture, LinkedIn and GitHub links, and a public username.</li>
-        <li>Resume Builder content, which may include education, work history, projects and skills.</li>
+        <li>Optional profile details: phone number, date of birth, gender, profile picture (an uploaded photo is cropped and stored at 400&times;400 pixels), LinkedIn and GitHub links, and a public username.</li>
+        <li>
+          Career Profile content: headline, about text, location, whether you are open to work, personal website,
+          languages, strengths and hobbies; education (institution, board or university, course, dates and score);
+          projects (description, links, skills, team size and role, dates); internships and work experience;
+          skills; achievements; and certificates from other providers. Each item can be shown on or hidden from your
+          public portfolio, and education scores have their own show/hide setting.
+        </li>
+        <li>Resume Builder settings, such as the template and which Career Profile items to include. Your existing resume content is copied into your Career Profile the first time you open it, hidden from your public portfolio until you choose to show it.</li>
         <li>Usernames for coding platforms you choose to connect (GitHub, LeetCode, HackerRank).</li>
         <li>Posts, comments and likes on your college feed; feedback you send us; off-campus offers and profile-correction requests you submit to your Institution; placement-drive registrations.</li>
         <li>Messages sent through the contact form on our website (name, email, phone, message), including from people who do not have an account.</li>

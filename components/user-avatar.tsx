@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { getShield } from "@/lib/shields"
+import { media } from "@/lib/public-profile"
 
 interface UserAvatarProps {
   name: string
@@ -69,7 +70,7 @@ export function UserAvatar({
   if (!hasShield) {
     return (
       <Avatar className={cn(SIZE_MAP[size], "flex-shrink-0", className)}>
-        {photoUrl && <AvatarImage src={photoUrl} alt={name} className="object-cover" />}
+        {photoUrl && <AvatarImage src={media(photoUrl)} alt={name} className="object-cover" />}
         <AvatarFallback
           className={cn(
             "bg-primary/15 text-primary font-semibold",
@@ -97,7 +98,7 @@ export function UserAvatar({
         }}
       >
         <Avatar className={SIZE_MAP[size]}>
-          {photoUrl && <AvatarImage src={photoUrl} alt={name} className="object-cover" />}
+          {photoUrl && <AvatarImage src={media(photoUrl)} alt={name} className="object-cover" />}
           <AvatarFallback
             className={cn(
               "bg-card text-primary font-semibold",

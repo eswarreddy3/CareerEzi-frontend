@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Globe, Loader2, Copy, ExternalLink, Check, AtSign, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -153,6 +154,11 @@ export function PublicProfileSettings() {
             <p className="text-xs text-muted-foreground">Set a username to claim your public profile link.</p>
           )
         )}
+
+        <p className="text-xs text-muted-foreground">
+          Projects, education and skills shown on your public profile come from your{" "}
+          <Link href="/career-profile" className="text-primary hover:underline">Career Profile</Link>.
+        </p>
       </div>
     </div>
   )

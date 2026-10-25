@@ -37,6 +37,7 @@ import {
   ClipboardCheck,
   Award,
   Sparkles,
+  IdCard,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -114,6 +115,7 @@ const studentNavBlocks: StudentNavBlock[] = [
   {
     type: "section", id: "personal", label: "Personal", icon: User, color: "slate",
     items: [
+      { href: "/career-profile", label: "Career Profile", icon: IdCard  },
       { href: "/resume",       label: "Resume Builder", icon: FileText  },
       { href: "/certificates", label: "Certificates",   icon: Award     },
       { href: "/report",       label: "My Report",      icon: BarChart2 },
