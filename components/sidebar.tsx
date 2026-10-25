@@ -38,6 +38,7 @@ import {
   Award,
   Sparkles,
   IdCard,
+  Gauge,
 } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
@@ -134,6 +135,8 @@ const collegeAdminTop: NavItem[] = [
   { href: "/admin",           label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/students",  label: "Students",  icon: Users            },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3        },
+  { href: "/admin/readiness", label: "Placement Readiness", icon: Gauge  },
+  { href: "/admin/leaderboard", label: "Leaderboard", icon: Trophy       },
 ]
 const collegeAdminGroups: NavGroup[] = [
   {
@@ -155,6 +158,8 @@ const collegeAdminBottom: NavItem[] = [
 const branchAdminNavItems: NavItem[] = [
   { href: "/branch-admin",          label: "Dashboard",    icon: LayoutDashboard, exact: true },
   { href: "/branch-admin/students", label: "Students",     icon: Users            },
+  { href: "/branch-admin/readiness", label: "Placement Readiness", icon: Gauge   },
+  { href: "/branch-admin/leaderboard", label: "Leaderboard", icon: Trophy        },
   { href: "/branch-admin/jobs",     label: "Job Postings", icon: BriefcaseBusiness },
   { href: "/feed",                  label: "College Feed", icon: Newspaper        },
 ]

@@ -82,6 +82,8 @@ const groups: {
     items: [
       { icon: BarChart3,     label: "Live analytics dashboard", desc: "Lesson completion, MCQ scores, and coding activity as it happens." },
       { icon: Users,         label: "Student management",       desc: "Full roster with search, filters, and per-student drill-down." },
+      { icon: ShieldCheck,   label: "Placement readiness",      desc: "ATS scores, profiles and verified skills per student — filter by skill and export for a drive." },
+      { icon: Trophy,        label: "College leaderboard",      desc: "Rank students by practice, ATS score, profile strength or streak — by branch and batch." },
       { icon: KeyRound,      label: "Branch admin roles",       desc: "Delegate a branch or department without handing over the college." },
       { icon: CalendarCheck, label: "Placement drive console",  desc: "Announce drives, set eligibility rules, and collect registrations." },
       { icon: Bell,          label: "1-click reminders",        desc: "Nudge inactive students by email straight from the dashboard." },

@@ -97,6 +97,8 @@ frontend/
 | /admin | college_admin | ✅ |
 | /admin/students | college_admin | ✅ |
 | /admin/analytics | college_admin | ✅ |
+| /admin/readiness, /branch-admin/readiness | college_admin, branch_admin | ✅ Placement readiness (`components/admin/readiness-dashboard.tsx`) |
+| /admin/leaderboard, /branch-admin/leaderboard | college_admin, branch_admin | ✅ College leaderboard (`components/admin/college-leaderboard.tsx`) |
 | /super-admin/* | super_admin | ✅ |
 | /super-admin/courses | super_admin | ✅ Course management (CRUD: courses, levels, lessons) |
 | /super-admin/domains | super_admin | ✅ Domain CRUD + course mapping with ordering |

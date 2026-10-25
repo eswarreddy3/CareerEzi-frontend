@@ -37,57 +37,23 @@ const iconMap: Record<string, LucideIcon> = {
   Server,
 }
 
+// Per-course cover themes — rich but desaturated gradients confined to the
+// card's cover band; the body stays neutral so the grid reads professional.
 const cardPalette = [
-  {
-    gradient: "from-cyan-500 via-teal-500 to-teal-700",
-    btn: "bg-white text-teal-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-violet-500 via-purple-500 to-purple-700",
-    btn: "bg-white text-purple-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-emerald-400 via-green-500 to-green-700",
-    btn: "bg-white text-green-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-amber-400 via-orange-400 to-orange-600",
-    btn: "bg-white text-orange-600 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-rose-400 via-pink-500 to-pink-700",
-    btn: "bg-white text-pink-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-blue-400 via-blue-500 to-indigo-700",
-    btn: "bg-white text-indigo-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
-  {
-    gradient: "from-fuchsia-500 via-purple-500 to-violet-700",
-    btn: "bg-white text-violet-700 hover:bg-white/90",
-    badge: "bg-white/20 text-white border-white/30",
-    circle1: "bg-white/10",
-    circle2: "bg-white/10",
-  },
+  { cover: "from-indigo-600 to-indigo-900",  fill: "bg-indigo-600",  btn: "bg-indigo-600 hover:bg-indigo-700" },
+  { cover: "from-teal-600 to-cyan-900",      fill: "bg-teal-600",    btn: "bg-teal-600 hover:bg-teal-700" },
+  { cover: "from-sky-700 to-slate-900",      fill: "bg-sky-700",     btn: "bg-sky-700 hover:bg-sky-800" },
+  { cover: "from-violet-600 to-indigo-900",  fill: "bg-violet-600",  btn: "bg-violet-600 hover:bg-violet-700" },
+  { cover: "from-emerald-600 to-teal-900",   fill: "bg-emerald-600", btn: "bg-emerald-600 hover:bg-emerald-700" },
+  { cover: "from-amber-600 to-orange-800",   fill: "bg-amber-600",   btn: "bg-amber-600 hover:bg-amber-700" },
+  { cover: "from-rose-600 to-rose-900",      fill: "bg-rose-600",    btn: "bg-rose-600 hover:bg-rose-700" },
 ]
+
+// Subtle dot texture laid over each cover gradient
+const coverPattern = {
+  backgroundImage: "radial-gradient(rgba(255,255,255,0.18) 1px, transparent 1px)",
+  backgroundSize: "14px 14px",
+}
 
 const difficultyLabel: Record<string, string> = {
   Beginner: "Beginner",
@@ -152,34 +118,37 @@ export default function LearnPage() {
             (course.assessments_done ?? 0) < (course.assessments_total ?? 0)
           const palette = cardPalette[idx % cardPalette.length]
 
+          const status = assessmentPending
+            ? { label: "Assessment pending", cls: "chip chip-warning" }
+            : progress >= 100
+              ? { label: "Completed", cls: "chip chip-success" }
+              : progress > 0
+                ? { label: "In progress", cls: "chip chip-primary" }
+                : null
+
           return (
             <div
               key={course.id}
               className={cn(
-                "relative flex h-full flex-col overflow-hidden rounded-2xl p-5 bg-gradient-to-br shadow-lg",
-                "transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl",
-                palette.gradient,
-                course.is_locked && "opacity-70"
+                "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
+                "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-foreground/15",
+                course.is_locked && "opacity-80"
               )}
             >
-              {/* Decorative background circles */}
-              <div className={cn("absolute -top-8 -right-8 w-32 h-32 rounded-full", palette.circle1)} />
-              <div className={cn("absolute -bottom-10 -left-10 w-36 h-36 rounded-full", palette.circle2)} />
-
               {/* Lock overlay */}
               {course.is_locked && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-black/40 backdrop-blur-sm">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <Lock className="h-5 w-5 text-white" />
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-background/70 backdrop-blur-sm">
+                  <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
                   </div>
                   {course.lock_reason === "plan" ? (
-                    <p className="text-xs text-white/90 text-center px-5 font-medium">
+                    <p className="text-xs text-muted-foreground text-center px-5 font-medium">
                       Not available in your college plan
                     </p>
                   ) : (
-                    <p className="text-xs text-white/90 text-center px-5 font-medium">
+                    <p className="text-xs text-muted-foreground text-center px-5 font-medium">
                       Complete{" "}
-                      <span className="font-bold text-white underline">
+                      <span className="font-semibold text-foreground underline">
                         {courses.find(c => c.id === course.prerequisite_id)?.title ?? course.prerequisite_id}
                       </span>{" "}
                       first
@@ -188,41 +157,45 @@ export default function LearnPage() {
                 </div>
               )}
 
-              {/* Content */}
-              <div className="relative z-10 flex flex-1 flex-col">
-                {/* Header row */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shadow-inner">
+              {/* Cover band */}
+              <div className={cn("relative h-28 shrink-0 overflow-hidden bg-gradient-to-br", palette.cover)}>
+                <div className="absolute inset-0" style={coverPattern} />
+                <Icon
+                  className="absolute -right-4 -bottom-6 h-28 w-28 text-white/10 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+                  strokeWidth={1.5}
+                />
+                <div className="relative flex h-full items-start justify-between p-4">
+                  <div className="w-11 h-11 rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-sm flex items-center justify-center">
                     <Icon className="h-5 w-5 text-white" />
                   </div>
-                  <span className={cn(
-                    "text-[11px] font-semibold px-2.5 py-0.5 rounded-full border",
-                    palette.badge
-                  )}>
+                  <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-black/20 text-white ring-1 ring-white/20 backdrop-blur-sm">
                     {difficultyLabel[course.difficulty]}
                   </span>
                 </div>
+              </div>
 
+              {/* Body */}
+              <div className="relative flex flex-1 flex-col p-5">
                 {/* Title & description — heights reserved for 2 lines each so every
                     card's stats/progress/CTA block starts at the same offset */}
-                <h3 className="font-bold text-xl font-serif text-white mb-1 leading-tight line-clamp-2 min-h-[2.4em] break-words">
+                <h3 className="font-semibold text-lg font-serif text-foreground mb-1 leading-tight line-clamp-2 min-h-[2.4em] break-words">
                   {course.title}
                 </h3>
-                <p className="text-xs text-white/70 mb-3 line-clamp-2 leading-relaxed min-h-[2.6em]">
+                <p className="text-xs text-muted-foreground mb-4 line-clamp-2 leading-relaxed min-h-[2.6em]">
                   {course.description}
                 </p>
 
                 {/* Stats row — mt-auto pins everything below to the card bottom */}
                 <div className="mt-auto flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3.5 w-3.5 text-white/80" />
-                    <span className="text-xs text-white/80">
+                    <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
                       {course.lessons_completed}/{course.total_lessons} lessons
                     </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3.5 w-3.5 text-yellow-300 fill-yellow-300" />
-                    <span className="text-xs font-semibold text-white">
+                  <div className="flex items-center gap-1 rounded-full bg-warning/10 px-2 py-0.5">
+                    <Star className="h-3 w-3 text-warning fill-warning" />
+                    <span className="text-[11px] font-semibold text-warning">
                       {course.points_per_lesson * course.total_lessons} pts
                     </span>
                   </div>
@@ -230,16 +203,18 @@ export default function LearnPage() {
 
                 {/* Progress bar — always visible */}
                 <div className="mb-4">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[11px] font-medium text-white drop-shadow">Progress</span>
-                    <span className="text-[11px] font-bold text-white drop-shadow">
-                      {assessmentPending ? "Assessment pending" : `${progress}%`}
-                    </span>
+                  <div className="flex justify-between items-center mb-1.5 min-h-[20px]">
+                    {status ? (
+                      <span className={cn(status.cls, "text-[10px] py-0")}>{status.label}</span>
+                    ) : (
+                      <span className="text-[11px] font-medium text-muted-foreground">Not started</span>
+                    )}
+                    <span className="text-[11px] font-semibold text-foreground tabular-nums">{progress}%</span>
                   </div>
-                  <div className="w-full h-2 rounded-full border border-white/40 bg-white/10">
+                  <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-white shadow transition-all duration-500"
-                      style={{ width: `${progress > 0 ? progress : 3}%` }}
+                      className={cn("h-full rounded-full transition-all duration-500", palette.fill)}
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
@@ -262,13 +237,13 @@ export default function LearnPage() {
                   }}
                   className={cn(
                     "w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl",
-                    "font-semibold text-xs transition-all duration-200 shadow-md",
+                    "font-semibold text-xs text-white transition-colors duration-200 shadow-sm",
                     "disabled:cursor-not-allowed disabled:opacity-50",
                     palette.btn
                   )}
                 >
                   {assessmentPending ? "Take Assessment" : progress > 0 ? "Continue Learning" : "Start Course"}
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </button>
               </div>
             </div>

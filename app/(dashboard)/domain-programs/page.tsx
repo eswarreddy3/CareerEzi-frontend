@@ -57,28 +57,27 @@ const difficultyConfig = {
 }
 
 // ── Per-domain color tokens (used for card gradients, glow, SVG strokes) ──────
-const defaultTheme = {
-  hex: "#00d4c8", textCls: "text-primary", bgCls: "bg-primary/10", borderCls: "border-primary/40",
-  glowCss: "rgba(0,212,200,0.25)", gradFrom: "#2dd4bf", gradVia: "#00d4c8", gradTo: "#0f766e",
-}
+// Deep, desaturated gradients (600 → 900) keep each domain distinct without the
+// neon look; `hex` stays at the 500 shade so strokes read in both themes.
+const defaultTheme = { hex: "#14b8a6", textCls: "text-teal-600 dark:text-teal-400", bgCls: "bg-teal-500/10", borderCls: "border-teal-500/40", glowCss: "rgba(20,184,166,0.25)", gradFrom: "#0d9488", gradVia: "#0f766e", gradTo: "#134e4a" }
 type DomainTheme = typeof defaultTheme
 
 const DOMAIN_THEME: Record<string, DomainTheme> = {
-  "data-analysis":   { hex: "#34d399", textCls: "text-emerald-400", bgCls: "bg-emerald-500/10", borderCls: "border-emerald-400/40", glowCss: "rgba(52,211,153,0.25)",  gradFrom: "#34d399", gradVia: "#10b981", gradTo: "#047857" },
-  "data-science":    { hex: "#60a5fa", textCls: "text-blue-400",    bgCls: "bg-blue-500/10",    borderCls: "border-blue-400/40",    glowCss: "rgba(96,165,250,0.25)",  gradFrom: "#60a5fa", gradVia: "#3b82f6", gradTo: "#1d4ed8" },
-  "machine-learning":{ hex: "#c084fc", textCls: "text-purple-400",  bgCls: "bg-purple-500/10",  borderCls: "border-purple-400/40",  glowCss: "rgba(192,132,252,0.25)", gradFrom: "#c084fc", gradVia: "#a855f7", gradTo: "#6d28d9" },
-  "web-development": { hex: "#22d3ee", textCls: "text-cyan-400",    bgCls: "bg-cyan-500/10",    borderCls: "border-cyan-400/40",    glowCss: "rgba(34,211,238,0.25)",  gradFrom: "#22d3ee", gradVia: "#06b6d4", gradTo: "#0e7490" },
+  "data-analysis":    { hex: "#10b981", textCls: "text-emerald-600 dark:text-emerald-400", bgCls: "bg-emerald-500/10", borderCls: "border-emerald-500/40", glowCss: "rgba(16,185,129,0.25)", gradFrom: "#059669", gradVia: "#047857", gradTo: "#134e4a" },
+  "data-science":     { hex: "#3b82f6", textCls: "text-blue-600 dark:text-blue-400", bgCls: "bg-blue-500/10", borderCls: "border-blue-500/40", glowCss: "rgba(59,130,246,0.25)", gradFrom: "#2563eb", gradVia: "#1d4ed8", gradTo: "#1e3a8a" },
+  "machine-learning": { hex: "#8b5cf6", textCls: "text-violet-600 dark:text-violet-400", bgCls: "bg-violet-500/10", borderCls: "border-violet-500/40", glowCss: "rgba(139,92,246,0.25)", gradFrom: "#7c3aed", gradVia: "#6d28d9", gradTo: "#312e81" },
+  "web-development":  { hex: "#06b6d4", textCls: "text-cyan-600 dark:text-cyan-400", bgCls: "bg-cyan-500/10", borderCls: "border-cyan-500/40", glowCss: "rgba(6,182,212,0.25)", gradFrom: "#0891b2", gradVia: "#0e7490", gradTo: "#164e63" },
 }
 
 // Domains created in super-admin that aren't in the map above still get a
 // distinct hue instead of every one of them falling back to the same teal.
 const FALLBACK_THEMES: DomainTheme[] = [
-  { hex: "#fb923c", textCls: "text-orange-400",  bgCls: "bg-orange-500/10",  borderCls: "border-orange-400/40",  glowCss: "rgba(251,146,60,0.25)",  gradFrom: "#fbbf24", gradVia: "#f97316", gradTo: "#c2410c" },
-  { hex: "#f472b6", textCls: "text-pink-400",    bgCls: "bg-pink-500/10",    borderCls: "border-pink-400/40",    glowCss: "rgba(244,114,182,0.25)", gradFrom: "#fb7185", gradVia: "#ec4899", gradTo: "#be185d" },
-  { hex: "#818cf8", textCls: "text-indigo-400",  bgCls: "bg-indigo-500/10",  borderCls: "border-indigo-400/40",  glowCss: "rgba(129,140,248,0.25)", gradFrom: "#818cf8", gradVia: "#6366f1", gradTo: "#4338ca" },
-  { hex: "#e879f9", textCls: "text-fuchsia-400", bgCls: "bg-fuchsia-500/10", borderCls: "border-fuchsia-400/40", glowCss: "rgba(232,121,249,0.25)", gradFrom: "#e879f9", gradVia: "#c026d3", gradTo: "#7e22ce" },
-  { hex: "#4ade80", textCls: "text-green-400",   bgCls: "bg-green-500/10",   borderCls: "border-green-400/40",   glowCss: "rgba(74,222,128,0.25)",  gradFrom: "#a3e635", gradVia: "#4ade80", gradTo: "#15803d" },
-  { hex: "#38bdf8", textCls: "text-sky-400",     bgCls: "bg-sky-500/10",     borderCls: "border-sky-400/40",     glowCss: "rgba(56,189,248,0.25)",  gradFrom: "#38bdf8", gradVia: "#0ea5e9", gradTo: "#0369a1" },
+  { hex: "#f59e0b", textCls: "text-amber-600 dark:text-amber-400", bgCls: "bg-amber-500/10", borderCls: "border-amber-500/40", glowCss: "rgba(245,158,11,0.25)", gradFrom: "#d97706", gradVia: "#b45309", gradTo: "#7c2d12" },
+  { hex: "#f43f5e", textCls: "text-rose-600 dark:text-rose-400", bgCls: "bg-rose-500/10", borderCls: "border-rose-500/40", glowCss: "rgba(244,63,94,0.25)", gradFrom: "#e11d48", gradVia: "#be123c", gradTo: "#881337" },
+  { hex: "#6366f1", textCls: "text-indigo-600 dark:text-indigo-400", bgCls: "bg-indigo-500/10", borderCls: "border-indigo-500/40", glowCss: "rgba(99,102,241,0.25)", gradFrom: "#4f46e5", gradVia: "#4338ca", gradTo: "#312e81" },
+  { hex: "#a855f7", textCls: "text-purple-600 dark:text-purple-400", bgCls: "bg-purple-500/10", borderCls: "border-purple-500/40", glowCss: "rgba(168,85,247,0.25)", gradFrom: "#9333ea", gradVia: "#7e22ce", gradTo: "#4c1d95" },
+  { hex: "#22c55e", textCls: "text-green-600 dark:text-green-400", bgCls: "bg-green-500/10", borderCls: "border-green-500/40", glowCss: "rgba(34,197,94,0.25)", gradFrom: "#16a34a", gradVia: "#15803d", gradTo: "#14532d" },
+  { hex: "#0ea5e9", textCls: "text-sky-600 dark:text-sky-400", bgCls: "bg-sky-500/10", borderCls: "border-sky-500/40", glowCss: "rgba(14,165,233,0.25)", gradFrom: "#0284c7", gradVia: "#0369a1", gradTo: "#0c4a6e" },
 ]
 
 // Hashed off the id (not the list index) so a domain keeps the same colour in
@@ -769,53 +768,18 @@ function DomainDetail({ data, onBack }: { data: DomainDetail; onBack: () => void
 }
 
 // ── Domain card (list view) ──────────────────────────────────────────────────
+// Deliberately different from the Learn page's course cards: no cover band —
+// a neutral card with a soft corner wash of the domain colour, a gradient icon
+// tile beside the title, and a mini roadmap that previews the path's courses.
 function DomainCard({
   domain, index, loading, onOpen,
 }: { domain: Domain; index: number; loading: boolean; onOpen: () => void }) {
   const Icon  = iconMap[domain.icon] ?? Database
   const theme = themeFor(domain.id)
   const meta  = DOMAIN_META[domain.id]
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  // Pointer-following spotlight. Written straight to CSS vars on the node so the
-  // highlight tracks the cursor without re-rendering the card on every mousemove.
-  const trackPointer = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    el.style.setProperty("--mx", `${e.clientX - r.left}px`)
-    el.style.setProperty("--my", `${e.clientY - r.top}px`)
-  }
-
-  if (domain.is_locked) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.07 }}
-      >
-        <div
-          className="relative h-full select-none overflow-hidden rounded-2xl p-5 shadow-lg"
-          style={{ background: `linear-gradient(140deg, ${theme.gradFrom}, ${theme.gradVia} 55%, ${theme.gradTo})` }}
-        >
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/45 backdrop-blur-[2px]">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-              <Lock className="h-4 w-4 text-white" />
-            </div>
-            <p className="text-xs font-medium text-white/90">Not available in your plan</p>
-          </div>
-          <div className="opacity-60">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-              <Icon className="h-6 w-6 text-white" />
-            </div>
-            <h3 className="mb-1 font-serif text-base font-semibold text-white">{domain.title}</h3>
-            <p className="line-clamp-2 text-xs text-white/75">{domain.description}</p>
-          </div>
-        </div>
-      </motion.div>
-    )
-  }
-
+  const locked = domain.is_locked
   const extraSkills = Math.max(0, domain.skills.length - 3)
+  const steps = Math.min(Math.max(domain.total_courses, 1), 6)
 
   return (
     <motion.div
@@ -823,108 +787,132 @@ function DomainCard({
       transition={{ delay: index * 0.07 }}
       className="h-full"
     >
-      <motion.div
-        ref={cardRef}
-        role="button"
-        tabIndex={0}
-        aria-label={`Explore ${domain.title}`}
+      <div
+        role={locked ? undefined : "button"}
+        tabIndex={locked ? undefined : 0}
+        aria-label={locked ? undefined : `Explore ${domain.title}`}
         aria-busy={loading}
-        onMouseMove={trackPointer}
-        onClick={onOpen}
-        onKeyDown={(e) => {
+        onClick={locked ? undefined : onOpen}
+        onKeyDown={locked ? undefined : (e) => {
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen() }
         }}
-        whileHover={{ y: -6, boxShadow: `0 20px 44px -10px ${theme.hex}cc` }}
-        whileTap={{ scale: 0.985 }}
-        transition={{ type: "spring", stiffness: 320, damping: 24 }}
         className={cn(
-          "group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl p-5",
-          "outline-none focus-visible:ring-2 focus-visible:ring-white/70",
-          "focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm",
+          "outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          locked
+            ? "select-none opacity-80"
+            : "cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[color:var(--accent)]"
         )}
-        style={{
-          background: `linear-gradient(140deg, ${theme.gradFrom}, ${theme.gradVia} 55%, ${theme.gradTo})`,
-          boxShadow: `0 10px 30px -12px ${theme.hex}99`,
-        } as React.CSSProperties}
+        style={{ "--accent": `${theme.hex}80` } as React.CSSProperties}
       >
-        {/* Cursor spotlight — fades in on hover, follows the pointer */}
+        {/* Corner wash — grows on hover */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ background: "radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.28), transparent 65%)" }}
+          className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100"
+          style={{ background: `radial-gradient(420px circle at 100% 0%, ${theme.glowCss}, transparent 60%)` }}
         />
-        {/* Decorative circles — drift outward slightly on hover */}
-        <div aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-125" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-white/10 transition-transform duration-500 group-hover:scale-110" />
-        {/* Top highlight rule — wipes in from the left on hover */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[3px] origin-left scale-x-0 bg-white/70 transition-transform duration-500 group-hover:scale-x-100"
-        />
+
+        {/* Lock overlay */}
+        {locked && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 rounded-2xl bg-background/70 backdrop-blur-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-xs font-medium text-muted-foreground">Not available in your plan</p>
+          </div>
+        )}
 
         <div className="relative flex flex-1 flex-col">
-          {/* Header — icon tile tilts, points chip sits opposite */}
-          <div className="mb-3 flex items-start justify-between">
-            <div className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 shadow-inner",
-              "transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110"
-            )}>
-              <Icon className="h-6 w-6 text-white" />
+          {/* Header — gradient icon tile beside title */}
+          <div className="mb-4 flex items-start gap-4">
+            <div
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-white transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, ${theme.gradFrom}, ${theme.gradTo})`,
+                boxShadow: `0 8px 20px -8px ${theme.hex}aa`,
+              }}
+            >
+              <Icon className="h-6 w-6" />
             </div>
-            <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-0.5 text-[11px] font-semibold text-white">
-              <Star className="h-3 w-3 fill-yellow-300 text-yellow-300" />{domain.total_points} pts
-            </span>
+            <div className="min-w-0 pt-0.5">
+              <span className={cn("text-[10px] font-semibold uppercase tracking-wider", theme.textCls)}>
+                Career path
+              </span>
+              <h3 className="font-serif text-lg font-semibold leading-tight text-foreground">{domain.title}</h3>
+            </div>
           </div>
 
-          {/* Title & copy */}
-          <h3 className="mb-0.5 font-serif text-base font-bold text-white">{domain.title}</h3>
           {meta && (
-            <p className="mb-1.5 line-clamp-1 text-[11px] font-medium text-white/90">{meta.tagline}</p>
+            <p className="mb-1.5 line-clamp-1 text-xs font-medium text-foreground/80">{meta.tagline}</p>
           )}
-          <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-white/70">{domain.description}</p>
+          <p className="mb-5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{domain.description}</p>
 
-          {/* Skills — chips lift in sequence as the card is hovered */}
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {domain.skills.slice(0, 3).map((skill, s) => (
+          {/* Mini roadmap — one node per course (capped), line fills on hover */}
+          <div className="mb-5">
+            <div className="mb-2 flex items-center justify-between text-[11px]">
+              <span className="font-medium text-muted-foreground">Roadmap</span>
+              <span className="font-semibold text-foreground">{domain.total_courses} courses</span>
+            </div>
+            <div className="relative flex items-center justify-between">
+              <div className="absolute inset-x-1.5 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-border" />
+              <div
+                className="absolute left-1.5 top-1/2 h-0.5 w-0 -translate-y-1/2 rounded-full transition-all duration-700 ease-out group-hover:w-[calc(100%-0.75rem)]"
+                style={{ background: `linear-gradient(to right, ${theme.gradFrom}, ${theme.hex})` }}
+              />
+              {Array.from({ length: steps }).map((_, i) => (
+                <span
+                  key={i}
+                  className="relative h-3 w-3 rounded-full border-2 bg-card transition-colors duration-300"
+                  style={{
+                    borderColor: theme.hex,
+                    backgroundColor: i === 0 ? theme.hex : undefined,
+                    transitionDelay: `${i * 90}ms`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Skills */}
+          <div className="mb-5 flex flex-wrap gap-1.5">
+            {domain.skills.slice(0, 3).map((skill) => (
               <span
                 key={skill}
-                className={cn(
-                  "rounded-full border border-white/30 bg-white/20 px-2 py-0.5 text-[10px] font-semibold text-white",
-                  "transition-transform duration-300 group-hover:-translate-y-0.5"
-                )}
-                style={{ transitionDelay: `${s * 60}ms` }}
+                className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-medium", theme.bgCls, theme.borderCls, theme.textCls)}
               >
                 {skill}
               </span>
             ))}
             {extraSkills > 0 && (
-              <span className="rounded-full border border-white/25 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/80">
+              <span className="rounded-full border border-border px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 +{extraSkills}
               </span>
             )}
           </div>
 
-          {/* Footer — mt-auto keeps the CTA on the card floor for every card */}
-          <div className="mt-auto flex items-center justify-between border-t border-white/25 pt-3">
-            <span className="flex items-center gap-1.5 text-xs text-white/80">
-              <BookOpen className="h-3.5 w-3.5" />{domain.total_courses} courses
+          {/* Footer */}
+          <div className="mt-auto flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+              <Trophy className="h-3.5 w-3.5 text-warning" />{domain.total_points} pts
             </span>
-            <span
-              className={cn(
-                "flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-bold shadow-md",
-                "transition-all duration-200 group-hover:bg-white/90"
-              )}
-              style={{ color: theme.gradTo }}
-            >
+            <span className={cn("flex items-center gap-1.5 text-xs font-semibold", theme.textCls)}>
               {loading ? (
                 <><Loader2 className="h-3.5 w-3.5 animate-spin" />Opening</>
               ) : (
-                <>Explore<ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-1" /></>
+                <>
+                  Explore path
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-white transition-transform duration-200 group-hover:translate-x-1"
+                    style={{ background: theme.gradFrom }}
+                  >
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </>
               )}
             </span>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }
