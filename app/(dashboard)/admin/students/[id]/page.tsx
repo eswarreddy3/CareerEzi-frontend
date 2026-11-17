@@ -15,12 +15,13 @@ import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell } from "recharts"
 import {
   ArrowLeft, Star, Flame, Brain, Code2, FileText, BookOpen,
   CheckCircle, XCircle, Clock, Github, Linkedin, Phone,
-  Mail, Calendar, Activity, Loader2, TrendingUp, Target, Download,
+  Mail, Calendar, Activity, Loader2, TrendingUp, Target, Download, KeyRound,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { generateStudentPDF, type StudentPerformance as Performance } from "@/lib/student-report"
+import { apiMessage, resendLogin, welcomeLabel, WELCOME_TONE_CLASS, type WelcomeStatus } from "@/lib/admin-students"
 
 interface ActivityEvent {
   type: string; action: string; details: Record<string, unknown>; timestamp: string
@@ -142,13 +143,29 @@ export default function StudentPerformancePage() {
   const [activityTotal, setActivityTotal] = useState(0)
   const [activityLoading, setActivityLoading] = useState(false)
   const [days, setDays] = useState(30)
+  const [resending, setResending] = useState(false)
 
-  useEffect(() => {
-    api.get(`/admin/students/${id}/performance`)
-      .then(res => setPerf(res.data))
-      .catch(() => toast.error("Failed to load student performance"))
-      .finally(() => setPerfLoading(false))
-  }, [id])
+  const loadPerf = () => api.get(`/admin/students/${id}/performance`)
+    .then(res => setPerf(res.data))
+    .catch(() => toast.error("Failed to load student performance"))
+    .finally(() => setPerfLoading(false))
+
+  useEffect(() => { loadPerf() }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleResendLogin() {
+    if (!perf) return
+    const { name, email } = perf.student
+    if (!confirm(`Send ${name} new login details? They get a new temporary password at ${email}; any earlier one stops working.`)) return
+    setResending(true)
+    try {
+      toast.success(await resendLogin(perf.student.id))
+      loadPerf()
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setResending(false)
+    }
+  }
 
   function loadActivity(d: number) {
     setDays(d)
@@ -170,6 +187,9 @@ export default function StudentPerformancePage() {
   if (!perf) return null
 
   const { student, mcq, coding, assignments, lessons } = perf
+  // Login-email fields come from the same endpoint (backend student_welcome.welcome_status)
+  const login = student as typeof student & Partial<WelcomeStatus>
+  const loginLabel = welcomeLabel(login)
 
   return (
     <div className="space-y-6">
@@ -252,6 +272,35 @@ export default function StudentPerformancePage() {
           </div>
         </GlassCard>
       </motion.div>
+
+      {/* Never logged in: show the login-email state and let the admin resend it */}
+      {loginLabel && (
+        <GlassCard className="border-warning/40">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <KeyRound className="h-5 w-5 text-warning flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-foreground">Has never logged in</p>
+              <p className={cn("text-sm", WELCOME_TONE_CLASS[loginLabel.tone])}>{loginLabel.text}</p>
+              {login.welcome_error ? (
+                <p className="text-xs text-muted-foreground mt-0.5 break-words">{login.welcome_error}</p>
+              ) : login.welcome_sent_at ? (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Accepted by the mail server. If they can&apos;t find it, ask them to check Spam, or resend.
+                </p>
+              ) : null}
+            </div>
+            <Button
+              size="sm"
+              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handleResendLogin}
+              disabled={resending}
+            >
+              {resending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+              Resend login details
+            </Button>
+          </div>
+        </GlassCard>
+      )}
 
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

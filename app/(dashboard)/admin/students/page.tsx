@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 import {
-  Users, Search, Flame, Mail, Loader2, Download,
+  Users, Search, Flame, Mail, Loader2, Download, KeyRound,
   AlertTriangle,
   CheckCircle, ExternalLink, FileDown, Pencil, Columns3,
   GraduationCap, Activity, Filter, UserCheck,
@@ -41,6 +41,10 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import api from "@/lib/api"
 import { generateStudentPDF, StudentPerformance } from "@/lib/student-report"
+import {
+  apiMessage, remindStudent, remindStudents, bulkRemindSummary,
+  resendLogin, resendLoginBulk, resendSummary, welcomeLabel, WELCOME_TONE_CLASS, type WelcomeStatus,
+} from "@/lib/admin-students"
 
 interface Student {
   id: number
@@ -55,6 +59,10 @@ interface Student {
   last_active: string | null
   is_inactive: boolean
   onboarded: boolean
+  last_reminded_at: string | null
+  welcome_requested_at: WelcomeStatus["welcome_requested_at"]
+  welcome_sent_at: WelcomeStatus["welcome_sent_at"]
+  welcome_error: WelcomeStatus["welcome_error"]
   // Academic profile (separate table — may be null if never filled)
   cgpa: number | null
   tenth_percent: number | null
@@ -172,6 +180,10 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true)
   const [remindingId, setRemindingId] = useState<number | null>(null)
   const [remindingSelected, setRemindingSelected] = useState(false)
+  const [resendingId, setResendingId] = useState<number | null>(null)
+  const [resendingSelected, setResendingSelected] = useState(false)
+  // Bumped after a send so the list re-fetches the new reminder / login-email state
+  const [reloadKey, setReloadKey] = useState(0)
   const [downloadingId, setDownloadingId] = useState<number | null>(null)
   const [exportingCSV, setExportingCSV] = useState(false)
 
@@ -280,30 +292,60 @@ export default function AdminStudentsPage() {
         .finally(() => { if (!cancelled) setLoading(false) })
     }, 300)
     return () => { cancelled = true; clearTimeout(timeout) }
-  }, [searchQuery, branchFilter, sectionFilter, yearFilter, statusFilter, sort, page, pageSize])
+  }, [searchQuery, branchFilter, sectionFilter, yearFilter, statusFilter, sort, page, pageSize, reloadKey])
 
   async function handleRemind(student: Student) {
     setRemindingId(student.id)
     try {
-      await api.post(`/admin/students/${student.id}/remind`)
-      toast.success(`Reminder sent to ${student.name}`)
-    } catch {
-      toast.error("Failed to send reminder")
+      toast.success(await remindStudent("/admin", student.id))
+      setReloadKey(k => k + 1)
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminder"))
     } finally {
       setRemindingId(null)
     }
   }
 
   async function handleRemindSelected() {
-    const toRemind = students.filter(s => selectedIds.has(s.id) && s.is_inactive)
-    if (!toRemind.length) { toast.info("No inactive students in selection"); return }
+    const ids = students.filter(s => selectedIds.has(s.id) && s.is_inactive).map(s => s.id)
+    if (!ids.length) { toast.info("No inactive students in selection"); return }
     setRemindingSelected(true)
-    let sent = 0
-    for (const s of toRemind) {
-      try { await api.post(`/admin/students/${s.id}/remind`); sent++ } catch {}
+    try {
+      toast.success(bulkRemindSummary(await remindStudents(ids)))
+      setReloadKey(k => k + 1)
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminders"))
+    } finally {
+      setRemindingSelected(false)
     }
-    toast.success(`Reminders sent to ${sent} student${sent !== 1 ? "s" : ""}`)
-    setRemindingSelected(false)
+  }
+
+  async function handleResendLogin(student: Student) {
+    if (!confirm(`Send ${student.name} new login details? They get a new temporary password at ${student.email}; any earlier one stops working.`)) return
+    setResendingId(student.id)
+    try {
+      toast.success(await resendLogin(student.id))
+      setReloadKey(k => k + 1)
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setResendingId(null)
+    }
+  }
+
+  async function handleResendSelected() {
+    const ids = students.filter(s => selectedIds.has(s.id) && !s.onboarded).map(s => s.id)
+    if (!ids.length) { toast.info("Everyone selected has already logged in"); return }
+    if (!confirm(`Send new login details to ${ids.length} student${ids.length !== 1 ? "s" : ""} who never logged in? Each gets a new temporary password.`)) return
+    setResendingSelected(true)
+    try {
+      toast.success(resendSummary(await resendLoginBulk({ student_ids: ids })))
+      setReloadKey(k => k + 1)
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setResendingSelected(false)
+    }
   }
 
   async function handleDownloadReport(student: Student) {
@@ -411,6 +453,19 @@ export default function AdminStudentsPage() {
               >
                 {remindingSelected ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
                 Remind ({selectedIds.size})
+              </Button>
+            )}
+            {students.some(s => selectedIds.has(s.id) && !s.onboarded) && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-white/15 hover:bg-white/25 text-white border-0 gap-1.5 h-8"
+                onClick={handleResendSelected}
+                disabled={resendingSelected}
+                title="Email new login details to selected students who never logged in"
+              >
+                {resendingSelected ? <Loader2 className="h-3 w-3 animate-spin" /> : <KeyRound className="h-3 w-3" />}
+                Resend login ({students.filter(s => selectedIds.has(s.id) && !s.onboarded).length})
               </Button>
             )}
             <Button
@@ -840,7 +895,17 @@ export default function AdminStudentsPage() {
                             {student.onboarded ? (
                               <span className="chip chip-success">Onboarded</span>
                             ) : (
-                              <span className="chip chip-warning">Not Onboarded</span>
+                              <div className="flex flex-col items-start gap-0.5">
+                                <span className="chip chip-warning">Not Onboarded</span>
+                                {(() => {
+                                  const w = welcomeLabel(student)
+                                  return w ? (
+                                    <span className={cn("text-[11px]", WELCOME_TONE_CLASS[w.tone])} title={student.welcome_error ?? undefined}>
+                                      {w.text}
+                                    </span>
+                                  ) : null
+                                })()}
+                              </div>
                             )}
                           </td>
                         )}
@@ -884,7 +949,17 @@ export default function AdminStudentsPage() {
                         {/* Actions — always visible */}
                         <td className="py-3 px-3">
                           <div className="flex items-center justify-end gap-1">
-                            {student.is_inactive && (
+                            {!student.onboarded && (
+                              <ActionBtn
+                                title="Resend login details"
+                                onClick={() => handleResendLogin(student)}
+                                disabled={resendingId === student.id}
+                                className="border-warning/30 text-warning hover:bg-warning/10"
+                              >
+                                {resendingId === student.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
+                              </ActionBtn>
+                            )}
+                            {student.is_inactive && student.onboarded && (
                               <ActionBtn
                                 title="Send reminder"
                                 onClick={() => handleRemind(student)}

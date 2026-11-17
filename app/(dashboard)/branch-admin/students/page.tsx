@@ -14,11 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Users, Search, Mail, Flame, Star, ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react"
+import { Users, Search, Mail, Flame, Star, ArrowDownWideNarrow, ArrowUpNarrowWide, KeyRound, Loader2 } from "lucide-react"
 import { PaginationBar } from "@/components/pagination-bar"
 import type { SortDir } from "@/components/sort-button"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import {
+  apiMessage, remindStudent, resendLogin, resendLoginBulk, resendSummary,
+  welcomeLabel, WELCOME_TONE_CLASS, type WelcomeStatus,
+} from "@/lib/admin-students"
 import { useAuthStore } from "@/store/authStore"
 import { cn } from "@/lib/utils"
 
@@ -34,7 +38,19 @@ interface Student {
   streak: number
   last_active: string | null
   is_inactive: boolean
+  last_reminded_at: string | null
+  onboarded: WelcomeStatus["onboarded"]
+  welcome_requested_at: WelcomeStatus["welcome_requested_at"]
+  welcome_sent_at: WelcomeStatus["welcome_sent_at"]
+  welcome_error: WelcomeStatus["welcome_error"]
 }
+
+const STATUS_OPTIONS: [string, string][] = [
+  ["all", "All students"],
+  ["active", "Active"],
+  ["inactive", "Inactive (3d+)"],
+  ["pending", "Never logged in"],
+]
 
 function formatLastActive(iso: string | null): string {
   if (!iso) return "Never"
@@ -68,6 +84,9 @@ export default function BranchAdminStudentsPage() {
   const [search, setSearch] = useState("")
   const [searchInput, setSearchInput] = useState("")
   const [remindingId, setRemindingId] = useState<number | null>(null)
+  const [status, setStatus] = useState("all")
+  const [resendingId, setResendingId] = useState<number | null>(null)
+  const [resendingAll, setResendingAll] = useState(false)
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
@@ -76,6 +95,7 @@ export default function BranchAdminStudentsPage() {
         page: String(page), per_page: String(pageSize), sort: sortKey, order: sortDir,
       })
       if (search) params.set("search", search)
+      if (status !== "all") params.set("status", status)
       const res = await api.get(`/branch-admin/students?${params}`)
       setStudents(res.data.students)
       setTotal(res.data.total)
@@ -85,7 +105,7 @@ export default function BranchAdminStudentsPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, sortKey, sortDir, search])
+  }, [page, pageSize, sortKey, sortDir, search, status])
 
   useEffect(() => { fetchStudents() }, [fetchStudents])
 
@@ -103,12 +123,38 @@ export default function BranchAdminStudentsPage() {
   async function sendReminder(id: number, name: string) {
     setRemindingId(id)
     try {
-      await api.post(`/branch-admin/students/${id}/remind`)
-      toast.success(`Reminder sent to ${name}`)
-    } catch {
-      toast.error("Failed to send reminder")
+      toast.success(await remindStudent("/branch-admin", id))
+      fetchStudents()
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminder"))
     } finally {
       setRemindingId(null)
+    }
+  }
+
+  async function handleResendLogin(s: Student) {
+    if (!confirm(`Send ${s.name} new login details? They get a new temporary password at ${s.email}; any earlier one stops working.`)) return
+    setResendingId(s.id)
+    try {
+      toast.success(await resendLogin(s.id))
+      fetchStudents()
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setResendingId(null)
+    }
+  }
+
+  async function handleResendAll() {
+    if (!confirm(`Send new login details to every ${user?.branch ?? ""} student who never logged in? Each gets a new temporary password.`)) return
+    setResendingAll(true)
+    try {
+      toast.success(resendSummary(await resendLoginBulk({ filter: {} })))
+      fetchStudents()
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setResendingAll(false)
     }
   }
 
@@ -146,7 +192,17 @@ export default function BranchAdminStudentsPage() {
             </Button>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1) }}>
+            <SelectTrigger className="h-8 w-[160px] bg-secondary/40 border-border text-xs" aria-label="Filter by status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map(([key, label]) => (
+                <SelectItem key={key} value={key} className="text-xs">{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <span className="text-xs text-muted-foreground">Sort by</span>
           <Select value={sortKey} onValueChange={changeSort}>
             <SelectTrigger className="h-8 w-[150px] bg-secondary/40 border-border text-xs" aria-label="Sort by">
@@ -168,6 +224,18 @@ export default function BranchAdminStudentsPage() {
           >
             {sortDir === "asc" ? <ArrowUpNarrowWide className="h-4 w-4" /> : <ArrowDownWideNarrow className="h-4 w-4" />}
           </Button>
+          {status === "pending" && total > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto h-8 border-warning/30 text-warning hover:bg-warning/10 text-xs gap-1.5"
+              onClick={handleResendAll}
+              disabled={resendingAll}
+            >
+              {resendingAll ? <Loader2 className="h-3 w-3 animate-spin" /> : <KeyRound className="h-3 w-3" />}
+              Resend login to all ({total})
+            </Button>
+          )}
         </div>
       </GlassCard>
 
@@ -217,6 +285,11 @@ export default function BranchAdminStudentsPage() {
                           Inactive
                         </Badge>
                       )}
+                      {!s.onboarded && (
+                        <Badge variant="outline" className="text-xs border-warning/30 text-warning bg-warning/10">
+                          Never logged in
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground flex-wrap">
                       <span>{s.email}</span>
@@ -224,6 +297,14 @@ export default function BranchAdminStudentsPage() {
                       {s.passout_year && <span>· {s.passout_year}</span>}
                       <span>· {formatLastActive(s.last_active)}</span>
                     </div>
+                    {(() => {
+                      const w = welcomeLabel(s)
+                      return w ? (
+                        <p className={cn("text-xs mt-0.5", WELCOME_TONE_CLASS[w.tone])} title={s.welcome_error ?? undefined}>
+                          {w.text}
+                        </p>
+                      ) : null
+                    })()}
                   </div>
 
                   <div className="flex items-center gap-4 flex-shrink-0">
@@ -235,7 +316,19 @@ export default function BranchAdminStudentsPage() {
                         <Flame className="h-3 w-3" />{s.streak}d
                       </span>
                     </div>
-                    {s.is_inactive && (
+                    {!s.onboarded && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-warning/30 text-warning hover:bg-warning/10 text-xs"
+                        onClick={() => handleResendLogin(s)}
+                        disabled={resendingId === s.id}
+                      >
+                        {resendingId === s.id ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <KeyRound className="h-3 w-3 mr-1" />}
+                        Resend login
+                      </Button>
+                    )}
+                    {s.is_inactive && s.onboarded && (
                       <Button
                         size="sm"
                         variant="outline"

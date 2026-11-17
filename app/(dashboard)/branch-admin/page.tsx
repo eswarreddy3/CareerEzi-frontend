@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { apiMessage, remindStudent } from "@/lib/admin-students"
 import { useAuthStore } from "@/store/authStore"
 import Link from "next/link"
 
@@ -61,10 +62,9 @@ export default function BranchAdminDashboard() {
   async function sendReminder(id: number, name: string) {
     setRemindingId(id)
     try {
-      await api.post(`/branch-admin/students/${id}/remind`)
-      toast.success(`Reminder sent to ${name}`)
-    } catch {
-      toast.error("Failed to send reminder")
+      toast.success(await remindStudent("/branch-admin", id))
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminder"))
     } finally {
       setRemindingId(null)
     }

@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { apiMessage, remindStudent, remindAllInactive, bulkRemindSummary } from "@/lib/admin-students"
 import { useAuthStore } from "@/store/authStore"
 import Link from "next/link"
 
@@ -145,10 +146,9 @@ export default function AdminDashboardPage() {
   async function handleSendReminder(student: InactiveStudent) {
     setRemindingId(student.id)
     try {
-      await api.post(`/admin/students/${student.id}/remind`)
-      toast.success(`Reminder sent to ${student.name}`)
-    } catch {
-      toast.error("Failed to send reminder")
+      toast.success(await remindStudent("/admin", student.id))
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminder"))
     } finally {
       setRemindingId(null)
     }
@@ -157,15 +157,14 @@ export default function AdminDashboardPage() {
   async function handleRemindAll() {
     if (!analytics?.inactive_students.length) return
     setRemindingAll(true)
-    let sent = 0
-    for (const student of analytics.inactive_students) {
-      try {
-        await api.post(`/admin/students/${student.id}/remind`)
-        sent++
-      } catch {}
+    try {
+      // Same 3-day rule as the list; queued in the background, 48h cooldown per student
+      toast.success(bulkRemindSummary(await remindAllInactive()))
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to send reminders"))
+    } finally {
+      setRemindingAll(false)
     }
-    toast.success(`Reminders sent to ${sent} student${sent !== 1 ? "s" : ""}`)
-    setRemindingAll(false)
   }
 
   if (loading) {

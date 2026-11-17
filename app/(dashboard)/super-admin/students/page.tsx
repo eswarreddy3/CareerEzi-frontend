@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef, type FormEvent } from "react"
-import { Plus, Upload, UserCheck, UserX, Trash2, FileText, X, Download } from "lucide-react"
+import { Plus, Upload, UserCheck, UserX, Trash2, FileText, X, Download, KeyRound } from "lucide-react"
 import { toast } from "sonner"
 import { GlassCard } from "@/components/glass-card"
 import { ModalForm } from "@/components/modal-form"
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import api from "@/lib/api"
+import { apiMessage, welcomeLabel, WELCOME_TONE_CLASS, type WelcomeStatus } from "@/lib/admin-students"
 
 interface Student {
   id: number
@@ -44,6 +45,9 @@ interface Student {
   is_inactive: boolean
   streak: number
   points: number
+  welcome_requested_at?: WelcomeStatus["welcome_requested_at"]
+  welcome_sent_at?: WelcomeStatus["welcome_sent_at"]
+  welcome_error?: WelcomeStatus["welcome_error"]
 }
 
 interface College {
@@ -141,8 +145,14 @@ export default function SuperAdminStudentsPage() {
     if (!selectedPassoutYear) { toast.error("Please select a passout year"); return }
     setIsSubmitting(true)
     try {
-      await api.post("/super-admin/students", data)
-      toast.success("Student created! Welcome email sent.")
+      const res = await api.post("/super-admin/students", data)
+      if (res.data.email_sent === false) {
+        toast.warning("Student created, but the login email could not be sent", {
+          description: "Use the resend button (key icon) on the student once the issue is fixed.",
+        })
+      } else {
+        toast.success("Student created! Welcome email sent.")
+      }
       setIsCreateOpen(false)
       setSelectedCollegeId("")
       setSelectedBranch("")
@@ -168,9 +178,17 @@ export default function SuperAdminStudentsPage() {
         headers: { "Content-Type": "multipart/form-data" },
       })
       const skippedCount = res.data.skipped?.length ?? 0
+      const emailFailed: string[] = res.data.email_failed ?? []
       toast.success(`${res.data.created} student${res.data.created !== 1 ? "s" : ""} created`, {
         description: skippedCount ? `${skippedCount} skipped (already exist)` : undefined,
       })
+      if (emailFailed.length) {
+        // Usually the mail provider's daily limit — the accounts exist, only the email is missing
+        toast.warning(`Login email failed for ${emailFailed.length} student${emailFailed.length !== 1 ? "s" : ""}`, {
+          description: "They show “Login email failed”. College admins can resend from their student list, or use the key icon here.",
+          duration: 15000,
+        })
+      }
       setIsBulkModalOpen(false)
       setBulkFile(null)
       if (csvRef.current) csvRef.current.value = ""
@@ -182,6 +200,20 @@ export default function SuperAdminStudentsPage() {
       })
     } finally {
       setIsBulkUploading(false)
+    }
+  }
+
+  const handleResendLogin = async (student: Student) => {
+    if (!window.confirm(`Send ${student.name} new login details? They get a new temporary password at ${student.email}; any earlier one stops working.`)) return
+    setActionLoading(student.id)
+    try {
+      const res = await api.post(`/super-admin/students/${student.id}/resend-welcome`)
+      toast.success(res.data.message ?? "New login details are on the way")
+      fetchStudents()
+    } catch (err) {
+      toast.error(apiMessage(err, "Failed to resend login details"))
+    } finally {
+      setActionLoading(null)
     }
   }
 
@@ -274,6 +306,7 @@ export default function SuperAdminStudentsPage() {
       header: "Onboarding",
       sortable: true,
       render: (row) => (
+        <div>
         <Badge
           variant="outline"
           className={cn(
@@ -285,6 +318,15 @@ export default function SuperAdminStudentsPage() {
         >
           {row.onboarded ? "Onboarded" : "Not Onboarded"}
         </Badge>
+        {(() => {
+          const w = welcomeLabel(row)
+          return w ? (
+            <p className={cn("text-[11px] mt-0.5 whitespace-nowrap", WELCOME_TONE_CLASS[w.tone])} title={row.welcome_error ?? undefined}>
+              {w.text}
+            </p>
+          ) : null
+        })()}
+        </div>
       ),
     },
     {
@@ -411,6 +453,18 @@ export default function SuperAdminStudentsPage() {
           }}
           actions={(row) => (
             <div className="flex items-center gap-1">
+              {!row.onboarded && row.is_active && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={actionLoading === row.id}
+                  className="h-7 px-2 text-muted-foreground hover:text-warning"
+                  onClick={() => handleResendLogin(row)}
+                  title="Resend login details"
+                >
+                  <KeyRound className="h-3.5 w-3.5" />
+                </Button>
+              )}
               {row.is_active ? (
                 <Button
                   size="sm"

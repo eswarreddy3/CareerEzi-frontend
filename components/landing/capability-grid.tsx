@@ -86,7 +86,7 @@ const groups: {
       { icon: Trophy,        label: "College leaderboard",      desc: "Rank students by practice, ATS score, profile strength or streak — by branch and batch." },
       { icon: KeyRound,      label: "Branch admin roles",       desc: "Delegate a branch or department without handing over the college." },
       { icon: CalendarCheck, label: "Placement drive console",  desc: "Announce drives, set eligibility rules, and collect registrations." },
-      { icon: Bell,          label: "1-click reminders",        desc: "Nudge inactive students by email straight from the dashboard." },
+      { icon: Bell,          label: "1-click reminders",        desc: "Nudge inactive students by email, and resend login details to anyone who never signed in." },
       { icon: LineChart,     label: "Batch progress tracking",  desc: "Compare cohorts and spot the students falling behind early." },
       { icon: MessageSquare, label: "Moderated college feed",   desc: "Admins post to the same campus feed students already read." },
     ],

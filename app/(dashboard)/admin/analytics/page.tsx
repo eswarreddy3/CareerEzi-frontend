@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import api from "@/lib/api"
+import { apiMessage, remindStudent } from "@/lib/admin-students"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -246,9 +247,8 @@ export default function AdminAnalyticsPage() {
   async function sendRemind(s: AtRiskStudent) {
     setReminding(s.id)
     try {
-      await api.post(`/admin/students/${s.id}/remind`)
-      toast.success(`Reminder sent to ${s.name}`)
-    } catch { toast.error("Failed to send reminder") }
+      toast.success(await remindStudent("/admin", s.id))
+    } catch (err) { toast.error(apiMessage(err, "Failed to send reminder")) }
     finally { setReminding(null) }
   }
 
